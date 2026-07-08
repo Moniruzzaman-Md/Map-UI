@@ -297,21 +297,21 @@ SYSTEM_CITIES[0].history.push({
 // created live.
 SYSTEM_CITIES[0].history.push({
   operation: "Map",
-  description: "Mapped supplier city: Agoda — New York City (US)",
+  description: "Mapped supplier city: Agoda — New York City (US) — ID: AG-US-001",
   userName: "Farhan Ahmed",
   userEmail: "farhan.ahmed@mynztrip.com",
   timestamp: new Date("2026-06-19T13:40:00"),
 });
 SYSTEM_CITIES[0].history.push({
   operation: "Map",
-  description: "Mapped supplier city: Booking.com — New York (US)",
+  description: "Mapped supplier city: Booking.com — New York (US) — ID: 20050000",
   userName: "Rafiul Karim",
   userEmail: "rafiul.karim@mynztrip.com",
   timestamp: new Date("2026-06-20T09:15:00"),
 });
 SYSTEM_CITIES[0].history.push({
   operation: "Map",
-  description: "Mapped supplier city: Agoda — Manhattan (US)",
+  description: "Mapped supplier city: Agoda — Manhattan (US) — ID: AG-US-009",
   userName: "Farhan Ahmed",
   userEmail: "farhan.ahmed@mynztrip.com",
   timestamp: new Date("2026-06-21T11:05:00"),
@@ -416,6 +416,27 @@ function getSystemCityLabel(id) {
   const city = SYSTEM_CITIES.find((c) => c.id === id);
   if (!city) return null;
   return [city.name, city.state, getSystemCountryName(city.country.code) || city.country.name].filter(Boolean).join(", ");
+}
+
+// System City's id is shown as a long-form number (not the small sequential
+// index used internally for lookups/references elsewhere in the project)
+// — purely a display convention, doesn't touch the actual c.id used for
+// matching/URLs/cross-entity references. Shared here (rather than kept
+// page-local) since more than one page now needs to show it.
+function getSystemCityDisplayId(id) {
+  return String(10000000000 + id);
+}
+
+// Same as getSystemCityLabel, but with the id appended — used specifically
+// for mapping History entries/modal headers (city-system.html,
+// city-supplier.html, city-mapping.html), so a city's history stays
+// unambiguous even if it's later renamed. Kept separate from
+// getSystemCityLabel itself since that one is also used in non-history UI
+// (checklist notes, remap preview, pinned-city meta) where the id would
+// just be clutter.
+function getSystemCityHistoryLabel(id) {
+  const label = getSystemCityLabel(id);
+  return label === null ? null : `${label} (ID: ${getSystemCityDisplayId(id)})`;
 }
 
 // ---------- Supplier City ----------
@@ -532,7 +553,7 @@ Object.keys(supplierCities).forEach((key) => {
 supplierCities.agoda[0].history.push({
   operation: "Create",
   systemCityLabel: getSystemCityLabel(0),
-  description: `Mapped To: ${getSystemCityLabel(0)}`,
+  description: `Mapped To: ${getSystemCityHistoryLabel(0)}`,
   userName: "Farhan Ahmed",
   userEmail: "farhan.ahmed@mynztrip.com",
   timestamp: new Date("2026-06-19T13:40:00"),
@@ -540,7 +561,7 @@ supplierCities.agoda[0].history.push({
 supplierCities.booking[0].history.push({
   operation: "Create",
   systemCityLabel: getSystemCityLabel(0),
-  description: `Mapped To: ${getSystemCityLabel(0)}`,
+  description: `Mapped To: ${getSystemCityHistoryLabel(0)}`,
   userName: "Rafiul Karim",
   userEmail: "rafiul.karim@mynztrip.com",
   timestamp: new Date("2026-06-20T09:15:00"),
@@ -548,7 +569,7 @@ supplierCities.booking[0].history.push({
 supplierCities.agoda[8].history.push({
   operation: "Create",
   systemCityLabel: getSystemCityLabel(0),
-  description: `Mapped To: ${getSystemCityLabel(0)}`,
+  description: `Mapped To: ${getSystemCityHistoryLabel(0)}`,
   userName: "Farhan Ahmed",
   userEmail: "farhan.ahmed@mynztrip.com",
   timestamp: new Date("2026-06-21T11:05:00"),
@@ -568,9 +589,9 @@ hydrateObject(supplierCities, loadFromStorage("supplierCities"));
 function applyMapping(supplierKey, row, newSystemCityId) {
   const oldId = row.systemCityId;
   if (oldId === newSystemCityId) return;
-  const oldLabel = oldId !== null && oldId !== undefined ? getSystemCityLabel(oldId) : null;
-  const newLabel = newSystemCityId !== null ? getSystemCityLabel(newSystemCityId) : null;
-  const supplierCityLabel = `${SUPPLIER_LABELS[supplierKey]} — ${row.name} (${row.countryCode})`;
+  const oldLabel = oldId !== null && oldId !== undefined ? getSystemCityHistoryLabel(oldId) : null;
+  const newLabel = newSystemCityId !== null ? getSystemCityHistoryLabel(newSystemCityId) : null;
+  const supplierCityLabel = `${SUPPLIER_LABELS[supplierKey]} — ${row.name} (${row.countryCode}) — ID: ${row.id}`;
 
   row.systemCityId = newSystemCityId;
   row.history.push({

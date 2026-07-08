@@ -392,14 +392,6 @@
 
   let state = { page: 1, pageSize: 10, query: "", country: "", cityState: "", status: "all" };
 
-  // System City's id is shown as a long-form number (not the small
-  // sequential index used internally for lookups/references elsewhere in
-  // the project) — purely a display convention, doesn't touch the actual
-  // c.id used for matching/URLs/cross-entity references.
-  function formatSystemCityDisplayId(id) {
-    return String(10000000000 + id);
-  }
-
   function getFiltered() {
     let rows = SYSTEM_CITIES;
     const q = state.query.trim().toLowerCase();
@@ -423,7 +415,7 @@
           .map(
             (c) => `
       <tr data-row-id="${c.id}">
-        <td>${formatSystemCityDisplayId(c.id)}</td>
+        <td>${getSystemCityDisplayId(c.id)}</td>
         <td data-col="name">${c.name}${c.cityType ? ` <span class="pill city-type-badge ${c.cityType === "merged" ? "info" : "neutral"}" aria-label="${c.cityType === "merged" ? "Merged" : "New"}">${c.cityType === "merged" ? "M" : "N"}</span>` : ""}</td>
         <td>${c.state ? c.state : '<span style="color:var(--text-muted)">—</span>'}</td>
         <td>${getSystemCountryName(c.country.code) || c.country.name} <span class="code-badge">${c.country.code}</span></td>
@@ -521,7 +513,7 @@
         return;
       }
 
-      document.getElementById("editCityId").value = formatSystemCityDisplayId(record.id);
+      document.getElementById("editCityId").value = getSystemCityDisplayId(record.id);
       document.getElementById("editCityCountry").value = `${getSystemCountryName(record.country.code) || record.country.name} (${record.country.code})`;
       document.getElementById("editCityState").value = record.state || "—";
       document.getElementById("editCityName").value = record.name;
@@ -535,7 +527,7 @@
     if (historyBtn) {
       const record = SYSTEM_CITIES.find((c) => String(c.id) === historyBtn.dataset.rowId);
       if (!record) return;
-      document.getElementById("historyCityName").textContent = `— ${record.name}`;
+      document.getElementById("historyCityName").textContent = `— ${record.name} (ID: ${getSystemCityDisplayId(record.id)})`;
       document.getElementById("historyList").innerHTML = renderHistoryList(record.history, "No edit history yet");
       openModal(document.getElementById("historyModal"));
       return;
@@ -573,7 +565,7 @@
                 <td class="history-row-label">Mapped Cities</td>
                 <td class="history-row-sep">:</td>
                 <td class="history-row-value">${r.cities
-                  .map((city) => `${city.name}${city.state ? `, ${city.state}` : ""} (${city.countryCode})`)
+                  .map((city) => `${city.name}${city.state ? `, ${city.state}` : ""} (${city.countryCode}) — ID: ${city.id}`)
                   .join("<br>")}</td>
               </tr>`
                   : ""
@@ -911,7 +903,7 @@
 
   function openEditMergedCity(record) {
     editMergeActiveRecordId = record.id;
-    document.getElementById("editMergeId").value = formatSystemCityDisplayId(record.id);
+    document.getElementById("editMergeId").value = getSystemCityDisplayId(record.id);
     const currentCountryName = getSystemCountryName(record.country.code) || record.country.name;
     editMergeCountryInput.value = `${currentCountryName} (${record.country.code})`;
     editMergeSelectedIds = new Set(record.mergedFrom || []);

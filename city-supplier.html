@@ -390,7 +390,7 @@
       const record = currentRows().find((r) => String(r.id) === historyBtn.dataset.rowId);
       if (!record) return;
       const supplierLabel = SUPPLIER_LABELS[state.supplier] || state.supplier;
-      document.getElementById("historyCityName").textContent = `— ${supplierLabel} / ${record.name}`;
+      document.getElementById("historyCityName").textContent = `— ${supplierLabel} / ${record.name} (ID: ${record.id})`;
       document.getElementById("historyList").innerHTML = renderHistoryList(record.history, "No mapping history yet");
       openModal(document.getElementById("historyModal"));
       return;

@@ -447,7 +447,7 @@
     if (pinnedCityId === null) return;
     const city = SYSTEM_CITIES.find((c) => c.id === pinnedCityId);
     if (!city) return;
-    document.getElementById("historyCityName").textContent = `— ${city.name}`;
+    document.getElementById("historyCityName").textContent = `— ${city.name} (ID: ${getSystemCityDisplayId(city.id)})`;
     document.getElementById("historyList").innerHTML = renderHistoryList(city.history, "No history yet");
     openModal(document.getElementById("historyModal"));
   });
@@ -565,7 +565,7 @@
       const supplierKey = historyBtn.dataset.supplier;
       const row = supplierCities[supplierKey].find((r) => String(r.id) === historyBtn.dataset.rowId);
       if (!row) return;
-      document.getElementById("historyCityName").textContent = `— ${SUPPLIER_LABELS[supplierKey]} / ${row.name}`;
+      document.getElementById("historyCityName").textContent = `— ${SUPPLIER_LABELS[supplierKey]} / ${row.name} (ID: ${row.id})`;
       document.getElementById("historyList").innerHTML = renderHistoryList(row.history, "No mapping history yet");
       openModal(document.getElementById("historyModal"));
     }
