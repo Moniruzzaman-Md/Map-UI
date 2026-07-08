@@ -51,7 +51,13 @@ SYSTEM_COUNTRIES.forEach((c, i) => {
 // sample history for a couple of countries, for demo purposes
 SYSTEM_COUNTRIES[0].history.push(
   { operation: "Edit", name: "United States", description: "Name: USA -> United States", userName: "Farhan Ahmed", userEmail: "farhan.ahmed@mynztrip.com", timestamp: new Date("2026-06-18T09:12:00") },
-  { operation: "Edit", name: "United States of America", description: "Name: United States -> United States of America", userName: "Nusrat Jahan", userEmail: "nusrat.jahan@mynztrip.com", timestamp: new Date("2026-06-20T14:47:00") }
+  { operation: "Edit", name: "United States of America", description: "Name: United States -> United States of America", userName: "Nusrat Jahan", userEmail: "nusrat.jahan@mynztrip.com", timestamp: new Date("2026-06-20T14:47:00") },
+  // Mirrors supplierCountries.agoda[0] / supplierCountries.hotelbeds[0]'s own
+  // seeded "Create" entries below (same users/timestamps), viewed from the
+  // system country's side — see SYSTEM_CITIES' matching comment above for
+  // why this demo needs both sides pre-seeded rather than created live.
+  { operation: "Map", description: "Mapped supplier country: Agoda — United States (US) — ID: AG-US-001", userName: "Farhan Ahmed", userEmail: "farhan.ahmed@mynztrip.com", timestamp: new Date("2026-06-18T09:12:00") },
+  { operation: "Map", description: "Mapped supplier country: HotelBeds — USA (US) — ID: HB_USA", userName: "Rafiul Karim", userEmail: "rafiul.karim@mynztrip.com", timestamp: new Date("2026-06-25T15:30:00") }
 );
 SYSTEM_COUNTRIES[4].history.push(
   { operation: "Edit", name: "India", description: "Name: Bharat -> India", userName: "Rafiul Karim", userEmail: "rafiul.karim@mynztrip.com", timestamp: new Date("2026-05-30T11:05:00") }
@@ -74,6 +80,19 @@ const SYSTEM_COUNTRY_CODES = Object.fromEntries(SYSTEM_COUNTRIES.map((c) => [c.n
 function getSystemCountryName(code) {
   const match = SYSTEM_COUNTRIES.find((c) => c.code === code);
   return match ? match.name : null;
+}
+
+// Appends a system country's code to its name for mapping-history text
+// (e.g. "India (IN)") — used instead of a bare name wherever a supplier
+// country's own "Mapped To:" history references the system-country side,
+// mirroring how the city version's "Mapped To:" already carries the system
+// city's own identifying details via getSystemCityHistoryLabel(). Falls
+// back to the bare name if the code can't be resolved (e.g. a stale name
+// snapshot that predates a rename no longer in SYSTEM_COUNTRY_CODES).
+function getSystemCountryNameWithCode(name) {
+  if (!name) return name;
+  const code = SYSTEM_COUNTRY_CODES[name];
+  return code ? `${name} (${code})` : name;
 }
 
 const SUPPLIER_LABELS = {
@@ -150,7 +169,7 @@ Object.keys(supplierCountries).forEach((key) => {
 supplierCountries.agoda[0].history.push({
   operation: "Create",
   systemCountry: "United States",
-  description: "Mapped To: United States",
+  description: "Mapped To: United States (US)",
   userName: "Farhan Ahmed",
   userEmail: "farhan.ahmed@mynztrip.com",
   timestamp: new Date("2026-06-18T09:12:00"),
@@ -158,7 +177,7 @@ supplierCountries.agoda[0].history.push({
 supplierCountries.hotelbeds[0].history.push({
   operation: "Create",
   systemCountry: "United States",
-  description: "Mapped To: United States",
+  description: "Mapped To: United States (US)",
   userName: "Rafiul Karim",
   userEmail: "rafiul.karim@mynztrip.com",
   timestamp: new Date("2026-06-25T15:30:00"),

@@ -470,7 +470,7 @@
   function applyCountryMapping(supplierKey, row, newSystemCountry) {
     const oldValue = row.systemCountry;
     if (oldValue === newSystemCountry) return;
-    const supplierCountryLabel = `${SUPPLIER_LABELS[supplierKey]} — ${row.name} (${row.code})`;
+    const supplierCountryLabel = `${SUPPLIER_LABELS[supplierKey]} — ${row.name} (${row.code}) — ID: ${row.supplierId}`;
 
     row.systemCountry = newSystemCountry;
     row.history.push({
@@ -478,9 +478,9 @@
       systemCountry: newSystemCountry,
       description: newSystemCountry
         ? oldValue
-          ? `Mapped To: ${oldValue} -> ${newSystemCountry}`
-          : `Mapped To: ${newSystemCountry}`
-        : `Mapped To: ${oldValue} -> Not mapped`,
+          ? `Mapped To: ${getSystemCountryNameWithCode(oldValue)} -> ${getSystemCountryNameWithCode(newSystemCountry)}`
+          : `Mapped To: ${getSystemCountryNameWithCode(newSystemCountry)}`
+        : `Mapped To: ${getSystemCountryNameWithCode(oldValue)} -> Not mapped`,
       userName: CURRENT_USER.name,
       userEmail: CURRENT_USER.email,
       timestamp: new Date(),

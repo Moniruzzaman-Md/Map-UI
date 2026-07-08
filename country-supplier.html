@@ -382,7 +382,7 @@
       const record = currentRows().find((r) => String(r.id) === historyBtn.dataset.rowId);
       if (!record) return;
       const supplierLabel = SUPPLIER_LABELS[state.supplier] || state.supplier;
-      document.getElementById("historyCountryName").textContent = `— ${supplierLabel} / ${record.name}`;
+      document.getElementById("historyCountryName").textContent = `— ${supplierLabel} / ${record.name} (ID: ${record.supplierId})`;
       document.getElementById("historyList").innerHTML = renderHistoryList(record.history, "No mapping history yet");
       openModal(document.getElementById("historyModal"));
     }
@@ -403,7 +403,9 @@
     record.history.push({
       operation: "Map",
       systemCountry: selected,
-      description: oldValue ? `Mapped To: ${oldValue} -> ${selected}` : `Mapped To: ${selected}`,
+      description: oldValue
+        ? `Mapped To: ${getSystemCountryNameWithCode(oldValue)} -> ${getSystemCountryNameWithCode(selected)}`
+        : `Mapped To: ${getSystemCountryNameWithCode(selected)}`,
       userName: CURRENT_USER.name,
       userEmail: CURRENT_USER.email,
       timestamp: new Date(),
@@ -428,7 +430,7 @@
         record.history.push({
           operation: "Unmap",
           systemCountry: null,
-          description: `Mapped To: ${oldValue} -> Not mapped`,
+          description: `Mapped To: ${getSystemCountryNameWithCode(oldValue)} -> Not mapped`,
           userName: CURRENT_USER.name,
           userEmail: CURRENT_USER.email,
           timestamp: new Date(),
