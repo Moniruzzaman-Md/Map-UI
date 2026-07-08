@@ -812,7 +812,7 @@
     // confirmation at Save time instead — see saveCityMappingBtn below.
     mapCityList.querySelectorAll("[data-map-city-id]").forEach((checkbox) => {
       checkbox.addEventListener("change", () => {
-        const id = Number(checkbox.dataset.mapCityId);
+        const id = checkbox.dataset.mapCityId;
         if (checkbox.checked) pendingChecked.add(id);
         else pendingChecked.delete(id);
         renderSelectedCitiesList();
@@ -868,7 +868,7 @@
 
     alreadyMappedList.querySelectorAll("[data-toggle-unmap-id]").forEach((btn) => {
       btn.addEventListener("click", () => {
-        const id = Number(btn.dataset.toggleUnmapId);
+        const id = btn.dataset.toggleUnmapId;
         if (pendingChecked.has(id)) pendingChecked.delete(id);
         else pendingChecked.add(id);
         renderCityList();
@@ -919,7 +919,7 @@
 
     newSelectionList.querySelectorAll("[data-deselect-city-id]").forEach((btn) => {
       btn.addEventListener("click", () => {
-        pendingChecked.delete(Number(btn.dataset.deselectCityId));
+        pendingChecked.delete(btn.dataset.deselectCityId);
         renderCityList();
         renderSelectedCitiesList();
         updateSelectionSummary();

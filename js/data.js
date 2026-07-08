@@ -474,9 +474,50 @@ generateBulkCityNames(200, true).forEach((name, i) => {
   });
 });
 
+// TBO's ids look like lowercase 3-letter city/airport codes (e.g. real-world
+// "dac"/"kul" style) rather than a sequential number — matches real codes
+// where one exists, falls back to the city name's own first 3 letters for
+// anything not in this list (deduplicated against codes already handed out,
+// since e.g. two different "New ..." cities would otherwise collide).
+const TBO_CITY_CODE_OVERRIDES = { Mumbai: "bom", "New Delhi": "del", Colombo: "cmb", Kathmandu: "ktm" };
+const usedTboCityCodes = new Set();
+
+// A supplier city's id is whatever format that supplier's own system uses —
+// unlike SYSTEM_CITIES (one internal id scheme), each supplier is a
+// separate external system with its own id conventions, so these
+// deliberately differ in shape per supplier (string, not always numeric),
+// mirroring how supplierCountries' own supplierId already varies by
+// supplier ("AG-US-001", "10023456", "HB_USA", "155"). Always a string,
+// even where a supplier's own style happens to look like a plain number.
+function generateSupplierCityId(supplierKey, countryCode, seq, cityName) {
+  const n = seq + 1;
+  switch (supplierKey) {
+    case "agoda":
+      return `AG-${countryCode}-${String(n).padStart(3, "0")}`;
+    case "booking":
+      return String(20050000 + seq);
+    case "hotelbeds":
+      return `HB_${countryCode}_${String(n).padStart(3, "0")}`;
+    case "tbo": {
+      if (TBO_CITY_CODE_OVERRIDES[cityName]) return TBO_CITY_CODE_OVERRIDES[cityName];
+      const base = (cityName.toLowerCase().match(/[a-z]/g) || []).slice(0, 3).join("").padEnd(3, "x");
+      let candidate = base;
+      let suffix = 2;
+      while (usedTboCityCodes.has(candidate)) {
+        candidate = `${base.slice(0, 2)}${suffix}`;
+        suffix++;
+      }
+      usedTboCityCodes.add(candidate);
+      return candidate;
+    }
+    default:
+      return String(n);
+  }
+}
+
 Object.keys(supplierCities).forEach((key) => {
   supplierCities[key].forEach((row, i) => {
-    row.id = i;
+    row.id = generateSupplierCityId(key, row.countryCode, i, row.name);
     row.history = [];
     row.active = true;
   });
