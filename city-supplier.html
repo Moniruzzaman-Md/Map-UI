@@ -82,6 +82,15 @@
             </div>
           </div>
           <a class="submenu-item" href="city-mapping.html">City Mapping</a>
+          <div class="submenu-group">
+            <button class="submenu-item submenu-toggle">
+              Hotel
+              <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="submenu-nested">
+              <a class="submenu-item nested" href="hotel-system.html">System</a>
+            </div>
+          </div>
         </div>
       </nav>
 
@@ -109,9 +118,11 @@
       <template id="supplierCityInfo">
         <p>This page maps each <strong>supplier's own city list</strong> to the system's master city list, so bookings from different suppliers can be matched to the same city record.</p>
         <ul>
+          <li><strong>ID</strong> — this supplier's own identifier for the city, not editable.</li>
           <li><strong>Map</strong> — go to City Mapping with this supplier city already pre-selected on the right, ready to pin a system city and save.</li>
           <li><strong>Unmap</strong> — appears once a city is mapped; opens a confirmation before clearing the mapping.</li>
           <li><strong>History</strong> — view every mapping made, changed, or removed, by whom and when.</li>
+          <li><strong>Active/Inactive toggle</strong> — controls whether this supplier city is available for booking. Changes immediately, no confirmation needed, and is logged to History. Filter the list by status with the <strong>Status</strong> dropdown.</li>
         </ul>
       </template>
 
@@ -126,10 +137,6 @@
             <div class="toolbar-filters">
               <select class="filter-select" id="supplierFilter">
                 <option value="">Select Supplier</option>
-                <option value="agoda">Agoda</option>
-                <option value="booking">Booking.com</option>
-                <option value="hotelbeds">HotelBeds</option>
-                <option value="tbo">TBO Holidays</option>
               </select>
               <select class="filter-select" id="countryFilter" disabled>
                 <option value="">All Countries</option>
@@ -139,6 +146,11 @@
                 <option value="mapped">Mapped</option>
                 <option value="unmapped">Unmapped</option>
               </select>
+              <select class="filter-select" id="statusFilter" disabled>
+                <option value="all">All Status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
             </div>
           </div>
         </div>
@@ -147,16 +159,18 @@
           <table class="data-table" id="supplierCityTable">
             <thead>
               <tr>
-                <th style="width:18%">Name</th>
-                <th style="width:14%">State</th>
-                <th style="width:18%">Country</th>
-                <th style="width:28%">System City</th>
-                <th style="width:22%">Action</th>
+                <th style="width:10%">ID</th>
+                <th style="width:14%">Name</th>
+                <th style="width:11%">State</th>
+                <th style="width:15%">Country</th>
+                <th style="width:22%">System City</th>
+                <th style="width:9%">Status</th>
+                <th style="width:19%">Action</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td colspan="5" class="empty-state">Select a supplier to view its city list</td>
+                <td colspan="7" class="empty-state">Select a supplier to view its city list</td>
               </tr>
             </tbody>
           </table>
@@ -211,11 +225,18 @@
   const tbody = document.querySelector("#supplierCityTable tbody");
   const paginationBar = document.getElementById("paginationBar");
   const supplierFilter = document.getElementById("supplierFilter");
+  supplierFilter.insertAdjacentHTML(
+    "beforeend",
+    Object.keys(SUPPLIER_LABELS)
+      .map((key) => `<option value="${key}">${SUPPLIER_LABELS[key]}</option>`)
+      .join("")
+  );
   const countryFilter = document.getElementById("countryFilter");
   const mappedFilter = document.getElementById("mappedFilter");
+  const statusFilter = document.getElementById("statusFilter");
   const citySearch = document.getElementById("citySearch");
 
-  let state = { page: 1, pageSize: 10, supplier: "", country: "", mapped: "all", query: "" };
+  let state = { page: 1, pageSize: 10, supplier: "", country: "", mapped: "all", status: "all", query: "" };
 
   function currentRows() {
     return supplierCities[state.supplier] || [];
@@ -227,6 +248,8 @@
     if (state.country) rows = rows.filter((r) => r.countryCode === state.country);
     if (state.mapped === "mapped") rows = rows.filter((r) => r.systemCityId !== null);
     if (state.mapped === "unmapped") rows = rows.filter((r) => r.systemCityId === null);
+    if (state.status === "active") rows = rows.filter((r) => r.active);
+    if (state.status === "inactive") rows = rows.filter((r) => !r.active);
     const q = state.query.trim().toLowerCase();
     if (q) rows = rows.filter((r) => r.name.toLowerCase().includes(q));
     return rows;
@@ -255,10 +278,12 @@
               : '<span class="text-not-mapped">Not mapped</span>';
             return `
       <tr>
+        <td>${r.id}</td>
         <td>${r.name}</td>
         <td>${r.state ? r.state : '<span style="color:var(--text-muted)">—</span>'}</td>
         <td>${getSupplierCountryName(state.supplier, r.countryCode)} <span class="code-badge">${r.countryCode}</span></td>
         <td>${systemCityCell}</td>
+        <td><span class="pill ${r.active ? "success" : "danger"}">${r.active ? "Active" : "Inactive"}</span></td>
         <td>
           <div class="row-actions">
             <button class="action-btn" data-map-btn data-row-id="${r.id}" aria-label="Map ${r.name}">
@@ -274,12 +299,15 @@
             </button>`
                 : ""
             }
+            <button class="action-btn" data-toggle-active-btn data-row-id="${r.id}" aria-label="${r.active ? "Deactivate" : "Activate"} ${r.name}">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 2v10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M6 5a8 8 0 106.5-1.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            </button>
           </div>
         </td>
       </tr>`;
           })
           .join("")
-      : `<tr><td colspan="5" class="empty-state">No cities match this filter</td></tr>`;
+      : `<tr><td colspan="7" class="empty-state">No cities match this filter</td></tr>`;
 
     renderPagination(paginationBar, {
       total: filtered.length,
@@ -297,6 +325,7 @@
     state.supplier = supplierFilter.value;
     state.page = 1;
     mappedFilter.disabled = !state.supplier;
+    statusFilter.disabled = !state.supplier;
     countryFilter.disabled = !state.supplier;
     citySearch.disabled = !state.supplier;
     state.country = "";
@@ -314,6 +343,8 @@
       citySearch.value = "";
       mappedFilter.value = "all";
       state.mapped = "all";
+      statusFilter.value = "all";
+      state.status = "all";
     }
     render();
   });
@@ -326,6 +357,12 @@
 
   mappedFilter.addEventListener("change", () => {
     state.mapped = mappedFilter.value;
+    state.page = 1;
+    render();
+  });
+
+  statusFilter.addEventListener("change", () => {
+    state.status = statusFilter.value;
     state.page = 1;
     render();
   });
@@ -371,6 +408,26 @@
           render();
         }
       );
+      return;
+    }
+
+    const toggleBtn = e.target.closest("[data-toggle-active-btn]");
+    if (toggleBtn) {
+      const record = currentRows().find((r) => String(r.id) === toggleBtn.dataset.rowId);
+      if (!record) return;
+      const wasActive = record.active;
+      record.active = !record.active;
+      record.history.push({
+        operation: "Status Change",
+        status: record.active,
+        description: `Status: ${wasActive ? "Active" : "Inactive"} -> ${record.active ? "Active" : "Inactive"}`,
+        userName: CURRENT_USER.name,
+        userEmail: CURRENT_USER.email,
+        timestamp: new Date(),
+      });
+      saveToStorage("supplierCities", supplierCities);
+      render();
+      showToast(`${record.name} marked ${record.active ? "Active" : "Inactive"}`);
     }
   });
 

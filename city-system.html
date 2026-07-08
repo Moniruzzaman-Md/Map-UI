@@ -82,6 +82,15 @@
             </div>
           </div>
           <a class="submenu-item" href="city-mapping.html">City Mapping</a>
+          <div class="submenu-group">
+            <button class="submenu-item submenu-toggle">
+              Hotel
+              <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="submenu-nested">
+              <a class="submenu-item nested" href="hotel-system.html">System</a>
+            </div>
+          </div>
         </div>
       </nav>
 
@@ -109,6 +118,7 @@
       <template id="cityListInfo">
         <p>This page manages the <strong>master list of cities</strong> used across the system.</p>
         <ul>
+          <li><strong>ID</strong> — a unique, system-generated identifier. Not editable.</li>
           <li><strong>New City</strong> — add a single new city under a country.</li>
           <li><strong>Merge Cities</strong> — combine two or more existing cities into one entry. Only cities from the original master list can be merged; cities you've already created or merged can't be merged again.</li>
           <li><strong>Edit</strong> — rename a city, or adjust which cities make up a merged one.</li>
@@ -148,11 +158,12 @@
           <table class="data-table" id="cityTable">
             <thead>
               <tr>
-                <th style="width:22%">Name</th>
-                <th style="width:14%">State</th>
-                <th style="width:18%">Country</th>
-                <th style="width:14%">Status</th>
-                <th style="width:32%">Action</th>
+                <th style="width:14%">ID</th>
+                <th style="width:18%">Name</th>
+                <th style="width:12%">State</th>
+                <th style="width:16%">Country</th>
+                <th style="width:12%">Status</th>
+                <th style="width:28%">Action</th>
               </tr>
             </thead>
             <tbody>
@@ -177,6 +188,10 @@
       </button>
     </div>
     <div class="modal-body">
+      <div class="form-group">
+        <label for="editCityId">ID</label>
+        <input type="text" id="editCityId" disabled />
+      </div>
       <div class="form-group">
         <label for="editCityCountry">Country</label>
         <input type="text" id="editCityCountry" disabled />
@@ -209,6 +224,10 @@
       </button>
     </div>
     <div class="modal-body">
+      <div class="form-group">
+        <label for="editMergeId">ID</label>
+        <input type="text" id="editMergeId" disabled />
+      </div>
       <div class="form-group">
         <label for="editMergeCountry">Country</label>
         <input type="text" id="editMergeCountry" disabled />
@@ -373,11 +392,19 @@
 
   let state = { page: 1, pageSize: 10, query: "", country: "", cityState: "", status: "all" };
 
+  // System City's id is shown as a long-form number (not the small
+  // sequential index used internally for lookups/references elsewhere in
+  // the project) — purely a display convention, doesn't touch the actual
+  // c.id used for matching/URLs/cross-entity references.
+  function formatSystemCityDisplayId(id) {
+    return String(10000000000 + id);
+  }
+
   function getFiltered() {
     let rows = SYSTEM_CITIES;
     const q = state.query.trim().toLowerCase();
     if (q) rows = rows.filter((c) => c.name.toLowerCase().includes(q));
-    if (state.country) rows = rows.filter((c) => c.country.name === state.country);
+    if (state.country) rows = rows.filter((c) => (getSystemCountryName(c.country.code) || c.country.name) === state.country);
     if (state.cityState) rows = rows.filter((c) => c.state === state.cityState);
     if (state.status === "active") rows = rows.filter((c) => c.active);
     if (state.status === "inactive") rows = rows.filter((c) => !c.active);
@@ -396,9 +423,10 @@
           .map(
             (c) => `
       <tr data-row-id="${c.id}">
+        <td>${formatSystemCityDisplayId(c.id)}</td>
         <td data-col="name">${c.name}${c.cityType ? ` <span class="pill city-type-badge ${c.cityType === "merged" ? "info" : "neutral"}" aria-label="${c.cityType === "merged" ? "Merged" : "New"}">${c.cityType === "merged" ? "M" : "N"}</span>` : ""}</td>
         <td>${c.state ? c.state : '<span style="color:var(--text-muted)">—</span>'}</td>
-        <td>${c.country.name} <span class="code-badge">${c.country.code}</span></td>
+        <td>${getSystemCountryName(c.country.code) || c.country.name} <span class="code-badge">${c.country.code}</span></td>
         <td><span class="pill ${c.active ? "success" : "danger"}">${c.active ? "Active" : "Inactive"}</span></td>
         <td>
           <div class="row-actions">
@@ -430,7 +458,7 @@
       </tr>`
           )
           .join("")
-      : `<tr><td colspan="5" class="empty-state">No cities found</td></tr>`;
+      : `<tr><td colspan="6" class="empty-state">No cities found</td></tr>`;
 
     renderPagination(paginationBar, {
       total: filtered.length,
@@ -493,7 +521,8 @@
         return;
       }
 
-      document.getElementById("editCityCountry").value = `${record.country.name} (${record.country.code})`;
+      document.getElementById("editCityId").value = formatSystemCityDisplayId(record.id);
+      document.getElementById("editCityCountry").value = `${getSystemCountryName(record.country.code) || record.country.name} (${record.country.code})`;
       document.getElementById("editCityState").value = record.state || "—";
       document.getElementById("editCityName").value = record.name;
       const modal = document.getElementById("editCityModal");
@@ -638,7 +667,11 @@
   // folded into another merge — only cities from the original master list
   // are eligible merge candidates. Shared by both the create and edit flows.
   function getMergeCandidates(countryName, query) {
-    let candidates = SYSTEM_CITIES.filter((c) => c.country.name === countryName && !c.cityType);
+    // Matches by code (stable) rather than the passed-in name, so a city
+    // whose country.name snapshot predates a rename on country-system.html
+    // is still correctly matched against the country's current name.
+    const meta = SYSTEM_COUNTRIES.find((c) => c.name === countryName);
+    let candidates = meta ? SYSTEM_CITIES.filter((c) => c.country.code === meta.code && !c.cityType) : [];
     const q = query.trim().toLowerCase();
     if (q) candidates = candidates.filter((c) => c.name.toLowerCase().includes(q));
     return candidates;
@@ -692,7 +725,7 @@
         <input type="checkbox" data-merge-id="${c.id}" ${mergeSelectedIds.has(c.id) ? "checked" : ""} />
         <span class="meta">
           <span>${c.name}</span>
-          <span class="sub">${[c.state, c.country.name].filter(Boolean).join(", ")}</span>
+          <span class="sub">${[c.state, getSystemCountryName(c.country.code) || c.country.name].filter(Boolean).join(", ")}</span>
         </span>
         <span class="pill ${c.active ? "success" : "danger"}">${c.active ? "Active" : "Inactive"}</span>
       </label>`
@@ -847,7 +880,7 @@
   function renderEditMergeList() {
     const record = SYSTEM_CITIES.find((c) => c.id === editMergeActiveRecordId);
     if (!record) return;
-    const candidates = getMergeCandidates(record.country.name, editMergeSearch.value);
+    const candidates = getMergeCandidates(getSystemCountryName(record.country.code) || record.country.name, editMergeSearch.value);
 
     editMergeList.innerHTML = candidates.length
       ? candidates
@@ -857,7 +890,7 @@
         <input type="checkbox" data-edit-merge-id="${c.id}" ${editMergeSelectedIds.has(c.id) ? "checked" : ""} />
         <span class="meta">
           <span>${c.name}</span>
-          <span class="sub">${[c.state, c.country.name].filter(Boolean).join(", ")}</span>
+          <span class="sub">${[c.state, getSystemCountryName(c.country.code) || c.country.name].filter(Boolean).join(", ")}</span>
         </span>
         <span class="pill ${c.active ? "success" : "danger"}">${c.active ? "Active" : "Inactive"}</span>
       </label>`
@@ -878,10 +911,12 @@
 
   function openEditMergedCity(record) {
     editMergeActiveRecordId = record.id;
-    editMergeCountryInput.value = `${record.country.name} (${record.country.code})`;
+    document.getElementById("editMergeId").value = formatSystemCityDisplayId(record.id);
+    const currentCountryName = getSystemCountryName(record.country.code) || record.country.name;
+    editMergeCountryInput.value = `${currentCountryName} (${record.country.code})`;
     editMergeSelectedIds = new Set(record.mergedFrom || []);
     editMergeSearch.value = "";
-    populateStatesForCountry(editMergeResultState, record.country.name);
+    populateStatesForCountry(editMergeResultState, currentCountryName);
     editMergeResultState.value = record.state || "";
     editMergeResultName.value = record.name;
     renderEditMergeList();

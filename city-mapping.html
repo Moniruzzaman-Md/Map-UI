@@ -82,6 +82,15 @@
             </div>
           </div>
           <a class="submenu-item active" href="city-mapping.html">City Mapping</a>
+          <div class="submenu-group">
+            <button class="submenu-item submenu-toggle">
+              Hotel
+              <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="submenu-nested">
+              <a class="submenu-item nested" href="hotel-system.html">System</a>
+            </div>
+          </div>
         </div>
       </nav>
 
@@ -220,10 +229,6 @@
                   <div class="toolbar-filters" style="margin-bottom:12px;">
                     <select class="filter-select" id="mapSupplierFilter">
                       <option value="">Select Supplier</option>
-                      <option value="agoda">Agoda</option>
-                      <option value="booking">Booking.com</option>
-                      <option value="hotelbeds">HotelBeds</option>
-                      <option value="tbo">TBO Holidays</option>
                     </select>
                     <select class="filter-select" id="mapCountryFilter" disabled>
                       <option value="">Select country</option>
@@ -414,7 +419,11 @@
       selectPinnedCity(null);
       return;
     }
-    let candidates = mappableSystemCities().filter((c) => c.country.name === countryName);
+    // Matches by code (stable) rather than the passed-in name, so a city
+    // whose country.name snapshot predates a rename on country-system.html
+    // is still correctly matched against the country's current name.
+    const countryMeta = SYSTEM_COUNTRIES.find((c) => c.name === countryName);
+    let candidates = countryMeta ? mappableSystemCities().filter((c) => c.country.code === countryMeta.code) : [];
     if (!pinState.disabled && pinState.value) {
       candidates = candidates.filter((c) => c.state === pinState.value);
     }
@@ -457,7 +466,7 @@
 
     pinnedCityCard.style.display = "";
     pinnedCityName.textContent = city.name;
-    pinnedCityMeta.textContent = `${[city.state, city.country.name].filter(Boolean).join(", ")} (${city.country.code})`;
+    pinnedCityMeta.textContent = `${[city.state, getSystemCountryName(city.country.code) || city.country.name].filter(Boolean).join(", ")} (${city.country.code})`;
     renderMappedCitiesSummary();
     resyncBaselineOnPinChange();
     updateBottomPinnedCityHint(city);
@@ -475,7 +484,7 @@
       bottomPinnedCityHint.textContent = "No system city pinned yet";
       return;
     }
-    const address = [city.state, city.country.name].filter(Boolean).join(", ");
+    const address = [city.state, getSystemCountryName(city.country.code) || city.country.name].filter(Boolean).join(", ");
     bottomPinnedCityHint.innerHTML = `Pinned: <strong>${city.name}</strong> — ${address}`;
   }
 
@@ -568,6 +577,12 @@
   // ---------- Right panel: map supplier cities ----------
 
   const mapSupplierFilter = document.getElementById("mapSupplierFilter");
+  mapSupplierFilter.insertAdjacentHTML(
+    "beforeend",
+    Object.keys(SUPPLIER_LABELS)
+      .map((key) => `<option value="${key}">${SUPPLIER_LABELS[key]}</option>`)
+      .join("")
+  );
   const mapCountryFilter = document.getElementById("mapCountryFilter");
   const mapStateFilter = document.getElementById("mapStateFilter");
   const mapCitySearch = document.getElementById("mapCitySearch");
@@ -1024,13 +1039,22 @@
       addedRows.forEach((row) => applyMapping(rightState.supplier, row, pinnedCityId));
       removedRows.forEach((row) => applyMapping(rightState.supplier, row, null));
 
-      refreshRightPanelBaseline();
-      renderMappedCitiesSummary();
-
       const parts = [];
       if (addedRows.length) parts.push(`${addedRows.length} mapped`);
       if (removedRows.length) parts.push(`${removedRows.length} unmapped`);
       showToast(parts.join(", "));
+
+      // Reset the whole page back to its just-loaded state (unpinned, no
+      // supplier/country/state chosen) rather than leaving everything
+      // filled in — a completed save is a natural stopping point, and
+      // starting the next mapping task fresh beats manually clearing each
+      // filter by hand. Reuses the exact same paths the page already uses
+      // for "nothing pinned"/"nothing filtered" (pinCountry's own change
+      // handler, and resetRightPanelFilters() — the same function called
+      // once at page load) rather than duplicating that logic here.
+      pinCountry.value = "";
+      pinCountry.dispatchEvent(new Event("change"));
+      resetRightPanelFilters();
     }
 
     // Always preview before applying, regardless of which buckets are
@@ -1067,7 +1091,7 @@
   if (linkedCityId !== null) {
     const linkedCity = mappableSystemCities().find((c) => String(c.id) === linkedCityId);
     if (linkedCity) {
-      pinCountry.value = linkedCity.country.name;
+      pinCountry.value = getSystemCountryName(linkedCity.country.code) || linkedCity.country.name;
       pinCountry.dispatchEvent(new Event("change"));
 
       if (linkedCity.state && !pinState.disabled) {

@@ -82,6 +82,15 @@
             </div>
           </div>
           <a class="submenu-item" href="city-mapping.html">City Mapping</a>
+          <div class="submenu-group">
+            <button class="submenu-item submenu-toggle">
+              Hotel
+              <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="submenu-nested">
+              <a class="submenu-item nested" href="hotel-system.html">System</a>
+            </div>
+          </div>
         </div>
       </nav>
 
@@ -246,26 +255,14 @@
 <script src="js/app.js"></script>
 <script src="js/data.js"></script>
 <script>
-  // built from the shared master list so this page and the Supplier
-  // mapping page never fall out of sync
-  const countries = SYSTEM_COUNTRIES.map((c) => ({ name: c.name, code: c.code }));
-  // stable index so edits track the right record across pagination/search
-  countries.forEach((c, i) => {
-    c.id = i;
-    c.history = [];
-  });
-
-  // sample history for a couple of countries, for demo purposes
-  countries[0].history.push(
-    { operation: "Edit", name: "United States", description: "Name: USA -> United States", userName: "Farhan Ahmed", userEmail: "farhan.ahmed@mynztrip.com", timestamp: new Date("2026-06-18T09:12:00") },
-    { operation: "Edit", name: "United States of America", description: "Name: United States -> United States of America", userName: "Nusrat Jahan", userEmail: "nusrat.jahan@mynztrip.com", timestamp: new Date("2026-06-20T14:47:00") }
-  );
-  countries[4].history.push(
-    { operation: "Edit", name: "India", description: "Name: Bharat -> India", userName: "Rafiul Karim", userEmail: "rafiul.karim@mynztrip.com", timestamp: new Date("2026-05-30T11:05:00") }
-  );
-
-  // restore any name edits saved from a previous session
-  hydrateArray(countries, loadFromStorage("countries"));
+  // A direct reference to the shared master array (js/data.js already
+  // seeds its id/history and hydrates it from storage) — NOT a copy, so
+  // edits made here actually mutate SYSTEM_COUNTRIES itself and are visible
+  // to every other page that reads it (City, Hotel, City Mapping, Country
+  // Supplier's filters). An earlier version of this page built its own
+  // `.map()`'d copy with a separate "countries" storage key, which silently
+  // desynced renames/history from the rest of the project.
+  const countries = SYSTEM_COUNTRIES;
 
   const tbody = document.querySelector("#countryTable tbody");
   const paginationBar = document.getElementById("paginationBar");
@@ -358,8 +355,22 @@
         userEmail: CURRENT_USER.email,
         timestamp: new Date(),
       });
+
+      // Supplier country mappings reference a system country by its NAME
+      // (supplierCountries[key][*].systemCountry — see country-supplier.html),
+      // not a stable id/code, so a rename here would otherwise silently
+      // orphan every existing mapping (its pre-fill wouldn't match any
+      // <option>, its table cell would keep showing the old name, and an
+      // accidental re-save could even unmap it). Cascade the rename into
+      // every supplier's rows so the mapping stays intact.
+      Object.keys(supplierCountries).forEach((key) => {
+        supplierCountries[key].forEach((row) => {
+          if (row.systemCountry === oldName) row.systemCountry = newName;
+        });
+      });
+      saveToStorage("supplierCountries", supplierCountries);
     }
-    saveToStorage("countries", countries);
+    saveToStorage("SYSTEM_COUNTRIES", SYSTEM_COUNTRIES);
     render();
     modal.classList.remove("open");
     showToast("Country updated successfully");
@@ -501,7 +512,7 @@
     }
 
     saveToStorage("supplierCountries", supplierCountries);
-    saveToStorage("countries", countries);
+    saveToStorage("SYSTEM_COUNTRIES", SYSTEM_COUNTRIES);
     renderMapCountriesBody();
   }
 

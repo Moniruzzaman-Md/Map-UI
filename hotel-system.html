@@ -1,0 +1,666 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>System Hotel List – Hotel Map | mynztrip.com</title>
+<link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- Top bar -->
+  <header class="topbar">
+    <div class="topbar-brand">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2L2 8l10 4 10-4-10-6z" fill="#fff"/>
+        <path d="M2 16l10 4 10-4M2 12l10 4 10-4" stroke="#fff" stroke-width="1.6" fill="none"/>
+      </svg>
+      mynztrip.com
+    </div>
+
+    <button class="icon-btn" aria-label="Menu">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+
+    <button class="icon-btn accent-red" aria-label="Messages">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" stroke="#fff" stroke-width="1.8" fill="none"/></svg>
+    </button>
+
+    <div class="topbar-search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <input type="text" placeholder="Booking ID, PNR, Ticket No..." />
+      <button type="button">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#fff" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+        Search
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+
+    <div class="topbar-right">
+      <button class="icon-btn" aria-label="Notifications">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9z" stroke="#fff" stroke-width="1.8" fill="none"/><path d="M13.7 21a2 2 0 01-3.4 0" stroke="#fff" stroke-width="1.8"/></svg>
+      </button>
+      <svg class="avatar" width="38" height="38" viewBox="0 0 38 38" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="19" cy="19" r="19" fill="#c7cbe8"/>
+        <circle cx="19" cy="15" r="6" fill="#7c82b0"/>
+        <path d="M6 34c1.5-7 8-10 13-10s11.5 3 13 10" fill="#7c82b0"/>
+      </svg>
+    </div>
+  </header>
+
+  <div class="app-body">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <!-- Hotel Map (mother menu for this project's pages) -->
+      <nav class="nav-group open">
+        <button class="nav-item active">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 4L4 6v14l5-2 6 2 5-2V4l-5 2-6-2z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 4v14M15 6v14" stroke="currentColor" stroke-width="1.6"/></svg>
+          Hotel Map
+          <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="submenu">
+          <div class="submenu-group">
+            <button class="submenu-item submenu-toggle">
+              Country
+              <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="submenu-nested">
+              <a class="submenu-item nested" href="country-system.html">System</a>
+              <a class="submenu-item nested" href="country-supplier.html">Supplier</a>
+            </div>
+          </div>
+          <div class="submenu-group">
+            <button class="submenu-item submenu-toggle">
+              City
+              <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="submenu-nested">
+              <a class="submenu-item nested" href="city-system.html">System</a>
+              <a class="submenu-item nested" href="city-supplier.html">Supplier</a>
+            </div>
+          </div>
+          <a class="submenu-item" href="city-mapping.html">City Mapping</a>
+          <div class="submenu-group open">
+            <button class="submenu-item submenu-toggle">
+              Hotel
+              <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="submenu-nested">
+              <a class="submenu-item nested active" href="hotel-system.html">System</a>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="reset-demo-btn" id="resetDemoDataBtn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 109-9 9 9 0 00-7 3.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3 3.5V8h4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Reset Demo Data
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main-content">
+      <div class="page-header">
+        <div class="breadcrumb">Hotel Map <span class="sep">/</span> Hotel <span class="sep">/</span> System</div>
+        <div class="page-title-row">
+          <h1 class="page-title">System Hotel List</h1>
+          <button class="info-icon-btn" data-info-target="#hotelListInfo" data-info-title="System Hotel List" aria-label="About this page">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 11v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="8" r="1" fill="currentColor"/></svg>
+          </button>
+        </div>
+      </div>
+      <hr class="page-divider" />
+
+      <template id="hotelListInfo">
+        <p>This page manages the <strong>master list of hotels</strong> used across the system.</p>
+        <ul>
+          <li><strong>+ Add Hotel</strong> — create a new hotel: name, address, latitude/longitude, star rating, and its country/state/city.</li>
+          <li><strong>Edit</strong> — every field is editable except the hotel's id.</li>
+          <li><strong>History</strong> — view every change: creation, edits, and status changes.</li>
+          <li><strong>Active/Inactive toggle</strong> — controls whether a hotel is available for booking. Changes immediately, no confirmation needed, and is logged to History.</li>
+        </ul>
+      </template>
+
+      <section class="content-card">
+        <div class="card-toolbar">
+          <h2>All Hotels</h2>
+          <div class="toolbar-controls">
+            <div class="toolbar-search">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              <input type="text" id="hotelSearch" placeholder="Search by hotel name..." />
+            </div>
+            <div class="toolbar-filters">
+              <select class="filter-select" id="hotelCountryFilter">
+                <option value="">All Countries</option>
+              </select>
+              <select class="filter-select" id="hotelStateFilter" disabled>
+                <option value="">Select State</option>
+              </select>
+              <select class="filter-select" id="hotelCityFilter" disabled>
+                <option value="">All Cities</option>
+              </select>
+              <select class="filter-select" id="hotelStatusFilter">
+                <option value="all">All Status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" id="addHotelBtn">+ Add Hotel</button>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table class="data-table" id="hotelTable">
+            <thead>
+              <tr>
+                <th style="width:20%">Name</th>
+                <th style="width:14%">City</th>
+                <th style="width:12%">State</th>
+                <th style="width:16%">Country</th>
+                <th style="width:10%">Star Rating</th>
+                <th style="width:10%">Status</th>
+                <th style="width:18%">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- rows injected here -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="table-footer pagination-bar" id="paginationBar"></div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<!-- Add / Edit Hotel Modal — one shared form since every field (except id)
+     is editable both ways, unlike City's more restrictive Edit modal. -->
+<div class="modal-overlay" id="hotelFormModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="hotelFormTitle">Add Hotel</h3>
+      <button class="modal-close" data-modal-close aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label for="hotelFormName">Hotel Name</label>
+        <input type="text" id="hotelFormName" placeholder="e.g. Grand Plaza New York" />
+      </div>
+      <div class="form-group">
+        <label for="hotelFormAddress">Address</label>
+        <input type="text" id="hotelFormAddress" placeholder="e.g. 123 5th Ave" />
+      </div>
+      <div class="form-group">
+        <label for="hotelFormCountry">Country</label>
+        <select id="hotelFormCountry" class="filter-select" style="width:100%; min-width:0;">
+          <option value="">Select country</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="hotelFormState">State</label>
+        <select id="hotelFormState" class="filter-select" style="width:100%; min-width:0;" disabled>
+          <option value="">Select country first</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="hotelFormCity">City</label>
+        <select id="hotelFormCity" class="filter-select" style="width:100%; min-width:0;" disabled>
+          <option value="">Select country first</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="hotelFormLatitude">Latitude</label>
+        <input type="number" step="any" id="hotelFormLatitude" placeholder="e.g. 40.7128" />
+      </div>
+      <div class="form-group">
+        <label for="hotelFormLongitude">Longitude</label>
+        <input type="number" step="any" id="hotelFormLongitude" placeholder="e.g. -74.0060" />
+      </div>
+      <div class="form-group">
+        <label for="hotelFormStarRating">Star Rating</label>
+        <select id="hotelFormStarRating" class="filter-select" style="width:100%; min-width:0;">
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" data-modal-close>Cancel</button>
+      <button class="btn btn-primary" id="saveHotelBtn">Save Hotel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit History Modal (card design) -->
+<div class="modal-overlay" id="historyModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Edit History <span id="historyHotelName" style="color:var(--text-muted); font-weight:600;"></span></h3>
+      <button class="modal-close" data-modal-close aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="history-list" id="historyList"></div>
+    </div>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+<script src="js/data.js"></script>
+<script>
+  const countryFilterSelect = document.getElementById("hotelCountryFilter");
+  countryFilterSelect.insertAdjacentHTML(
+    "beforeend",
+    SYSTEM_COUNTRIES.map((c) => `<option value="${c.name}">${c.name} (${c.code})</option>`).join("")
+  );
+
+  const stateFilterSelect = document.getElementById("hotelStateFilter");
+  const cityFilterSelect = document.getElementById("hotelCityFilter");
+  const statusFilterSelect = document.getElementById("hotelStatusFilter");
+  const tbody = document.querySelector("#hotelTable tbody");
+  const paginationBar = document.getElementById("paginationBar");
+  const hotelSearch = document.getElementById("hotelSearch");
+
+  let state = { page: 1, pageSize: 10, query: "", country: "", hotelState: "", city: "", status: "all" };
+
+  function getFiltered() {
+    let rows = SYSTEM_HOTELS;
+    const q = state.query.trim().toLowerCase();
+    if (q) rows = rows.filter((h) => h.name.toLowerCase().includes(q));
+    if (state.country) rows = rows.filter((h) => (getSystemCountryName(resolveHotelLocation(h).country.code) || resolveHotelLocation(h).country.name) === state.country);
+    if (state.hotelState) rows = rows.filter((h) => resolveHotelLocation(h).state === state.hotelState);
+    if (state.city) rows = rows.filter((h) => resolveHotelLocation(h).city === state.city);
+    if (state.status === "active") rows = rows.filter((h) => h.active);
+    if (state.status === "inactive") rows = rows.filter((h) => !h.active);
+    return rows;
+  }
+
+  // City filter is a facet over whichever country/state is currently
+  // selected — hotel city is a plain field, not a lookup into a master city
+  // list, so its options are just the distinct city values present here.
+  // Resolved live via resolveHotelLocation() (js/data.js) rather than the
+  // hotel's own stored snapshot, so a rename on city-system.html or
+  // country-system.html is reflected here without re-saving every hotel.
+  function updateCityFilterOptions() {
+    let candidates = SYSTEM_HOTELS;
+    if (state.country) candidates = candidates.filter((h) => (getSystemCountryName(resolveHotelLocation(h).country.code) || resolveHotelLocation(h).country.name) === state.country);
+    if (state.hotelState) candidates = candidates.filter((h) => resolveHotelLocation(h).state === state.hotelState);
+    const cities = [...new Set(candidates.map((h) => resolveHotelLocation(h).city))].sort();
+    const current = state.city;
+    cityFilterSelect.innerHTML = `<option value="">All Cities</option>` + cities.map((c) => `<option value="${c}">${c}</option>`).join("");
+    cityFilterSelect.disabled = cities.length === 0;
+    if (cities.includes(current)) {
+      cityFilterSelect.value = current;
+    } else {
+      state.city = "";
+    }
+  }
+
+  function render() {
+    const filtered = getFiltered();
+    const totalPages = Math.max(1, Math.ceil(filtered.length / state.pageSize));
+    state.page = Math.min(state.page, totalPages);
+    const startIdx = (state.page - 1) * state.pageSize;
+    const pageItems = filtered.slice(startIdx, startIdx + state.pageSize);
+
+    tbody.innerHTML = pageItems.length
+      ? pageItems
+          .map((h) => {
+            const loc = resolveHotelLocation(h);
+            const countryName = getSystemCountryName(loc.country.code) || loc.country.name;
+            return `
+      <tr data-row-id="${h.id}">
+        <td data-col="name">${h.name}</td>
+        <td>${loc.city}</td>
+        <td>${loc.state ? loc.state : '<span style="color:var(--text-muted)">—</span>'}</td>
+        <td>${countryName} <span class="code-badge">${loc.country.code}</span></td>
+        <td>${h.starRating}</td>
+        <td><span class="pill ${h.active ? "success" : "danger"}">${h.active ? "Active" : "Inactive"}</span></td>
+        <td>
+          <div class="row-actions">
+            <button class="action-btn" data-edit-btn data-row-id="${h.id}" aria-label="Edit ${h.name}">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4L16.5 3.5z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+            </button>
+            <button class="action-btn" data-history-btn data-row-id="${h.id}" aria-label="View edit history for ${h.name}">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 109-9 9 9 0 00-7 3.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3 3.5V8h4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 7.5V12l3.2 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <button class="action-btn" data-toggle-active-btn data-row-id="${h.id}" aria-label="${h.active ? "Deactivate" : "Activate"} ${h.name}">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 2v10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M6 5a8 8 0 106.5-1.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            </button>
+          </div>
+        </td>
+      </tr>`;
+          })
+          .join("")
+      : `<tr><td colspan="7" class="empty-state">No hotels found</td></tr>`;
+
+    renderPagination(paginationBar, {
+      total: filtered.length,
+      page: state.page,
+      pageSize: state.pageSize,
+      onChange: ({ page, pageSize }) => {
+        state.page = page;
+        state.pageSize = pageSize;
+        render();
+      },
+    });
+  }
+
+  const runSearch = debounce(() => {
+    state.query = hotelSearch.value;
+    state.page = 1;
+    render();
+  });
+  hotelSearch.addEventListener("input", runSearch);
+
+  countryFilterSelect.addEventListener("change", () => {
+    state.country = countryFilterSelect.value;
+    state.page = 1;
+    state.hotelState = "";
+
+    const countryMeta = SYSTEM_COUNTRIES.find((c) => c.name === state.country);
+    const states = countryMeta ? getStatesForCountryCode(countryMeta.code) : [];
+
+    if (states.length) {
+      stateFilterSelect.disabled = false;
+      stateFilterSelect.innerHTML =
+        `<option value="">All States</option>` + states.map((s) => `<option value="${s}">${s}</option>`).join("");
+    } else {
+      stateFilterSelect.disabled = true;
+      stateFilterSelect.innerHTML = `<option value="">${countryMeta ? "No state required" : "Select State"}</option>`;
+    }
+    updateCityFilterOptions();
+    render();
+  });
+
+  stateFilterSelect.addEventListener("change", () => {
+    state.hotelState = stateFilterSelect.value;
+    state.page = 1;
+    updateCityFilterOptions();
+    render();
+  });
+
+  cityFilterSelect.addEventListener("change", () => {
+    state.city = cityFilterSelect.value;
+    state.page = 1;
+    render();
+  });
+
+  statusFilterSelect.addEventListener("change", () => {
+    state.status = statusFilterSelect.value;
+    state.page = 1;
+    render();
+  });
+
+  updateCityFilterOptions();
+  render();
+
+  // ---------- Row actions: Edit / History / Toggle Active ----------
+
+  document.addEventListener("click", (e) => {
+    const editBtn = e.target.closest("[data-edit-btn]");
+    if (editBtn) {
+      openHotelForm(SYSTEM_HOTELS.find((h) => String(h.id) === editBtn.dataset.rowId));
+      return;
+    }
+
+    const historyBtn = e.target.closest("[data-history-btn]");
+    if (historyBtn) {
+      const record = SYSTEM_HOTELS.find((h) => String(h.id) === historyBtn.dataset.rowId);
+      if (!record) return;
+      document.getElementById("historyHotelName").textContent = `— ${record.name}`;
+      document.getElementById("historyList").innerHTML = renderHistoryList(record.history, "No edit history yet");
+      openModal(document.getElementById("historyModal"));
+      return;
+    }
+
+    const toggleBtn = e.target.closest("[data-toggle-active-btn]");
+    if (toggleBtn) {
+      const record = SYSTEM_HOTELS.find((h) => String(h.id) === toggleBtn.dataset.rowId);
+      if (!record) return;
+      const wasActive = record.active;
+      record.active = !record.active;
+      record.history.push({
+        operation: "Status Change",
+        status: record.active,
+        description: `Status: ${wasActive ? "Active" : "Inactive"} -> ${record.active ? "Active" : "Inactive"}`,
+        userName: CURRENT_USER.name,
+        userEmail: CURRENT_USER.email,
+        timestamp: new Date(),
+      });
+      saveToStorage("SYSTEM_HOTELS", SYSTEM_HOTELS);
+      render();
+      showToast(`${record.name} marked ${record.active ? "Active" : "Inactive"}`);
+    }
+  });
+
+  // ---------- Add / Edit Hotel form ----------
+
+  const hotelFormModal = document.getElementById("hotelFormModal");
+  const hotelFormTitle = document.getElementById("hotelFormTitle");
+  const hotelFormName = document.getElementById("hotelFormName");
+  const hotelFormAddress = document.getElementById("hotelFormAddress");
+  const hotelFormCountry = document.getElementById("hotelFormCountry");
+  const hotelFormState = document.getElementById("hotelFormState");
+  const hotelFormCity = document.getElementById("hotelFormCity");
+  const hotelFormLatitude = document.getElementById("hotelFormLatitude");
+  const hotelFormLongitude = document.getElementById("hotelFormLongitude");
+  const hotelFormStarRating = document.getElementById("hotelFormStarRating");
+
+  hotelFormCountry.insertAdjacentHTML(
+    "beforeend",
+    SYSTEM_COUNTRIES.map((c) => `<option value="${c.name}">${c.name} (${c.code})</option>`).join("")
+  );
+
+  function populateHotelFormStates(countryName, selectedState) {
+    const meta = SYSTEM_COUNTRIES.find((c) => c.name === countryName);
+    const states = meta ? getStatesForCountryCode(meta.code) : [];
+    if (states.length) {
+      hotelFormState.disabled = false;
+      hotelFormState.innerHTML =
+        `<option value="">Select state</option>` + states.map((s) => `<option value="${s}">${s}</option>`).join("");
+      if (selectedState) hotelFormState.value = selectedState;
+    } else {
+      hotelFormState.disabled = true;
+      hotelFormState.innerHTML = `<option value="">${meta ? "No state required" : "Select country first"}</option>`;
+    }
+  }
+
+  // City is picked from SYSTEM_CITIES (the same master list "Pin a System
+  // City" in city-mapping.html uses), not free-typed — country gates the
+  // list, state (if the country has one) narrows it further but is never
+  // required, matching this project's established "state is an optional
+  // extra filter, never gates the load" convention. Only prepopulated
+  // cities are eligible (same !c.cityType filter used everywhere else a
+  // system city is picked from a master list) — cities created via Add
+  // City/Merge Cities aren't valid targets here either.
+  function populateHotelFormCities(countryName, stateValue, selectedCityId) {
+    if (!countryName) {
+      hotelFormCity.disabled = true;
+      hotelFormCity.innerHTML = `<option value="">Select country first</option>`;
+      return;
+    }
+    // Matches by code (stable) rather than the passed-in name, so a city
+    // whose country.name snapshot predates a rename on country-system.html
+    // is still correctly matched against the country's current name.
+    const countryMeta = SYSTEM_COUNTRIES.find((c) => c.name === countryName);
+    let candidates = countryMeta ? SYSTEM_CITIES.filter((c) => !c.cityType && c.country.code === countryMeta.code) : [];
+    if (stateValue) candidates = candidates.filter((c) => c.state === stateValue);
+    hotelFormCity.disabled = candidates.length === 0;
+    hotelFormCity.innerHTML = candidates.length
+      ? `<option value="">Select city</option>` + candidates.map((c) => `<option value="${c.id}">${c.name}</option>`).join("")
+      : `<option value="">No prepopulated cities here</option>`;
+    if (selectedCityId !== null && selectedCityId !== undefined) {
+      hotelFormCity.value = String(selectedCityId);
+    }
+  }
+
+  hotelFormCountry.addEventListener("change", () => {
+    populateHotelFormStates(hotelFormCountry.value, "");
+    populateHotelFormCities(hotelFormCountry.value, "", null);
+  });
+
+  hotelFormState.addEventListener("change", () => {
+    populateHotelFormCities(hotelFormCountry.value, hotelFormState.value, null);
+  });
+
+  // Opens the shared form in either mode: no argument (or falsy) = Add, a
+  // hotel record = Edit with every field pre-filled. Add and Edit use the
+  // exact same field set here (unlike City, where Edit only allows renaming)
+  // since the user asked for every field except id to be editable.
+  function openHotelForm(record) {
+    hotelFormModal.dataset.activeRow = record ? record.id : "";
+    hotelFormTitle.textContent = record ? "Edit Hotel" : "Add Hotel";
+
+    // Resolved live rather than read off the record's own snapshot, so a
+    // rename on city-system.html/country-system.html since this hotel was
+    // last saved doesn't leave the Country/City selects unable to match any
+    // option (a stale name wouldn't be found among the freshly-populated
+    // <option>s below).
+    const loc = record ? resolveHotelLocation(record) : null;
+    const countryName = loc ? getSystemCountryName(loc.country.code) || loc.country.name : "";
+
+    hotelFormName.value = record ? record.name : "";
+    hotelFormAddress.value = record ? record.address : "";
+    hotelFormLatitude.value = record ? record.latitude : "";
+    hotelFormLongitude.value = record ? record.longitude : "";
+    hotelFormStarRating.value = record ? String(record.starRating) : "5";
+    hotelFormCountry.value = countryName;
+    populateHotelFormStates(countryName, loc ? loc.state : "");
+    populateHotelFormCities(countryName, loc ? loc.state : "", record ? record.systemCityId : null);
+
+    openModal(hotelFormModal);
+  }
+
+  document.getElementById("addHotelBtn").addEventListener("click", () => openHotelForm(null));
+
+  document.getElementById("saveHotelBtn").addEventListener("click", () => {
+    const name = hotelFormName.value.trim();
+    const countryName = hotelFormCountry.value;
+    const cityRecord = hotelFormCity.value ? SYSTEM_CITIES.find((c) => c.id === Number(hotelFormCity.value)) : null;
+    if (!name) {
+      showToast("Hotel name is required", "error");
+      return;
+    }
+    if (!countryName) {
+      showToast("Please select a country", "error");
+      return;
+    }
+    if (!cityRecord) {
+      showToast("Please select a city", "error");
+      return;
+    }
+
+    const meta = SYSTEM_COUNTRIES.find((c) => c.name === countryName);
+    const city = cityRecord.name;
+    const newState = cityRecord.state;
+    const systemCityId = cityRecord.id;
+    const address = hotelFormAddress.value.trim();
+    const latitude = hotelFormLatitude.value === "" ? null : Number(hotelFormLatitude.value);
+    const longitude = hotelFormLongitude.value === "" ? null : Number(hotelFormLongitude.value);
+    const starRating = Number(hotelFormStarRating.value);
+
+    const rowId = hotelFormModal.dataset.activeRow;
+
+    if (rowId === "") {
+      // Add
+      SYSTEM_HOTELS.push({
+        id: SYSTEM_HOTELS.length,
+        name,
+        address,
+        latitude,
+        longitude,
+        starRating,
+        city,
+        state: newState,
+        country: { name: meta.name, code: meta.code },
+        systemCityId,
+        active: true,
+        history: [
+          {
+            operation: "Create",
+            name,
+            description: [
+              `Name: ${name}`,
+              `Address: ${address}`,
+              `City: ${city}`,
+              newState ? `State: ${newState}` : null,
+              `Country: ${meta.name} (${meta.code})`,
+              `Star Rating: ${starRating}`,
+            ]
+              .filter(Boolean)
+              .join(", "),
+            userName: CURRENT_USER.name,
+            userEmail: CURRENT_USER.email,
+            timestamp: new Date(),
+          },
+        ],
+      });
+      showToast("Hotel added successfully");
+    } else {
+      // Edit — build an old -> new changelog only for fields that actually
+      // changed, matching this project's history-description convention.
+      const record = SYSTEM_HOTELS.find((h) => String(h.id) === String(rowId));
+      if (!record) return;
+
+      const changes = [];
+      function diff(label, oldVal, newVal) {
+        if (oldVal !== newVal) changes.push(`${label}: ${oldVal ?? "—"} -> ${newVal ?? "—"}`);
+      }
+      // Compare against the resolved-live location, not the raw stored
+      // snapshot — otherwise re-saving a hotel whose city/country was
+      // renamed elsewhere logs a misleading "you changed City/Country"
+      // entry for a change the user never made here.
+      const oldLoc = resolveHotelLocation(record);
+      const oldCountryName = getSystemCountryName(oldLoc.country.code) || oldLoc.country.name;
+      diff("Name", record.name, name);
+      diff("Address", record.address, address);
+      diff("City", oldLoc.city, city);
+      diff("State", oldLoc.state, newState);
+      diff("Country", oldCountryName, meta.name);
+      diff("Latitude", record.latitude, latitude);
+      diff("Longitude", record.longitude, longitude);
+      diff("Star Rating", record.starRating, starRating);
+
+      record.name = name;
+      record.address = address;
+      record.city = city;
+      record.state = newState;
+      record.country = { name: meta.name, code: meta.code };
+      record.systemCityId = systemCityId;
+      record.latitude = latitude;
+      record.longitude = longitude;
+      record.starRating = starRating;
+
+      if (changes.length) {
+        record.history.push({
+          operation: "Edit",
+          name,
+          description: changes.join(", "),
+          userName: CURRENT_USER.name,
+          userEmail: CURRENT_USER.email,
+          timestamp: new Date(),
+        });
+      }
+      showToast("Hotel updated successfully");
+    }
+
+    saveToStorage("SYSTEM_HOTELS", SYSTEM_HOTELS);
+    updateCityFilterOptions();
+    render();
+    hotelFormModal.classList.remove("open");
+  });
+</script>
+</body>
+</html>

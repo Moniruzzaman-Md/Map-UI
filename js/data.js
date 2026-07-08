@@ -42,7 +42,39 @@ const SYSTEM_COUNTRIES = [
   { name: "Sri Lanka", code: "LK" },
   { name: "Nepal", code: "NP" },
 ];
+
+SYSTEM_COUNTRIES.forEach((c, i) => {
+  c.id = i;
+  c.history = [];
+});
+
+// sample history for a couple of countries, for demo purposes
+SYSTEM_COUNTRIES[0].history.push(
+  { operation: "Edit", name: "United States", description: "Name: USA -> United States", userName: "Farhan Ahmed", userEmail: "farhan.ahmed@mynztrip.com", timestamp: new Date("2026-06-18T09:12:00") },
+  { operation: "Edit", name: "United States of America", description: "Name: United States -> United States of America", userName: "Nusrat Jahan", userEmail: "nusrat.jahan@mynztrip.com", timestamp: new Date("2026-06-20T14:47:00") }
+);
+SYSTEM_COUNTRIES[4].history.push(
+  { operation: "Edit", name: "India", description: "Name: Bharat -> India", userName: "Rafiul Karim", userEmail: "rafiul.karim@mynztrip.com", timestamp: new Date("2026-05-30T11:05:00") }
+);
+
+// restore any name edits saved from a previous session
+hydrateArray(SYSTEM_COUNTRIES, loadFromStorage("SYSTEM_COUNTRIES"));
+
+// Computed after hydration so a renamed country's code still resolves
+// correctly (this is a name-keyed lookup, built from whatever names are
+// current, not the ones baked into the literal array above).
 const SYSTEM_COUNTRY_CODES = Object.fromEntries(SYSTEM_COUNTRIES.map((c) => [c.name, c.code]));
+
+// A country's code is the one part of it that's never editable (see
+// country-system.html's Edit Country modal), so it's the stable key to
+// resolve a CURRENT country name through — anything that stored a country
+// as a { name, code } snapshot (SYSTEM_CITIES, SYSTEM_HOTELS) should
+// display via this instead of the snapshot's own .name, or a rename on
+// country-system.html won't show up anywhere that snapshot was taken.
+function getSystemCountryName(code) {
+  const match = SYSTEM_COUNTRIES.find((c) => c.code === code);
+  return match ? match.name : null;
+}
 
 const SUPPLIER_LABELS = {
   agoda: "Agoda",
@@ -288,6 +320,87 @@ SYSTEM_CITIES[0].history.push({
 // restore any edits/new/merged cities saved from a previous session
 hydrateArray(SYSTEM_CITIES, loadFromStorage("SYSTEM_CITIES"));
 
+// ---------- System Hotel ----------
+// Plain literal fields (name/address/lat/long/starRating/city/state/country),
+// same shape philosophy as SYSTEM_CITIES above — not a foreign key into
+// SYSTEM_CITIES, matching how city/state/country are just literals there too.
+
+// systemCityId is hardcoded per seed hotel (matching SYSTEM_CITIES' fixed
+// definition-order indices above) rather than computed by matching name +
+// country code at runtime — a name-match retrofit is fragile against a
+// rename that happens before a hotel's systemCityId is ever computed (e.g.
+// renaming "Los Angeles" before hotel-system.html has ever loaded once
+// would permanently fail to find "Los Angeles" and leave The Beverly
+// Hilton unlinked). city/state/country below are still the display
+// snapshot (kept for the same reasons as elsewhere), but the reference is
+// the actual source of truth wherever it's set.
+const SYSTEM_HOTELS = [
+  { name: "Grand Plaza New York", address: "123 5th Ave", latitude: 40.7128, longitude: -74.006, starRating: 5, city: "New York", state: "New York", country: { name: "United States", code: "US" }, systemCityId: 0 },
+  { name: "The Beverly Hilton", address: "9876 Wilshire Blvd", latitude: 34.0522, longitude: -118.2437, starRating: 4, city: "Los Angeles", state: "California", country: { name: "United States", code: "US" }, systemCityId: 1 },
+  { name: "The Peninsula Chicago", address: "108 E Superior St", latitude: 41.8955, longitude: -87.6244, starRating: 5, city: "Chicago", state: "Illinois", country: { name: "United States", code: "US" }, systemCityId: 3 },
+  { name: "Fairmont Royal York", address: "100 Front St W", latitude: 43.6455, longitude: -79.3806, starRating: 4, city: "Toronto", state: "Ontario", country: { name: "Canada", code: "CA" }, systemCityId: 10 },
+  { name: "The Savoy London", address: "Strand", latitude: 51.51, longitude: -0.12, starRating: 5, city: "London", state: null, country: { name: "United Kingdom", code: "GB" }, systemCityId: 17 },
+  { name: "Hotel Ritz Paris", address: "15 Place Vendome", latitude: 48.8683, longitude: 2.3289, starRating: 5, city: "Paris", state: null, country: { name: "France", code: "FR" }, systemCityId: 19 },
+  { name: "Hotel Adlon Berlin", address: "Pariser Platz 3", latitude: 52.5163, longitude: 13.3777, starRating: 5, city: "Berlin", state: null, country: { name: "Germany", code: "DE" }, systemCityId: 34 },
+  { name: "Park Hyatt Tokyo", address: "3-7-1-2 Nishi Shinjuku", latitude: 35.6852, longitude: 139.6905, starRating: 5, city: "Tokyo", state: null, country: { name: "Japan", code: "JP" }, systemCityId: 21 },
+  { name: "Marina Bay Sands", address: "10 Bayfront Ave", latitude: 1.2834, longitude: 103.8607, starRating: 5, city: "Singapore", state: null, country: { name: "Singapore", code: "SG" }, systemCityId: 23 },
+  { name: "The Fullerton Hotel", address: "1 Fullerton Square", latitude: 1.2865, longitude: 103.8535, starRating: 5, city: "Singapore", state: null, country: { name: "Singapore", code: "SG" }, systemCityId: 23 },
+  { name: "Burj Al Arab", address: "Jumeirah St", latitude: 25.1412, longitude: 55.1853, starRating: 5, city: "Dubai", state: null, country: { name: "United Arab Emirates", code: "AE" }, systemCityId: 24 },
+  { name: "Taj Mahal Palace", address: "Apollo Bunder", latitude: 18.922, longitude: 72.8332, starRating: 5, city: "Mumbai", state: null, country: { name: "India", code: "IN" }, systemCityId: 30 },
+  { name: "Shangri-La Bangkok", address: "89 Soi Wat Suan Plu", latitude: 13.7223, longitude: 100.5147, starRating: 5, city: "Bangkok", state: null, country: { name: "Thailand", code: "TH" }, systemCityId: 26 },
+  { name: "Park Hyatt Sydney", address: "7 Hickson Rd", latitude: -33.8568, longitude: 151.2153, starRating: 5, city: "Sydney", state: null, country: { name: "Australia", code: "AU" }, systemCityId: 28 },
+];
+
+SYSTEM_HOTELS.forEach((h, i) => {
+  h.id = i;
+  h.history = [];
+  h.active = true;
+});
+const SEED_HOTEL_COUNT = SYSTEM_HOTELS.length;
+
+hydrateArray(SYSTEM_HOTELS, loadFromStorage("SYSTEM_HOTELS"));
+
+// hydrateArray fully replaces SYSTEM_HOTELS with whatever's in localStorage,
+// which wipes out systemCityId for any hotel saved before the Add/Edit form
+// switched City from free text to a SYSTEM_CITIES picker (or before
+// systemCityId was hardcoded into the seed literals above) — self-heal it
+// the same way the cityType correction above does, instead of relying on
+// the user clearing localStorage by hand. This is a last-resort fallback
+// for genuinely legacy saved data only: the seed hotels above already carry
+// a hardcoded systemCityId (not name-matched, precisely to avoid this same
+// matching being fragile against a city rename — see the comment on
+// SYSTEM_HOTELS), and every hotel created via the form always has one set
+// too, so this loop is a no-op for all of them.
+SYSTEM_HOTELS.forEach((h) => {
+  if (h.systemCityId !== undefined && h.systemCityId !== null) return;
+  const match = SYSTEM_CITIES.find((c) => !c.cityType && c.name === h.city && c.country.code === h.country.code);
+  h.systemCityId = match ? match.id : null;
+});
+
+// Resolves a hotel's current city/state/country — live via systemCityId
+// when the referenced system city still exists, so a rename on
+// city-system.html propagates here too, instead of trusting the hotel's
+// own stored city/state/country snapshot (kept only for display/filter
+// convenience and as a fallback for records with no matching reference).
+// Shared by hotel-system.html's table/filters and getSystemHotelLabel below.
+function resolveHotelLocation(hotel) {
+  if (hotel.systemCityId !== null && hotel.systemCityId !== undefined) {
+    const city = SYSTEM_CITIES.find((c) => c.id === hotel.systemCityId);
+    if (city) return { city: city.name, state: city.state, country: city.country };
+  }
+  return { city: hotel.city, state: hotel.state, country: hotel.country };
+}
+
+// Full disambiguating label for a system hotel, mirroring getSystemCityLabel
+// — not called by anything yet, but the eventual Hotel Mapping feature will
+// need it the same way city-mapping.html needs getSystemCityLabel.
+function getSystemHotelLabel(id) {
+  const hotel = SYSTEM_HOTELS.find((h) => h.id === id);
+  if (!hotel) return null;
+  const loc = resolveHotelLocation(hotel);
+  return [hotel.name, loc.city, loc.state, getSystemCountryName(loc.country.code) || loc.country.name].filter(Boolean).join(", ");
+}
+
 // The seed cities (first SEED_CITY_COUNT, in their fixed definition order —
 // nothing ever removes or reorders them) must never carry a cityType, even
 // if a stale save from an older build of the app persisted one. This makes
@@ -302,7 +415,7 @@ SYSTEM_CITIES.slice(0, SEED_CITY_COUNT).forEach((c) => {
 function getSystemCityLabel(id) {
   const city = SYSTEM_CITIES.find((c) => c.id === id);
   if (!city) return null;
-  return [city.name, city.state, city.country.name].filter(Boolean).join(", ");
+  return [city.name, city.state, getSystemCountryName(city.country.code) || city.country.name].filter(Boolean).join(", ");
 }
 
 // ---------- Supplier City ----------
@@ -365,6 +478,7 @@ Object.keys(supplierCities).forEach((key) => {
   supplierCities[key].forEach((row, i) => {
     row.id = i;
     row.history = [];
+    row.active = true;
   });
 });
 
