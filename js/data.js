@@ -354,20 +354,43 @@ hydrateArray(SYSTEM_CITIES, loadFromStorage("SYSTEM_CITIES"));
 // snapshot (kept for the same reasons as elsewhere), but the reference is
 // the actual source of truth wherever it's set.
 const SYSTEM_HOTELS = [
-  { name: "Grand Plaza New York", address: "123 5th Ave", latitude: 40.7128, longitude: -74.006, starRating: 5, city: "New York", state: "New York", country: { name: "United States", code: "US" }, systemCityId: 0 },
-  { name: "The Beverly Hilton", address: "9876 Wilshire Blvd", latitude: 34.0522, longitude: -118.2437, starRating: 4, city: "Los Angeles", state: "California", country: { name: "United States", code: "US" }, systemCityId: 1 },
-  { name: "The Peninsula Chicago", address: "108 E Superior St", latitude: 41.8955, longitude: -87.6244, starRating: 5, city: "Chicago", state: "Illinois", country: { name: "United States", code: "US" }, systemCityId: 3 },
-  { name: "Fairmont Royal York", address: "100 Front St W", latitude: 43.6455, longitude: -79.3806, starRating: 4, city: "Toronto", state: "Ontario", country: { name: "Canada", code: "CA" }, systemCityId: 10 },
-  { name: "The Savoy London", address: "Strand", latitude: 51.51, longitude: -0.12, starRating: 5, city: "London", state: null, country: { name: "United Kingdom", code: "GB" }, systemCityId: 17 },
-  { name: "Hotel Ritz Paris", address: "15 Place Vendome", latitude: 48.8683, longitude: 2.3289, starRating: 5, city: "Paris", state: null, country: { name: "France", code: "FR" }, systemCityId: 19 },
-  { name: "Hotel Adlon Berlin", address: "Pariser Platz 3", latitude: 52.5163, longitude: 13.3777, starRating: 5, city: "Berlin", state: null, country: { name: "Germany", code: "DE" }, systemCityId: 34 },
-  { name: "Park Hyatt Tokyo", address: "3-7-1-2 Nishi Shinjuku", latitude: 35.6852, longitude: 139.6905, starRating: 5, city: "Tokyo", state: null, country: { name: "Japan", code: "JP" }, systemCityId: 21 },
-  { name: "Marina Bay Sands", address: "10 Bayfront Ave", latitude: 1.2834, longitude: 103.8607, starRating: 5, city: "Singapore", state: null, country: { name: "Singapore", code: "SG" }, systemCityId: 23 },
-  { name: "The Fullerton Hotel", address: "1 Fullerton Square", latitude: 1.2865, longitude: 103.8535, starRating: 5, city: "Singapore", state: null, country: { name: "Singapore", code: "SG" }, systemCityId: 23 },
-  { name: "Burj Al Arab", address: "Jumeirah St", latitude: 25.1412, longitude: 55.1853, starRating: 5, city: "Dubai", state: null, country: { name: "United Arab Emirates", code: "AE" }, systemCityId: 24 },
-  { name: "Taj Mahal Palace", address: "Apollo Bunder", latitude: 18.922, longitude: 72.8332, starRating: 5, city: "Mumbai", state: null, country: { name: "India", code: "IN" }, systemCityId: 30 },
-  { name: "Shangri-La Bangkok", address: "89 Soi Wat Suan Plu", latitude: 13.7223, longitude: 100.5147, starRating: 5, city: "Bangkok", state: null, country: { name: "Thailand", code: "TH" }, systemCityId: 26 },
-  { name: "Park Hyatt Sydney", address: "7 Hickson Rd", latitude: -33.8568, longitude: 151.2153, starRating: 5, city: "Sydney", state: null, country: { name: "Australia", code: "AU" }, systemCityId: 28 },
+  { name: "Grand Plaza New York", address: "123 5th Ave", latitude: 40.7128, longitude: -74.006, starRating: 5, city: "New York", state: "New York", country: { name: "United States", code: "US" }, systemCityId: 0, email: "reservations@grandplazanewyork.com", phoneNumber: "+1 212 555 0101", providerId: "PRV-1001" },
+  { name: "The Beverly Hilton", address: "9876 Wilshire Blvd", latitude: 34.0522, longitude: -118.2437, starRating: 4, city: "Los Angeles", state: "California", country: { name: "United States", code: "US" }, systemCityId: 1, email: "info@beverlyhilton.com", phoneNumber: "+1 310 555 0172", providerId: "PRV-1002" },
+  { name: "The Peninsula Chicago", address: "108 E Superior St", latitude: 41.8955, longitude: -87.6244, starRating: 5, city: "Chicago", state: "Illinois", country: { name: "United States", code: "US" }, systemCityId: 3, email: "reservations@peninsulachicago.com", phoneNumber: "+1 312 555 0134", providerId: "PRV-1003" },
+  { name: "Fairmont Royal York", address: "100 Front St W", latitude: 43.6455, longitude: -79.3806, starRating: 4, city: "Toronto", state: "Ontario", country: { name: "Canada", code: "CA" }, systemCityId: 10, email: "frontdesk@fairmontroyalyork.com", phoneNumber: "+1 416 555 0198", providerId: "PRV-1004" },
+  { name: "The Savoy London", address: "Strand", latitude: 51.51, longitude: -0.12, starRating: 5, city: "London", state: null, country: { name: "United Kingdom", code: "GB" }, systemCityId: 17, email: "info@thesavoylondon.co.uk", phoneNumber: "+44 20 7555 0123", providerId: "PRV-1005" },
+  { name: "Hotel Ritz Paris", address: "15 Place Vendome", latitude: 48.8683, longitude: 2.3289, starRating: 5, city: "Paris", state: null, country: { name: "France", code: "FR" }, systemCityId: 19, email: "reservation@ritzparis.fr", phoneNumber: "+33 1 55 55 0145", providerId: "PRV-1006" },
+  { name: "Hotel Adlon Berlin", address: "Pariser Platz 3", latitude: 52.5163, longitude: 13.3777, starRating: 5, city: "Berlin", state: null, country: { name: "Germany", code: "DE" }, systemCityId: 34, email: "info@adlonberlin.de", phoneNumber: "+49 30 555 0187", providerId: "PRV-1007" },
+  { name: "Park Hyatt Tokyo", address: "3-7-1-2 Nishi Shinjuku", latitude: 35.6852, longitude: 139.6905, starRating: 5, city: "Tokyo", state: null, country: { name: "Japan", code: "JP" }, systemCityId: 21, email: "tokyo.park@hyatt.jp", phoneNumber: "+81 3 5555 0162", providerId: "PRV-1008" },
+  { name: "Marina Bay Sands", address: "10 Bayfront Ave", latitude: 1.2834, longitude: 103.8607, starRating: 5, city: "Singapore", state: null, country: { name: "Singapore", code: "SG" }, systemCityId: 23, email: "enquiry@marinabaysands.sg", phoneNumber: "+65 6555 0188", providerId: "PRV-1009" },
+  { name: "The Fullerton Hotel", address: "1 Fullerton Square", latitude: 1.2865, longitude: 103.8535, starRating: 5, city: "Singapore", state: null, country: { name: "Singapore", code: "SG" }, systemCityId: 23, email: "info@fullertonhotel.sg", phoneNumber: "+65 6555 0133", providerId: "PRV-1010" },
+  { name: "Burj Al Arab", address: "Jumeirah St", latitude: 25.1412, longitude: 55.1853, starRating: 5, city: "Dubai", state: null, country: { name: "United Arab Emirates", code: "AE" }, systemCityId: 24, email: "reservations@burjalarab.ae", phoneNumber: "+971 4 555 0199", providerId: "PRV-1011" },
+  { name: "Taj Mahal Palace", address: "Apollo Bunder", latitude: 18.922, longitude: 72.8332, starRating: 5, city: "Mumbai", state: null, country: { name: "India", code: "IN" }, systemCityId: 30, email: "tajmahalpalace.mumbai@tajhotels.in", phoneNumber: "+91 22 5555 0166", providerId: "PRV-1012" },
+  { name: "Shangri-La Bangkok", address: "89 Soi Wat Suan Plu", latitude: 13.7223, longitude: 100.5147, starRating: 5, city: "Bangkok", state: null, country: { name: "Thailand", code: "TH" }, systemCityId: 26, email: "sbk@shangri-la.th", phoneNumber: "+66 2 555 0177", providerId: "PRV-1013" },
+  { name: "Park Hyatt Sydney", address: "7 Hickson Rd", latitude: -33.8568, longitude: 151.2153, starRating: 5, city: "Sydney", state: null, country: { name: "Australia", code: "AU" }, systemCityId: 28, email: "sydney.park@hyatt.au", phoneNumber: "+61 2 5555 0144", providerId: "PRV-1014" },
+  // Deliberately every free-text field long enough to overflow its column
+  // on hotel-system.html (Name/Address/City/State/Country/Email/Phone/
+  // Provider ID all treated with the fixed-width + fade-on-overflow
+  // .truncatable component) — a test row, not a real hotel, so the fade
+  // effect is exercised on every one of those columns at once instead of
+  // relying on scattered real-looking values to happen to be long enough.
+  // systemCityId is deliberately null so city/state resolve from this
+  // row's own (fictional, over-long) literals instead of a real
+  // SYSTEM_CITIES match.
+  {
+    name: "The Grand Intercontinental Royal Meridien Palace Resort & Spa Collection",
+    address: "Building 42, Sector 7, Phase 3, Near Central Business District, Boulevard Extension Road",
+    latitude: 25.276987,
+    longitude: 55.296249,
+    starRating: 5,
+    city: "Northeast Port Alexandria Harbourfront Township",
+    state: "Southwestern Autonomous Province Territory",
+    country: { name: "United Arab Emirates", code: "AE" },
+    systemCityId: null,
+    email: "reservations.concierge.frontdesk@thegrandintercontinentalroyalmeridienpalace-resort.com",
+    phoneNumber: "+1 (800) 555-0100 extension 123456789",
+    providerId: "PRV-TEST-INTENTIONALLY-VERY-LONG-0000001",
+  },
 ];
 
 SYSTEM_HOTELS.forEach((h, i) => {
@@ -376,6 +399,13 @@ SYSTEM_HOTELS.forEach((h, i) => {
   h.active = true;
 });
 const SEED_HOTEL_COUNT = SYSTEM_HOTELS.length;
+
+// Same long-form display-id convention as getSystemCityDisplayId, with a
+// different offset so hotel ids never collide with city ids if the two are
+// ever shown side by side (e.g. a future Hotel Mapping page).
+function getSystemHotelDisplayId(id) {
+  return String(50000000000 + id);
+}
 
 hydrateArray(SYSTEM_HOTELS, loadFromStorage("SYSTEM_HOTELS"));
 

@@ -118,8 +118,8 @@
       <template id="hotelListInfo">
         <p>This page manages the <strong>master list of hotels</strong> used across the system.</p>
         <ul>
-          <li><strong>+ Add Hotel</strong> — create a new hotel: name, address, latitude/longitude, star rating, and its country/state/city.</li>
-          <li><strong>Edit</strong> — every field is editable except the hotel's id.</li>
+          <li><strong>+ Add Hotel</strong> — create a new hotel: name, address, latitude/longitude, star rating, country/state/city, email, phone number, and a provider id (required — email and phone number are optional).</li>
+          <li><strong>Edit</strong> — every field is editable except the hotel's <strong>Id</strong> and <strong>Provider Id</strong>, which are fixed once the hotel is created.</li>
           <li><strong>History</strong> — view every change: creation, edits, and status changes.</li>
           <li><strong>Active/Inactive toggle</strong> — controls whether a hotel is available for booking. Changes immediately, no confirmation needed, and is logged to History.</li>
         </ul>
@@ -153,17 +153,29 @@
           </div>
         </div>
 
+        <div class="card-toolbar" style="padding-top:0;">
+          <label class="toggle-row" for="hotelRevealValuesToggle" style="margin-bottom:0;">
+            <input type="checkbox" id="hotelRevealValuesToggle" />
+            Show full values
+          </label>
+        </div>
+
         <div class="table-wrap">
           <table class="data-table" id="hotelTable">
             <thead>
               <tr>
-                <th style="width:20%">Name</th>
-                <th style="width:14%">City</th>
-                <th style="width:12%">State</th>
-                <th style="width:16%">Country</th>
-                <th style="width:10%">Star Rating</th>
-                <th style="width:10%">Status</th>
-                <th style="width:18%">Action</th>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Address</th>
+                <th>City</th>
+                <th>State</th>
+                <th>Country</th>
+                <th>Star Rating</th>
+                <th>Email</th>
+                <th>Phone Number</th>
+                <th>Provider ID</th>
+                <th>Status</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody>
@@ -189,6 +201,10 @@
       </button>
     </div>
     <div class="modal-body">
+      <div class="form-group">
+        <label for="hotelFormId">ID</label>
+        <input type="text" id="hotelFormId" disabled placeholder="Assigned after save" />
+      </div>
       <div class="form-group">
         <label for="hotelFormName">Hotel Name</label>
         <input type="text" id="hotelFormName" placeholder="e.g. Grand Plaza New York" />
@@ -233,6 +249,18 @@
           <option value="5">5</option>
         </select>
       </div>
+      <div class="form-group">
+        <label for="hotelFormEmail">Email</label>
+        <input type="email" id="hotelFormEmail" placeholder="e.g. reservations@hotel.com" />
+      </div>
+      <div class="form-group">
+        <label for="hotelFormPhone">Phone Number</label>
+        <input type="text" id="hotelFormPhone" placeholder="e.g. +1 212 555 0101" />
+      </div>
+      <div class="form-group">
+        <label for="hotelFormProviderId">Provider ID</label>
+        <input type="text" id="hotelFormProviderId" placeholder="e.g. PRV-1001" />
+      </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" data-modal-close>Cancel</button>
@@ -271,6 +299,8 @@
   const tbody = document.querySelector("#hotelTable tbody");
   const paginationBar = document.getElementById("paginationBar");
   const hotelSearch = document.getElementById("hotelSearch");
+  const hotelTableEl = document.getElementById("hotelTable");
+  const revealValuesToggle = document.getElementById("hotelRevealValuesToggle");
 
   let state = { page: 1, pageSize: 10, query: "", country: "", hotelState: "", city: "", status: "all" };
 
@@ -314,18 +344,46 @@
     const startIdx = (state.page - 1) * state.pageSize;
     const pageItems = filtered.slice(startIdx, startIdx + state.pageSize);
 
+    // Every value column is wrapped in .truncatable (fixed width per
+    // column, see styles.css) instead of a plain <td> — guarantees a
+    // single line per cell (never wraps to 2 lines) no matter how long
+    // the real value is. Short values render fully with no visual change;
+    // long ones are simply clipped, fading out toward the trailing edge,
+    // once refreshValueOverflowState() (below) measures real overflow —
+    // there's no scrolling to see the rest, only the tooltip (title="")
+    // or the "Show full values" toggle reveal it, and the toggle never
+    // changes the column width. A blank value is never wrapped in
+    // .truncatable at all — there's nothing to truncate. Status (a pill)
+    // and Action (icon buttons) are the only columns that stay plain —
+    // they're fixed, compact elements, not free-text values that can
+    // overflow.
+    function truncatableCell(value, modifier) {
+      if (!value) return `<span style="color:var(--text-muted)">—</span>`;
+      return `<div class="truncatable truncatable--${modifier}" title="${value}"><span class="truncatable-text">${value}</span></div>`;
+    }
+
     tbody.innerHTML = pageItems.length
       ? pageItems
           .map((h) => {
             const loc = resolveHotelLocation(h);
             const countryName = getSystemCountryName(loc.country.code) || loc.country.name;
+            const countryPlain = `${countryName} (${loc.country.code})`;
             return `
       <tr data-row-id="${h.id}">
-        <td data-col="name">${h.name}</td>
-        <td>${loc.city}</td>
-        <td>${loc.state ? loc.state : '<span style="color:var(--text-muted)">—</span>'}</td>
-        <td>${countryName} <span class="code-badge">${loc.country.code}</span></td>
-        <td>${h.starRating}</td>
+        <td>${truncatableCell(getSystemHotelDisplayId(h.id), "id")}</td>
+        <td data-col="name">${truncatableCell(h.name, "name")}</td>
+        <td>${truncatableCell(h.address, "address")}</td>
+        <td>${truncatableCell(loc.city, "city")}</td>
+        <td>${truncatableCell(loc.state, "state")}</td>
+        <td>
+          <div class="truncatable truncatable--country" title="${countryPlain}">
+            <span class="truncatable-text">${countryName} <span class="code-badge">${loc.country.code}</span></span>
+          </div>
+        </td>
+        <td>${truncatableCell(`${h.starRating} ★`, "starrating")}</td>
+        <td>${truncatableCell(h.email, "email")}</td>
+        <td>${truncatableCell(h.phoneNumber, "phone")}</td>
+        <td>${truncatableCell(h.providerId, "providerid")}</td>
         <td><span class="pill ${h.active ? "success" : "danger"}">${h.active ? "Active" : "Inactive"}</span></td>
         <td>
           <div class="row-actions">
@@ -343,7 +401,7 @@
       </tr>`;
           })
           .join("")
-      : `<tr><td colspan="7" class="empty-state">No hotels found</td></tr>`;
+      : `<tr><td colspan="12" class="empty-state">No hotels found</td></tr>`;
 
     renderPagination(paginationBar, {
       total: filtered.length,
@@ -355,7 +413,25 @@
         render();
       },
     });
+
+    refreshValueOverflowState();
   }
+
+  // Re-measures every .truncatable cell after each render() (search/filter/
+  // pagination change) and after the "Show full values" toggle flips —
+  // only cells whose content genuinely doesn't fit their fixed width get
+  // .is-overflowing (and therefore the fade-out via CSS); a short value
+  // that already fits gets no visual treatment at all.
+  function refreshValueOverflowState() {
+    document.querySelectorAll("#hotelTable .truncatable").forEach((el) => {
+      el.classList.toggle("is-overflowing", el.scrollWidth > el.clientWidth + 1);
+    });
+  }
+
+  revealValuesToggle.addEventListener("change", () => {
+    hotelTableEl.classList.toggle("reveal-values", revealValuesToggle.checked);
+    refreshValueOverflowState();
+  });
 
   const runSearch = debounce(() => {
     state.query = hotelSearch.value;
@@ -419,7 +495,7 @@
     if (historyBtn) {
       const record = SYSTEM_HOTELS.find((h) => String(h.id) === historyBtn.dataset.rowId);
       if (!record) return;
-      document.getElementById("historyHotelName").textContent = `— ${record.name}`;
+      document.getElementById("historyHotelName").textContent = `— ${record.name} (ID: ${getSystemHotelDisplayId(record.id)})`;
       document.getElementById("historyList").innerHTML = renderHistoryList(record.history, "No edit history yet");
       openModal(document.getElementById("historyModal"));
       return;
@@ -449,6 +525,7 @@
 
   const hotelFormModal = document.getElementById("hotelFormModal");
   const hotelFormTitle = document.getElementById("hotelFormTitle");
+  const hotelFormId = document.getElementById("hotelFormId");
   const hotelFormName = document.getElementById("hotelFormName");
   const hotelFormAddress = document.getElementById("hotelFormAddress");
   const hotelFormCountry = document.getElementById("hotelFormCountry");
@@ -457,6 +534,9 @@
   const hotelFormLatitude = document.getElementById("hotelFormLatitude");
   const hotelFormLongitude = document.getElementById("hotelFormLongitude");
   const hotelFormStarRating = document.getElementById("hotelFormStarRating");
+  const hotelFormEmail = document.getElementById("hotelFormEmail");
+  const hotelFormPhone = document.getElementById("hotelFormPhone");
+  const hotelFormProviderId = document.getElementById("hotelFormProviderId");
 
   hotelFormCountry.insertAdjacentHTML(
     "beforeend",
@@ -518,7 +598,10 @@
   // Opens the shared form in either mode: no argument (or falsy) = Add, a
   // hotel record = Edit with every field pre-filled. Add and Edit use the
   // exact same field set here (unlike City, where Edit only allows renaming)
-  // since the user asked for every field except id to be editable.
+  // since the user asked for every field except id and provider id to be
+  // editable — id is always disabled (assigned on save), and provider id is
+  // free-text on Add but locked (disabled) once the hotel exists, same
+  // "not editable after creation" rule as id.
   function openHotelForm(record) {
     hotelFormModal.dataset.activeRow = record ? record.id : "";
     hotelFormTitle.textContent = record ? "Edit Hotel" : "Add Hotel";
@@ -531,11 +614,16 @@
     const loc = record ? resolveHotelLocation(record) : null;
     const countryName = loc ? getSystemCountryName(loc.country.code) || loc.country.name : "";
 
+    hotelFormId.value = record ? getSystemHotelDisplayId(record.id) : "";
     hotelFormName.value = record ? record.name : "";
     hotelFormAddress.value = record ? record.address : "";
     hotelFormLatitude.value = record ? record.latitude : "";
     hotelFormLongitude.value = record ? record.longitude : "";
     hotelFormStarRating.value = record ? String(record.starRating) : "5";
+    hotelFormEmail.value = record ? record.email || "" : "";
+    hotelFormPhone.value = record ? record.phoneNumber || "" : "";
+    hotelFormProviderId.value = record ? record.providerId || "" : "";
+    hotelFormProviderId.disabled = Boolean(record);
     hotelFormCountry.value = countryName;
     populateHotelFormStates(countryName, loc ? loc.state : "");
     populateHotelFormCities(countryName, loc ? loc.state : "", record ? record.systemCityId : null);
@@ -561,6 +649,10 @@
       showToast("Please select a city", "error");
       return;
     }
+    if (!hotelFormProviderId.value.trim()) {
+      showToast("Provider ID is required", "error");
+      return;
+    }
 
     const meta = SYSTEM_COUNTRIES.find((c) => c.name === countryName);
     const city = cityRecord.name;
@@ -570,6 +662,9 @@
     const latitude = hotelFormLatitude.value === "" ? null : Number(hotelFormLatitude.value);
     const longitude = hotelFormLongitude.value === "" ? null : Number(hotelFormLongitude.value);
     const starRating = Number(hotelFormStarRating.value);
+    const email = hotelFormEmail.value.trim();
+    const phoneNumber = hotelFormPhone.value.trim();
+    const providerId = hotelFormProviderId.value.trim();
 
     const rowId = hotelFormModal.dataset.activeRow;
 
@@ -586,6 +681,9 @@
         state: newState,
         country: { name: meta.name, code: meta.code },
         systemCityId,
+        email,
+        phoneNumber,
+        providerId,
         active: true,
         history: [
           {
@@ -598,6 +696,9 @@
               newState ? `State: ${newState}` : null,
               `Country: ${meta.name} (${meta.code})`,
               `Star Rating: ${starRating}`,
+              email ? `Email: ${email}` : null,
+              phoneNumber ? `Phone Number: ${phoneNumber}` : null,
+              providerId ? `Provider ID: ${providerId}` : null,
             ]
               .filter(Boolean)
               .join(", "),
@@ -632,6 +733,12 @@
       diff("Latitude", record.latitude, latitude);
       diff("Longitude", record.longitude, longitude);
       diff("Star Rating", record.starRating, starRating);
+      diff("Email", record.email || null, email || null);
+      diff("Phone Number", record.phoneNumber || null, phoneNumber || null);
+      // Id and Provider Id are intentionally excluded here — both are fixed
+      // at creation and not editable, so record.providerId is never
+      // reassigned below (hotelFormProviderId is disabled while editing,
+      // matching hotelFormId).
 
       record.name = name;
       record.address = address;
@@ -642,6 +749,8 @@
       record.latitude = latitude;
       record.longitude = longitude;
       record.starRating = starRating;
+      record.email = email;
+      record.phoneNumber = phoneNumber;
 
       if (changes.length) {
         record.history.push({

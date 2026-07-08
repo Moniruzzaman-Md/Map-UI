@@ -584,6 +584,122 @@ table.data-table {
   background: #fafaff;
 }
 
+/* ---------- Truncatable value cells (hotel-system.html) ----------
+   Every value column (ID, Name, Address, City, State, Country, Star
+   Rating, Email, Phone Number, Provider ID) is capped to a fixed
+   per-column width rather than letting the column — or the row itself —
+   grow/wrap to fit its content. This guarantees a single line per cell,
+   always: no column ever wraps a value onto a second line, no matter how
+   long it is. The column width never changes and the cell never scrolls
+   — anything past the fixed width is simply clipped (overflow: hidden),
+   with the value fading out toward its trailing edge (a mask-image
+   gradient — letters stay perfectly sharp, they just fade from solid to
+   transparent over the last ~40px, matching the reference look: NOT a
+   Gaussian blur/softened pixels) whenever hotel-system.html's own
+   refreshValueOverflowState() measures it as actually overflowing
+   (.is-overflowing) — a short value that already fits (most IDs, Star
+   Ratings, many cities/states) gets no fade at all. Hovering always shows
+   the real value via the wrapper's title="" regardless of fade state.
+   #hotelTable.reveal-values (the "Show full values" toggle) removes the
+   fade table-wide — column width stays exactly the same either way
+   (still single-line, still clipped, just unfaded), so revealing values
+   never changes how compact the table is or lets anything wrap. Status
+   (a pill) and Action (icon buttons) are the only columns left plain —
+   they're fixed, compact elements, not free-text values that can
+   overflow. */
+
+/* Clips #hotelTable's own box so a long row-actions tooltip
+   (.action-btn[aria-label]::after — a project-wide CSS-only tooltip,
+   content: attr(aria-label), see the shared rule below) can never inflate
+   .table-wrap's scrollable width. That tooltip is invisible at rest
+   (opacity/visibility) but still occupies real layout space, and for a
+   hotel with a very long name (e.g. the intentional stress-test row) its
+   "View edit history for {name}" text is wide enough to stick out past
+   the table's right edge — scrollWidth then reflects that invisible
+   overflow, and scrolling .table-wrap all the way right lands on real,
+   visible blank space past the actual last column. Scoped to #hotelTable
+   specifically (not the shared .data-table class) so no other page's
+   table is affected; the tooltip itself still renders on hover, just
+   clipped at the table's own (generous) width instead of table-wrap's. */
+#hotelTable {
+  overflow: hidden;
+}
+
+.truncatable {
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.truncatable-text {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+/* Masking .truncatable itself (the fixed-width, clipped viewport), not
+   .truncatable-text (which is as wide as the full unclipped value) —
+   mask-image percentages are relative to the masked element's own box, so
+   this keeps the fade anchored to the visible right edge of the column no
+   matter how long the real value is. */
+.truncatable.is-overflowing {
+  mask-image: linear-gradient(to right, #000 0%, #000 calc(100% - 40px), transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, #000 0%, #000 calc(100% - 40px), transparent 100%);
+}
+
+/* Reveals the true full value: lifts the fixed width so the cell grows to
+   fit its content instead of clipping it (white-space stays nowrap, so
+   this still never wraps to a second line — it just makes that one
+   column wider, and the outer .table-wrap scrolls horizontally if the
+   now-wider table exceeds the viewport, same fallback as any other wide
+   table in this project). Without this, toggling on would just remove
+   the fade and hard-clip the value instead of actually revealing it. */
+#hotelTable.reveal-values .truncatable {
+  mask-image: none !important;
+  -webkit-mask-image: none !important;
+  width: auto !important;
+  overflow: visible;
+}
+
+.truncatable--id {
+  width: 100px;
+}
+
+.truncatable--name {
+  width: 170px;
+}
+
+.truncatable--address {
+  width: 200px;
+}
+
+.truncatable--city {
+  width: 100px;
+}
+
+.truncatable--state {
+  width: 110px;
+}
+
+.truncatable--country {
+  width: 150px;
+}
+
+.truncatable--starrating {
+  width: 70px;
+}
+
+.truncatable--email {
+  width: 190px;
+}
+
+.truncatable--phone {
+  width: 140px;
+}
+
+.truncatable--providerid {
+  width: 120px;
+}
+
 .code-badge {
   display: inline-block;
   background: var(--bg-panel);
