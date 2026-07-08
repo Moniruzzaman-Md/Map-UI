@@ -1,0 +1,1219 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>City Mapping – Hotel Map | mynztrip.com</title>
+<link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- Top bar -->
+  <header class="topbar">
+    <div class="topbar-brand">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2L2 8l10 4 10-4-10-6z" fill="#fff"/>
+        <path d="M2 16l10 4 10-4M2 12l10 4 10-4" stroke="#fff" stroke-width="1.6" fill="none"/>
+      </svg>
+      mynztrip.com
+    </div>
+
+    <button class="icon-btn" aria-label="Menu">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+
+    <button class="icon-btn accent-red" aria-label="Messages">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" stroke="#fff" stroke-width="1.8" fill="none"/></svg>
+    </button>
+
+    <div class="topbar-search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <input type="text" placeholder="Booking ID, PNR, Ticket No..." />
+      <button type="button">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#fff" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+        Search
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+
+    <div class="topbar-right">
+      <button class="icon-btn" aria-label="Notifications">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9z" stroke="#fff" stroke-width="1.8" fill="none"/><path d="M13.7 21a2 2 0 01-3.4 0" stroke="#fff" stroke-width="1.8"/></svg>
+      </button>
+      <svg class="avatar" width="38" height="38" viewBox="0 0 38 38" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="19" cy="19" r="19" fill="#c7cbe8"/>
+        <circle cx="19" cy="15" r="6" fill="#7c82b0"/>
+        <path d="M6 34c1.5-7 8-10 13-10s11.5 3 13 10" fill="#7c82b0"/>
+      </svg>
+    </div>
+  </header>
+
+  <div class="app-body">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <!-- Hotel Map (mother menu for this project's pages) -->
+      <nav class="nav-group open">
+        <button class="nav-item active">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 4L4 6v14l5-2 6 2 5-2V4l-5 2-6-2z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 4v14M15 6v14" stroke="currentColor" stroke-width="1.6"/></svg>
+          Hotel Map
+          <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="submenu">
+          <div class="submenu-group">
+            <button class="submenu-item submenu-toggle">
+              Country
+              <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="submenu-nested">
+              <a class="submenu-item nested" href="country-system.html">System</a>
+              <a class="submenu-item nested" href="country-supplier.html">Supplier</a>
+            </div>
+          </div>
+          <div class="submenu-group">
+            <button class="submenu-item submenu-toggle">
+              City
+              <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="submenu-nested">
+              <a class="submenu-item nested" href="city-system.html">System</a>
+              <a class="submenu-item nested" href="city-supplier.html">Supplier</a>
+            </div>
+          </div>
+          <a class="submenu-item active" href="city-mapping.html">City Mapping</a>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="reset-demo-btn" id="resetDemoDataBtn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 109-9 9 9 0 00-7 3.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3 3.5V8h4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Reset Demo Data
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main-content" id="cityMappingMain">
+      <div class="page-header">
+        <div class="breadcrumb">Hotel Map <span class="sep">/</span> City Mapping</div>
+        <div class="page-title-row">
+          <h1 class="page-title">City Mapping</h1>
+          <button class="info-icon-btn" data-info-target="#cityMappingInfo" data-info-title="City Mapping" aria-label="About this page">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 11v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="8" r="1" fill="currentColor"/></svg>
+          </button>
+        </div>
+      </div>
+      <hr class="page-divider" />
+
+      <template id="cityMappingInfo">
+        <p>Pin a <strong>system city</strong> at top-left to review what's already mapped to it (top-right), and use the section below to select <strong>supplier cities</strong> to map — the pin and the supplier selection work independently, in either order, and only need each other at save time.</p>
+        <ul>
+          <li>Only prepopulated system cities can be pinned here — cities added or merged via <strong>Add City</strong> on the City List page aren't eligible.</li>
+          <li>State is always an optional extra filter, never required — the pin city list loads as soon as a Country is chosen, and the supplier city list loads as soon as Supplier + Country are chosen.</li>
+          <li>Top-right shows every supplier city currently mapped to the pinned city, filterable by a single supplier via the dropdown ("All Suppliers" by default). Its History/Unmap buttons act immediately, one row at a time — for quick single fixes, not batch review.</li>
+          <li>A city already mapped to a <em>different</em> system city is highlighted below, with a small "Mapped: City, State, Country" note under its name. Checking it never interrupts you — any actual changes are reviewed together in one place at Save time.</li>
+          <li>On the left, <strong>Already Mapped</strong> lists this supplier's cities already mapped to the pinned city — its <strong>Unmap</strong> button queues a removal without the row disappearing, so you can change your mind (the button becomes <strong>Undo</strong>) right up until Save. <strong>New Selection</strong> lists your fresh picks from the checklist on the right — tagged <strong>Remap</strong> if that city is already mapped elsewhere, or <strong>New</strong> if it isn't mapped anywhere yet. Both sections collapse independently.</li>
+          <li><strong>Save Mapping</strong> always opens a preview before anything is applied, organized into up to four sections: <strong>Previously Saved</strong> (unchanged, for context), <strong>New Map</strong>, <strong>Remap</strong> (cities being reassigned from a different system city), and <strong>Unmap</strong>.</li>
+          <li>Tick <strong>"Show only cities not yet mapped"</strong> on the right to hide supplier cities that already map to some system city — unlike a system city, a supplier city maps to at most one, so this narrows the list to what's still available.</li>
+          <li>Each section below fills a full screen's worth of space — use the up/down buttons floating at the top-right to jump straight between the Pin/Existing Mapping section and the Map Supplier Cities section.</li>
+          <li>The Map Supplier Cities section header shows a compact "Pinned: City — State, Country" reminder of which system city you're currently mapping into, so you don't lose that context after jumping down here.</li>
+          <li>Tick <strong>"Full Screen"</strong> (top-right) to hide the breadcrumb and page title too, giving each section the entire screen — the toggle itself stays floating and reachable so you can turn it back off.</li>
+        </ul>
+      </template>
+
+      <div class="mapping-nav-fabs">
+        <button type="button" class="mapping-nav-fab mapping-chrome-toggle" id="mappingChromeToggleBtn" aria-label="Hide page title and breadcrumb for full-height sections">
+          <svg class="icon-expand" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg class="icon-collapse" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>Full Screen</span>
+        </button>
+        <button type="button" class="mapping-nav-fab" id="mappingNavTopBtn" aria-label="Go to Pin System City / Existing Mapping section">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 15l6-6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>Pin &amp; Existing Mapping</span>
+        </button>
+        <button type="button" class="mapping-nav-fab" id="mappingNavBottomBtn" aria-label="Go to Map Supplier Cities section">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>Map Supplier Cities</span>
+        </button>
+      </div>
+
+      <div class="mapping-page-layout">
+
+        <div class="mapping-layout mapping-layout-top">
+
+          <!-- Top-left panel: pin a system city -->
+          <section class="mapping-panel">
+            <div class="mapping-panel-header">
+              <h2>1. Pin a System City</h2>
+              <p>Only prepopulated cities can be selected.</p>
+            </div>
+            <div class="mapping-panel-body">
+              <div class="form-group">
+                <label for="pinCountry">System Country</label>
+                <select id="pinCountry" class="filter-select" style="width:100%; min-width:0;">
+                  <option value="">Select country</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="pinState">State (optional)</label>
+                <select id="pinState" class="filter-select" style="width:100%; min-width:0;" disabled>
+                  <option value="">Select country first</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="pinCity">City</label>
+                <select id="pinCity" class="filter-select" style="width:100%; min-width:0;" disabled>
+                  <option value="">Select country first</option>
+                </select>
+              </div>
+
+              <div class="pinned-city-card" id="pinnedCityCard" style="display:none;">
+                <div class="pinned-city-name" id="pinnedCityName"></div>
+                <div class="pinned-city-meta" id="pinnedCityMeta"></div>
+                <div class="pinned-city-actions">
+                  <span class="pill neutral" id="pinnedCityMappedCount">0 mapped</span>
+                  <div class="row-actions">
+                    <button class="action-btn" id="pinnedCityHistoryBtn" aria-label="View history for this system city">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 109-9 9 9 0 00-7 3.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3 3.5V8h4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 7.5V12l3.2 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                    <button class="btn btn-secondary" id="clearPinnedCityBtn">Change City</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Top-right panel: existing mapping with the pinned city -->
+          <section class="mapping-panel">
+            <div class="mapping-panel-header">
+              <h2>2. Existing Mapping with Pinned City</h2>
+              <p>Supplier cities already mapped to the pinned system city.</p>
+            </div>
+            <div class="mapping-panel-body">
+              <div class="empty-state" id="mappedCitiesEmptyState">Pin a system city to see its existing mappings.</div>
+              <div class="form-group" id="mappedCitiesSection" style="display:none;">
+                <label for="mappedSupplierFilter">Filter by Supplier</label>
+                <select id="mappedSupplierFilter" class="filter-select" style="width:100%; min-width:0;">
+                  <option value="">All Suppliers</option>
+                </select>
+                <div class="merge-list" id="mappedCitiesList" style="margin-top:10px;"></div>
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+        <!-- Bottom panel: map supplier cities -->
+        <section class="mapping-panel mapping-bottom-panel">
+          <div class="mapping-panel-header">
+            <h2>3. Map Supplier Cities</h2>
+            <p>Select a supplier, then narrow down by country/state and multi-select cities to map.</p>
+            <div class="pinned-city-inline-hint" id="bottomPinnedCityHint">No system city pinned yet</div>
+          </div>
+          <div class="mapping-panel-body">
+            <div id="rightPanelContent">
+              <div class="mapping-layout mapping-layout-bottom">
+
+                <!-- Bottom-left: filters + selected supplier cities -->
+                <div class="mapping-bottom-col">
+                  <div class="toolbar-filters" style="margin-bottom:12px;">
+                    <select class="filter-select" id="mapSupplierFilter">
+                      <option value="">Select Supplier</option>
+                      <option value="agoda">Agoda</option>
+                      <option value="booking">Booking.com</option>
+                      <option value="hotelbeds">HotelBeds</option>
+                      <option value="tbo">TBO Holidays</option>
+                    </select>
+                    <select class="filter-select" id="mapCountryFilter" disabled>
+                      <option value="">Select country</option>
+                    </select>
+                  </div>
+                  <div class="toolbar-filters" style="margin-bottom:16px;">
+                    <select class="filter-select" id="mapStateFilter" disabled>
+                      <option value="">All States</option>
+                    </select>
+                  </div>
+                  <div class="form-group mapping-list-group">
+                    <label>Selected Supplier Cities</label>
+                    <div class="merge-list" id="selectedCitiesList">
+                      <details class="mapping-collapsible-inline" id="alreadyMappedSection">
+                        <summary class="mapping-collapsible-header mapping-collapsible-header--warning">
+                          <span>Already Mapped (<span id="alreadyMappedCount">0</span>)</span>
+                          <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </summary>
+                        <div id="alreadyMappedList"></div>
+                      </details>
+                      <details class="mapping-collapsible-inline" id="newSelectionSection" open>
+                        <summary class="mapping-collapsible-header mapping-collapsible-header--info">
+                          <span>New Selection (<span id="newSelectionCount">0</span>)</span>
+                          <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </summary>
+                        <div id="newSelectionList"></div>
+                      </details>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Bottom-right: multi-select checklist -->
+                <div class="mapping-bottom-col">
+                  <div class="mapping-header-row" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                    <label class="toggle-row" for="mapUnmappedOnlyToggle" style="margin-bottom:0;">
+                      <input type="checkbox" id="mapUnmappedOnlyToggle" />
+                      Show only cities not yet mapped
+                    </label>
+                    <span class="hint" id="mapMappedStat" style="margin-top:0;">Mapped: 0/0</span>
+                  </div>
+
+                  <div class="form-group mapping-list-group">
+                    <div class="mapping-search-actions-row" style="margin-bottom:6px;">
+                      <label style="margin-bottom:0;">Supplier Cities</label>
+                      <span class="mapping-save-summary" id="mapSelectionSummary">No pending changes</span>
+                    </div>
+                    <div class="mapping-search-actions-row">
+                      <div class="toolbar-search mapping-search-half">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                        <input type="text" id="mapCitySearch" placeholder="Search by city name..." disabled />
+                      </div>
+                      <button class="btn btn-primary" id="saveCityMappingBtn">Save Mapping</button>
+                    </div>
+                    <div class="merge-list" id="mapCityList"></div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Mapping History Modal (card design) -->
+<div class="modal-overlay" id="historyModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Mapping History <span id="historyCityName" style="color:var(--text-muted); font-weight:600;"></span></h3>
+      <button class="modal-close" data-modal-close aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="history-list" id="historyList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Dialog: intentional exception to the sliding-drawer modal
+     convention — this is a real centered popup (fade + scale in place),
+     since a confirm/warning prompt reads better centered than as a drawer.
+     Mirrors the same #confirmModal pattern used in city-system.html. -->
+<div class="modal-overlay popup-overlay" id="confirmModal">
+  <div class="popup-box">
+    <div class="modal-header">
+      <h3>Please Confirm</h3>
+      <button class="modal-close" data-modal-close aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div id="confirmMessage"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" data-modal-close>Cancel</button>
+      <button class="btn btn-primary" id="confirmActionBtn">Continue</button>
+    </div>
+  </div>
+</div>
+
+<!-- Mapping Preview Modal: always shown on Save Mapping, organized into up
+     to four sections (Previously Saved / New Map / Remap / Unmap). Kept
+     separate from #confirmModal above, which stays for one-off single-row
+     unmap confirmations elsewhere on this page. -->
+<div class="modal-overlay popup-overlay" id="mappingPreviewModal">
+  <div class="popup-box popup-box-lg">
+    <div class="modal-header">
+      <h3>Review Mapping Changes</h3>
+      <button class="modal-close" data-modal-close aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div id="previewSections"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" data-modal-close>Cancel</button>
+      <button class="btn btn-primary" id="previewConfirmBtn">Confirm &amp; Save</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+<script src="js/data.js"></script>
+<script>
+  // ---------- Left panel: pin a system city ----------
+
+  const pinCountry = document.getElementById("pinCountry");
+  const pinState = document.getElementById("pinState");
+  const pinCity = document.getElementById("pinCity");
+  const pinnedCityCard = document.getElementById("pinnedCityCard");
+  const pinnedCityName = document.getElementById("pinnedCityName");
+  const pinnedCityMeta = document.getElementById("pinnedCityMeta");
+  const pinnedCityMappedCount = document.getElementById("pinnedCityMappedCount");
+  const clearPinnedCityBtn = document.getElementById("clearPinnedCityBtn");
+  const pinnedCityHistoryBtn = document.getElementById("pinnedCityHistoryBtn");
+  const mappedCitiesSection = document.getElementById("mappedCitiesSection");
+  const mappedCitiesList = document.getElementById("mappedCitiesList");
+  const mappedCitiesEmptyState = document.getElementById("mappedCitiesEmptyState");
+  const mappedSupplierFilter = document.getElementById("mappedSupplierFilter");
+
+  mappedSupplierFilter.insertAdjacentHTML(
+    "beforeend",
+    Object.keys(SUPPLIER_LABELS)
+      .map((key) => `<option value="${key}">${SUPPLIER_LABELS[key]}</option>`)
+      .join("")
+  );
+  mappedSupplierFilter.addEventListener("change", renderMappedCitiesSummary);
+
+  pinCountry.insertAdjacentHTML(
+    "beforeend",
+    SYSTEM_COUNTRIES.map((c) => `<option value="${c.name}">${c.name} (${c.code})</option>`).join("")
+  );
+
+  // Cities created or merged via Add City (city-system.html) carry a
+  // cityType; only cities from the original prepopulated master list (no
+  // cityType) can be pinned as a mapping target here.
+  function mappableSystemCities() {
+    return SYSTEM_CITIES.filter((c) => !c.cityType);
+  }
+
+  let pinnedCityId = null;
+
+  pinCountry.addEventListener("change", () => {
+    const meta = SYSTEM_COUNTRIES.find((c) => c.name === pinCountry.value);
+    const states = meta ? getStatesForCountryCode(meta.code) : [];
+    if (states.length) {
+      pinState.disabled = false;
+      pinState.innerHTML = `<option value="">All states</option>` + states.map((s) => `<option value="${s}">${s}</option>`).join("");
+    } else {
+      pinState.disabled = true;
+      pinState.innerHTML = `<option value="">${meta ? "No state required" : "Select country first"}</option>`;
+    }
+    populatePinCitySelect();
+  });
+
+  pinState.addEventListener("change", populatePinCitySelect);
+
+  function populatePinCitySelect() {
+    const countryName = pinCountry.value;
+    if (!countryName) {
+      pinCity.disabled = true;
+      pinCity.innerHTML = `<option value="">Select country first</option>`;
+      selectPinnedCity(null);
+      return;
+    }
+    let candidates = mappableSystemCities().filter((c) => c.country.name === countryName);
+    if (!pinState.disabled && pinState.value) {
+      candidates = candidates.filter((c) => c.state === pinState.value);
+    }
+    pinCity.disabled = candidates.length === 0;
+    pinCity.innerHTML = candidates.length
+      ? `<option value="">Select city</option>` + candidates.map((c) => `<option value="${c.id}">${c.name}</option>`).join("")
+      : `<option value="">No prepopulated cities here</option>`;
+    selectPinnedCity(null);
+  }
+
+  pinCity.addEventListener("change", () => {
+    selectPinnedCity(pinCity.value === "" ? null : Number(pinCity.value));
+  });
+
+  clearPinnedCityBtn.addEventListener("click", () => {
+    pinCity.value = "";
+    selectPinnedCity(null);
+  });
+
+  pinnedCityHistoryBtn.addEventListener("click", () => {
+    if (pinnedCityId === null) return;
+    const city = SYSTEM_CITIES.find((c) => c.id === pinnedCityId);
+    if (!city) return;
+    document.getElementById("historyCityName").textContent = `— ${city.name}`;
+    document.getElementById("historyList").innerHTML = renderHistoryList(city.history, "No history yet");
+    openModal(document.getElementById("historyModal"));
+  });
+
+  function selectPinnedCity(id) {
+    pinnedCityId = id;
+    const city = id === null ? null : SYSTEM_CITIES.find((c) => c.id === id);
+
+    if (!city) {
+      pinnedCityCard.style.display = "none";
+      renderMappedCitiesSummary();
+      resyncBaselineOnPinChange();
+      updateBottomPinnedCityHint(null);
+      return;
+    }
+
+    pinnedCityCard.style.display = "";
+    pinnedCityName.textContent = city.name;
+    pinnedCityMeta.textContent = `${[city.state, city.country.name].filter(Boolean).join(", ")} (${city.country.code})`;
+    renderMappedCitiesSummary();
+    resyncBaselineOnPinChange();
+    updateBottomPinnedCityHint(city);
+  }
+
+  // Compact reminder in the bottom section's header of which system city is
+  // currently pinned — name + address only ("State, Country", same format
+  // as the existing-mapping list's address), not the full pinned-city-card
+  // (mapped-count pill, History/Change City buttons) that already lives in
+  // the top section.
+  const bottomPinnedCityHint = document.getElementById("bottomPinnedCityHint");
+
+  function updateBottomPinnedCityHint(city) {
+    if (!city) {
+      bottomPinnedCityHint.textContent = "No system city pinned yet";
+      return;
+    }
+    const address = [city.state, city.country.name].filter(Boolean).join(", ");
+    bottomPinnedCityHint.innerHTML = `Pinned: <strong>${city.name}</strong> — ${address}`;
+  }
+
+  // All supplier cities, from any supplier, currently mapped to the pinned
+  // city — shown so an existing mapping can be reviewed/edited from this
+  // same screen even if it falls outside the right panel's active filter.
+  function getSupplierCitiesMappedTo(systemCityId) {
+    const rows = [];
+    Object.keys(supplierCities).forEach((supplierKey) => {
+      supplierCities[supplierKey].forEach((row) => {
+        if (row.systemCityId === systemCityId) rows.push({ supplierKey, row });
+      });
+    });
+    return rows;
+  }
+
+  function renderMappedCitiesSummary() {
+    const hasPin = pinnedCityId !== null;
+    mappedCitiesEmptyState.style.display = hasPin ? "none" : "";
+    mappedCitiesSection.style.display = hasPin ? "" : "none";
+    if (!hasPin) return;
+
+    // Total mapped count (the pill) always reflects every supplier,
+    // regardless of the filter below — only the list itself narrows.
+    const allMapped = getSupplierCitiesMappedTo(pinnedCityId);
+    pinnedCityMappedCount.textContent = `${allMapped.length} mapped`;
+
+    const filterValue = mappedSupplierFilter.value;
+    const mapped = filterValue ? allMapped.filter(({ supplierKey }) => supplierKey === filterValue) : allMapped;
+    mappedCitiesList.innerHTML = !mapped.length
+      ? `<div class="empty-state">No mappings for the selected supplier</div>`
+      : mapped
+          .map(({ supplierKey, row }) => {
+            // "City address" is state+country (state optional), never the
+            // country code badge already shown next to the name — reuses
+            // getSupplierCountryName() (same helper the bottom checklist
+            // uses) rather than a second country-name lookup.
+            const address = [row.state, getSupplierCountryName(supplierKey, row.countryCode)].filter(Boolean).join(", ");
+            return `
+      <div class="merge-list-item">
+        <span class="meta">
+          <span class="merge-list-name" title="${row.name}">${row.name} <span class="code-badge">${row.countryCode}</span></span>
+          <span class="sub">${SUPPLIER_LABELS[supplierKey]} · ${address}</span>
+        </span>
+        <div class="row-actions">
+          <button class="action-btn" data-history-btn data-supplier="${supplierKey}" data-row-id="${row.id}" aria-label="View mapping history for ${row.name}">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 109-9 9 9 0 00-7 3.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3 3.5V8h4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 7.5V12l3.2 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <button class="action-btn" data-unmap-btn data-supplier="${supplierKey}" data-row-id="${row.id}" aria-label="Unmap ${row.name}">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+      </div>`;
+          })
+          .join("");
+  }
+
+  mappedCitiesList.addEventListener("click", (e) => {
+    const unmapBtn = e.target.closest("[data-unmap-btn]");
+    if (unmapBtn) {
+      const supplierKey = unmapBtn.dataset.supplier;
+      const row = supplierCities[supplierKey].find((r) => String(r.id) === unmapBtn.dataset.rowId);
+      if (!row) return;
+      showConfirm(
+        `<p style="margin:0;">Unmap <strong>${row.name}</strong> from <strong>${getSystemCityLabel(row.systemCityId)}</strong>?</p>`,
+        () => {
+          applyMapping(supplierKey, row, null);
+          renderMappedCitiesSummary();
+          if (rightState.supplier === supplierKey) resyncBaselineOnPinChange();
+          showToast(`${row.name} unmapped`);
+        }
+      );
+      return;
+    }
+
+    const historyBtn = e.target.closest("[data-history-btn]");
+    if (historyBtn) {
+      const supplierKey = historyBtn.dataset.supplier;
+      const row = supplierCities[supplierKey].find((r) => String(r.id) === historyBtn.dataset.rowId);
+      if (!row) return;
+      document.getElementById("historyCityName").textContent = `— ${SUPPLIER_LABELS[supplierKey]} / ${row.name}`;
+      document.getElementById("historyList").innerHTML = renderHistoryList(row.history, "No mapping history yet");
+      openModal(document.getElementById("historyModal"));
+    }
+  });
+
+  // applyMapping() (map/unmap a supplier city row + log history) now lives
+  // in js/data.js, shared with city-supplier.html.
+
+  // ---------- Right panel: map supplier cities ----------
+
+  const mapSupplierFilter = document.getElementById("mapSupplierFilter");
+  const mapCountryFilter = document.getElementById("mapCountryFilter");
+  const mapStateFilter = document.getElementById("mapStateFilter");
+  const mapCitySearch = document.getElementById("mapCitySearch");
+  const mapUnmappedOnlyToggle = document.getElementById("mapUnmappedOnlyToggle");
+  const mapCityList = document.getElementById("mapCityList");
+  const alreadyMappedList = document.getElementById("alreadyMappedList");
+  const alreadyMappedCount = document.getElementById("alreadyMappedCount");
+  const newSelectionList = document.getElementById("newSelectionList");
+  const newSelectionCount = document.getElementById("newSelectionCount");
+  const mapSelectionSummary = document.getElementById("mapSelectionSummary");
+  const saveCityMappingBtn = document.getElementById("saveCityMappingBtn");
+
+  let rightState = { supplier: "", country: "", cityState: "", query: "" };
+  let initialMappedIds = new Set();
+  let pendingChecked = new Set();
+
+  // The city list (and search) only require Supplier + Country — State is
+  // an optional extra filter on top, never part of the gate, even for
+  // countries that do have stateful cities.
+  function rightGateSatisfied() {
+    return Boolean(rightState.supplier && rightState.country);
+  }
+
+  // Called once at startup — the right panel is always visible/usable now,
+  // independent of whether a system city is pinned on the left, so this
+  // just establishes the initial empty-filters state instead of hiding
+  // anything.
+  function resetRightPanelFilters() {
+    mapSupplierFilter.value = "";
+    rightState = { supplier: "", country: "", cityState: "", query: "" };
+    mapCountryFilter.disabled = true;
+    mapCountryFilter.innerHTML = `<option value="">Select country</option>`;
+    mapStateFilter.disabled = true;
+    mapStateFilter.innerHTML = `<option value="">All States</option>`;
+    mapCitySearch.disabled = true;
+    mapCitySearch.value = "";
+    initialMappedIds = new Set();
+    pendingChecked = new Set();
+    renderCityList();
+    renderSelectedCitiesList();
+    updateSelectionSummary();
+  }
+
+  // Recomputes which of the current supplier's cities are already mapped to
+  // the pinned system city — the baseline that Save Mapping diffs against.
+  // Hard reset: only correct when the *supplier* just changed, since
+  // pendingChecked's ids are only meaningful within one supplier's array.
+  function refreshRightPanelBaseline() {
+    if (!rightState.supplier) return;
+    initialMappedIds =
+      pinnedCityId === null
+        ? new Set()
+        : new Set(
+            (supplierCities[rightState.supplier] || []).filter((r) => r.systemCityId === pinnedCityId).map((r) => r.id)
+          );
+    pendingChecked = new Set(initialMappedIds);
+    renderCityList();
+    renderSelectedCitiesList();
+    updateSelectionSummary();
+  }
+
+  // Called whenever the LEFT panel's pin changes (set, cleared, or swapped
+  // to a different city) while the supplier stays the same. Unlike
+  // refreshRightPanelBaseline() above, this must PRESERVE any manual or
+  // deep-linked selections instead of wiping them: a row can only be in
+  // both the old baseline and pendingChecked because it was baseline-seeded
+  // (the only action available on an already-checked baseline row is
+  // *un*checking, which already removes it from pendingChecked), so
+  // subtracting the old baseline never discards a row the user actually
+  // chose, and a row can't belong to two different system cities' baselines
+  // at once (systemCityId is single-valued) so the union below can't
+  // double-count.
+  function resyncBaselineOnPinChange() {
+    if (!rightState.supplier) {
+      renderCityList();
+      return;
+    }
+    const newBaseline =
+      pinnedCityId === null
+        ? new Set()
+        : new Set(
+            (supplierCities[rightState.supplier] || []).filter((r) => r.systemCityId === pinnedCityId).map((r) => r.id)
+          );
+    const preserved = [...pendingChecked].filter((id) => !initialMappedIds.has(id));
+    pendingChecked = new Set([...preserved, ...newBaseline]);
+    initialMappedIds = newBaseline;
+    renderCityList();
+    renderSelectedCitiesList();
+    updateSelectionSummary();
+  }
+
+  mapSupplierFilter.addEventListener("change", () => {
+    rightState.supplier = mapSupplierFilter.value;
+    rightState.country = "";
+    rightState.cityState = "";
+    rightState.query = "";
+    mapCitySearch.value = "";
+    mapCountryFilter.disabled = !rightState.supplier;
+    mapStateFilter.disabled = true;
+    mapStateFilter.innerHTML = `<option value="">All States</option>`;
+    mapCitySearch.disabled = true;
+
+    if (rightState.supplier) {
+      const codes = [...new Set((supplierCities[rightState.supplier] || []).map((r) => r.countryCode))];
+      mapCountryFilter.innerHTML =
+        `<option value="">Select country</option>` +
+        codes.map((code) => `<option value="${code}">${getSupplierCountryName(rightState.supplier, code)}</option>`).join("");
+    } else {
+      mapCountryFilter.innerHTML = `<option value="">Select country</option>`;
+    }
+    refreshRightPanelBaseline();
+  });
+
+  mapCountryFilter.addEventListener("change", () => {
+    rightState.country = mapCountryFilter.value;
+    rightState.cityState = "";
+
+    const states = rightState.country
+      ? [
+          ...new Set(
+            (supplierCities[rightState.supplier] || [])
+              .filter((r) => r.countryCode === rightState.country && r.state)
+              .map((r) => r.state)
+          ),
+        ]
+      : [];
+
+    if (states.length) {
+      mapStateFilter.disabled = false;
+      mapStateFilter.innerHTML = `<option value="">All States</option>` + states.map((s) => `<option value="${s}">${s}</option>`).join("");
+    } else {
+      mapStateFilter.disabled = true;
+      mapStateFilter.innerHTML = `<option value="">${rightState.country ? "No state required" : "Select country first"}</option>`;
+    }
+    mapCitySearch.disabled = !rightGateSatisfied();
+    renderCityList();
+  });
+
+  mapStateFilter.addEventListener("change", () => {
+    rightState.cityState = mapStateFilter.value;
+    renderCityList();
+  });
+
+  const runMapSearch = debounce(() => {
+    rightState.query = mapCitySearch.value;
+    renderCityList();
+  });
+  mapCitySearch.addEventListener("input", runMapSearch);
+  mapUnmappedOnlyToggle.addEventListener("change", renderCityList);
+
+  function currentMapCandidates() {
+    let rows = supplierCities[rightState.supplier] || [];
+    rows = rows.filter((r) => r.countryCode === rightState.country);
+    if (rightState.cityState) rows = rows.filter((r) => r.state === rightState.cityState);
+    // Unlike a system city (which can validly have many supplier cities
+    // mapped to it), a supplier city maps to at most one system city, so
+    // "mapped or not" is a meaningful single yes/no filter here — helps
+    // find fresh cities to map without scrolling past already-mapped ones.
+    if (mapUnmappedOnlyToggle.checked) rows = rows.filter((r) => r.systemCityId === null);
+    const q = rightState.query.trim().toLowerCase();
+    if (q) rows = rows.filter((r) => r.name.toLowerCase().includes(q));
+    return rows;
+  }
+
+  // "Mapped: n/x" next to the unmapped-only toggle — scoped to
+  // supplier+country(+state), deliberately ignoring search and the toggle
+  // itself so the stat doesn't shift as the user searches or filters.
+  function updateMappedStat() {
+    const stat = document.getElementById("mapMappedStat");
+    if (!rightState.supplier || !rightState.country) {
+      stat.textContent = "Mapped: 0/0";
+      return;
+    }
+    let rows = supplierCities[rightState.supplier] || [];
+    rows = rows.filter((r) => r.countryCode === rightState.country);
+    if (rightState.cityState) rows = rows.filter((r) => r.state === rightState.cityState);
+    const mapped = rows.filter((r) => r.systemCityId !== null).length;
+    stat.textContent = `Mapped: ${mapped}/${rows.length}`;
+  }
+
+  function renderCityList() {
+    updateMappedStat();
+
+    if (!rightState.supplier) {
+      mapCityList.innerHTML = `<div class="empty-state">Select a supplier to continue</div>`;
+      return;
+    }
+    if (!rightState.country) {
+      mapCityList.innerHTML = `<div class="empty-state">Select a country to continue</div>`;
+      return;
+    }
+
+    const rows = currentMapCandidates();
+    mapCityList.innerHTML = rows.length
+      ? rows
+          .map((r) => {
+            const checked = pendingChecked.has(r.id);
+            const mappedToOtherId = r.systemCityId !== null && r.systemCityId !== pinnedCityId ? r.systemCityId : null;
+            const rowClass = mappedToOtherId !== null ? "merge-list-item mapped-elsewhere" : "merge-list-item";
+            const mappedNote =
+              mappedToOtherId !== null
+                ? `<span class="mapped-elsewhere-note">Mapped: ${getSystemCityLabel(mappedToOtherId)}</span>`
+                : "";
+            // Whether this row is already mapped to *anything* can't be
+            // resolved into "will this be a Remap or does it match the pin"
+            // until a system city is actually pinned — lock the checkbox
+            // rather than let the user create that ambiguous state (see
+            // renderNewSelectionSection()'s matching guard).
+            const locked = pinnedCityId === null && r.systemCityId !== null;
+            return `
+      <label class="${rowClass}">
+        <input type="checkbox" data-map-city-id="${r.id}" ${checked ? "checked" : ""} ${locked ? "disabled" : ""} />
+        <span class="meta">
+          <span>${r.name} <span class="code-badge">${r.countryCode}</span></span>
+          <span class="sub">${getSupplierCountryName(rightState.supplier, r.countryCode)}${r.state ? ` · ${r.state}` : ""}</span>
+          ${mappedNote}
+        </span>
+      </label>`;
+          })
+          .join("")
+      : `<div class="empty-state">No cities match this filter</div>`;
+
+    // No per-checkbox interruption — checking a city that's already mapped
+    // elsewhere is allowed freely here (this panel works independently of
+    // the left pin, so there may not even be a target to compare against
+    // yet). Any actual re-maps get reviewed together in one batch
+    // confirmation at Save time instead — see saveCityMappingBtn below.
+    mapCityList.querySelectorAll("[data-map-city-id]").forEach((checkbox) => {
+      checkbox.addEventListener("change", () => {
+        const id = Number(checkbox.dataset.mapCityId);
+        if (checkbox.checked) pendingChecked.add(id);
+        else pendingChecked.delete(id);
+        renderSelectedCitiesList();
+        updateSelectionSummary();
+      });
+    });
+  }
+
+  // Renders both collapsible sections. "Already Mapped" membership is fixed
+  // to initialMappedIds (the baseline snapshot) regardless of current
+  // checked state — unlike the old single-list version, unmapping a row
+  // here must NOT make it disappear, only flip its own button between
+  // Unmap/Undo, so the row list itself can't be keyed off pendingChecked.
+  // "New Selection" membership is pendingChecked minus the baseline, same as
+  // before, and still disappears when deselected (that's a real "never
+  // picked it" state, not an undo-able unmap).
+  function renderSelectedCitiesList() {
+    const rows = rightState.supplier ? supplierCities[rightState.supplier] || [] : [];
+
+    const alreadyMappedRows = [...initialMappedIds].map((id) => rows.find((r) => r.id === id)).filter(Boolean);
+    const newSelectionRows = [...pendingChecked]
+      .filter((id) => !initialMappedIds.has(id))
+      .map((id) => rows.find((r) => r.id === id))
+      .filter(Boolean);
+
+    renderAlreadyMappedSection(alreadyMappedRows);
+    renderNewSelectionSection(newSelectionRows);
+  }
+
+  function renderAlreadyMappedSection(alreadyMappedRows) {
+    alreadyMappedCount.textContent = alreadyMappedRows.length;
+    alreadyMappedList.innerHTML = alreadyMappedRows.length
+      ? alreadyMappedRows
+          .map((r) => {
+            // Still checked = still mapped (offer Unmap); unchecked here
+            // means the user already queued it for unmap this session
+            // (offer Undo instead) — this is what makes unmapping
+            // reversible without the row ever leaving the list.
+            const queuedForUnmap = !pendingChecked.has(r.id);
+            return `
+      <div class="merge-list-item">
+        <span class="meta">
+          <span class="merge-list-name" title="${r.name}">${r.name} <span class="code-badge">${r.countryCode}</span></span>
+          <span class="sub">${getSupplierCountryName(rightState.supplier, r.countryCode)}${r.state ? ` · ${r.state}` : ""}</span>
+        </span>
+        <div class="row-actions">
+          <button class="btn btn-secondary btn-compact" data-toggle-unmap-id="${r.id}">${queuedForUnmap ? "Undo" : "Unmap"}</button>
+        </div>
+      </div>`;
+          })
+          .join("")
+      : `<div class="empty-state">No existing mappings for this supplier</div>`;
+
+    alreadyMappedList.querySelectorAll("[data-toggle-unmap-id]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const id = Number(btn.dataset.toggleUnmapId);
+        if (pendingChecked.has(id)) pendingChecked.delete(id);
+        else pendingChecked.add(id);
+        renderCityList();
+        renderSelectedCitiesList();
+        updateSelectionSummary();
+      });
+    });
+  }
+
+  function renderNewSelectionSection(newSelectionRows) {
+    newSelectionCount.textContent = newSelectionRows.length;
+    newSelectionList.innerHTML = newSelectionRows.length
+      ? newSelectionRows
+          .map((r) => {
+            // A "new selection" row already mapped elsewhere (systemCityId
+            // set) is a remap in progress, not a fresh map — label it
+            // accordingly rather than calling it "New" like a genuinely
+            // unmapped city, matching the same New Map vs Remap distinction
+            // the Save preview uses. But "Remap" is a real, decidable claim
+            // only once a system city is pinned (only then do we know
+            // whether this row ends up reassigned, or actually just matches
+            // the pin and belongs in Already Mapped instead) — a row can
+            // still be checked-and-ambiguous here via the one case that
+            // can't be locked at the checkbox itself: it was a genuine
+            // Remap while pinned, then the pin got cleared. Show "Locked"
+            // instead of asserting "Remap" when that happens.
+            const isRemap = r.systemCityId !== null;
+            const tag = !isRemap ? "New" : pinnedCityId === null ? "Locked" : "Remap";
+            const tagClass = !isRemap ? "info" : pinnedCityId === null ? "neutral" : "warning";
+            return `
+      <div class="merge-list-item">
+        <span class="meta">
+          <span class="merge-list-name" title="${r.name}">
+            ${r.name} <span class="code-badge">${r.countryCode}</span>
+            <span class="pill ${tagClass} pill-tag">${tag}</span>
+          </span>
+          <span class="sub">${getSupplierCountryName(rightState.supplier, r.countryCode)}${r.state ? ` · ${r.state}` : ""}</span>
+        </span>
+        <div class="row-actions">
+          <button class="action-btn" data-deselect-city-id="${r.id}" aria-label="Remove ${r.name} from selection">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+      </div>`;
+          })
+          .join("")
+      : `<div class="empty-state">No new cities selected yet</div>`;
+
+    newSelectionList.querySelectorAll("[data-deselect-city-id]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        pendingChecked.delete(Number(btn.dataset.deselectCityId));
+        renderCityList();
+        renderSelectedCitiesList();
+        updateSelectionSummary();
+      });
+    });
+  }
+
+  function updateSelectionSummary() {
+    const added = [...pendingChecked].filter((id) => !initialMappedIds.has(id)).length;
+    const removed = [...initialMappedIds].filter((id) => !pendingChecked.has(id)).length;
+    const parts = [];
+    if (added) parts.push(`${added} to map`);
+    if (removed) parts.push(`${removed} to unmap`);
+    mapSelectionSummary.textContent = parts.length ? parts.join(", ") : "No pending changes";
+  }
+
+  // ---------- Save preview (4 buckets: Previously Saved / New Map / Remap / Unmap) ----------
+
+  // A plain row (no checkbox/actions) shared by the Previously Saved, New
+  // Map and Unmap sections below — the Remap section needs the richer
+  // compare-box markup instead, see renderRemapRows().
+  function previewRowHtml(r) {
+    return `
+      <div class="merge-list-item">
+        <span class="meta">
+          <span>${r.name} <span class="code-badge">${r.countryCode}</span></span>
+          <span class="sub">${getSupplierCountryName(rightState.supplier, r.countryCode)}${r.state ? ` · ${r.state}` : ""}</span>
+        </span>
+      </div>`;
+  }
+
+  // One compare block per re-map — same .remap-* CSS used by the single-item
+  // version elsewhere in this project (city-supplier.html).
+  function renderRemapRows(rows, targetLabel) {
+    return rows
+      .map(
+        (row) => `
+      <div class="remap-batch-item">
+        <div class="remap-subject"><strong>${row.name}</strong> <span class="code-badge">${row.countryCode}</span></div>
+        <div class="remap-compare">
+          <div class="remap-box">
+            <div class="remap-box-label">Currently mapped to</div>
+            <div class="remap-box-value">${getSystemCityLabel(row.systemCityId)}</div>
+          </div>
+          <div class="remap-arrow" aria-hidden="true">&darr;</div>
+          <div class="remap-box remap-box-target">
+            <div class="remap-box-label">Will map to</div>
+            <div class="remap-box-value">${targetLabel}</div>
+          </div>
+        </div>
+      </div>`
+      )
+      .join("");
+  }
+
+  function previewSectionHtml(title, rows, bodyHtml) {
+    return `
+      <div class="preview-section">
+        <div class="preview-section-title">${title} (${rows.length})</div>
+        ${rows.length ? bodyHtml : `<div class="empty-state">None</div>`}
+      </div>`;
+  }
+
+  function buildPreviewSectionsHtml({ keptRows, newMapRows, remapRows, removedRows, pinnedCityId }) {
+    const targetLabel = getSystemCityLabel(pinnedCityId);
+    return (
+      previewSectionHtml("Previously Saved", keptRows, `<div class="merge-list">${keptRows.map(previewRowHtml).join("")}</div>`) +
+      previewSectionHtml("New Map", newMapRows, `<div class="merge-list">${newMapRows.map(previewRowHtml).join("")}</div>`) +
+      previewSectionHtml("Remap", remapRows, renderRemapRows(remapRows, targetLabel)) +
+      previewSectionHtml("Unmap", removedRows, `<div class="merge-list">${removedRows.map(previewRowHtml).join("")}</div>`)
+    );
+  }
+
+  let pendingPreviewConfirm = null;
+
+  function openMappingPreview(buckets, onConfirm) {
+    document.getElementById("previewSections").innerHTML = buildPreviewSectionsHtml(buckets);
+    pendingPreviewConfirm = onConfirm;
+    openModal(document.getElementById("mappingPreviewModal"));
+  }
+
+  document.getElementById("previewConfirmBtn").addEventListener("click", () => {
+    const action = pendingPreviewConfirm;
+    pendingPreviewConfirm = null;
+    closeModal(document.getElementById("mappingPreviewModal"));
+    if (action) action();
+  });
+
+  saveCityMappingBtn.addEventListener("click", () => {
+    if (!rightState.supplier) {
+      showToast("Select a supplier first", "error");
+      return;
+    }
+    if (pinnedCityId === null) {
+      showToast("Pin a system city on the left to save", "error");
+      return;
+    }
+
+    const rows = supplierCities[rightState.supplier] || [];
+    const addedIds = [...pendingChecked].filter((id) => !initialMappedIds.has(id));
+    const removedIds = [...initialMappedIds].filter((id) => !pendingChecked.has(id));
+    const keptIds = [...initialMappedIds].filter((id) => pendingChecked.has(id));
+
+    const addedRows = addedIds.map((id) => rows.find((r) => r.id === id)).filter(Boolean);
+    const removedRows = removedIds.map((id) => rows.find((r) => r.id === id)).filter(Boolean);
+    const keptRows = keptIds.map((id) => rows.find((r) => r.id === id)).filter(Boolean);
+
+    const remapRows = addedRows.filter((row) => row.systemCityId !== null);
+    const newMapRows = addedRows.filter((row) => row.systemCityId === null);
+
+    if (!addedRows.length && !removedRows.length) {
+      showToast("No changes to save", "error");
+      return;
+    }
+
+    function doApply() {
+      addedRows.forEach((row) => applyMapping(rightState.supplier, row, pinnedCityId));
+      removedRows.forEach((row) => applyMapping(rightState.supplier, row, null));
+
+      refreshRightPanelBaseline();
+      renderMappedCitiesSummary();
+
+      const parts = [];
+      if (addedRows.length) parts.push(`${addedRows.length} mapped`);
+      if (removedRows.length) parts.push(`${removedRows.length} unmapped`);
+      showToast(parts.join(", "));
+    }
+
+    // Always preview before applying, regardless of which buckets are
+    // non-empty — a single plain new map still gets the same one consistent
+    // confirm step as a batch of re-maps.
+    openMappingPreview({ keptRows, newMapRows, remapRows, removedRows, pinnedCityId }, doApply);
+  });
+
+  // ---------- Confirm dialog (generic, mirrors city-system.html) ----------
+
+  let pendingConfirmAction = null;
+
+  function showConfirm(html, onConfirm) {
+    document.getElementById("confirmMessage").innerHTML = html;
+    pendingConfirmAction = onConfirm;
+    openModal(document.getElementById("confirmModal"));
+  }
+
+  document.getElementById("confirmActionBtn").addEventListener("click", () => {
+    const action = pendingConfirmAction;
+    pendingConfirmAction = null;
+    closeModal(document.getElementById("confirmModal"));
+    if (action) action();
+  });
+
+  resetRightPanelFilters();
+
+  // ---------- Deep link pre-fill from city-system.html's Map button ----------
+  // e.g. city-mapping.html?cityId=5
+
+  const urlParams = new URLSearchParams(location.search);
+  const linkedCityId = urlParams.get("cityId");
+
+  if (linkedCityId !== null) {
+    const linkedCity = mappableSystemCities().find((c) => String(c.id) === linkedCityId);
+    if (linkedCity) {
+      pinCountry.value = linkedCity.country.name;
+      pinCountry.dispatchEvent(new Event("change"));
+
+      if (linkedCity.state && !pinState.disabled) {
+        pinState.value = linkedCity.state;
+        pinState.dispatchEvent(new Event("change"));
+      }
+
+      pinCity.value = String(linkedCity.id);
+      pinCity.dispatchEvent(new Event("change"));
+    }
+  }
+
+  // ---------- Deep link pre-fill from city-supplier.html's Map button ----------
+  // e.g. city-mapping.html?supplier=agoda&country=US&state=New%20York&supplierCityId=3
+  // Deliberately separate param names from the ?cityId= pin deep link above
+  // (that name is already taken by the system-city pin) so the two deep
+  // links are fully independent and composable — either or both can be
+  // present on the same URL.
+
+  const deepLinkSupplier = urlParams.get("supplier");
+  const deepLinkCountry = urlParams.get("country");
+  const deepLinkState = urlParams.get("state");
+  const deepLinkSupplierCityId = urlParams.get("supplierCityId");
+
+  // Arriving from city-supplier.html's Map button means the Map Supplier
+  // Cities section (not the top pin/existing-mapping section) is what the
+  // user actually came here to use — scroll there by default once the
+  // full-screen section wiring below is ready (see the flag's use further
+  // down this script).
+  let shouldScrollToMapSection = Boolean(deepLinkSupplier);
+
+  if (deepLinkSupplier && mapSupplierFilter.querySelector(`option[value="${deepLinkSupplier}"]`)) {
+    mapSupplierFilter.value = deepLinkSupplier;
+    mapSupplierFilter.dispatchEvent(new Event("change"));
+
+    if (deepLinkCountry && mapCountryFilter.querySelector(`option[value="${deepLinkCountry}"]`)) {
+      mapCountryFilter.value = deepLinkCountry;
+      mapCountryFilter.dispatchEvent(new Event("change"));
+
+      if (deepLinkState && !mapStateFilter.disabled && mapStateFilter.querySelector(`option[value="${deepLinkState}"]`)) {
+        mapStateFilter.value = deepLinkState;
+        mapStateFilter.dispatchEvent(new Event("change"));
+      }
+    }
+
+    if (deepLinkSupplierCityId) {
+      const linkedRow = (supplierCities[deepLinkSupplier] || []).find((r) => String(r.id) === deepLinkSupplierCityId);
+      // Checking never interrupts or commits anything now (the batch
+      // confirm at Save time reviews re-maps) — EXCEPT when nothing's
+      // pinned and this row is already mapped elsewhere: pre-checking it
+      // then would land it in "New Selection" with no way yet to tell
+      // whether it's a genuine remap or actually just matches whatever gets
+      // pinned next. Leave it unchecked (but still visible, filters still
+      // pre-filled) until the user pins a system city, matching the
+      // checklist's own lock for the same case.
+      if (linkedRow && !(pinnedCityId === null && linkedRow.systemCityId !== null)) {
+        pendingChecked.add(linkedRow.id);
+        renderCityList();
+        renderSelectedCitiesList();
+        updateSelectionSummary();
+      }
+    }
+  }
+
+  // ---------- Full-screen sections: dynamic height + floating nav ----------
+  // Each of the two sections is sized to one full "screen" via the
+  // --mapping-section-height custom property, computed from
+  // .mapping-page-layout's own clientHeight — that already nets out the
+  // topbar/page-header/padding above it (this element is a flex:1;
+  // min-height:0 child of .main-content, so its clientHeight is exactly
+  // "whatever vertical space the viewport leaves for it," independent of the
+  // section heights themselves since this container scrolls its overflow
+  // rather than growing to fit it). Recomputed on resize so it stays correct
+  // window-to-window and device-to-device; the CSS min-height (480px) is the
+  // floor for very small screens.
+  const mappingPageLayout = document.querySelector(".mapping-page-layout");
+
+  function syncMappingSectionHeight() {
+    document.documentElement.style.setProperty("--mapping-section-height", `${mappingPageLayout.clientHeight}px`);
+  }
+
+  syncMappingSectionHeight();
+  window.addEventListener("resize", debounce(syncMappingSectionHeight, 150));
+
+  const mappingNavTopBtn = document.getElementById("mappingNavTopBtn");
+  const mappingNavBottomBtn = document.getElementById("mappingNavBottomBtn");
+  const mappingTopSection = document.querySelector(".mapping-layout-top");
+  const mappingBottomSection = document.querySelector(".mapping-bottom-panel");
+
+  mappingNavTopBtn.addEventListener("click", () => {
+    mappingTopSection.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+  mappingNavBottomBtn.addEventListener("click", () => {
+    mappingBottomSection.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+
+  // Highlight whichever nav button matches the section currently in view —
+  // an IntersectionObserver scoped to .mapping-page-layout (the scroll
+  // container) rather than a scroll listener, since each section is exactly
+  // one screen tall: whichever one crosses the 50% threshold is
+  // unambiguously "the one being looked at," no manual scroll-position math
+  // needed.
+  const sectionNavObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        const btn = entry.target === mappingTopSection ? mappingNavTopBtn : mappingNavBottomBtn;
+        btn.classList.toggle("active", entry.isIntersecting);
+      });
+    },
+    { root: mappingPageLayout, threshold: 0.5 }
+  );
+  sectionNavObserver.observe(mappingTopSection);
+  sectionNavObserver.observe(mappingBottomSection);
+
+  // Deep-linked from city-supplier.html — jump straight to Map Supplier
+  // Cities instead of leaving the page at the top pin section by default.
+  // No smooth animation here: this is establishing where the page lands on
+  // load, not responding to a click.
+  if (shouldScrollToMapSection) {
+    mappingBottomSection.scrollIntoView({ block: "start" });
+  }
+
+  // "Full Screen" toggle — hides the breadcrumb/title/divider so the two
+  // sections can claim that space too. Scoped to #cityMappingMain (this
+  // page's own <main> id) rather than the shared .main-content/.page-header
+  // classes, so it can't leak into any other page. Off by default; the
+  // toggle button itself stays in the floating cluster so it's reachable
+  // either way.
+  const cityMappingMain = document.getElementById("cityMappingMain");
+  const mappingChromeToggleBtn = document.getElementById("mappingChromeToggleBtn");
+
+  mappingChromeToggleBtn.addEventListener("click", () => {
+    const hidden = !cityMappingMain.classList.contains("chrome-hidden");
+    cityMappingMain.classList.toggle("chrome-hidden", hidden);
+    mappingChromeToggleBtn.classList.toggle("active", hidden);
+    mappingChromeToggleBtn.querySelector("span").textContent = hidden ? "Exit Full Screen" : "Full Screen";
+    mappingChromeToggleBtn.setAttribute(
+      "aria-label",
+      hidden ? "Show page title and breadcrumb" : "Hide page title and breadcrumb for full-height sections"
+    );
+    // The breadcrumb/title/divider being hidden frees up vertical space
+    // inside .main-content, which .mapping-page-layout (flex:1;min-height:0)
+    // immediately absorbs — recompute the section height against that new,
+    // larger clientHeight.
+    syncMappingSectionHeight();
+  });
+</script>
+</body>
+</html>

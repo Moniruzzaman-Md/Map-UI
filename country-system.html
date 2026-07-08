@@ -1,0 +1,630 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Country List – Hotel Map | mynztrip.com</title>
+<link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- Top bar -->
+  <header class="topbar">
+    <div class="topbar-brand">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2L2 8l10 4 10-4-10-6z" fill="#fff"/>
+        <path d="M2 16l10 4 10-4M2 12l10 4 10-4" stroke="#fff" stroke-width="1.6" fill="none"/>
+      </svg>
+      mynztrip.com
+    </div>
+
+    <button class="icon-btn" aria-label="Menu">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+
+    <button class="icon-btn accent-red" aria-label="Messages">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" stroke="#fff" stroke-width="1.8" fill="none"/></svg>
+    </button>
+
+    <div class="topbar-search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <input type="text" placeholder="Booking ID, PNR, Ticket No..." />
+      <button type="button">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#fff" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+        Search
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+
+    <div class="topbar-right">
+      <button class="icon-btn" aria-label="Notifications">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9z" stroke="#fff" stroke-width="1.8" fill="none"/><path d="M13.7 21a2 2 0 01-3.4 0" stroke="#fff" stroke-width="1.8"/></svg>
+      </button>
+      <svg class="avatar" width="38" height="38" viewBox="0 0 38 38" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="19" cy="19" r="19" fill="#c7cbe8"/>
+        <circle cx="19" cy="15" r="6" fill="#7c82b0"/>
+        <path d="M6 34c1.5-7 8-10 13-10s11.5 3 13 10" fill="#7c82b0"/>
+      </svg>
+    </div>
+  </header>
+
+  <div class="app-body">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <!-- Hotel Map (mother menu for this project's pages) -->
+      <nav class="nav-group open">
+        <button class="nav-item active">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 4L4 6v14l5-2 6 2 5-2V4l-5 2-6-2z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 4v14M15 6v14" stroke="currentColor" stroke-width="1.6"/></svg>
+          Hotel Map
+          <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="submenu">
+          <div class="submenu-group open">
+            <button class="submenu-item submenu-toggle">
+              Country
+              <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="submenu-nested">
+              <a class="submenu-item nested active" href="country-system.html">System</a>
+              <a class="submenu-item nested" href="country-supplier.html">Supplier</a>
+            </div>
+          </div>
+          <div class="submenu-group">
+            <button class="submenu-item submenu-toggle">
+              City
+              <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="submenu-nested">
+              <a class="submenu-item nested" href="city-system.html">System</a>
+              <a class="submenu-item nested" href="city-supplier.html">Supplier</a>
+            </div>
+          </div>
+          <a class="submenu-item" href="city-mapping.html">City Mapping</a>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="reset-demo-btn" id="resetDemoDataBtn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 109-9 9 9 0 00-7 3.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3 3.5V8h4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Reset Demo Data
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main-content">
+      <div class="page-header">
+        <div class="breadcrumb">Hotel Map <span class="sep">/</span> Country <span class="sep">/</span> System</div>
+        <div class="page-title-row">
+          <h1 class="page-title">Country List</h1>
+          <button class="info-icon-btn" data-info-target="#countryListInfo" data-info-title="Country List" aria-label="About this page">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 11v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="8" r="1" fill="currentColor"/></svg>
+          </button>
+        </div>
+      </div>
+      <hr class="page-divider" />
+
+      <template id="countryListInfo">
+        <p>This page manages the <strong>master list of countries</strong> used everywhere else in the system — supplier country mappings and city records both reference these entries.</p>
+        <ul>
+          <li><strong>Edit</strong> — rename a country.</li>
+          <li><strong>History</strong> — view every past name change, who made it, and when, plus supplier countries mapped or unmapped to this country.</li>
+          <li><strong>Mapping Summary</strong> — see at a glance which suppliers have this country mapped.</li>
+          <li><strong>Map</strong> — for each supplier, see which of their countries (if any) maps to this system country, with an Unmap option, or pick one to map if none does yet.</li>
+        </ul>
+      </template>
+
+      <section class="content-card">
+        <div class="card-toolbar">
+          <h2>All Countries</h2>
+          <div class="toolbar-search">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            <input type="text" id="countrySearch" placeholder="Search by name or code..." />
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table class="data-table" id="countryTable">
+            <thead>
+              <tr>
+                <th style="width:45%">Name</th>
+                <th style="width:25%">Code</th>
+                <th style="width:30%">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- rows injected here -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="table-footer pagination-bar" id="paginationBar"></div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<!-- Edit Country Modal -->
+<div class="modal-overlay" id="editCountryModal" data-fill-from="true">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Edit Country</h3>
+      <button class="modal-close" data-modal-close aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label for="countryCode">Code</label>
+        <input type="text" id="countryCode" data-fill="code" disabled />
+        <p class="hint">Country code cannot be changed.</p>
+      </div>
+      <div class="form-group">
+        <label for="countryName">Country Name</label>
+        <input type="text" id="countryName" data-fill="name" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" data-modal-close>Cancel</button>
+      <button class="btn btn-primary" id="saveCountryBtn">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit History Modal (card design) -->
+<div class="modal-overlay" id="historyModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Edit History <span id="historyCountryName" style="color:var(--text-muted); font-weight:600;"></span></h3>
+      <button class="modal-close" data-modal-close aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="history-list" id="historyList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Mapping Summary Modal (card design, one card per supplier) -->
+<div class="modal-overlay" id="summaryModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Mapping Summary <span id="summaryCountryName" style="color:var(--text-muted); font-weight:600;"></span></h3>
+      <button class="modal-close" data-modal-close aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="history-list" id="summaryList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Map Supplier Countries Modal: per supplier, either the country
+     currently mapped here (with Unmap) or a picker to map one (with Map) —
+     each action commits immediately, no batch Save. -->
+<div class="modal-overlay" id="mapCountriesModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Map Supplier Countries <span id="mapCountriesSystemName" style="color:var(--text-muted); font-weight:600;"></span></h3>
+      <button class="modal-close" data-modal-close aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" id="mapCountriesBody"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" data-modal-close>Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Dialog: intentional exception to the sliding-drawer modal
+     convention — this is a real centered popup (fade + scale in place),
+     since a confirm/warning prompt reads better centered than as a drawer.
+     Mirrors the same #confirmModal pattern used in city-mapping.html. -->
+<div class="modal-overlay popup-overlay" id="confirmModal">
+  <div class="popup-box">
+    <div class="modal-header">
+      <h3>Please Confirm</h3>
+      <button class="modal-close" data-modal-close aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div id="confirmMessage"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" data-modal-close>Cancel</button>
+      <button class="btn btn-primary" id="confirmActionBtn">Continue</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+<script src="js/data.js"></script>
+<script>
+  // built from the shared master list so this page and the Supplier
+  // mapping page never fall out of sync
+  const countries = SYSTEM_COUNTRIES.map((c) => ({ name: c.name, code: c.code }));
+  // stable index so edits track the right record across pagination/search
+  countries.forEach((c, i) => {
+    c.id = i;
+    c.history = [];
+  });
+
+  // sample history for a couple of countries, for demo purposes
+  countries[0].history.push(
+    { operation: "Edit", name: "United States", description: "Name: USA -> United States", userName: "Farhan Ahmed", userEmail: "farhan.ahmed@mynztrip.com", timestamp: new Date("2026-06-18T09:12:00") },
+    { operation: "Edit", name: "United States of America", description: "Name: United States -> United States of America", userName: "Nusrat Jahan", userEmail: "nusrat.jahan@mynztrip.com", timestamp: new Date("2026-06-20T14:47:00") }
+  );
+  countries[4].history.push(
+    { operation: "Edit", name: "India", description: "Name: Bharat -> India", userName: "Rafiul Karim", userEmail: "rafiul.karim@mynztrip.com", timestamp: new Date("2026-05-30T11:05:00") }
+  );
+
+  // restore any name edits saved from a previous session
+  hydrateArray(countries, loadFromStorage("countries"));
+
+  const tbody = document.querySelector("#countryTable tbody");
+  const paginationBar = document.getElementById("paginationBar");
+  const searchInput = document.getElementById("countrySearch");
+
+  let state = { page: 1, pageSize: 10, query: "" };
+
+  function getFiltered() {
+    const q = state.query.trim().toLowerCase();
+    if (!q) return countries;
+    return countries.filter(
+      (c) => c.name.toLowerCase().includes(q) || c.code.toLowerCase().includes(q)
+    );
+  }
+
+  function render() {
+    const filtered = getFiltered();
+    const totalPages = Math.max(1, Math.ceil(filtered.length / state.pageSize));
+    state.page = Math.min(state.page, totalPages);
+    const startIdx = (state.page - 1) * state.pageSize;
+    const pageItems = filtered.slice(startIdx, startIdx + state.pageSize);
+
+    tbody.innerHTML = pageItems.length
+      ? pageItems
+          .map(
+            (c) => `
+      <tr data-row-id="${c.id}">
+        <td data-col="name">${c.name}</td>
+        <td data-col="code"><span class="code-badge">${c.code}</span></td>
+        <td>
+          <div class="row-actions">
+            <button class="action-btn" data-modal-target="#editCountryModal" aria-label="Edit ${c.name}">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4L16.5 3.5z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+            </button>
+            <button class="action-btn" data-map-btn data-row-id="${c.id}" aria-label="Map supplier countries to ${c.name}">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M9 17l-4.5 2V7L9 5m0 12l6 2m-6-2V5m6 14l4.5-2V5L15 7m0 12V7m0 0L9 5" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+            </button>
+            <button class="action-btn" data-history-btn data-row-id="${c.id}" aria-label="View edit history for ${c.name}">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 109-9 9 9 0 00-7 3.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3 3.5V8h4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 7.5V12l3.2 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <button class="action-btn" data-summary-btn data-row-id="${c.id}" aria-label="View mapping summary for ${c.name}">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="14" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="14" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/></svg>
+            </button>
+          </div>
+        </td>
+      </tr>`
+          )
+          .join("")
+      : `<tr><td colspan="3" style="text-align:center; color:var(--text-muted); padding:28px;">No countries found</td></tr>`;
+
+    renderPagination(paginationBar, {
+      total: filtered.length,
+      page: state.page,
+      pageSize: state.pageSize,
+      onChange: ({ page, pageSize }) => {
+        state.page = page;
+        state.pageSize = pageSize;
+        render();
+      },
+    });
+  }
+
+  const runSearch = debounce(() => {
+    state.query = searchInput.value;
+    state.page = 1;
+    render();
+  });
+  searchInput.addEventListener("input", runSearch);
+
+  render();
+
+  document.getElementById("saveCountryBtn").addEventListener("click", () => {
+    const modal = document.getElementById("editCountryModal");
+    const rowId = modal.dataset.activeRow;
+    const newName = document.getElementById("countryName").value.trim();
+    if (!newName) {
+      showToast("Country name is required", "error");
+      return;
+    }
+    if (rowId === "") return;
+    const record = countries.find((c) => String(c.id) === String(rowId));
+    if (record && record.name !== newName) {
+      const oldName = record.name;
+      record.name = newName;
+      record.history.push({
+        operation: "Edit",
+        name: newName,
+        description: `Name: ${oldName} -> ${newName}`,
+        userName: CURRENT_USER.name,
+        userEmail: CURRENT_USER.email,
+        timestamp: new Date(),
+      });
+    }
+    saveToStorage("countries", countries);
+    render();
+    modal.classList.remove("open");
+    showToast("Country updated successfully");
+  });
+
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-history-btn]");
+    if (!btn) return;
+    const record = countries.find((c) => String(c.id) === btn.dataset.rowId);
+    if (!record) return;
+
+    document.getElementById("historyCountryName").textContent = `— ${record.name}`;
+    document.getElementById("historyList").innerHTML = renderHistoryList(record.history, "No edit history yet");
+
+    openModal(document.getElementById("historyModal"));
+  });
+
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-summary-btn]");
+    if (!btn) return;
+    const record = countries.find((c) => String(c.id) === btn.dataset.rowId);
+    if (!record) return;
+
+    document.getElementById("summaryCountryName").textContent = `— ${record.name}`;
+    const summaryList = document.getElementById("summaryList");
+    const rows = getMappingSummary(record.name);
+    summaryList.innerHTML = rows
+      .map(
+        (r) => `
+      <div class="history-entry">
+        <div class="history-entry-label">${r.supplierLabel}</div>
+        <div class="history-card">
+          <table>
+            <tbody>
+              <tr>
+                <td class="history-row-label">Status</td>
+                <td class="history-row-sep">:</td>
+                <td class="history-row-value">${
+                  r.mapped ? '<span class="text-mapped">Mapped</span>' : '<span class="text-not-mapped">Not mapped</span>'
+                }</td>
+              </tr>
+              ${
+                r.mapped
+                  ? `
+              <tr>
+                <td class="history-row-label">Supplier Country</td>
+                <td class="history-row-sep">:</td>
+                <td class="history-row-value">${r.countryName}</td>
+              </tr>
+              <tr>
+                <td class="history-row-label">Country ID</td>
+                <td class="history-row-sep">:</td>
+                <td class="history-row-value">${r.countryId}</td>
+              </tr>`
+                  : ""
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>`
+      )
+      .join("");
+
+    openModal(document.getElementById("summaryModal"));
+  });
+
+  // ---------- Map Supplier Countries (bulk, one checklist per supplier) ----------
+
+  function formatSystemCountryLabel(name) {
+    return `${name} (${SYSTEM_COUNTRY_CODES[name] || "-"})`;
+  }
+
+  let mapCountriesActiveRecord = null;
+
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-map-btn]");
+    if (!btn) return;
+    const record = countries.find((c) => String(c.id) === btn.dataset.rowId);
+    if (!record) return;
+
+    mapCountriesActiveRecord = record;
+    document.getElementById("mapCountriesSystemName").textContent = `— ${record.name}`;
+    renderMapCountriesBody();
+    openModal(document.getElementById("mapCountriesModal"));
+  });
+
+  // Applies (or clears) one supplier country's systemCountry and logs it,
+  // same changelog convention as the existing per-row Map Country modal on
+  // country-supplier.html — then re-renders so that supplier's section
+  // switches live between "mapped, offer Unmap" and "picker, offer Map".
+  // Logs from BOTH sides, same reasoning as applyMapping() for cities in
+  // js/data.js: the supplier country has one evolving value (systemCountry)
+  // so it gets an old -> new changelog; a system country instead gets
+  // additive/removal log lines (Map/Unmap) since — even though it's
+  // one-or-zero-per-supplier in practice — it can still be the target of
+  // several different suppliers' countries over time.
+  function applyCountryMapping(supplierKey, row, newSystemCountry) {
+    const oldValue = row.systemCountry;
+    if (oldValue === newSystemCountry) return;
+    const supplierCountryLabel = `${SUPPLIER_LABELS[supplierKey]} — ${row.name} (${row.code})`;
+
+    row.systemCountry = newSystemCountry;
+    row.history.push({
+      operation: oldValue ? "Edit" : "Create",
+      systemCountry: newSystemCountry,
+      description: newSystemCountry
+        ? oldValue
+          ? `Mapped To: ${oldValue} -> ${newSystemCountry}`
+          : `Mapped To: ${newSystemCountry}`
+        : `Mapped To: ${oldValue} -> Not mapped`,
+      userName: CURRENT_USER.name,
+      userEmail: CURRENT_USER.email,
+      timestamp: new Date(),
+    });
+
+    if (oldValue) {
+      const oldCountry = countries.find((c) => c.name === oldValue);
+      if (oldCountry) {
+        oldCountry.history.push({
+          operation: "Unmap",
+          description: `Unmapped supplier country: ${supplierCountryLabel}`,
+          userName: CURRENT_USER.name,
+          userEmail: CURRENT_USER.email,
+          timestamp: new Date(),
+        });
+      }
+    }
+    if (newSystemCountry) {
+      const newCountry = countries.find((c) => c.name === newSystemCountry);
+      if (newCountry) {
+        newCountry.history.push({
+          operation: "Map",
+          description: `Mapped supplier country: ${supplierCountryLabel}`,
+          userName: CURRENT_USER.name,
+          userEmail: CURRENT_USER.email,
+          timestamp: new Date(),
+        });
+      }
+    }
+
+    saveToStorage("supplierCountries", supplierCountries);
+    saveToStorage("countries", countries);
+    renderMapCountriesBody();
+  }
+
+  function renderMapCountriesBody() {
+    const body = document.getElementById("mapCountriesBody");
+    body.innerHTML = Object.keys(SUPPLIER_LABELS)
+      .map((key) => {
+        const rows = supplierCountries[key] || [];
+        const matches = rows.filter((r) => r.systemCountry === mapCountriesActiveRecord.name);
+
+        const sectionHtml = matches.length
+          ? `<div class="merge-list">${matches
+              .map(
+                (r) => `
+          <div class="merge-list-item">
+            <span class="meta">
+              <span>${r.name} <span class="code-badge">${r.code}</span></span>
+              <span class="sub">${r.supplierId}</span>
+            </span>
+            <button class="btn btn-secondary" data-unmap-country-supplier="${key}" data-unmap-country-id="${r.id}">Unmap</button>
+          </div>`
+              )
+              .join("")}</div>`
+          : rows.length
+          ? `<div style="display:flex; gap:8px; align-items:center;">
+              <select class="filter-select" data-map-country-select="${key}" style="flex:1; min-width:0;">
+                <option value="">Select ${SUPPLIER_LABELS[key]} country</option>
+                ${rows
+                  .map(
+                    (r) =>
+                      `<option value="${r.id}">${r.name} (${r.code})${
+                        r.systemCountry ? ` — mapped to ${r.systemCountry}` : ""
+                      }</option>`
+                  )
+                  .join("")}
+              </select>
+              <button class="btn btn-primary" data-map-country-btn="${key}">Map</button>
+            </div>`
+          : `<div class="empty-state">No countries for this supplier</div>`;
+
+        return `
+    <div class="form-group">
+      <label>${SUPPLIER_LABELS[key]}</label>
+      ${sectionHtml}
+    </div>`;
+      })
+      .join("");
+
+    body.querySelectorAll("[data-unmap-country-supplier]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const supplierKey = btn.dataset.unmapCountrySupplier;
+        const id = Number(btn.dataset.unmapCountryId);
+        const row = (supplierCountries[supplierKey] || []).find((r) => r.id === id);
+        if (!row) return;
+        showConfirm(
+          `<p style="margin:0;">Unmap <strong>${row.name}</strong> (${SUPPLIER_LABELS[supplierKey]}) from <strong>${mapCountriesActiveRecord.name}</strong>?</p>`,
+          () => {
+            applyCountryMapping(supplierKey, row, null);
+            showToast(`${row.name} unmapped`);
+          }
+        );
+      });
+    });
+
+    body.querySelectorAll("[data-map-country-btn]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const supplierKey = btn.dataset.mapCountryBtn;
+        const select = body.querySelector(`[data-map-country-select="${supplierKey}"]`);
+        const id = select.value === "" ? null : Number(select.value);
+        if (id === null) {
+          showToast("Please select a country first", "error");
+          return;
+        }
+        const row = (supplierCountries[supplierKey] || []).find((r) => r.id === id);
+        if (!row) return;
+
+        if (row.systemCountry && row.systemCountry !== mapCountriesActiveRecord.name) {
+          const mappedElsewhere = row.systemCountry;
+          showConfirm(
+            `
+            <div class="remap-subject"><strong>${row.name}</strong> <span class="code-badge">${row.code}</span> is already mapped. Remap it?</div>
+            <div class="remap-compare">
+              <div class="remap-box">
+                <div class="remap-box-label">Currently mapped to</div>
+                <div class="remap-box-value">${formatSystemCountryLabel(mappedElsewhere)}</div>
+              </div>
+              <div class="remap-arrow" aria-hidden="true">&rarr;</div>
+              <div class="remap-box remap-box-target">
+                <div class="remap-box-label">Will map to</div>
+                <div class="remap-box-value">${formatSystemCountryLabel(mapCountriesActiveRecord.name)}</div>
+              </div>
+            </div>
+            `,
+            () => {
+              applyCountryMapping(supplierKey, row, mapCountriesActiveRecord.name);
+              showToast(`${row.name} mapped to ${mapCountriesActiveRecord.name}`);
+            }
+          );
+          return;
+        }
+
+        applyCountryMapping(supplierKey, row, mapCountriesActiveRecord.name);
+        showToast(`${row.name} mapped to ${mapCountriesActiveRecord.name}`);
+      });
+    });
+  }
+
+  // ---------- Confirm dialog (generic, mirrors city-mapping.html) ----------
+
+  let pendingConfirmAction = null;
+
+  function showConfirm(html, onConfirm) {
+    document.getElementById("confirmMessage").innerHTML = html;
+    pendingConfirmAction = onConfirm;
+    openModal(document.getElementById("confirmModal"));
+  }
+
+  document.getElementById("confirmActionBtn").addEventListener("click", () => {
+    const action = pendingConfirmAction;
+    pendingConfirmAction = null;
+    closeModal(document.getElementById("confirmModal"));
+    if (action) action();
+  });
+</script>
+</body>
+</html>

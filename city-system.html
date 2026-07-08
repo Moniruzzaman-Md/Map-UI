@@ -1,0 +1,980 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>City List – Hotel Map | mynztrip.com</title>
+<link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- Top bar -->
+  <header class="topbar">
+    <div class="topbar-brand">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2L2 8l10 4 10-4-10-6z" fill="#fff"/>
+        <path d="M2 16l10 4 10-4M2 12l10 4 10-4" stroke="#fff" stroke-width="1.6" fill="none"/>
+      </svg>
+      mynztrip.com
+    </div>
+
+    <button class="icon-btn" aria-label="Menu">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+
+    <button class="icon-btn accent-red" aria-label="Messages">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" stroke="#fff" stroke-width="1.8" fill="none"/></svg>
+    </button>
+
+    <div class="topbar-search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <input type="text" placeholder="Booking ID, PNR, Ticket No..." />
+      <button type="button">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#fff" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+        Search
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+
+    <div class="topbar-right">
+      <button class="icon-btn" aria-label="Notifications">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9z" stroke="#fff" stroke-width="1.8" fill="none"/><path d="M13.7 21a2 2 0 01-3.4 0" stroke="#fff" stroke-width="1.8"/></svg>
+      </button>
+      <svg class="avatar" width="38" height="38" viewBox="0 0 38 38" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="19" cy="19" r="19" fill="#c7cbe8"/>
+        <circle cx="19" cy="15" r="6" fill="#7c82b0"/>
+        <path d="M6 34c1.5-7 8-10 13-10s11.5 3 13 10" fill="#7c82b0"/>
+      </svg>
+    </div>
+  </header>
+
+  <div class="app-body">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <!-- Hotel Map (mother menu for this project's pages) -->
+      <nav class="nav-group open">
+        <button class="nav-item active">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 4L4 6v14l5-2 6 2 5-2V4l-5 2-6-2z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 4v14M15 6v14" stroke="currentColor" stroke-width="1.6"/></svg>
+          Hotel Map
+          <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="submenu">
+          <div class="submenu-group">
+            <button class="submenu-item submenu-toggle">
+              Country
+              <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="submenu-nested">
+              <a class="submenu-item nested" href="country-system.html">System</a>
+              <a class="submenu-item nested" href="country-supplier.html">Supplier</a>
+            </div>
+          </div>
+          <div class="submenu-group open">
+            <button class="submenu-item submenu-toggle">
+              City
+              <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="submenu-nested">
+              <a class="submenu-item nested active" href="city-system.html">System</a>
+              <a class="submenu-item nested" href="city-supplier.html">Supplier</a>
+            </div>
+          </div>
+          <a class="submenu-item" href="city-mapping.html">City Mapping</a>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="reset-demo-btn" id="resetDemoDataBtn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 109-9 9 9 0 00-7 3.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3 3.5V8h4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Reset Demo Data
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main-content">
+      <div class="page-header">
+        <div class="breadcrumb">Hotel Map <span class="sep">/</span> City <span class="sep">/</span> System</div>
+        <div class="page-title-row">
+          <h1 class="page-title">City List</h1>
+          <button class="info-icon-btn" data-info-target="#cityListInfo" data-info-title="City List" aria-label="About this page">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 11v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="8" r="1" fill="currentColor"/></svg>
+          </button>
+        </div>
+      </div>
+      <hr class="page-divider" />
+
+      <template id="cityListInfo">
+        <p>This page manages the <strong>master list of cities</strong> used across the system.</p>
+        <ul>
+          <li><strong>New City</strong> — add a single new city under a country.</li>
+          <li><strong>Merge Cities</strong> — combine two or more existing cities into one entry. Only cities from the original master list can be merged; cities you've already created or merged can't be merged again.</li>
+          <li><strong>Edit</strong> — rename a city, or adjust which cities make up a merged one.</li>
+          <li><strong>Map</strong> — jump to City Mapping with this city already pinned, to map supplier cities to it. Only available for prepopulated cities — cities created via New City or Merge Cities can't be mapped.</li>
+          <li><strong>History</strong> — view every change: creation, renames, status changes, and merge composition changes, plus supplier cities mapped or unmapped to this city.</li>
+          <li><strong>Summary</strong> — see, per supplier, which of their cities are mapped to this one. Only available for prepopulated cities — cities created via New City or Merge Cities can't be mapped, so there's nothing to summarize for them.</li>
+          <li><strong>Active/Inactive toggle</strong> — controls whether a city is available for booking.</li>
+        </ul>
+      </template>
+
+      <section class="content-card">
+        <div class="card-toolbar">
+          <h2>All Cities</h2>
+          <div class="toolbar-controls">
+            <div class="toolbar-search">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              <input type="text" id="citySearch" placeholder="Search by city name..." />
+            </div>
+            <div class="toolbar-filters">
+              <select class="filter-select" id="cityCountryFilter">
+                <option value="">All Countries</option>
+              </select>
+              <select class="filter-select" id="cityStateFilter" disabled>
+                <option value="">Select State</option>
+              </select>
+              <select class="filter-select" id="cityStatusFilter">
+                <option value="all">All Status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" id="addCityBtn">+ Add City</button>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table class="data-table" id="cityTable">
+            <thead>
+              <tr>
+                <th style="width:22%">Name</th>
+                <th style="width:14%">State</th>
+                <th style="width:18%">Country</th>
+                <th style="width:14%">Status</th>
+                <th style="width:32%">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- rows injected here -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="table-footer pagination-bar" id="paginationBar"></div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<!-- Edit City Modal -->
+<div class="modal-overlay" id="editCityModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Edit City</h3>
+      <button class="modal-close" data-modal-close aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label for="editCityCountry">Country</label>
+        <input type="text" id="editCityCountry" disabled />
+      </div>
+      <div class="form-group">
+        <label for="editCityState">State</label>
+        <input type="text" id="editCityState" disabled />
+      </div>
+      <div class="form-group">
+        <label for="editCityName">City Name</label>
+        <input type="text" id="editCityName" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" data-modal-close>Cancel</button>
+      <button class="btn btn-primary" id="saveCityBtn">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Merged City Modal: mirrors the Merge Cities creation panel, since a
+     merged city should be edited the same way it was created — by adjusting
+     which cities make it up, not by treating it like a single plain city. -->
+<div class="modal-overlay" id="editMergedCityModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Edit Merged City</h3>
+      <button class="modal-close" data-modal-close aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label for="editMergeCountry">Country</label>
+        <input type="text" id="editMergeCountry" disabled />
+        <p class="hint">Country can't be changed for a merged city.</p>
+      </div>
+      <div class="form-group">
+        <label for="editMergeCitySearch">Cities merged into this entry — add or remove (keep at least 2)</label>
+        <input type="text" id="editMergeCitySearch" placeholder="Search cities..." style="margin-bottom:10px;" />
+        <div class="merge-list" id="editMergeList"></div>
+      </div>
+      <div class="form-group">
+        <label for="editMergeResultState">Merged City — State</label>
+        <select id="editMergeResultState" class="filter-select" style="width:100%; min-width:0;" disabled>
+          <option value="">No state required</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="editMergeResultName">Merged City — Name</label>
+        <input type="text" id="editMergeResultName" placeholder="Resulting city name" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" data-modal-close>Cancel</button>
+      <button class="btn btn-primary" id="saveEditMergeBtn">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Dialog: intentional exception to the sliding-drawer modal
+     convention — this is a real centered popup (fade + scale in place),
+     since a confirm/warning prompt reads better centered than as a drawer. -->
+<div class="modal-overlay popup-overlay" id="confirmModal">
+  <div class="popup-box">
+    <div class="modal-header">
+      <h3>Please Confirm</h3>
+      <button class="modal-close" data-modal-close aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p id="confirmMessage" style="margin:0; color:var(--text-dark); line-height:1.5;"></p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" data-modal-close>Cancel</button>
+      <button class="btn btn-primary" id="confirmActionBtn">Continue</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit History Modal (card design) -->
+<div class="modal-overlay" id="historyModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Edit History <span id="historyCityName" style="color:var(--text-muted); font-weight:600;"></span></h3>
+      <button class="modal-close" data-modal-close aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="history-list" id="historyList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Mapping Summary Modal (card design, one card per supplier) -->
+<div class="modal-overlay" id="summaryModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Mapping Summary <span id="summaryCityName" style="color:var(--text-muted); font-weight:600;"></span></h3>
+      <button class="modal-close" data-modal-close aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="history-list" id="summaryList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Add City Modal: New City / Merge Cities -->
+<div class="modal-overlay" id="addCityModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Add City</h3>
+      <button class="modal-close" data-modal-close aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-tabs">
+      <button class="modal-tab active" data-tab-btn="new">New City</button>
+      <button class="modal-tab" data-tab-btn="merge">Merge Cities</button>
+    </div>
+
+    <!-- New City panel -->
+    <div class="modal-body modal-tab-panel active" data-tab-panel="new">
+      <div class="form-group">
+        <label for="newCityCountry">Country</label>
+        <select id="newCityCountry" class="filter-select" style="width:100%; min-width:0;">
+          <option value="">Select country</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="newCityState">State</label>
+        <select id="newCityState" class="filter-select" style="width:100%; min-width:0;" disabled>
+          <option value="">Select country first</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="newCityName">City Name</label>
+        <input type="text" id="newCityName" placeholder="e.g. Boston" />
+      </div>
+    </div>
+
+    <!-- Merge Cities panel -->
+    <div class="modal-body modal-tab-panel" data-tab-panel="merge">
+      <div class="form-group">
+        <label for="mergeCountry">Country</label>
+        <select id="mergeCountry" class="filter-select" style="width:100%; min-width:0;">
+          <option value="">Select country</option>
+        </select>
+        <p class="hint">Cities load once a country is chosen — the merged city will belong to this country.</p>
+      </div>
+      <div class="form-group">
+        <label for="mergeCitySearch">Select at least 2 cities to merge</label>
+        <input type="text" id="mergeCitySearch" placeholder="Search cities..." disabled style="margin-bottom:10px;" />
+        <div class="merge-list" id="mergeList"></div>
+      </div>
+      <div class="form-group">
+        <label for="mergeResultState">Merged City — State</label>
+        <select id="mergeResultState" class="filter-select" style="width:100%; min-width:0;" disabled>
+          <option value="">Select country first</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="mergeResultName">Merged City — Name</label>
+        <input type="text" id="mergeResultName" placeholder="Resulting city name" />
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" data-modal-close>Cancel</button>
+      <button class="btn btn-primary" id="saveNewCityBtn" data-tab-footer="new">Save City</button>
+      <button class="btn btn-primary" id="saveMergeCityBtn" data-tab-footer="merge" style="display:none;">Merge Cities</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+<script src="js/data.js"></script>
+<script>
+  const countryFilterSelect = document.getElementById("cityCountryFilter");
+  countryFilterSelect.insertAdjacentHTML(
+    "beforeend",
+    SYSTEM_COUNTRIES.map((c) => `<option value="${c.name}">${c.name} (${c.code})</option>`).join("")
+  );
+
+  const stateFilterSelect = document.getElementById("cityStateFilter");
+  const statusFilterSelect = document.getElementById("cityStatusFilter");
+  const tbody = document.querySelector("#cityTable tbody");
+  const paginationBar = document.getElementById("paginationBar");
+  const citySearch = document.getElementById("citySearch");
+
+  let state = { page: 1, pageSize: 10, query: "", country: "", cityState: "", status: "all" };
+
+  function getFiltered() {
+    let rows = SYSTEM_CITIES;
+    const q = state.query.trim().toLowerCase();
+    if (q) rows = rows.filter((c) => c.name.toLowerCase().includes(q));
+    if (state.country) rows = rows.filter((c) => c.country.name === state.country);
+    if (state.cityState) rows = rows.filter((c) => c.state === state.cityState);
+    if (state.status === "active") rows = rows.filter((c) => c.active);
+    if (state.status === "inactive") rows = rows.filter((c) => !c.active);
+    return rows;
+  }
+
+  function render() {
+    const filtered = getFiltered();
+    const totalPages = Math.max(1, Math.ceil(filtered.length / state.pageSize));
+    state.page = Math.min(state.page, totalPages);
+    const startIdx = (state.page - 1) * state.pageSize;
+    const pageItems = filtered.slice(startIdx, startIdx + state.pageSize);
+
+    tbody.innerHTML = pageItems.length
+      ? pageItems
+          .map(
+            (c) => `
+      <tr data-row-id="${c.id}">
+        <td data-col="name">${c.name}${c.cityType ? ` <span class="pill city-type-badge ${c.cityType === "merged" ? "info" : "neutral"}" aria-label="${c.cityType === "merged" ? "Merged" : "New"}">${c.cityType === "merged" ? "M" : "N"}</span>` : ""}</td>
+        <td>${c.state ? c.state : '<span style="color:var(--text-muted)">—</span>'}</td>
+        <td>${c.country.name} <span class="code-badge">${c.country.code}</span></td>
+        <td><span class="pill ${c.active ? "success" : "danger"}">${c.active ? "Active" : "Inactive"}</span></td>
+        <td>
+          <div class="row-actions">
+            <button class="action-btn" data-edit-btn data-row-id="${c.id}" aria-label="Edit ${c.name}">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4L16.5 3.5z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+            </button>
+            ${
+              c.cityType
+                ? ""
+                : `<a class="action-btn" href="city-mapping.html?cityId=${c.id}" aria-label="Map supplier cities to ${c.name}">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M9 17l-4.5 2V7L9 5m0 12l6 2m-6-2V5m6 14l4.5-2V5L15 7m0 12V7m0 0L9 5" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+            </a>`
+            }
+            <button class="action-btn" data-history-btn data-row-id="${c.id}" aria-label="View edit history for ${c.name}">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 109-9 9 9 0 00-7 3.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3 3.5V8h4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 7.5V12l3.2 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            ${
+              c.cityType
+                ? ""
+                : `<button class="action-btn" data-summary-btn data-row-id="${c.id}" aria-label="View mapping summary for ${c.name}">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="14" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="14" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/></svg>
+            </button>`
+            }
+            <button class="action-btn" data-toggle-active-btn data-row-id="${c.id}" aria-label="${c.active ? "Deactivate" : "Activate"} ${c.name}">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 2v10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M6 5a8 8 0 106.5-1.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            </button>
+          </div>
+        </td>
+      </tr>`
+          )
+          .join("")
+      : `<tr><td colspan="5" class="empty-state">No cities found</td></tr>`;
+
+    renderPagination(paginationBar, {
+      total: filtered.length,
+      page: state.page,
+      pageSize: state.pageSize,
+      onChange: ({ page, pageSize }) => {
+        state.page = page;
+        state.pageSize = pageSize;
+        render();
+      },
+    });
+  }
+
+  const runSearch = debounce(() => {
+    state.query = citySearch.value;
+    state.page = 1;
+    render();
+  });
+  citySearch.addEventListener("input", runSearch);
+
+  countryFilterSelect.addEventListener("change", () => {
+    state.country = countryFilterSelect.value;
+    state.page = 1;
+    state.cityState = "";
+
+    const countryMeta = SYSTEM_COUNTRIES.find((c) => c.name === state.country);
+    const states = countryMeta ? getStatesForCountryCode(countryMeta.code) : [];
+
+    if (states.length) {
+      stateFilterSelect.disabled = false;
+      stateFilterSelect.innerHTML =
+        `<option value="">All States</option>` + states.map((s) => `<option value="${s}">${s}</option>`).join("");
+    } else {
+      stateFilterSelect.disabled = true;
+      stateFilterSelect.innerHTML = `<option value="">Select State</option>`;
+    }
+    render();
+  });
+
+  stateFilterSelect.addEventListener("change", () => {
+    state.cityState = stateFilterSelect.value;
+    state.page = 1;
+    render();
+  });
+
+  statusFilterSelect.addEventListener("change", () => {
+    state.status = statusFilterSelect.value;
+    state.page = 1;
+    render();
+  });
+
+  document.addEventListener("click", (e) => {
+    const editBtn = e.target.closest("[data-edit-btn]");
+    if (editBtn) {
+      const record = SYSTEM_CITIES.find((c) => String(c.id) === editBtn.dataset.rowId);
+      if (!record) return;
+
+      if (record.cityType === "merged") {
+        openEditMergedCity(record);
+        return;
+      }
+
+      document.getElementById("editCityCountry").value = `${record.country.name} (${record.country.code})`;
+      document.getElementById("editCityState").value = record.state || "—";
+      document.getElementById("editCityName").value = record.name;
+      const modal = document.getElementById("editCityModal");
+      modal.dataset.activeRow = record.id;
+      openModal(modal);
+      return;
+    }
+
+    const historyBtn = e.target.closest("[data-history-btn]");
+    if (historyBtn) {
+      const record = SYSTEM_CITIES.find((c) => String(c.id) === historyBtn.dataset.rowId);
+      if (!record) return;
+      document.getElementById("historyCityName").textContent = `— ${record.name}`;
+      document.getElementById("historyList").innerHTML = renderHistoryList(record.history, "No edit history yet");
+      openModal(document.getElementById("historyModal"));
+      return;
+    }
+
+    const summaryBtn = e.target.closest("[data-summary-btn]");
+    if (summaryBtn) {
+      const record = SYSTEM_CITIES.find((c) => String(c.id) === summaryBtn.dataset.rowId);
+      if (!record) return;
+
+      document.getElementById("summaryCityName").textContent = `— ${record.name}`;
+      const summaryList = document.getElementById("summaryList");
+      const rows = getCityMappingSummary(record.id);
+      summaryList.innerHTML = rows
+        .map(
+          (r) => `
+      <div class="history-entry">
+        <div class="history-entry-label">${r.supplierLabel}</div>
+        <div class="history-card">
+          <table>
+            <tbody>
+              <tr>
+                <td class="history-row-label">Status</td>
+                <td class="history-row-sep">:</td>
+                <td class="history-row-value">${
+                  r.mapped
+                    ? `<span class="text-mapped">Mapped (${r.cities.length})</span>`
+                    : '<span class="text-not-mapped">Not mapped</span>'
+                }</td>
+              </tr>
+              ${
+                r.mapped
+                  ? `
+              <tr>
+                <td class="history-row-label">Mapped Cities</td>
+                <td class="history-row-sep">:</td>
+                <td class="history-row-value">${r.cities
+                  .map((city) => `${city.name}${city.state ? `, ${city.state}` : ""} (${city.countryCode})`)
+                  .join("<br>")}</td>
+              </tr>`
+                  : ""
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>`
+        )
+        .join("");
+
+      openModal(document.getElementById("summaryModal"));
+      return;
+    }
+
+    const toggleBtn = e.target.closest("[data-toggle-active-btn]");
+    if (toggleBtn) {
+      const record = SYSTEM_CITIES.find((c) => String(c.id) === toggleBtn.dataset.rowId);
+      if (!record) return;
+      const wasActive = record.active;
+      record.active = !record.active;
+      record.history.push({
+        operation: "Status Change",
+        status: record.active,
+        description: `Status: ${wasActive ? "Active" : "Inactive"} -> ${record.active ? "Active" : "Inactive"}`,
+        userName: CURRENT_USER.name,
+        userEmail: CURRENT_USER.email,
+        timestamp: new Date(),
+      });
+      saveToStorage("SYSTEM_CITIES", SYSTEM_CITIES);
+      render();
+      showToast(`${record.name} marked ${record.active ? "Active" : "Inactive"}`);
+    }
+  });
+
+  document.getElementById("saveCityBtn").addEventListener("click", () => {
+    const modal = document.getElementById("editCityModal");
+    const rowId = modal.dataset.activeRow;
+    const newName = document.getElementById("editCityName").value.trim();
+    if (!newName) {
+      showToast("City name is required", "error");
+      return;
+    }
+    if (rowId === "") return;
+    const record = SYSTEM_CITIES.find((c) => String(c.id) === String(rowId));
+    if (record && record.name !== newName) {
+      const oldName = record.name;
+      record.name = newName;
+      record.history.push({
+        operation: "Edit",
+        name: newName,
+        description: `Name: ${oldName} -> ${newName}`,
+        userName: CURRENT_USER.name,
+        userEmail: CURRENT_USER.email,
+        timestamp: new Date(),
+      });
+    }
+    saveToStorage("SYSTEM_CITIES", SYSTEM_CITIES);
+    render();
+    modal.classList.remove("open");
+    showToast("City updated successfully");
+  });
+
+  // ---------- Add City (New City / Merge Cities) ----------
+
+  function populateCountrySelect(select) {
+    select.insertAdjacentHTML(
+      "beforeend",
+      SYSTEM_COUNTRIES.map((c) => `<option value="${c.name}">${c.name} (${c.code})</option>`).join("")
+    );
+  }
+
+  function populateStatesForCountry(stateSelect, countryName) {
+    const meta = SYSTEM_COUNTRIES.find((c) => c.name === countryName);
+    const states = meta ? getStatesForCountryCode(meta.code) : [];
+    if (states.length) {
+      stateSelect.disabled = false;
+      stateSelect.innerHTML =
+        `<option value="">Select state</option>` + states.map((s) => `<option value="${s}">${s}</option>`).join("");
+    } else {
+      stateSelect.disabled = true;
+      stateSelect.innerHTML = `<option value="">${meta ? "No state required" : "Select country first"}</option>`;
+    }
+  }
+
+  function wireCountryStateCascade(countrySelect, stateSelect) {
+    countrySelect.addEventListener("change", () => populateStatesForCountry(stateSelect, countrySelect.value));
+  }
+
+  // A city that was itself created via Add City (single or merged) can't be
+  // folded into another merge — only cities from the original master list
+  // are eligible merge candidates. Shared by both the create and edit flows.
+  function getMergeCandidates(countryName, query) {
+    let candidates = SYSTEM_CITIES.filter((c) => c.country.name === countryName && !c.cityType);
+    const q = query.trim().toLowerCase();
+    if (q) candidates = candidates.filter((c) => c.name.toLowerCase().includes(q));
+    return candidates;
+  }
+
+  // Human-readable "City A, City B" list for merge history descriptions.
+  function describeCityIds(ids) {
+    return ids
+      .map((cid) => SYSTEM_CITIES.find((c) => c.id === cid))
+      .filter(Boolean)
+      .map((c) => c.name)
+      .join(", ");
+  }
+
+  const newCityCountry = document.getElementById("newCityCountry");
+  const newCityState = document.getElementById("newCityState");
+  const newCityName = document.getElementById("newCityName");
+  populateCountrySelect(newCityCountry);
+  wireCountryStateCascade(newCityCountry, newCityState);
+
+  const mergeCountry = document.getElementById("mergeCountry");
+  const mergeResultState = document.getElementById("mergeResultState");
+  const mergeResultName = document.getElementById("mergeResultName");
+  populateCountrySelect(mergeCountry);
+  wireCountryStateCascade(mergeCountry, mergeResultState);
+
+  const mergeSearch = document.getElementById("mergeCitySearch");
+  const mergeList = document.getElementById("mergeList");
+  let mergeSelectedIds = new Set();
+
+  mergeCountry.addEventListener("change", () => {
+    mergeSelectedIds = new Set();
+    mergeSearch.disabled = !mergeCountry.value;
+    mergeSearch.value = "";
+    renderMergeList();
+  });
+
+  function renderMergeList() {
+    if (!mergeCountry.value) {
+      mergeList.innerHTML = `<div class="empty-state">Select a country first</div>`;
+      return;
+    }
+
+    const candidates = getMergeCandidates(mergeCountry.value, mergeSearch.value);
+
+    mergeList.innerHTML = candidates.length
+      ? candidates
+          .map(
+            (c) => `
+      <label class="merge-list-item">
+        <input type="checkbox" data-merge-id="${c.id}" ${mergeSelectedIds.has(c.id) ? "checked" : ""} />
+        <span class="meta">
+          <span>${c.name}</span>
+          <span class="sub">${[c.state, c.country.name].filter(Boolean).join(", ")}</span>
+        </span>
+        <span class="pill ${c.active ? "success" : "danger"}">${c.active ? "Active" : "Inactive"}</span>
+      </label>`
+          )
+          .join("")
+      : `<div class="empty-state">No cities in this country match your search</div>`;
+
+    mergeList.querySelectorAll("[data-merge-id]").forEach((checkbox) => {
+      checkbox.addEventListener("change", () => {
+        const id = Number(checkbox.dataset.mergeId);
+        if (checkbox.checked) mergeSelectedIds.add(id);
+        else mergeSelectedIds.delete(id);
+      });
+    });
+  }
+
+  mergeSearch.addEventListener("input", renderMergeList);
+
+  function resetAddCityModal() {
+    newCityName.value = "";
+    newCityCountry.value = "";
+    newCityCountry.dispatchEvent(new Event("change"));
+    mergeSelectedIds = new Set();
+    mergeSearch.value = "";
+    mergeSearch.disabled = true;
+    mergeResultName.value = "";
+    mergeCountry.value = "";
+    mergeCountry.dispatchEvent(new Event("change"));
+    renderMergeList();
+    switchAddCityTab("new");
+  }
+
+  function switchAddCityTab(tab) {
+    document.querySelectorAll("[data-tab-btn]").forEach((btn) => {
+      btn.classList.toggle("active", btn.dataset.tabBtn === tab);
+    });
+    document.querySelectorAll("[data-tab-panel]").forEach((panel) => {
+      panel.classList.toggle("active", panel.dataset.tabPanel === tab);
+    });
+    document.querySelectorAll("[data-tab-footer]").forEach((btn) => {
+      btn.style.display = btn.dataset.tabFooter === tab ? "" : "none";
+    });
+  }
+
+  document.querySelectorAll("[data-tab-btn]").forEach((btn) => {
+    btn.addEventListener("click", () => switchAddCityTab(btn.dataset.tabBtn));
+  });
+
+  document.getElementById("addCityBtn").addEventListener("click", () => {
+    resetAddCityModal();
+    openModal(document.getElementById("addCityModal"));
+  });
+
+  document.getElementById("saveNewCityBtn").addEventListener("click", () => {
+    const name = newCityName.value.trim();
+    const countryName = newCityCountry.value;
+    if (!countryName) {
+      showToast("Please select a country", "error");
+      return;
+    }
+    if (!name) {
+      showToast("City name is required", "error");
+      return;
+    }
+    const meta = SYSTEM_COUNTRIES.find((c) => c.name === countryName);
+    const newCityStateValue = newCityState.disabled ? null : newCityState.value || null;
+    SYSTEM_CITIES.push({
+      id: SYSTEM_CITIES.length,
+      name,
+      state: newCityStateValue,
+      country: { name: meta.name, code: meta.code },
+      active: true,
+      history: [
+        {
+          operation: "Create",
+          name,
+          description: [`Name: ${name}`, newCityStateValue ? `State: ${newCityStateValue}` : null, `Country: ${meta.name} (${meta.code})`]
+            .filter(Boolean)
+            .join(", "),
+          userName: CURRENT_USER.name,
+          userEmail: CURRENT_USER.email,
+          timestamp: new Date(),
+        },
+      ],
+      cityType: "normal",
+    });
+    saveToStorage("SYSTEM_CITIES", SYSTEM_CITIES);
+    render();
+    document.getElementById("addCityModal").classList.remove("open");
+    showToast("City added successfully");
+  });
+
+  document.getElementById("saveMergeCityBtn").addEventListener("click", () => {
+    const countryName = mergeCountry.value;
+    if (!countryName) {
+      showToast("Please select a country first", "error");
+      return;
+    }
+    if (mergeSelectedIds.size < 2) {
+      showToast("Select at least 2 cities to merge", "error");
+      return;
+    }
+    const name = mergeResultName.value.trim();
+    if (!name) {
+      showToast("Merged city name is required", "error");
+      return;
+    }
+    const meta = SYSTEM_COUNTRIES.find((c) => c.name === countryName);
+    const mergeStateValue = mergeResultState.disabled ? null : mergeResultState.value || null;
+    SYSTEM_CITIES.push({
+      id: SYSTEM_CITIES.length,
+      name,
+      state: mergeStateValue,
+      country: { name: meta.name, code: meta.code },
+      active: true,
+      history: [
+        {
+          operation: "Create",
+          name,
+          description: [
+            `Name: ${name}`,
+            mergeStateValue ? `State: ${mergeStateValue}` : null,
+            `Country: ${meta.name} (${meta.code})`,
+            `Merged from: ${describeCityIds([...mergeSelectedIds])}`,
+          ]
+            .filter(Boolean)
+            .join(", "),
+          userName: CURRENT_USER.name,
+          userEmail: CURRENT_USER.email,
+          timestamp: new Date(),
+        },
+      ],
+      cityType: "merged",
+      mergedFrom: [...mergeSelectedIds],
+    });
+    saveToStorage("SYSTEM_CITIES", SYSTEM_CITIES);
+    render();
+    document.getElementById("addCityModal").classList.remove("open");
+    showToast("Cities merged successfully");
+  });
+
+  // ---------- Edit Merged City (mirrors the Merge Cities creation panel) ----------
+
+  const editMergeCountryInput = document.getElementById("editMergeCountry");
+  const editMergeSearch = document.getElementById("editMergeCitySearch");
+  const editMergeList = document.getElementById("editMergeList");
+  const editMergeResultState = document.getElementById("editMergeResultState");
+  const editMergeResultName = document.getElementById("editMergeResultName");
+  let editMergeSelectedIds = new Set();
+  let editMergeActiveRecordId = null;
+
+  function renderEditMergeList() {
+    const record = SYSTEM_CITIES.find((c) => c.id === editMergeActiveRecordId);
+    if (!record) return;
+    const candidates = getMergeCandidates(record.country.name, editMergeSearch.value);
+
+    editMergeList.innerHTML = candidates.length
+      ? candidates
+          .map(
+            (c) => `
+      <label class="merge-list-item">
+        <input type="checkbox" data-edit-merge-id="${c.id}" ${editMergeSelectedIds.has(c.id) ? "checked" : ""} />
+        <span class="meta">
+          <span>${c.name}</span>
+          <span class="sub">${[c.state, c.country.name].filter(Boolean).join(", ")}</span>
+        </span>
+        <span class="pill ${c.active ? "success" : "danger"}">${c.active ? "Active" : "Inactive"}</span>
+      </label>`
+          )
+          .join("")
+      : `<div class="empty-state">No cities in this country match your search</div>`;
+
+    editMergeList.querySelectorAll("[data-edit-merge-id]").forEach((checkbox) => {
+      checkbox.addEventListener("change", () => {
+        const id = Number(checkbox.dataset.editMergeId);
+        if (checkbox.checked) editMergeSelectedIds.add(id);
+        else editMergeSelectedIds.delete(id);
+      });
+    });
+  }
+
+  editMergeSearch.addEventListener("input", renderEditMergeList);
+
+  function openEditMergedCity(record) {
+    editMergeActiveRecordId = record.id;
+    editMergeCountryInput.value = `${record.country.name} (${record.country.code})`;
+    editMergeSelectedIds = new Set(record.mergedFrom || []);
+    editMergeSearch.value = "";
+    populateStatesForCountry(editMergeResultState, record.country.name);
+    editMergeResultState.value = record.state || "";
+    editMergeResultName.value = record.name;
+    renderEditMergeList();
+    openModal(document.getElementById("editMergedCityModal"));
+  }
+
+  document.getElementById("saveEditMergeBtn").addEventListener("click", () => {
+    const record = SYSTEM_CITIES.find((c) => c.id === editMergeActiveRecordId);
+    if (!record) return;
+    const name = editMergeResultName.value.trim();
+    if (!name) {
+      showToast("City name is required", "error");
+      return;
+    }
+    if (editMergeSelectedIds.size === 0) {
+      showToast("Select at least 2 cities to merge", "error");
+      return;
+    }
+
+    function applyMergeEdit() {
+      const oldName = record.name;
+      const oldState = record.state;
+      const newState = editMergeResultState.disabled ? null : editMergeResultState.value || null;
+      const previousIds = record.mergedFrom || [];
+      const newIds = [...editMergeSelectedIds];
+      const added = newIds.filter((cid) => !previousIds.includes(cid));
+      const removed = previousIds.filter((cid) => !newIds.includes(cid));
+
+      const changeParts = [];
+      if (oldName !== name) changeParts.push(`Name: ${oldName} -> ${name}`);
+      if (oldState !== newState) changeParts.push(`State: ${oldState || "—"} -> ${newState || "—"}`);
+      const mergeParts = [];
+      if (removed.length) mergeParts.push(`Removed -> ${describeCityIds(removed)}`);
+      if (added.length) mergeParts.push(`Added -> ${describeCityIds(added)}`);
+      if (mergeParts.length) changeParts.push(`Merged City: ${mergeParts.join("; ")}`);
+
+      record.name = name;
+      record.state = newState;
+      record.mergedFrom = newIds;
+
+      if (changeParts.length) {
+        record.history.push({
+          operation: "Edit",
+          name,
+          description: changeParts.join(", "),
+          userName: CURRENT_USER.name,
+          userEmail: CURRENT_USER.email,
+          timestamp: new Date(),
+        });
+      }
+      saveToStorage("SYSTEM_CITIES", SYSTEM_CITIES);
+      render();
+      closeModal(document.getElementById("editMergedCityModal"));
+      showToast("Merged city updated successfully");
+    }
+
+    if (editMergeSelectedIds.size === 1) {
+      showConfirm(
+        "A merged city must contain at least 2 cities. Saving now will delete this merged city entirely. Continue?",
+        () => {
+          const idx = SYSTEM_CITIES.findIndex((c) => c.id === record.id);
+          if (idx !== -1) SYSTEM_CITIES.splice(idx, 1);
+          saveToStorage("SYSTEM_CITIES", SYSTEM_CITIES);
+          render();
+          closeModal(document.getElementById("editMergedCityModal"));
+          showToast("Merged city deleted — only one city remained", "error");
+        }
+      );
+      return;
+    }
+
+    applyMergeEdit();
+  });
+
+  // ---------- Confirm dialog (generic) ----------
+
+  let pendingConfirmAction = null;
+
+  function showConfirm(message, onConfirm) {
+    document.getElementById("confirmMessage").textContent = message;
+    pendingConfirmAction = onConfirm;
+    openModal(document.getElementById("confirmModal"));
+  }
+
+  document.getElementById("confirmActionBtn").addEventListener("click", () => {
+    const action = pendingConfirmAction;
+    pendingConfirmAction = null;
+    closeModal(document.getElementById("confirmModal"));
+    if (action) action();
+  });
+
+  renderMergeList();
+  render();
+</script>
+</body>
+</html>

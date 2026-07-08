@@ -1,0 +1,1988 @@
+/* ==========================================================================
+   mynztrip.com — Admin Portal shared styles
+   Shared across all standalone design pages
+   ========================================================================== */
+
+:root {
+  --navy-dark: #0d0d5c;
+  --navy: #10108a;
+  --navy-light: #1a1aa8;
+  --navy-hover: rgba(255, 255, 255, 0.08);
+  --accent-red: #e6414d;
+  --accent-blue: #2b3ed1;
+  --table-head: #1b1b8f;
+  --cyan: #19c3e6;
+  --cyan-hover: #0fb0d2;
+  --drawer-width: 480px;
+  --success: #1a9d5c;
+  --warning: #c8790d;
+  --bg-page: #f2f2f9;
+  --bg-card: #ffffff;
+  --bg-panel: #ececfa;
+  --text-dark: #1c1c33;
+  --text-muted: #6b6b85;
+  --text-on-navy: #ffffff;
+  --border-color: #e4e4f0;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-pill: 999px;
+  --shadow-sm: 0 1px 2px rgba(16, 16, 90, 0.06);
+  --shadow-md: 0 4px 16px rgba(16, 16, 90, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", Roboto, -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg-page);
+  color: var(--text-dark);
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* ---------- Layout shell ---------- */
+
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* ---------- Top header ---------- */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--navy-dark);
+  padding: 12px 20px;
+  flex-shrink: 0;
+  z-index: 50;
+}
+
+.topbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.topbar-brand svg {
+  flex-shrink: 0;
+}
+
+.icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  border: none;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.icon-btn:hover {
+  background: var(--navy-hover);
+}
+
+.icon-btn.accent-red {
+  background: var(--accent-red);
+}
+
+.icon-btn.accent-red:hover {
+  background: #d13440;
+}
+
+.topbar-search {
+  flex: 1;
+  max-width: 520px;
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  padding-left: 14px;
+}
+
+.topbar-search svg {
+  color: #9a9ab0;
+  flex-shrink: 0;
+}
+
+.topbar-search input {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 10px 8px;
+  font-size: 14px;
+  color: var(--text-dark);
+}
+
+.topbar-search button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background: var(--accent-blue);
+  color: #fff;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 10px 18px;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+}
+
+.topbar-search button:hover {
+  background: #2434b8;
+}
+
+.topbar-spacer {
+  flex: 1;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-left: auto;
+}
+
+.avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  object-fit: cover;
+  background: #ccc;
+}
+
+/* ---------- Body: sidebar + content ---------- */
+
+.app-body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.sidebar {
+  width: 260px;
+  background: var(--navy-dark);
+  flex-shrink: 0;
+  padding: 10px 0 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.nav-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 22px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 15px;
+  font-weight: 500;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+}
+
+.nav-item svg {
+  flex-shrink: 0;
+}
+
+.nav-item .chevron {
+  margin-left: auto;
+  transition: transform 0.15s ease;
+}
+
+.nav-item:hover {
+  background: var(--navy-hover);
+}
+
+.nav-item.active,
+.nav-group.open > .nav-item {
+  background: var(--navy-hover);
+}
+
+.nav-group.open > .nav-item .chevron {
+  transform: rotate(180deg);
+}
+
+.submenu {
+  display: flex;
+  flex-direction: column;
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.nav-group:not(.open) .submenu {
+  display: none;
+}
+
+.submenu-item {
+  padding: 11px 22px 11px 56px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.75);
+  border-left: 3px solid transparent;
+}
+
+.submenu-item:hover {
+  color: #fff;
+  background: var(--navy-hover);
+}
+
+.submenu-item.active {
+  color: #fff;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.1);
+  border-left-color: var(--accent-red);
+}
+
+/* Nested sub-group inside a submenu, e.g. Hotel Map > Country > System/Supplier */
+
+.submenu-toggle {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.submenu-toggle .chevron {
+  margin-left: auto;
+  width: 12px;
+  height: 12px;
+  transition: transform 0.15s ease;
+}
+
+.submenu-group.open > .submenu-toggle .chevron {
+  transform: rotate(180deg);
+}
+
+.submenu-nested {
+  display: flex;
+  flex-direction: column;
+  background: rgba(0, 0, 0, 0.12);
+}
+
+.submenu-group:not(.open) .submenu-nested {
+  display: none;
+}
+
+.submenu-item.nested {
+  padding-left: 72px;
+  font-size: 13.5px;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 16px 22px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.reset-demo-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 12.5px;
+  padding: 6px 0;
+}
+
+.reset-demo-btn:hover {
+  color: #fff;
+}
+
+/* ---------- Main content ---------- */
+
+.main-content {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  padding: 28px 32px 40px;
+  display: flex;
+  flex-direction: column;
+}
+
+.page-header {
+  margin-bottom: 18px;
+  flex-shrink: 0;
+}
+
+.breadcrumb {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.breadcrumb .sep {
+  margin: 0 6px;
+  color: #c6c6da;
+}
+
+.page-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin: 0;
+}
+
+.info-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: var(--text-muted);
+}
+
+.info-icon-btn:hover,
+.info-icon-btn:focus-visible {
+  background: var(--bg-panel);
+  color: var(--accent-blue);
+}
+
+.info-popup-body {
+  color: var(--text-dark);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.info-popup-body p,
+.info-popup-body ul,
+.info-popup-body ol {
+  margin: 0 0 10px;
+}
+
+.info-popup-body p:last-child,
+.info-popup-body ul:last-child,
+.info-popup-body ol:last-child {
+  margin-bottom: 0;
+}
+
+.info-popup-body ul,
+.info-popup-body ol {
+  padding-left: 20px;
+}
+
+.info-popup-body li {
+  margin-bottom: 4px;
+}
+
+.info-popup-body strong {
+  color: var(--text-dark);
+}
+
+.page-divider {
+  border: none;
+  border-top: 1px solid var(--border-color);
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.content-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
+  margin-top: 20px;
+  overflow: hidden;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  gap: 16px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.card-toolbar h2 {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0;
+  color: var(--text-dark);
+}
+
+.toolbar-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  min-width: 240px;
+}
+
+.toolbar-search:focus-within {
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px rgba(43, 62, 209, 0.12);
+}
+
+.toolbar-search:has(input:disabled) {
+  background: var(--bg-panel);
+  cursor: not-allowed;
+}
+
+.toolbar-search svg {
+  color: #9a9ab0;
+  flex-shrink: 0;
+}
+
+.toolbar-search input {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 14px;
+  width: 100%;
+  color: var(--text-dark);
+}
+
+.toolbar-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.toolbar-search input:disabled {
+  cursor: not-allowed;
+  color: var(--text-muted);
+}
+
+.toolbar-filters {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.filter-select {
+  padding: 9px 14px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  color: var(--text-dark);
+  background: #fff;
+  outline: none;
+  min-width: 190px;
+}
+
+.filter-select:focus {
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px rgba(43, 62, 209, 0.12);
+}
+
+.text-not-mapped {
+  color: var(--accent-red);
+  font-style: italic;
+}
+
+.text-mapped {
+  color: var(--success);
+  font-weight: 700;
+}
+
+.empty-state {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 48px 20px;
+}
+
+/* ---------- Table ---------- */
+
+.table-wrap {
+  overflow: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+table.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.data-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  text-align: left;
+  background: var(--table-head);
+  color: #fff;
+  font-weight: 700;
+  font-size: 12.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border-color);
+  white-space: nowrap;
+}
+
+.data-table tbody td {
+  padding: 13px 20px;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-dark);
+  vertical-align: middle;
+}
+
+.data-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.data-table tbody tr:hover {
+  background: #fafaff;
+}
+
+.code-badge {
+  display: inline-block;
+  background: var(--bg-panel);
+  color: var(--navy);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  background: #fff;
+  color: var(--navy);
+}
+
+.action-btn:hover {
+  background: var(--accent-blue);
+  border-color: var(--accent-blue);
+  color: #fff;
+}
+
+.table-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  font-size: 13px;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border-color);
+  flex-shrink: 0;
+  background: var(--bg-card);
+}
+
+.btn-download {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 18px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: var(--cyan);
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.btn-download:hover {
+  background: var(--cyan-hover);
+}
+
+/* ---------- Pagination ---------- */
+
+.pagination-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.pagination-info {
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.pagination-info strong {
+  color: var(--text-dark);
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.page-btn {
+  min-width: 32px;
+  height: 32px;
+  padding: 0 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  background: #fff;
+  color: var(--text-dark);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.page-btn:hover:not(:disabled):not(.active) {
+  background: var(--bg-panel);
+}
+
+.page-btn.nav {
+  font-weight: 600;
+  color: var(--text-dark);
+  padding: 0 14px;
+}
+
+.page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.page-btn.active {
+  background: var(--accent-blue);
+  border-color: var(--accent-blue);
+  color: #fff;
+}
+
+.page-ellipsis {
+  padding: 0 4px;
+  color: var(--text-muted);
+}
+
+.page-size {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.page-size-select {
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  font-size: 13px;
+  color: var(--text-dark);
+  background: #fff;
+  outline: none;
+}
+
+/* ---------- Modal ---------- */
+
+/* Slide-in-from-right drawer */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(13, 13, 40, 0.25);
+  display: flex;
+  align-items: stretch;
+  justify-content: flex-end;
+  z-index: 100;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+
+.modal-overlay.open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+/* Fixed width for every drawer in the project — do not vary per content type */
+.modal {
+  background: #fff;
+  width: 100%;
+  max-width: var(--drawer-width);
+  height: 100%;
+  box-shadow: -8px 0 28px rgba(16, 16, 90, 0.18);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+}
+
+.modal-overlay.open .modal {
+  transform: translateX(0);
+}
+
+/* ---------- Centered popup — deliberate exception to the drawer convention.
+   Only used for the merge-city deletion confirm dialog. ---------- */
+
+.modal-overlay.popup-overlay {
+  align-items: center;
+  justify-content: center;
+}
+
+.popup-box {
+  background: #fff;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 20px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  transform: scale(0.94);
+  opacity: 0;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.modal-overlay.popup-overlay.open .popup-box {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 26px;
+  border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.modal-close:hover {
+  background: var(--bg-panel);
+}
+
+.modal-body {
+  padding: 22px 26px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* ---------- History (card design, not a table) ---------- */
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.history-entry-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.history-card {
+  background: #fff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: 10px 12px;
+}
+
+.history-card table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.history-card td {
+  padding: 6px 0;
+  font-size: 14px;
+  vertical-align: baseline;
+}
+
+.history-row-label {
+  white-space: nowrap;
+  padding-right: 16px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.history-card .history-row-sep {
+  padding: 6px 8px;
+  color: var(--text-muted);
+}
+
+.history-row-value {
+  width: 100%;
+  color: var(--text-dark);
+  font-weight: 600;
+  word-break: break-word;
+}
+
+/* ---------- History card v2: Operation/Timestamp, User, Description ---------- */
+
+.history-card-v2 td {
+  padding: 0;
+  vertical-align: top;
+}
+
+.history-card-v2 .history-op-row td {
+  padding-bottom: 4px;
+}
+
+.history-card-v2 .history-time-cell {
+  text-align: right;
+  color: var(--text-muted);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.history-card-v2 .history-user-cell {
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.history-user-name {
+  padding-top: 5px;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.history-user-email {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 1px;
+}
+
+.history-card-v2 .history-description-row td {
+  padding-top: 0;
+}
+
+.history-description-cell {
+  color: var(--text-dark);
+  font-size: 14px;
+  line-height: 1.6;
+  word-break: break-word;
+}
+
+.row-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group:last-child {
+  margin-bottom: 0;
+}
+
+.form-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 6px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  outline: none;
+  color: var(--text-dark);
+}
+
+.form-group input:focus {
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px rgba(43, 62, 209, 0.12);
+}
+
+.form-group input:disabled {
+  background: var(--bg-panel);
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+/* Not scoped under .form-group — also used standalone for a small muted
+   status note outside a form (e.g. the Save row hint on the mapping pages). */
+.hint {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 26px;
+  border-top: 1px solid var(--border-color);
+  background: var(--bg-panel);
+  flex-shrink: 0;
+}
+
+.btn {
+  padding: 9px 18px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+
+.btn-secondary {
+  background: #fff;
+  border-color: var(--border-color);
+  color: var(--text-dark);
+}
+
+.btn-secondary:hover {
+  background: var(--bg-panel);
+}
+
+.btn-primary {
+  background: var(--accent-blue);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: #2434b8;
+}
+
+.toast {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  min-width: 320px;
+  max-width: 400px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: var(--success);
+  color: #fff;
+  padding: 16px 40px 16px 16px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  opacity: 0;
+  transform: translateX(24px);
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  z-index: 300;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+.toast.error {
+  background: var(--accent-red);
+}
+
+.toast-icon {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.22);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+}
+
+.toast-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.toast-title {
+  display: block;
+  font-weight: 700;
+  font-size: 15px;
+  margin-bottom: 2px;
+}
+
+.toast-message {
+  display: block;
+  font-size: 13.5px;
+  line-height: 1.4;
+}
+
+.toast-close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  background: none;
+  border: none;
+  color: #fff;
+  opacity: 0.85;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+}
+
+.toast-close:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* ---------- Solid status pill (e.g. Active/Inactive) ---------- */
+
+.pill {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.pill.success {
+  background: var(--success);
+}
+
+.pill.danger {
+  background: var(--accent-red);
+}
+
+.pill.info {
+  background: var(--accent-blue);
+}
+
+.pill.neutral {
+  background: var(--text-muted);
+}
+
+.pill.warning {
+  background: var(--warning);
+}
+
+.pill.operation-pill {
+  border-radius: var(--radius-sm);
+}
+
+/* ---------- Searchable select (every dropdown in the project) ---------- */
+
+.searchable-select {
+  position: relative;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.searchable-select-native {
+  display: none !important;
+}
+
+.searchable-select-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  text-align: left;
+}
+
+.searchable-select-trigger:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.searchable-select-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.searchable-select-trigger.placeholder .searchable-select-label {
+  color: var(--text-muted);
+}
+
+.searchable-select-caret {
+  flex-shrink: 0;
+  color: var(--text-muted);
+  transition: transform 0.15s ease;
+}
+
+.searchable-select.open .searchable-select-caret {
+  transform: rotate(180deg);
+}
+
+.searchable-select-panel {
+  position: fixed;
+  z-index: 1000;
+  display: none;
+  flex-direction: column;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+  max-height: 280px;
+  overflow: hidden;
+}
+
+.searchable-select-panel.open {
+  display: flex;
+}
+
+.searchable-select-search {
+  border: none;
+  border-bottom: 1px solid var(--border-color);
+  padding: 10px 12px;
+  font-size: 14px;
+  outline: none;
+  color: var(--text-dark);
+  flex-shrink: 0;
+}
+
+.searchable-select-options {
+  overflow-y: auto;
+  padding: 4px;
+}
+
+.searchable-select-option {
+  padding: 8px 10px;
+  font-size: 14px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  color: var(--text-dark);
+}
+
+.searchable-select-option:hover,
+.searchable-select-option.highlighted {
+  background: var(--bg-panel);
+}
+
+.searchable-select-option.selected {
+  font-weight: 600;
+  color: var(--accent-blue);
+}
+
+/* Same warning tint as .merge-list-item.mapped-elsewhere, for a select
+   option a page has flagged data-mapped="true" (already mapped elsewhere). */
+.searchable-select-option.mapped-elsewhere {
+  background: rgba(200, 121, 13, 0.1);
+}
+
+.searchable-select-option.mapped-elsewhere:hover,
+.searchable-select-option.mapped-elsewhere.highlighted {
+  background: rgba(200, 121, 13, 0.2);
+}
+
+.searchable-select-empty {
+  padding: 14px 10px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+/* ---------- Modal tabs (e.g. New City / Merge Cities) ---------- */
+
+.modal-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
+}
+
+.modal-tab {
+  flex: 1;
+  padding: 13px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+
+.modal-tab.active {
+  color: var(--accent-blue);
+  border-bottom-color: var(--accent-blue);
+}
+
+.modal-tab-panel:not(.active) {
+  display: none;
+}
+
+/* ---------- Merge candidate checklist ---------- */
+
+.merge-list {
+  max-height: 220px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+}
+
+.merge-list-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 13.5px;
+}
+
+.merge-list-item:last-child {
+  border-bottom: none;
+}
+
+.merge-list-item input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.merge-list-item .meta {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Name line: truncates instead of wrapping/overflowing so a long city name
+   can never force horizontal scroll — full name still available via the
+   title="" tooltip set alongside this class. */
+.merge-list-item .meta .merge-list-name {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Always its own line below the name (block, not inline) regardless of how
+   long the name above it is — this is what guarantees "supplier + address"
+   never collides with the name on one line. Also truncates rather than
+   overflowing, same reasoning as .merge-list-name above. */
+.merge-list-item .meta .sub {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 1px;
+}
+
+/* Row tint for a supplier city already mapped to a different system city —
+   pairs with the small "Mapped: ..." note rendered in its meta. */
+.merge-list-item.mapped-elsewhere {
+  background: rgba(200, 121, 13, 0.08);
+  border-left: 3px solid var(--warning);
+  padding-left: 9px;
+}
+
+/* Locked checkbox: already mapped elsewhere, but nothing's pinned yet so we
+   can't yet tell if checking it would be a genuine remap or would actually
+   just match whatever gets pinned next — dim the whole row and show a
+   not-allowed cursor so the lock reads as deliberate, not a rendering bug. */
+.merge-list-item.mapped-elsewhere:has(input:disabled) {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.merge-list-item.mapped-elsewhere input:disabled {
+  cursor: not-allowed;
+}
+
+/* Small muted caption, not a shouty pill — just enough to say what a
+   mapped-elsewhere row currently maps to. */
+.mapped-elsewhere-note {
+  display: block;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 3px;
+}
+
+/* ---------- Remap confirmation (side-by-side compare) ---------- */
+
+.remap-subject {
+  font-size: 14px;
+  color: var(--text-dark);
+  margin-bottom: 14px;
+}
+
+.remap-compare {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.remap-box {
+  flex: 1;
+  min-width: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--bg-panel);
+}
+
+.remap-box-target {
+  border-color: var(--accent-blue);
+  background: rgba(43, 62, 209, 0.06);
+}
+
+.remap-box-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.remap-box-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-dark);
+  word-break: break-word;
+}
+
+.remap-arrow {
+  flex-shrink: 0;
+  color: var(--text-muted);
+  font-size: 18px;
+}
+
+/* Spacing between stacked remap compare blocks in the batch confirm popup
+   (city-mapping.html's Save Mapping, when multiple cities are being
+   re-mapped in one go). */
+.remap-batch-item + .remap-batch-item {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+}
+
+/* ---------- City Mapping (top/bottom layout) ---------- */
+
+/* Outer vertical stack: top section (pin + existing mapping) above the
+   bottom workspace (supplier city selection) — each section is sized to one
+   full "screen" (see --mapping-section-height, computed in city-mapping.html
+   from this element's own clientHeight, which already nets out the topbar/
+   page-header/padding above it). This container is the scroll region: it's
+   the flex-constrained child of .main-content (flex:1; min-height:0, same
+   nested-scroll convention used by .mapping-panel-body elsewhere), and
+   scrolls internally via overflow-y so the fixed 100vh app shell (html/body
+   have overflow:hidden) never needs to scroll itself. scroll-snap-type is
+   "proximity" (not "mandatory") so free scrolling still feels natural, while
+   the floating nav buttons' scrollIntoView() calls land exactly on a
+   section's top edge. */
+.mapping-page-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 20px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scroll-snap-type: y proximity;
+}
+
+/* Generic 2-column grid, reused for both the top section's left/right split
+   and (nested, via .mapping-layout-bottom below) the bottom workspace's
+   selected-list/checklist split. */
+.mapping-layout {
+  display: grid;
+  grid-template-columns: 1fr 1.3fr;
+  gap: 20px;
+}
+
+/* Top section: review-only context (pin summary + existing mappings).
+   Height is dynamic (set via the --mapping-section-height custom property,
+   computed in JS from the viewport) so it always fills one full screen
+   worth of space regardless of window size/device; min-height is the floor
+   for very small screens. Each mapping-panel's own .mapping-panel-body
+   (overflow-y:auto) still scrolls internally if that panel's content (e.g.
+   a long supplier-filtered mapping list) is taller than the section. */
+.mapping-layout-top {
+  height: var(--mapping-section-height, 640px);
+  min-height: 480px;
+  flex-shrink: 0;
+  scroll-snap-align: start;
+}
+
+/* Bottom workspace: same full-screen sizing as the top section — the
+   primary work area, but no longer flex:1 (which would fight the explicit
+   per-section height model above). Its own .mapping-panel-body still
+   scrolls internally for overflow, same as every other .mapping-panel.
+   Selector is the compound ".mapping-panel.mapping-bottom-panel" (not just
+   ".mapping-bottom-panel") so its min-height reliably beats .mapping-panel's
+   own "min-height: 0" — same specificity via a single class would otherwise
+   come down to source order, which is fragile. */
+.mapping-panel.mapping-bottom-panel {
+  height: var(--mapping-section-height, 640px);
+  min-height: 480px;
+  flex-shrink: 0;
+  scroll-snap-align: start;
+}
+
+.mapping-layout-bottom {
+  margin-top: 16px;
+}
+
+/* Floating buttons (top-right, fixed) to jump between the top and bottom
+   sections — companion to the scroll-snap behavior above. */
+.mapping-nav-fabs {
+  position: fixed;
+  top: 96px;
+  right: 32px;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.mapping-nav-fab {
+  height: 38px;
+  padding: 0 16px 0 12px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-md);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-dark);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.mapping-nav-fab svg {
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+
+.mapping-nav-fab:hover {
+  background: var(--bg-panel);
+}
+
+/* Marks whichever button matches the section currently scrolled into view
+   (see the IntersectionObserver wiring in city-mapping.html). */
+.mapping-nav-fab.active {
+  background: var(--accent-blue);
+  border-color: var(--accent-blue);
+  color: #fff;
+}
+
+.mapping-nav-fab.active svg {
+  color: #fff;
+}
+
+.mapping-nav-fab.active:hover {
+  background: var(--accent-blue);
+}
+
+/* "Full Screen" toggle: swaps its own icon based on .active (not the
+   currently-viewed-section highlight above, which is applied to the other
+   two buttons only) — expand icon when off, collapse icon when on. */
+.mapping-chrome-toggle .icon-collapse {
+  display: none;
+}
+
+.mapping-chrome-toggle.active .icon-expand {
+  display: none;
+}
+
+.mapping-chrome-toggle.active .icon-collapse {
+  display: block;
+}
+
+/* Scoped to this page's own <main id="cityMappingMain"> rather than the
+   shared .main-content/.page-header classes, so toggling "Full Screen" here
+   can never affect any other page. */
+#cityMappingMain.chrome-hidden .page-header,
+#cityMappingMain.chrome-hidden .page-divider {
+  display: none;
+}
+
+.mapping-bottom-col {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* Makes the bottom section's body a bounded flex column instead of the
+   default "auto-height content, scroll the whole body if it overflows"
+   behavior .mapping-panel-body normally has (still correct for the top
+   section's two panels, which keep the base rule) — scoped via this
+   compound selector so only the bottom panel opts into it. #rightPanelContent
+   (unique to this page) is the direct child that actually holds the 3 rows
+   (filters / grid / save bar); it also needs to be a flex column, with only
+   the grid allowed to grow, so the whole chain below can properly shrink
+   instead of ballooning to fit hundreds of checklist rows (the classic
+   flexbox "every ancestor needs min-height:0" trap). */
+.mapping-bottom-panel .mapping-panel-body {
+  display: flex;
+  flex-direction: column;
+}
+
+#rightPanelContent {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+/* The 3 filters live in the left column only now (2 rows: Supplier+Country,
+   then State+the "include saved" checkbox) — keep them from ever being
+   squeezed by the list below, which is the one that should flex/shrink. */
+.mapping-bottom-col > .toolbar-filters {
+  flex-shrink: 0;
+  min-height: 39px;
+}
+
+/* Normalizes this row to the same 39px height as the .filter-select
+   dropdowns and the Save button — otherwise the eye jumps between different
+   row heights scanning across the two columns. */
+.mapping-header-row {
+  min-height: 39px;
+}
+
+.mapping-list-group > label {
+  margin-bottom: 8px;
+}
+
+/* .form-group input's generic padding/border (meant for a standalone
+   labeled text field) has the same specificity as .toolbar-search input's
+   borderless/transparent styling and comes later in this file, so it
+   silently wins and re-adds a border + 10px padding whenever a
+   .toolbar-search sits inside a .form-group — exactly the case here
+   (nested in .form-group.mapping-list-group), which is what inflated this
+   search box to 56px tall instead of matching the selects at 39px. Higher
+   specificity here restores .toolbar-search input's intended look rather
+   than fighting source order. */
+.form-group .toolbar-search input {
+  padding: 0;
+  border: none;
+  background: transparent;
+}
+
+.mapping-layout-bottom {
+  flex: 1;
+  min-height: 0;
+}
+
+/* Wraps a label (+ optional search box) and its .merge-list so the list can
+   grow to fill the rest of the column's height — both the "Selected Supplier
+   Cities" list (left) and the checklist (right) use this, so the two
+   columns end at the same height instead of one trailing off into empty
+   space while the other is still full of rows. */
+.mapping-list-group {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.mapping-list-group .merge-list {
+  flex: 1;
+  min-height: 160px;
+  max-height: none;
+}
+
+/* "Already Mapped" / "New Selection" — 2 sections inside the one
+   #selectedCitiesList box (not 2 separate boxes): native <details>/<summary>
+   for free open/closed + keyboard handling, styled as a plain divider inside
+   the existing .merge-list rather than its own bordered card, so this list
+   keeps looking like a single unified box and keeps participating in the
+   flex-fill sizing above like it always did. */
+.mapping-collapsible-inline {
+  border-bottom: 1px solid var(--border-color);
+}
+
+.mapping-collapsible-inline:last-child {
+  border-bottom: none;
+}
+
+.mapping-collapsible-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-dark);
+  list-style: none;
+}
+
+.mapping-collapsible-header::-webkit-details-marker {
+  display: none;
+}
+
+.mapping-collapsible-header .chevron {
+  color: var(--text-muted);
+  transition: transform 0.15s ease;
+  flex-shrink: 0;
+}
+
+.mapping-collapsible-inline[open] .mapping-collapsible-header .chevron {
+  transform: rotate(180deg);
+}
+
+/* Color-codes the two section headers so they're distinguishable at a
+   glance — warning/orange for "Already Mapped" (matches this project's
+   existing "mapped elsewhere" warning tint used everywhere else), blue for
+   "New Selection" (matches the "New" pill / primary-action blue used
+   throughout). The chevron picks up the same color for a cohesive look. */
+.mapping-collapsible-header--warning {
+  color: var(--warning);
+}
+
+.mapping-collapsible-header--warning .chevron {
+  color: var(--warning);
+}
+
+.mapping-collapsible-header--info {
+  color: var(--accent-blue);
+}
+
+.mapping-collapsible-header--info .chevron {
+  color: var(--accent-blue);
+}
+
+/* Compact Unmap/Undo button inside a list row — .btn's default padding
+   (9px 18px) is sized for standalone buttons, too large for an inline
+   per-row action. */
+.btn-compact {
+  padding: 4px 12px;
+  font-size: 12px;
+}
+
+/* Splits the search box and the Save button onto one row, search half-width
+   and left, Save right — replaces the old arrangement (full-width search box
+   on its own row, Save Mapping full-width below both columns). Only 2
+   children, so space-between alone pushes them to opposite ends;
+   .mapping-search-half caps the search box's own width so it doesn't just
+   grow to fill the leftover space. */
+.mapping-search-actions-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.mapping-search-half {
+  flex: 0 1 50%;
+  max-width: 50%;
+  margin-bottom: 0;
+}
+
+/* Change-detection summary, sitting directly above the Save button like a
+   label — matches "Supplier Cities" label's weight (same as .form-group
+   label) rather than the muted, small .hint styling. */
+.mapping-save-summary {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.toolbar-search.mapping-search-half {
+  min-height: 39px;
+}
+
+/* Small inline "Saved"/"New" tag next to a row's name in the bottom-left
+   Selected Supplier Cities list and the Save preview's sections. */
+.pill-tag {
+  padding: 2px 8px;
+  font-size: 10px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+/* ---------- Save preview modal (4 sections side by side) ---------- */
+
+.popup-box-lg {
+  max-width: 1120px;
+}
+
+#previewSections {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.preview-section {
+  flex: 1;
+  min-width: 0;
+}
+
+.preview-section-title {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+
+/* Side-by-side now, so the divider between sections is a left border, not a
+   top border/margin like a stacked layout would need. */
+.preview-section + .preview-section {
+  margin-top: 0;
+  padding-left: 20px;
+  border-left: 1px solid var(--border-color);
+}
+
+/* Remap rows inside the preview specifically read top-to-bottom (box, arrow,
+   box) rather than the side-by-side compare used elsewhere in this project
+   (e.g. country-system.html's own single-row remap confirm, untouched) —
+   narrower columns in this 4-across layout suit a vertical compare better.
+   Scoped to this modal only, not the shared .remap-compare/.remap-arrow
+   base rules. */
+#mappingPreviewModal .remap-compare {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+#mappingPreviewModal .remap-arrow {
+  align-self: center;
+}
+
+.mapping-panel {
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.mapping-panel-header {
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
+}
+
+.mapping-panel-header h2 {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 4px;
+  color: var(--text-dark);
+}
+
+.mapping-panel-header p {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* Compact "which system city am I mapping into" reminder in the bottom
+   section's header — not the full pinned-city-card (mapped-count pill,
+   History/Change City buttons) from the top section, just name + address,
+   since the two sections are full-screen/independent and this one loses
+   sight of the pin once scrolled to. */
+.pinned-city-inline-hint {
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--text-dark);
+}
+
+.pinned-city-inline-hint strong {
+  font-weight: 700;
+}
+
+.mapping-panel-body {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.pinned-city-card {
+  margin-top: 18px;
+  padding: 16px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--bg-panel);
+}
+
+.pinned-city-card .pinned-city-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+.pinned-city-card .pinned-city-meta {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* Not scoped under .pinned-city-card — also used standalone for a
+   label+button action row outside a pinned-city summary (e.g. the Save
+   Mapping row on city-mapping.html). */
+.pinned-city-actions {
+  margin-top: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Checkbox + label toggle row, e.g. "Show only unmapped" filters on the
+   mapping pages — a lighter-weight alternative to a filter-select when the
+   choice is a plain on/off. */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text-dark);
+  margin-bottom: 16px;
+  cursor: pointer;
+}
+
+.toggle-row input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+/* ---------- Tooltips ----------
+   Any icon-only button with an aria-label gets a hover/focus tooltip for
+   free, using the aria-label text itself — no extra markup per button. */
+
+.action-btn[aria-label],
+.icon-btn[aria-label],
+.modal-close[aria-label],
+.toast-close[aria-label],
+.city-type-badge[aria-label] {
+  position: relative;
+}
+
+.action-btn[aria-label]::after,
+.icon-btn[aria-label]::after,
+.modal-close[aria-label]::after,
+.toast-close[aria-label]::after,
+.city-type-badge[aria-label]::after {
+  content: attr(aria-label);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  background: var(--navy-dark);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.3;
+  white-space: nowrap;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s;
+  z-index: 60;
+}
+
+.action-btn[aria-label]:hover::after,
+.action-btn[aria-label]:focus-visible::after,
+.icon-btn[aria-label]:hover::after,
+.icon-btn[aria-label]:focus-visible::after,
+.modal-close[aria-label]:hover::after,
+.modal-close[aria-label]:focus-visible::after,
+.toast-close[aria-label]:hover::after,
+.toast-close[aria-label]:focus-visible::after,
+.city-type-badge[aria-label]:hover::after,
+.city-type-badge[aria-label]:focus-visible::after {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+.city-type-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  font-size: 11px;
+  vertical-align: middle;
+}
