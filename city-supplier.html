@@ -381,7 +381,7 @@
       if (!row) return;
       const params = new URLSearchParams({ supplier: state.supplier, country: row.countryCode, supplierCityId: String(row.id) });
       if (row.state) params.set("state", row.state);
-      location.href = `city-mapping.html?${params.toString()}`;
+      window.open(`city-mapping.html?${params.toString()}`, "_blank", "noopener");
       return;
     }
 
