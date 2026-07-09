@@ -302,7 +302,7 @@ function debounce(fn, delay = 350) {
 // Shared identity + formatting for history entries across all pages.
 const CURRENT_USER = { name: "Admin User", email: "admin@mynztrip.com" };
 
-const OPERATION_PILL_CLASS = { Create: "success", Edit: "info", "Status Change": "neutral", Map: "success", Unmap: "danger" };
+const OPERATION_PILL_CLASS = { Create: "success", Edit: "info", "Status Change": "neutral", Map: "success", Remap: "info", Unmap: "danger" };
 
 function operationPillHtml(operation) {
   const op = operation || "Edit";

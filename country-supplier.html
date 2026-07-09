@@ -106,7 +106,6 @@
     <!-- Main content -->
     <main class="main-content">
       <div class="page-header">
-        <div class="breadcrumb">Hotel Map <span class="sep">/</span> Country <span class="sep">/</span> Supplier</div>
         <div class="page-title-row">
           <h1 class="page-title">Supplier Country List</h1>
           <button class="info-icon-btn" data-info-target="#supplierCountryInfo" data-info-title="Supplier Country List" aria-label="About this page">
@@ -142,6 +141,10 @@
                 <option value="unmapped">Unmapped</option>
               </select>
             </div>
+            <button class="btn btn-danger" id="resetSupplierCountryFilterBtn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 109-9 9 9 0 00-7 3.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3 3.5V8h4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Reset
+            </button>
           </div>
         </div>
 
@@ -149,10 +152,10 @@
           <table class="data-table" id="supplierCountryTable">
             <thead>
               <tr>
-                <th style="width:30%">Country Name</th>
-                <th style="width:20%">Country ID</th>
-                <th style="width:30%">System Country</th>
-                <th style="width:20%">Action</th>
+                <th style="width:1%">Country ID</th>
+                <th>Country Name</th>
+                <th>System Country</th>
+                <th style="width:1%">Action</th>
               </tr>
             </thead>
             <tbody>
@@ -294,11 +297,11 @@
           .map(
             (r) => `
       <tr>
+        <td style="white-space:nowrap"><span class="code-badge">${r.supplierId}</span></td>
         <td>${r.name}</td>
-        <td><span class="code-badge">${r.supplierId}</span></td>
         <td>${
           r.systemCountry
-            ? `${r.systemCountry} <span class="code-badge">${SYSTEM_COUNTRY_CODES[r.systemCountry] || "-"}</span>`
+            ? `<span class="code-badge">${SYSTEM_COUNTRY_CODES[r.systemCountry] || "-"}</span> ${r.systemCountry}`
             : '<span class="text-not-mapped">Not mapped</span>'
         }</td>
         <td>
@@ -358,6 +361,11 @@
   });
   countrySearch.addEventListener("input", runSearch);
 
+  document.getElementById("resetSupplierCountryFilterBtn").addEventListener("click", () => {
+    supplierFilter.value = "";
+    supplierFilter.dispatchEvent(new Event("change"));
+  });
+
   function currentRows() {
     return supplierCountries[state.supplier] || [];
   }
@@ -389,6 +397,29 @@
     }
   });
 
+  function applySupplierCountryMapping(record, selected) {
+    const oldValue = record.systemCountry;
+    record.systemCountry = selected;
+    record.history.push({
+      // "Remap" (not "Map") when replacing an existing mapping with a
+      // different one — matches the Map/Remap/Unmap vocabulary used
+      // everywhere a mapping (not an entity property) changes; Unmap has
+      // its own separate button/handler below.
+      operation: oldValue ? "Remap" : "Map",
+      systemCountry: selected,
+      description: oldValue
+        ? `Mapped To: ${getSystemCountryNameWithCode(oldValue)} -> ${getSystemCountryNameWithCode(selected)}`
+        : `Mapped To: ${getSystemCountryNameWithCode(selected)}`,
+      userName: CURRENT_USER.name,
+      userEmail: CURRENT_USER.email,
+      timestamp: new Date(),
+    });
+    saveToStorage("supplierCountries", supplierCountries);
+    render();
+    document.getElementById("mapCountryModal").classList.remove("open");
+    showToast("Country mapped successfully");
+  }
+
   document.getElementById("saveMappingBtn").addEventListener("click", () => {
     const modal = document.getElementById("mapCountryModal");
     const rowId = modal.dataset.activeRow;
@@ -400,21 +431,39 @@
     }
     if (!record) return;
     const oldValue = record.systemCountry;
-    record.systemCountry = selected;
-    record.history.push({
-      operation: "Map",
-      systemCountry: selected,
-      description: oldValue
-        ? `Mapped To: ${getSystemCountryNameWithCode(oldValue)} -> ${getSystemCountryNameWithCode(selected)}`
-        : `Mapped To: ${getSystemCountryNameWithCode(selected)}`,
-      userName: CURRENT_USER.name,
-      userEmail: CURRENT_USER.email,
-      timestamp: new Date(),
-    });
-    saveToStorage("supplierCountries", supplierCountries);
-    render();
-    modal.classList.remove("open");
-    showToast("Country mapped successfully");
+
+    // No actual change (same country re-selected) — nothing to save or log.
+    if (oldValue === selected) {
+      modal.classList.remove("open");
+      return;
+    }
+
+    // Reassigning a country that's already mapped elsewhere must never be
+    // silent — show exactly what's changing and require confirmation,
+    // same remap-compare pattern used by the System Country List's own
+    // bulk Map modal and city-mapping.html's remap confirm.
+    if (oldValue) {
+      showConfirm(
+        `
+        <div class="remap-subject"><strong>${record.name}</strong> <span class="code-badge">${record.code}</span> is already mapped. Remap it?</div>
+        <div class="remap-compare">
+          <div class="remap-box">
+            <div class="remap-box-label">Currently mapped to</div>
+            <div class="remap-box-value">${getSystemCountryNameWithCode(oldValue)}</div>
+          </div>
+          <div class="remap-arrow" aria-hidden="true">&rarr;</div>
+          <div class="remap-box remap-box-target">
+            <div class="remap-box-label">Will map to</div>
+            <div class="remap-box-value">${getSystemCountryNameWithCode(selected)}</div>
+          </div>
+        </div>
+        `,
+        () => applySupplierCountryMapping(record, selected)
+      );
+      return;
+    }
+
+    applySupplierCountryMapping(record, selected);
   });
 
   document.getElementById("unmapCountryBtn").addEventListener("click", () => {

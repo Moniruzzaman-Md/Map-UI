@@ -167,7 +167,7 @@ Object.keys(supplierCountries).forEach((key) => {
 
 // sample mapping history for demo purposes
 supplierCountries.agoda[0].history.push({
-  operation: "Create",
+  operation: "Map",
   systemCountry: "United States",
   description: "Mapped To: United States (US)",
   userName: "Farhan Ahmed",
@@ -175,7 +175,7 @@ supplierCountries.agoda[0].history.push({
   timestamp: new Date("2026-06-18T09:12:00"),
 });
 supplierCountries.hotelbeds[0].history.push({
-  operation: "Create",
+  operation: "Map",
   systemCountry: "United States",
   description: "Mapped To: United States (US)",
   userName: "Rafiul Karim",

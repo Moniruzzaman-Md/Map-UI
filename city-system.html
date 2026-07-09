@@ -106,7 +106,6 @@
     <!-- Main content -->
     <main class="main-content">
       <div class="page-header">
-        <div class="breadcrumb">Hotel Map <span class="sep">/</span> City <span class="sep">/</span> System</div>
         <div class="page-title-row">
           <h1 class="page-title">System City List</h1>
           <button class="info-icon-btn" data-info-target="#cityListInfo" data-info-title="System City List" aria-label="About this page">
@@ -150,6 +149,10 @@
                 <option value="inactive">Inactive</option>
               </select>
             </div>
+            <button class="btn btn-danger" id="resetCityFilterBtn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 109-9 9 9 0 00-7 3.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3 3.5V8h4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Reset
+            </button>
             <button class="btn btn-primary" id="addCityBtn">+ Add City</button>
           </div>
         </div>
@@ -520,6 +523,16 @@
   statusFilterSelect.addEventListener("change", () => {
     state.status = statusFilterSelect.value;
     state.page = 1;
+    render();
+  });
+
+  document.getElementById("resetCityFilterBtn").addEventListener("click", () => {
+    citySearch.value = "";
+    countryFilterSelect.value = "";
+    stateFilterSelect.disabled = true;
+    stateFilterSelect.innerHTML = `<option value="">Select State</option>`;
+    statusFilterSelect.value = "all";
+    state = { ...state, page: 1, query: "", country: "", cityState: "", status: "all" };
     render();
   });
 
@@ -1083,6 +1096,20 @@
     closeModal(document.getElementById("confirmModal"));
     if (action) action();
   });
+
+  // Pre-select country filter when arriving from a deep link, e.g.
+  // city-system.html?country=GB (used by the "View Cities" action on the
+  // System Country List page). The link passes the standard ISO country
+  // code, but #cityCountryFilter's <option> values are keyed by country
+  // name (not code), so resolve code -> name before applying it.
+  const urlParams = new URLSearchParams(location.search);
+  const linkedCountryCode = urlParams.get("country");
+  const linkedCountryMeta = linkedCountryCode ? SYSTEM_COUNTRIES.find((c) => c.code === linkedCountryCode) : null;
+  const linkedCountryName = linkedCountryMeta ? linkedCountryMeta.name : null;
+  if (linkedCountryName && countryFilterSelect.querySelector(`option[value="${linkedCountryName}"]`)) {
+    countryFilterSelect.value = linkedCountryName;
+    countryFilterSelect.dispatchEvent(new Event("change"));
+  }
 
   renderMergeList();
   render();

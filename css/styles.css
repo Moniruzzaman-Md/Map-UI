@@ -342,17 +342,6 @@ button {
   flex-shrink: 0;
 }
 
-.breadcrumb {
-  font-size: 13px;
-  color: var(--text-muted);
-  margin-bottom: 6px;
-}
-
-.breadcrumb .sep {
-  margin: 0 6px;
-  color: #c6c6da;
-}
-
 .page-title-row {
   display: flex;
   align-items: center;
@@ -608,20 +597,28 @@ table.data-table {
    they're fixed, compact elements, not free-text values that can
    overflow. */
 
-/* Clips #hotelTable's own box so a long row-actions tooltip
+/* Clips each listed table's own box so a long row-actions tooltip
    (.action-btn[aria-label]::after — a project-wide CSS-only tooltip,
    content: attr(aria-label), see the shared rule below) can never inflate
    .table-wrap's scrollable width. That tooltip is invisible at rest
-   (opacity/visibility) but still occupies real layout space, and for a
-   hotel with a very long name (e.g. the intentional stress-test row) its
-   "View edit history for {name}" text is wide enough to stick out past
-   the table's right edge — scrollWidth then reflects that invisible
-   overflow, and scrolling .table-wrap all the way right lands on real,
-   visible blank space past the actual last column. Scoped to #hotelTable
-   specifically (not the shared .data-table class) so no other page's
+   (opacity/visibility), horizontally centered on its button, but still
+   occupies real layout space — when the button it centers on sits at (or
+   near) the table's right edge and its aria-label text is long enough
+   (e.g. "View edit history for {name}", "View cities in {name}"), the
+   tooltip's phantom box sticks out past the table's right edge.
+   scrollWidth then reflects that invisible overflow, producing a real
+   horizontal scrollbar on .table-wrap even though every visible column
+   already fits — scrolling all the way right lands on real, visible blank
+   space past the actual last column. First found on #hotelTable (long
+   hotel names); recurred on #countryTable/#supplierCountryTable once their
+   Action column was narrowed to fit-content, leaving the last button's
+   centered tooltip with less buffer room before it pokes past the edge.
+   Scoped per-table (not the shared .data-table class) so no other page's
    table is affected; the tooltip itself still renders on hover, just
    clipped at the table's own (generous) width instead of table-wrap's. */
-#hotelTable {
+#hotelTable,
+#countryTable,
+#supplierCountryTable {
   overflow: hidden;
 }
 
@@ -1134,6 +1131,9 @@ table.data-table {
 }
 
 .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   padding: 9px 18px;
   border-radius: var(--radius-sm);
   font-size: 14px;
@@ -1158,6 +1158,15 @@ table.data-table {
 
 .btn-primary:hover {
   background: #2434b8;
+}
+
+.btn-danger {
+  background: var(--accent-red);
+  color: #fff;
+}
+
+.btn-danger:hover {
+  background: #c9313b;
 }
 
 .toast {
@@ -2084,7 +2093,8 @@ table.data-table {
 .icon-btn[aria-label],
 .modal-close[aria-label],
 .toast-close[aria-label],
-.city-type-badge[aria-label] {
+.city-type-badge[aria-label],
+.info-icon-btn[aria-label] {
   position: relative;
 }
 
@@ -2092,7 +2102,8 @@ table.data-table {
 .icon-btn[aria-label]::after,
 .modal-close[aria-label]::after,
 .toast-close[aria-label]::after,
-.city-type-badge[aria-label]::after {
+.city-type-badge[aria-label]::after,
+.info-icon-btn[aria-label]::after {
   content: attr(aria-label);
   position: absolute;
   bottom: calc(100% + 8px);
@@ -2123,7 +2134,9 @@ table.data-table {
 .toast-close[aria-label]:hover::after,
 .toast-close[aria-label]:focus-visible::after,
 .city-type-badge[aria-label]:hover::after,
-.city-type-badge[aria-label]:focus-visible::after {
+.city-type-badge[aria-label]:focus-visible::after,
+.info-icon-btn[aria-label]:hover::after,
+.info-icon-btn[aria-label]:focus-visible::after {
   opacity: 1;
   visibility: visible;
   transform: translateX(-50%) translateY(0);

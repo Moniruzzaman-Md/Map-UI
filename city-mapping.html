@@ -106,7 +106,6 @@
     <!-- Main content -->
     <main class="main-content" id="cityMappingMain">
       <div class="page-header">
-        <div class="breadcrumb">Hotel Map <span class="sep">/</span> City Mapping</div>
         <div class="page-title-row">
           <h1 class="page-title">City Mapping</h1>
           <button class="info-icon-btn" data-info-target="#cityMappingInfo" data-info-title="City Mapping" aria-label="About this page">
@@ -128,12 +127,12 @@
           <li>Tick <strong>"Show only cities not yet mapped"</strong> on the right to hide supplier cities that already map to some system city — unlike a system city, a supplier city maps to at most one, so this narrows the list to what's still available.</li>
           <li>Each section below fills a full screen's worth of space — use the up/down buttons floating at the top-right to jump straight between the Pin/Existing Mapping section and the Map Supplier Cities section.</li>
           <li>The Map Supplier Cities section header shows a compact "Pinned: City — State, Country" reminder of which system city you're currently mapping into, so you don't lose that context after jumping down here.</li>
-          <li>Tick <strong>"Full Screen"</strong> (top-right) to hide the breadcrumb and page title too, giving each section the entire screen — the toggle itself stays floating and reachable so you can turn it back off.</li>
+          <li>Tick <strong>"Full Screen"</strong> (top-right) to hide the page title too, giving each section the entire screen — the toggle itself stays floating and reachable so you can turn it back off.</li>
         </ul>
       </template>
 
       <div class="mapping-nav-fabs">
-        <button type="button" class="mapping-nav-fab mapping-chrome-toggle" id="mappingChromeToggleBtn" aria-label="Hide page title and breadcrumb for full-height sections">
+        <button type="button" class="mapping-nav-fab mapping-chrome-toggle" id="mappingChromeToggleBtn" aria-label="Hide page title for full-height sections">
           <svg class="icon-expand" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           <svg class="icon-collapse" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           <span>Full Screen</span>
@@ -239,6 +238,10 @@
                     <select class="filter-select" id="mapStateFilter" disabled>
                       <option value="">All States</option>
                     </select>
+                    <button class="btn btn-danger" id="resetMapFilterBtn">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 109-9 9 9 0 00-7 3.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3 3.5V8h4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      Reset
+                    </button>
                   </div>
                   <div class="form-group mapping-list-group">
                     <label>Selected Supplier Cities</label>
@@ -734,6 +737,12 @@
   mapCitySearch.addEventListener("input", runMapSearch);
   mapUnmappedOnlyToggle.addEventListener("change", renderCityList);
 
+  document.getElementById("resetMapFilterBtn").addEventListener("click", () => {
+    mapUnmappedOnlyToggle.checked = false;
+    mapSupplierFilter.value = "";
+    mapSupplierFilter.dispatchEvent(new Event("change"));
+  });
+
   function currentMapCandidates() {
     let rows = supplierCities[rightState.supplier] || [];
     rows = rows.filter((r) => r.countryCode === rightState.country);
@@ -1215,7 +1224,7 @@
     mappingBottomSection.scrollIntoView({ block: "start" });
   }
 
-  // "Full Screen" toggle — hides the breadcrumb/title/divider so the two
+  // "Full Screen" toggle — hides the title/divider so the two
   // sections can claim that space too. Scoped to #cityMappingMain (this
   // page's own <main> id) rather than the shared .main-content/.page-header
   // classes, so it can't leak into any other page. Off by default; the
@@ -1231,9 +1240,9 @@
     mappingChromeToggleBtn.querySelector("span").textContent = hidden ? "Exit Full Screen" : "Full Screen";
     mappingChromeToggleBtn.setAttribute(
       "aria-label",
-      hidden ? "Show page title and breadcrumb" : "Hide page title and breadcrumb for full-height sections"
+      hidden ? "Show page title" : "Hide page title for full-height sections"
     );
-    // The breadcrumb/title/divider being hidden frees up vertical space
+    // The title/divider being hidden frees up vertical space
     // inside .main-content, which .mapping-page-layout (flex:1;min-height:0)
     // immediately absorbs — recompute the section height against that new,
     // larger clientHeight.

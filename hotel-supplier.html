@@ -106,7 +106,6 @@
     <!-- Main content -->
     <main class="main-content">
       <div class="page-header">
-        <div class="breadcrumb">Hotel Map <span class="sep">/</span> Hotel <span class="sep">/</span> Supplier</div>
         <div class="page-title-row">
           <h1 class="page-title">Supplier Hotel List</h1>
           <button class="info-icon-btn" data-info-target="#supplierHotelInfo" data-info-title="Supplier Hotel List" aria-label="About this page">
@@ -151,6 +150,10 @@
                 <option value="inactive">Inactive</option>
               </select>
             </div>
+            <button class="btn btn-danger" id="resetSupplierHotelFilterBtn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 109-9 9 9 0 00-7 3.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3 3.5V8h4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Reset
+            </button>
             <label class="toggle-row" for="hotelRevealValuesToggle" style="margin-bottom:0;">
               <input type="checkbox" id="hotelRevealValuesToggle" disabled />
               Show full values
@@ -357,6 +360,11 @@
   revealValuesToggle.addEventListener("change", () => {
     document.getElementById("supplierHotelTable").classList.toggle("reveal-values", revealValuesToggle.checked);
     refreshValueOverflowState();
+  });
+
+  document.getElementById("resetSupplierHotelFilterBtn").addEventListener("click", () => {
+    supplierFilter.value = "";
+    supplierFilter.dispatchEvent(new Event("change"));
   });
 
   countryFilterSelect.addEventListener("change", () => {

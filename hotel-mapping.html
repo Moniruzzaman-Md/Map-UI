@@ -106,7 +106,6 @@
     <!-- Main content -->
     <main class="main-content">
       <div class="page-header">
-        <div class="breadcrumb">Hotel Map <span class="sep">/</span> Hotel Mapping</div>
         <div class="page-title-row">
           <h1 class="page-title">Hotel Mapping</h1>
           <button class="info-icon-btn" data-info-target="#hotelMappingInfo" data-info-title="Hotel Mapping" aria-label="About this page">
@@ -179,6 +178,10 @@
                 <select class="filter-select" id="hotelMapCityFilter" disabled>
                   <option value="">All Cities</option>
                 </select>
+                <button class="btn btn-danger" id="resetHotelMapFilterBtn">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 109-9 9 9 0 00-7 3.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3 3.5V8h4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  Reset
+                </button>
               </div>
 
               <div class="mapping-header-row" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
@@ -495,6 +498,19 @@
 
     searchInput.addEventListener("input", () => {
       state.query = searchInput.value;
+      renderHotelList();
+    });
+
+    document.getElementById("resetHotelMapFilterBtn").addEventListener("click", () => {
+      countryFilterSelect.value = "";
+      state.country = "";
+      state.hotelState = "";
+      state.city = "";
+      state.query = "";
+      searchInput.value = "";
+      unmappedOnlyToggle.checked = false;
+      updateStateFilterOptions();
+      updateCityFilterOptions();
       renderHotelList();
     });
 
