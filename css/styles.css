@@ -1378,27 +1378,33 @@ table.data-table {
   flex-shrink: 0;
 }
 
-.modal-tabs .info-icon-btn {
-  flex-shrink: 0;
-  margin-right: 10px;
-}
-
 .modal-tab {
   flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
   padding: 13px;
-  text-align: center;
-  font-weight: 600;
-  font-size: 14px;
-  color: var(--text-muted);
-  background: none;
-  border: none;
   border-bottom: 2px solid transparent;
   margin-bottom: -1px;
 }
 
 .modal-tab.active {
-  color: var(--accent-blue);
   border-bottom-color: var(--accent-blue);
+}
+
+.modal-tab-label {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.modal-tab.active .modal-tab-label {
+  color: var(--accent-blue);
 }
 
 .modal-tab-panel:not(.active) {

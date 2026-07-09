@@ -557,10 +557,11 @@
   // City" in city-mapping.html uses), not free-typed — country gates the
   // list, state (if the country has one) narrows it further but is never
   // required, matching this project's established "state is an optional
-  // extra filter, never gates the load" convention. Only prepopulated
-  // cities are eligible (same !c.cityType filter used everywhere else a
-  // system city is picked from a master list) — cities created via Add
-  // City/Merge Cities aren't valid targets here either.
+  // extra filter, never gates the load" convention. Prepopulated cities and
+  // New City entries are both eligible — a hotel can be directly attached
+  // to either. A Merged city is excluded: it has no identity of its own to
+  // attach a hotel to, it's only ever a view over its component cities'
+  // supplier mappings (see city-system.html's Merge Cities info popup).
   function populateHotelFormCities(countryName, stateValue, selectedCityId) {
     if (!countryName) {
       hotelFormCity.disabled = true;
@@ -571,12 +572,12 @@
     // whose country.name snapshot predates a rename on country-system.html
     // is still correctly matched against the country's current name.
     const countryMeta = SYSTEM_COUNTRIES.find((c) => c.name === countryName);
-    let candidates = countryMeta ? SYSTEM_CITIES.filter((c) => !c.cityType && c.country.code === countryMeta.code) : [];
+    let candidates = countryMeta ? SYSTEM_CITIES.filter((c) => c.cityType !== "merged" && c.country.code === countryMeta.code) : [];
     if (stateValue) candidates = candidates.filter((c) => c.state === stateValue);
     hotelFormCity.disabled = candidates.length === 0;
     hotelFormCity.innerHTML = candidates.length
       ? `<option value="">Select city</option>` + candidates.map((c) => `<option value="${c.id}">${c.name}</option>`).join("")
-      : `<option value="">No prepopulated cities here</option>`;
+      : `<option value="">No eligible cities here</option>`;
     if (selectedCityId !== null && selectedCityId !== undefined) {
       hotelFormCity.value = String(selectedCityId);
     }

@@ -306,9 +306,15 @@
   </div>
 </div>
 
+<template id="newCityInfo">
+  <p>A city added here isn't linked to any supplier city — it has no supplier-city mapping step, unlike prepopulated or merged cities. Instead, system hotels are mapped to it directly.</p>
+  <p><strong>Example:</strong> You add "Riverside" as a New City, then add a hotel directly to it via the System Hotel List. When a user selects "Riverside" while searching for hotels (matched by hotel id), that hotel comes back — but nothing from any supplier's own city list, since no supplier city is mapped to "Riverside".</p>
+</template>
+
 <template id="mergeCitiesInfo">
   <p>A merged city groups two or more existing system cities into one entry. Since each of those system cities can already have several supplier cities mapped to it, a merged city ends up representing every hotel from every supplier city linked — directly or indirectly, through any of the cities it merges — to it.</p>
   <p>Only cities from the original master list can be merged — a city created via <strong>Add City</strong> (New City or Merge Cities) can't be merged again.</p>
+  <p><strong>Example:</strong> You merge "New York" and "Brooklyn" into "Greater New York". When a user selects "Greater New York" while searching for hotels (matched by hotel id), the hotel ids returned are every supplier city mapped to New York or Brooklyn.</p>
 </template>
 
 <!-- Add City Modal: New City / Merge Cities -->
@@ -321,11 +327,18 @@
       </button>
     </div>
     <div class="modal-tabs">
-      <button class="modal-tab active" data-tab-btn="new">New City</button>
-      <button class="modal-tab" data-tab-btn="merge">Merge Cities</button>
-      <button class="info-icon-btn" data-info-target="#mergeCitiesInfo" data-info-title="Merge Cities" data-tab-info="merge" style="display:none;" aria-label="About Merge Cities">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 11v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="8" r="1" fill="currentColor"/></svg>
-      </button>
+      <div class="modal-tab active">
+        <button class="modal-tab-label" data-tab-btn="new">New City</button>
+        <button class="info-icon-btn" data-info-target="#newCityInfo" data-info-title="New City" aria-label="About New City">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 11v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="8" r="1" fill="currentColor"/></svg>
+        </button>
+      </div>
+      <div class="modal-tab">
+        <button class="modal-tab-label" data-tab-btn="merge">Merge Cities</button>
+        <button class="info-icon-btn" data-info-target="#mergeCitiesInfo" data-info-title="Merge Cities" aria-label="About Merge Cities">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 11v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="8" r="1" fill="currentColor"/></svg>
+        </button>
+      </div>
     </div>
 
     <!-- New City panel -->
@@ -780,16 +793,13 @@
 
   function switchAddCityTab(tab) {
     document.querySelectorAll("[data-tab-btn]").forEach((btn) => {
-      btn.classList.toggle("active", btn.dataset.tabBtn === tab);
+      (btn.closest(".modal-tab") || btn).classList.toggle("active", btn.dataset.tabBtn === tab);
     });
     document.querySelectorAll("[data-tab-panel]").forEach((panel) => {
       panel.classList.toggle("active", panel.dataset.tabPanel === tab);
     });
     document.querySelectorAll("[data-tab-footer]").forEach((btn) => {
       btn.style.display = btn.dataset.tabFooter === tab ? "" : "none";
-    });
-    document.querySelectorAll("[data-tab-info]").forEach((btn) => {
-      btn.style.display = btn.dataset.tabInfo === tab ? "" : "none";
     });
   }
 
