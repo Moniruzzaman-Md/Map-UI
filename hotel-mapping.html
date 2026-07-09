@@ -1,0 +1,595 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Hotel Mapping – Hotel Map | mynztrip.com</title>
+<link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- Top bar -->
+  <header class="topbar">
+    <div class="topbar-brand">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2L2 8l10 4 10-4-10-6z" fill="#fff"/>
+        <path d="M2 16l10 4 10-4M2 12l10 4 10-4" stroke="#fff" stroke-width="1.6" fill="none"/>
+      </svg>
+      mynztrip.com
+    </div>
+
+    <button class="icon-btn" aria-label="Menu">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+
+    <button class="icon-btn accent-red" aria-label="Messages">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" stroke="#fff" stroke-width="1.8" fill="none"/></svg>
+    </button>
+
+    <div class="topbar-search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <input type="text" placeholder="Booking ID, PNR, Ticket No..." />
+      <button type="button">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#fff" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+        Search
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+
+    <div class="topbar-right">
+      <button class="icon-btn" aria-label="Notifications">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9z" stroke="#fff" stroke-width="1.8" fill="none"/><path d="M13.7 21a2 2 0 01-3.4 0" stroke="#fff" stroke-width="1.8"/></svg>
+      </button>
+      <svg class="avatar" width="38" height="38" viewBox="0 0 38 38" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="19" cy="19" r="19" fill="#c7cbe8"/>
+        <circle cx="19" cy="15" r="6" fill="#7c82b0"/>
+        <path d="M6 34c1.5-7 8-10 13-10s11.5 3 13 10" fill="#7c82b0"/>
+      </svg>
+    </div>
+  </header>
+
+  <div class="app-body">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <!-- Hotel Map (mother menu for this project's pages) -->
+      <nav class="nav-group open">
+        <button class="nav-item active">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 4L4 6v14l5-2 6 2 5-2V4l-5 2-6-2z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 4v14M15 6v14" stroke="currentColor" stroke-width="1.6"/></svg>
+          Hotel Map
+          <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="submenu">
+          <div class="submenu-group">
+            <button class="submenu-item submenu-toggle">
+              Country
+              <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="submenu-nested">
+              <a class="submenu-item nested" href="country-system.html">System</a>
+              <a class="submenu-item nested" href="country-supplier.html">Supplier</a>
+            </div>
+          </div>
+          <div class="submenu-group">
+            <button class="submenu-item submenu-toggle">
+              City
+              <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="submenu-nested">
+              <a class="submenu-item nested" href="city-system.html">System</a>
+              <a class="submenu-item nested" href="city-supplier.html">Supplier</a>
+            </div>
+          </div>
+          <a class="submenu-item" href="city-mapping.html">City Mapping</a>
+          <div class="submenu-group">
+            <button class="submenu-item submenu-toggle">
+              Hotel
+              <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="submenu-nested">
+              <a class="submenu-item nested" href="hotel-system.html">System</a>
+              <a class="submenu-item nested" href="hotel-supplier.html">Supplier</a>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="reset-demo-btn" id="resetDemoDataBtn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 109-9 9 9 0 00-7 3.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3 3.5V8h4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Reset Demo Data
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main-content">
+      <div class="page-header">
+        <div class="breadcrumb">Hotel Map <span class="sep">/</span> Hotel Mapping</div>
+        <div class="page-title-row">
+          <h1 class="page-title">Hotel Mapping</h1>
+          <button class="info-icon-btn" data-info-target="#hotelMappingInfo" data-info-title="Hotel Mapping" aria-label="About this page">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 11v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="8" r="1" fill="currentColor"/></svg>
+          </button>
+        </div>
+      </div>
+      <hr class="page-divider" />
+
+      <template id="hotelMappingInfo">
+        <p>Maps <strong>system hotels</strong> to a New City. Unlike every other mapping in this project, a hotel can be mapped to more than one city — there's no "remap" here, just check to map and uncheck to unmap.</p>
+        <ul>
+          <li>Filter by Country/State/City to narrow down the hotel list — these filter the hotel's own location, not the pinned city.</li>
+          <li>On the left, <strong>Already Mapped</strong> lists hotels currently mapped to this city — its <strong>Unmap</strong> button queues a removal without the row disappearing, so you can change your mind (the button becomes <strong>Undo</strong>) right up until Save. <strong>New Selection</strong> lists your fresh picks from the checklist on the right.</li>
+          <li><strong>Show only unmapped</strong> hides hotels already mapped to this city, so you can see what's still available.</li>
+          <li><strong>Save Mapping</strong> always opens a preview first — Previously Saved, New Map, and Unmap — before applying anything, and logs a Map/Unmap entry on both the hotel's and this city's History.</li>
+        </ul>
+      </template>
+
+      <section class="mapping-panel" style="flex:1; min-height:0;">
+        <div class="mapping-panel-header">
+          <h2>Hotel Mapping</h2>
+          <p>Select which system hotels are mapped to this New City.</p>
+        </div>
+        <div class="mapping-panel-body" id="hotelMappingBody">
+          <div class="pinned-city-card" id="pinnedCityCard" style="margin-top:0;">
+            <div class="pinned-city-name" id="pinnedCityName"></div>
+            <div class="pinned-city-meta" id="pinnedCityMeta"></div>
+            <div class="pinned-city-actions">
+              <span class="pill neutral" id="pinnedCityMappedCount">0 mapped</span>
+              <button class="action-btn" id="pinnedCityHistoryBtn" aria-label="View history for this city">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 109-9 9 9 0 00-7 3.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3 3.5V8h4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 7.5V12l3.2 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="mapping-layout mapping-layout-bottom" style="margin-top:16px;">
+            <!-- Left: Already Mapped / New Selection -->
+            <div class="mapping-bottom-col">
+              <div class="form-group mapping-list-group">
+                <label>Selected Hotels</label>
+                <div class="merge-list" style="max-height:460px;">
+                  <details class="mapping-collapsible-inline" open>
+                    <summary class="mapping-collapsible-header mapping-collapsible-header--warning">
+                      <span>Already Mapped (<span id="hotelAlreadyMappedCount">0</span>)</span>
+                      <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </summary>
+                    <div id="hotelAlreadyMappedList"></div>
+                  </details>
+                  <details class="mapping-collapsible-inline" open>
+                    <summary class="mapping-collapsible-header mapping-collapsible-header--info">
+                      <span>New Selection (<span id="hotelNewSelectionCount">0</span>)</span>
+                      <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </summary>
+                    <div id="hotelNewSelectionList"></div>
+                  </details>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: filters + checklist -->
+            <div class="mapping-bottom-col">
+              <div class="toolbar-filters" style="margin-bottom:12px;">
+                <select class="filter-select" id="hotelMapCountryFilter">
+                  <option value="">Select country</option>
+                </select>
+                <select class="filter-select" id="hotelMapStateFilter" disabled>
+                  <option value="">All States</option>
+                </select>
+                <select class="filter-select" id="hotelMapCityFilter" disabled>
+                  <option value="">All Cities</option>
+                </select>
+              </div>
+
+              <div class="mapping-header-row" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                <label class="toggle-row" for="hotelMapUnmappedOnlyToggle" style="margin-bottom:0;">
+                  <input type="checkbox" id="hotelMapUnmappedOnlyToggle" />
+                  Show only unmapped
+                </label>
+                <span class="hint" id="hotelMapMappedStat" style="margin-top:0;">Mapped: 0/0</span>
+              </div>
+
+              <div class="form-group mapping-list-group">
+                <div class="mapping-search-actions-row" style="margin-bottom:6px;">
+                  <label style="margin-bottom:0;">Hotels</label>
+                  <span class="mapping-save-summary" id="hotelMapSelectionSummary">No pending changes</span>
+                </div>
+                <div class="mapping-search-actions-row">
+                  <div class="toolbar-search mapping-search-half">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                    <input type="text" id="hotelMapSearch" placeholder="Search by hotel name..." />
+                  </div>
+                  <button class="btn btn-primary" id="saveHotelMappingBtn">Save Mapping</button>
+                </div>
+                <div class="merge-list" id="hotelMapList" style="max-height:460px;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<!-- History Modal (card design) -->
+<div class="modal-overlay" id="historyModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Edit History <span id="historyCityName" style="color:var(--text-muted); font-weight:600;"></span></h3>
+      <button class="modal-close" data-modal-close aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="history-list" id="historyList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Save preview: 3 sections (no Remap bucket — a hotel can map to many
+     cities, so every new pick is unambiguously "New," never a reassignment).
+     Reuses the same .popup-box-lg + #previewSections-style layout
+     city-mapping.html's own Save preview uses. -->
+<div class="modal-overlay popup-overlay" id="hotelMappingPreviewModal">
+  <div class="popup-box popup-box-lg">
+    <div class="modal-header">
+      <h3>Review Hotel Mapping Changes</h3>
+      <button class="modal-close" data-modal-close aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div id="previewSections"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" data-modal-close>Cancel</button>
+      <button class="btn btn-primary" id="hotelPreviewConfirmBtn">Confirm &amp; Save</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+<script src="js/data.js"></script>
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const pinnedCityId = Number(params.get("cityId"));
+  const pinnedCity = SYSTEM_CITIES.find((c) => c.id === pinnedCityId && c.cityType === "normal");
+
+  const countryFilterSelect = document.getElementById("hotelMapCountryFilter");
+  const stateFilterSelect = document.getElementById("hotelMapStateFilter");
+  const cityFilterSelect = document.getElementById("hotelMapCityFilter");
+  const unmappedOnlyToggle = document.getElementById("hotelMapUnmappedOnlyToggle");
+  const mappedStat = document.getElementById("hotelMapMappedStat");
+  const searchInput = document.getElementById("hotelMapSearch");
+  const hotelMapList = document.getElementById("hotelMapList");
+  const alreadyMappedList = document.getElementById("hotelAlreadyMappedList");
+  const alreadyMappedCount = document.getElementById("hotelAlreadyMappedCount");
+  const newSelectionList = document.getElementById("hotelNewSelectionList");
+  const newSelectionCount = document.getElementById("hotelNewSelectionCount");
+  const selectionSummary = document.getElementById("hotelMapSelectionSummary");
+
+  if (!pinnedCity) {
+    // A live-created New City only exists in localStorage — some browsers
+    // (Firefox) partition that per file:// document, so a fresh New City's
+    // Map link can silently fail to resolve when the project is opened as
+    // local files instead of served over http. Doesn't affect a real
+    // deployment (one shared http origin) or the pre-seeded demo cities.
+    document.getElementById("hotelMappingBody").innerHTML = `<div class="empty-state">No New City found for this link. If you just created this city, make sure you're testing over http:// (not file://) or using Chrome/Edge — Firefox partitions local-file storage per page, so a brand-new city's data may not carry over yet. Otherwise, go back to the System City List and use a New City's Map button.</div>`;
+  } else {
+    document.getElementById("pinnedCityName").textContent = pinnedCity.name;
+    document.getElementById("pinnedCityMeta").textContent = [pinnedCity.state, getSystemCountryName(pinnedCity.country.code) || pinnedCity.country.name]
+      .filter(Boolean)
+      .join(", ");
+
+    document.getElementById("pinnedCityHistoryBtn").addEventListener("click", () => {
+      document.getElementById("historyCityName").textContent = `— ${pinnedCity.name} (ID: ${getSystemCityDisplayId(pinnedCity.id)})`;
+      document.getElementById("historyList").innerHTML = renderHistoryList(pinnedCity.history, "No history yet");
+      openModal(document.getElementById("historyModal"));
+    });
+
+    SYSTEM_COUNTRIES.forEach((c) => {
+      countryFilterSelect.insertAdjacentHTML("beforeend", `<option value="${c.name}">${c.name} (${c.code})</option>`);
+    });
+
+    const state = { country: "", hotelState: "", city: "", query: "" };
+    const initialMappedIds = new Set(SYSTEM_HOTELS.filter((h) => (h.mappedCityIds || []).includes(pinnedCityId)).map((h) => h.id));
+    const pendingChecked = new Set(initialMappedIds);
+
+    function updatePinnedCount() {
+      document.getElementById("pinnedCityMappedCount").textContent = `${initialMappedIds.size} mapped`;
+    }
+
+    function hotelMetaSub(h) {
+      const loc = resolveHotelLocation(h);
+      const address = [loc.state, getSystemCountryName(loc.country.code) || loc.country.name].filter(Boolean).join(", ");
+      return `${loc.city}${address ? `, ${address}` : ""}`;
+    }
+
+    function candidatesForFilters() {
+      let rows = SYSTEM_HOTELS;
+      if (state.country)
+        rows = rows.filter((h) => (getSystemCountryName(resolveHotelLocation(h).country.code) || resolveHotelLocation(h).country.name) === state.country);
+      if (state.hotelState) rows = rows.filter((h) => resolveHotelLocation(h).state === state.hotelState);
+      if (state.city) rows = rows.filter((h) => resolveHotelLocation(h).city === state.city);
+      return rows;
+    }
+
+    function updateStateFilterOptions() {
+      let candidates = SYSTEM_HOTELS;
+      if (state.country)
+        candidates = candidates.filter((h) => (getSystemCountryName(resolveHotelLocation(h).country.code) || resolveHotelLocation(h).country.name) === state.country);
+      const states = [...new Set(candidates.map((h) => resolveHotelLocation(h).state).filter(Boolean))].sort();
+      stateFilterSelect.innerHTML = `<option value="">All States</option>` + states.map((s) => `<option value="${s}">${s}</option>`).join("");
+      stateFilterSelect.disabled = !state.country || states.length === 0;
+    }
+
+    function updateCityFilterOptions() {
+      const candidates = candidatesForFilters();
+      const cities = [...new Set(candidates.map((h) => resolveHotelLocation(h).city))].sort();
+      cityFilterSelect.innerHTML = `<option value="">All Cities</option>` + cities.map((c) => `<option value="${c}">${c}</option>`).join("");
+      cityFilterSelect.disabled = !state.country || cities.length === 0;
+    }
+
+    // "Mapped: n/x" is scoped to country/state only (not city/search/toggle),
+    // same rule-14 convention used elsewhere: a stat shouldn't shift with the
+    // very filter it's describing.
+    function updateMappedStat() {
+      let rows = SYSTEM_HOTELS;
+      if (state.country)
+        rows = rows.filter((h) => (getSystemCountryName(resolveHotelLocation(h).country.code) || resolveHotelLocation(h).country.name) === state.country);
+      if (state.hotelState) rows = rows.filter((h) => resolveHotelLocation(h).state === state.hotelState);
+      const mappedCount = rows.filter((h) => pendingChecked.has(h.id)).length;
+      mappedStat.textContent = `Mapped: ${mappedCount}/${rows.length}`;
+    }
+
+    function renderHotelList() {
+      updateMappedStat();
+      let rows = candidatesForFilters();
+      const q = state.query.trim().toLowerCase();
+      if (q) rows = rows.filter((h) => h.name.toLowerCase().includes(q));
+      // Hide only rows that are "previously saved and still mapped" — a
+      // freshly-checked hotel (pending New Map) or one just unchecked
+      // (pending Unmap) must stay visible, since hiding it here would make
+      // it impossible to review or undo that pending change from this list.
+      if (unmappedOnlyToggle.checked) rows = rows.filter((h) => !(initialMappedIds.has(h.id) && pendingChecked.has(h.id)));
+
+      hotelMapList.innerHTML = rows.length
+        ? rows
+            .map(
+              (h) => `
+      <label class="merge-list-item">
+        <input type="checkbox" data-hotel-id="${h.id}" ${pendingChecked.has(h.id) ? "checked" : ""} />
+        <span class="meta">
+          <span class="merge-list-name" title="${h.name}">${h.name}</span>
+          <span class="sub">${hotelMetaSub(h)}</span>
+        </span>
+        <span class="pill ${h.active ? "success" : "danger"}">${h.active ? "Active" : "Inactive"}</span>
+      </label>`
+            )
+            .join("")
+        : `<div class="empty-state">No hotels match this filter</div>`;
+
+      hotelMapList.querySelectorAll("[data-hotel-id]").forEach((checkbox) => {
+        checkbox.addEventListener("change", () => {
+          const id = Number(checkbox.dataset.hotelId);
+          if (checkbox.checked) pendingChecked.add(id);
+          else pendingChecked.delete(id);
+          updateMappedStat();
+          renderSelectedHotelsList();
+          updateSelectionSummary();
+        });
+      });
+    }
+
+    // ---------- Left column: Already Mapped / New Selection ----------
+
+    function renderSelectedHotelsList() {
+      const alreadyMappedRows = [...initialMappedIds].map((id) => SYSTEM_HOTELS.find((h) => h.id === id)).filter(Boolean);
+      const newSelectionRows = [...pendingChecked]
+        .filter((id) => !initialMappedIds.has(id))
+        .map((id) => SYSTEM_HOTELS.find((h) => h.id === id))
+        .filter(Boolean);
+
+      renderAlreadyMappedSection(alreadyMappedRows);
+      renderNewSelectionSection(newSelectionRows);
+    }
+
+    function renderAlreadyMappedSection(rows) {
+      alreadyMappedCount.textContent = rows.length;
+      alreadyMappedList.innerHTML = rows.length
+        ? rows
+            .map((h) => {
+              // Still checked = still mapped (offer Unmap); unchecked here
+              // means the user already queued it for unmap this session
+              // (offer Undo instead) — reversible without the row ever
+              // leaving the list, same pattern as city-mapping.html.
+              const queuedForUnmap = !pendingChecked.has(h.id);
+              return `
+      <div class="merge-list-item">
+        <span class="meta">
+          <span class="merge-list-name" title="${h.name}">${h.name}</span>
+          <span class="sub">${hotelMetaSub(h)}</span>
+        </span>
+        <div class="row-actions">
+          <button class="btn btn-secondary btn-compact" data-toggle-unmap-id="${h.id}">${queuedForUnmap ? "Undo" : "Unmap"}</button>
+        </div>
+      </div>`;
+            })
+            .join("")
+        : `<div class="empty-state">No hotels mapped yet</div>`;
+
+      alreadyMappedList.querySelectorAll("[data-toggle-unmap-id]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const id = Number(btn.dataset.toggleUnmapId);
+          if (pendingChecked.has(id)) pendingChecked.delete(id);
+          else pendingChecked.add(id);
+          renderHotelList();
+          renderSelectedHotelsList();
+          updateSelectionSummary();
+        });
+      });
+    }
+
+    function renderNewSelectionSection(rows) {
+      newSelectionCount.textContent = rows.length;
+      newSelectionList.innerHTML = rows.length
+        ? rows
+            .map(
+              (h) => `
+      <div class="merge-list-item">
+        <span class="meta">
+          <span class="merge-list-name" title="${h.name}">${h.name} <span class="pill info pill-tag">New</span></span>
+          <span class="sub">${hotelMetaSub(h)}</span>
+        </span>
+        <div class="row-actions">
+          <button class="action-btn" data-deselect-hotel-id="${h.id}" aria-label="Remove ${h.name} from selection">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+      </div>`
+            )
+            .join("")
+        : `<div class="empty-state">No new hotels selected yet</div>`;
+
+      newSelectionList.querySelectorAll("[data-deselect-hotel-id]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          pendingChecked.delete(Number(btn.dataset.deselectHotelId));
+          renderHotelList();
+          renderSelectedHotelsList();
+          updateSelectionSummary();
+        });
+      });
+    }
+
+    function updateSelectionSummary() {
+      const added = [...pendingChecked].filter((id) => !initialMappedIds.has(id)).length;
+      const removed = [...initialMappedIds].filter((id) => !pendingChecked.has(id)).length;
+      const parts = [];
+      if (added) parts.push(`${added} to map`);
+      if (removed) parts.push(`${removed} to unmap`);
+      selectionSummary.textContent = parts.length ? parts.join(", ") : "No pending changes";
+    }
+
+    countryFilterSelect.addEventListener("change", () => {
+      state.country = countryFilterSelect.value;
+      state.hotelState = "";
+      state.city = "";
+      updateStateFilterOptions();
+      updateCityFilterOptions();
+      renderHotelList();
+    });
+
+    stateFilterSelect.addEventListener("change", () => {
+      state.hotelState = stateFilterSelect.value;
+      state.city = "";
+      updateCityFilterOptions();
+      renderHotelList();
+    });
+
+    cityFilterSelect.addEventListener("change", () => {
+      state.city = cityFilterSelect.value;
+      renderHotelList();
+    });
+
+    unmappedOnlyToggle.addEventListener("change", renderHotelList);
+
+    searchInput.addEventListener("input", () => {
+      state.query = searchInput.value;
+      renderHotelList();
+    });
+
+    // ---------- Save preview (3 buckets: Previously Saved / New Map / Unmap) ----------
+    // No Remap bucket — unlike every other mapping in this project, a hotel
+    // isn't limited to one city, so a freshly-checked hotel is always a
+    // plain New Map, never a reassignment.
+
+    function previewRowHtml(h) {
+      return `
+      <div class="merge-list-item">
+        <span class="meta">
+          <span>${h.name}</span>
+          <span class="sub">${hotelMetaSub(h)}</span>
+        </span>
+      </div>`;
+    }
+
+    function previewSectionHtml(title, rows, bodyHtml) {
+      return `
+      <div class="preview-section">
+        <div class="preview-section-title">${title} (${rows.length})</div>
+        ${rows.length ? bodyHtml : `<div class="empty-state">None</div>`}
+      </div>`;
+    }
+
+    function buildHotelPreviewSectionsHtml({ keptRows, newMapRows, removedRows }) {
+      return (
+        previewSectionHtml("Previously Saved", keptRows, `<div class="merge-list">${keptRows.map(previewRowHtml).join("")}</div>`) +
+        previewSectionHtml("New Map", newMapRows, `<div class="merge-list">${newMapRows.map(previewRowHtml).join("")}</div>`) +
+        previewSectionHtml("Unmap", removedRows, `<div class="merge-list">${removedRows.map(previewRowHtml).join("")}</div>`)
+      );
+    }
+
+    let pendingPreviewConfirm = null;
+
+    function openHotelMappingPreview(buckets, onConfirm) {
+      document.getElementById("previewSections").innerHTML = buildHotelPreviewSectionsHtml(buckets);
+      pendingPreviewConfirm = onConfirm;
+      openModal(document.getElementById("hotelMappingPreviewModal"));
+    }
+
+    document.getElementById("hotelPreviewConfirmBtn").addEventListener("click", () => {
+      const action = pendingPreviewConfirm;
+      pendingPreviewConfirm = null;
+      closeModal(document.getElementById("hotelMappingPreviewModal"));
+      if (action) action();
+    });
+
+    document.getElementById("saveHotelMappingBtn").addEventListener("click", () => {
+      const addedIds = [...pendingChecked].filter((id) => !initialMappedIds.has(id));
+      const removedIds = [...initialMappedIds].filter((id) => !pendingChecked.has(id));
+      const keptIds = [...initialMappedIds].filter((id) => pendingChecked.has(id));
+
+      if (!addedIds.length && !removedIds.length) {
+        showToast("No changes to save", "error");
+        return;
+      }
+
+      const addedRows = addedIds.map((id) => SYSTEM_HOTELS.find((h) => h.id === id)).filter(Boolean);
+      const removedRows = removedIds.map((id) => SYSTEM_HOTELS.find((h) => h.id === id)).filter(Boolean);
+      const keptRows = keptIds.map((id) => SYSTEM_HOTELS.find((h) => h.id === id)).filter(Boolean);
+
+      function doApply() {
+        addedRows.forEach((h) => {
+          applyHotelCityMap(h, pinnedCity, true);
+          initialMappedIds.add(h.id);
+        });
+        removedRows.forEach((h) => {
+          applyHotelCityMap(h, pinnedCity, false);
+          initialMappedIds.delete(h.id);
+        });
+        updatePinnedCount();
+        renderHotelList();
+        renderSelectedHotelsList();
+        updateSelectionSummary();
+
+        const parts = [];
+        if (addedRows.length) parts.push(`${addedRows.length} mapped`);
+        if (removedRows.length) parts.push(`${removedRows.length} unmapped`);
+        showToast(parts.join(", "));
+      }
+
+      // Always preview before applying, same as city-mapping.html — even a
+      // single plain new map still gets the same one consistent confirm step.
+      openHotelMappingPreview({ keptRows, newMapRows: addedRows, removedRows }, doApply);
+    });
+
+    updatePinnedCount();
+    updateStateFilterOptions();
+    updateCityFilterOptions();
+    renderHotelList();
+    renderSelectedHotelsList();
+    updateSelectionSummary();
+  }
+</script>
+</body>
+</html>

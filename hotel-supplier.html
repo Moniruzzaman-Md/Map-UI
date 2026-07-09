@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Supplier Hotel List – Hotel Map | mynztrip.com</title>
+<link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- Top bar -->
+  <header class="topbar">
+    <div class="topbar-brand">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2L2 8l10 4 10-4-10-6z" fill="#fff"/>
+        <path d="M2 16l10 4 10-4M2 12l10 4 10-4" stroke="#fff" stroke-width="1.6" fill="none"/>
+      </svg>
+      mynztrip.com
+    </div>
+
+    <button class="icon-btn" aria-label="Menu">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+
+    <button class="icon-btn accent-red" aria-label="Messages">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" stroke="#fff" stroke-width="1.8" fill="none"/></svg>
+    </button>
+
+    <div class="topbar-search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <input type="text" placeholder="Booking ID, PNR, Ticket No..." />
+      <button type="button">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#fff" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+        Search
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+
+    <div class="topbar-right">
+      <button class="icon-btn" aria-label="Notifications">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9z" stroke="#fff" stroke-width="1.8" fill="none"/><path d="M13.7 21a2 2 0 01-3.4 0" stroke="#fff" stroke-width="1.8"/></svg>
+      </button>
+      <svg class="avatar" width="38" height="38" viewBox="0 0 38 38" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="19" cy="19" r="19" fill="#c7cbe8"/>
+        <circle cx="19" cy="15" r="6" fill="#7c82b0"/>
+        <path d="M6 34c1.5-7 8-10 13-10s11.5 3 13 10" fill="#7c82b0"/>
+      </svg>
+    </div>
+  </header>
+
+  <div class="app-body">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <!-- Hotel Map (mother menu for this project's pages) -->
+      <nav class="nav-group open">
+        <button class="nav-item active">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 4L4 6v14l5-2 6 2 5-2V4l-5 2-6-2z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 4v14M15 6v14" stroke="currentColor" stroke-width="1.6"/></svg>
+          Hotel Map
+          <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="submenu">
+          <div class="submenu-group">
+            <button class="submenu-item submenu-toggle">
+              Country
+              <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="submenu-nested">
+              <a class="submenu-item nested" href="country-system.html">System</a>
+              <a class="submenu-item nested" href="country-supplier.html">Supplier</a>
+            </div>
+          </div>
+          <div class="submenu-group">
+            <button class="submenu-item submenu-toggle">
+              City
+              <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="submenu-nested">
+              <a class="submenu-item nested" href="city-system.html">System</a>
+              <a class="submenu-item nested" href="city-supplier.html">Supplier</a>
+            </div>
+          </div>
+          <a class="submenu-item" href="city-mapping.html">City Mapping</a>
+          <div class="submenu-group open">
+            <button class="submenu-item submenu-toggle">
+              Hotel
+              <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="submenu-nested">
+              <a class="submenu-item nested" href="hotel-system.html">System</a>
+              <a class="submenu-item nested active" href="hotel-supplier.html">Supplier</a>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="reset-demo-btn" id="resetDemoDataBtn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 109-9 9 9 0 00-7 3.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3 3.5V8h4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Reset Demo Data
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main-content">
+      <div class="page-header">
+        <div class="breadcrumb">Hotel Map <span class="sep">/</span> Hotel <span class="sep">/</span> Supplier</div>
+        <div class="page-title-row">
+          <h1 class="page-title">Supplier Hotel List</h1>
+          <button class="info-icon-btn" data-info-target="#supplierHotelInfo" data-info-title="Supplier Hotel List" aria-label="About this page">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 11v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="8" r="1" fill="currentColor"/></svg>
+          </button>
+        </div>
+      </div>
+      <hr class="page-divider" />
+
+      <template id="supplierHotelInfo">
+        <p>Read-only reference list of each supplier's own hotel feed, alongside which <strong>system hotel</strong> (if any) it corresponds to.</p>
+        <ul>
+          <li><strong>System Hotel</strong> — the matching entry in the System Hotel List, in place of a raw Provider ID.</li>
+          <li><strong>Update Date</strong> — when the supplier last reported this hotel's data.</li>
+          <li>This list can't be edited here — there's no Map, Edit, or History action for it.</li>
+        </ul>
+      </template>
+
+      <section class="content-card">
+        <div class="card-toolbar">
+          <div class="toolbar-controls">
+            <div class="toolbar-search">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              <input type="text" id="hotelSearch" placeholder="Search by hotel name..." disabled />
+            </div>
+            <div class="toolbar-filters">
+              <select class="filter-select" id="supplierFilter">
+                <option value="">Select Supplier</option>
+              </select>
+              <select class="filter-select" id="hotelCountryFilter" disabled>
+                <option value="">All Countries</option>
+              </select>
+              <select class="filter-select" id="hotelStateFilter" disabled>
+                <option value="">All States</option>
+              </select>
+              <select class="filter-select" id="hotelCityFilter" disabled>
+                <option value="">All Cities</option>
+              </select>
+              <select class="filter-select" id="hotelStatusFilter" disabled>
+                <option value="all">All Status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
+            <label class="toggle-row" for="hotelRevealValuesToggle" style="margin-bottom:0;">
+              <input type="checkbox" id="hotelRevealValuesToggle" disabled />
+              Show full values
+            </label>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table class="data-table" id="supplierHotelTable">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Address</th>
+                <th>City</th>
+                <th>State</th>
+                <th>Country</th>
+                <th>Star Rating</th>
+                <th>Email</th>
+                <th>Phone Number</th>
+                <th>System Hotel</th>
+                <th>Status</th>
+                <th>Update Date</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td colspan="13" class="empty-state">Select a supplier to view its hotel list</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="table-footer pagination-bar" id="paginationBar"></div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+<script src="js/data.js"></script>
+<script>
+  const supplierFilter = document.getElementById("supplierFilter");
+  supplierFilter.insertAdjacentHTML(
+    "beforeend",
+    Object.keys(SUPPLIER_LABELS)
+      .map((key) => `<option value="${key}">${SUPPLIER_LABELS[key]}</option>`)
+      .join("")
+  );
+
+  const countryFilterSelect = document.getElementById("hotelCountryFilter");
+  const stateFilterSelect = document.getElementById("hotelStateFilter");
+  const cityFilterSelect = document.getElementById("hotelCityFilter");
+  const statusFilterSelect = document.getElementById("hotelStatusFilter");
+  const hotelSearch = document.getElementById("hotelSearch");
+  const revealValuesToggle = document.getElementById("hotelRevealValuesToggle");
+  const tbody = document.querySelector("#supplierHotelTable tbody");
+  const paginationBar = document.getElementById("paginationBar");
+
+  let state = { page: 1, pageSize: 10, supplier: "", country: "", hotelState: "", city: "", status: "all", query: "" };
+
+  function currentRows() {
+    return state.supplier ? supplierHotels[state.supplier] || [] : [];
+  }
+
+  function candidatesForFilters() {
+    let rows = currentRows();
+    if (state.country) rows = rows.filter((r) => (getSystemCountryName(r.country.code) || r.country.name) === state.country);
+    if (state.hotelState) rows = rows.filter((r) => r.state === state.hotelState);
+    if (state.city) rows = rows.filter((r) => r.city === state.city);
+    return rows;
+  }
+
+  function updateFilterOptions() {
+    const rows = currentRows();
+    const countries = [...new Set(rows.map((r) => getSystemCountryName(r.country.code) || r.country.name))].sort();
+    countryFilterSelect.innerHTML = `<option value="">All Countries</option>` + countries.map((c) => `<option value="${c}">${c}</option>`).join("");
+    countryFilterSelect.disabled = !state.supplier || countries.length === 0;
+
+    let stateCandidates = rows;
+    if (state.country) stateCandidates = stateCandidates.filter((r) => (getSystemCountryName(r.country.code) || r.country.name) === state.country);
+    const states = [...new Set(stateCandidates.map((r) => r.state).filter(Boolean))].sort();
+    stateFilterSelect.innerHTML = `<option value="">All States</option>` + states.map((s) => `<option value="${s}">${s}</option>`).join("");
+    stateFilterSelect.disabled = !state.supplier || states.length === 0;
+
+    const cityCandidates = candidatesForFilters();
+    const cities = [...new Set(cityCandidates.map((r) => r.city))].sort();
+    cityFilterSelect.innerHTML = `<option value="">All Cities</option>` + cities.map((c) => `<option value="${c}">${c}</option>`).join("");
+    cityFilterSelect.disabled = !state.supplier || cities.length === 0;
+  }
+
+  function getFiltered() {
+    let rows = candidatesForFilters();
+    if (state.status === "active") rows = rows.filter((r) => r.active);
+    if (state.status === "inactive") rows = rows.filter((r) => !r.active);
+    const q = state.query.trim().toLowerCase();
+    if (q) rows = rows.filter((r) => r.name.toLowerCase().includes(q));
+    return rows;
+  }
+
+  // Same fixed-width + fade-on-overflow treatment as hotel-system.html — a
+  // value never breaks to a second line, it either fits or fades out toward
+  // the trailing edge, revealed in full only via the tooltip or the "Show
+  // full values" toggle.
+  function truncatableCell(value, modifier) {
+    if (!value) return `<span style="color:var(--text-muted)">—</span>`;
+    return `<div class="truncatable truncatable--${modifier}" title="${value}"><span class="truncatable-text">${value}</span></div>`;
+  }
+
+  function render() {
+    if (!state.supplier) {
+      tbody.innerHTML = `<tr><td colspan="13" class="empty-state">Select a supplier to view its hotel list</td></tr>`;
+      paginationBar.innerHTML = "";
+      return;
+    }
+
+    const filtered = getFiltered();
+    const totalPages = Math.max(1, Math.ceil(filtered.length / state.pageSize));
+    state.page = Math.min(state.page, totalPages);
+    const startIdx = (state.page - 1) * state.pageSize;
+    const pageItems = filtered.slice(startIdx, startIdx + state.pageSize);
+
+    tbody.innerHTML = pageItems.length
+      ? pageItems
+          .map((r) => {
+            const countryName = getSystemCountryName(r.country.code) || r.country.name;
+            const countryPlain = `${countryName} (${r.country.code})`;
+            const systemHotelPlain =
+              r.systemHotelId !== null && r.systemHotelId !== undefined
+                ? `${getSystemHotelLabel(r.systemHotelId)} (ID: ${getSystemHotelDisplayId(r.systemHotelId)})`
+                : "";
+            return `
+      <tr>
+        <td><span class="code-badge">${r.id}</span></td>
+        <td>${truncatableCell(r.name, "name")}</td>
+        <td>${truncatableCell(r.address, "address")}</td>
+        <td>${truncatableCell(r.city, "city")}</td>
+        <td>${truncatableCell(r.state, "state")}</td>
+        <td>
+          <div class="truncatable truncatable--country" title="${countryPlain}">
+            <span class="truncatable-text">${countryName} <span class="code-badge">${r.country.code}</span></span>
+          </div>
+        </td>
+        <td>${truncatableCell(`${r.starRating} ★`, "starrating")}</td>
+        <td>${truncatableCell(r.email, "email")}</td>
+        <td>${truncatableCell(r.phoneNumber, "phone")}</td>
+        <td>${
+          systemHotelPlain
+            ? `<div class="truncatable truncatable--systemhotel" title="${systemHotelPlain}">
+                 <span class="truncatable-text">${getSystemHotelLabel(r.systemHotelId)} <span class="code-badge">${getSystemHotelDisplayId(r.systemHotelId)}</span></span>
+               </div>`
+            : '<span class="text-not-mapped">Not mapped</span>'
+        }</td>
+        <td><span class="pill ${r.active ? "success" : "danger"}">${r.active ? "Active" : "Inactive"}</span></td>
+        <td>${truncatableCell(formatTimestamp(r.updatedAt), "updatedate")}</td>
+        <td></td>
+      </tr>`;
+          })
+          .join("")
+      : `<tr><td colspan="13" class="empty-state">No hotels match this filter</td></tr>`;
+
+    renderPagination(paginationBar, {
+      total: filtered.length,
+      page: state.page,
+      pageSize: state.pageSize,
+      onChange: ({ page, pageSize }) => {
+        state.page = page;
+        state.pageSize = pageSize;
+        render();
+      },
+    });
+
+    refreshValueOverflowState();
+  }
+
+  // Re-measures every .truncatable cell after each render() — only cells
+  // whose content genuinely doesn't fit their fixed width get
+  // .is-overflowing (and therefore the fade-out via CSS), same mechanism as
+  // hotel-system.html.
+  function refreshValueOverflowState() {
+    document.querySelectorAll("#supplierHotelTable .truncatable").forEach((el) => {
+      el.classList.toggle("is-overflowing", el.scrollWidth > el.clientWidth + 1);
+    });
+  }
+
+  supplierFilter.addEventListener("change", () => {
+    state.supplier = supplierFilter.value;
+    state.page = 1;
+    state.country = "";
+    state.hotelState = "";
+    state.city = "";
+    state.status = "all";
+    state.query = "";
+    hotelSearch.value = "";
+    statusFilterSelect.value = "all";
+    hotelSearch.disabled = !state.supplier;
+    statusFilterSelect.disabled = !state.supplier;
+    revealValuesToggle.disabled = !state.supplier;
+    updateFilterOptions();
+    render();
+  });
+
+  revealValuesToggle.addEventListener("change", () => {
+    document.getElementById("supplierHotelTable").classList.toggle("reveal-values", revealValuesToggle.checked);
+    refreshValueOverflowState();
+  });
+
+  countryFilterSelect.addEventListener("change", () => {
+    state.country = countryFilterSelect.value;
+    state.hotelState = "";
+    state.city = "";
+    state.page = 1;
+    updateFilterOptions();
+    render();
+  });
+
+  stateFilterSelect.addEventListener("change", () => {
+    state.hotelState = stateFilterSelect.value;
+    state.city = "";
+    state.page = 1;
+    updateFilterOptions();
+    render();
+  });
+
+  cityFilterSelect.addEventListener("change", () => {
+    state.city = cityFilterSelect.value;
+    state.page = 1;
+    render();
+  });
+
+  statusFilterSelect.addEventListener("change", () => {
+    state.status = statusFilterSelect.value;
+    state.page = 1;
+    render();
+  });
+
+  const runSearch = debounce(() => {
+    state.query = hotelSearch.value;
+    state.page = 1;
+    render();
+  });
+  hotelSearch.addEventListener("input", runSearch);
+
+  render();
+</script>
+</body>
+</html>

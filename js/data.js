@@ -336,6 +336,56 @@ SYSTEM_CITIES[0].history.push({
   timestamp: new Date("2026-06-21T11:05:00"),
 });
 
+// Demo "New City" and "Merged City" examples, pre-seeded here rather than
+// requiring the Add City feature to be used live — a live-created city only
+// exists in localStorage, and some browsers (Firefox) partition that per
+// file:// document, so a deep link that depends on it (e.g. New City's Map
+// button -> hotel-mapping.html?cityId=X) silently can't find it when the
+// project is opened as local files instead of served over http. These two
+// examples live directly in this seed data instead, exactly like every
+// prepopulated city above, so the Map/Summary features are demoable with
+// zero setup regardless of how the project is opened.
+const DEMO_NEW_CITY_ID = SYSTEM_CITIES.length;
+SYSTEM_CITIES.push({
+  id: DEMO_NEW_CITY_ID,
+  name: "Crestwood Bay",
+  state: "Florida",
+  country: { name: "United States", code: "US" },
+  active: true,
+  history: [
+    {
+      operation: "Create",
+      name: "Crestwood Bay",
+      description: "Name: Crestwood Bay, State: Florida, Country: United States (US)",
+      userName: "Nusrat Jahan",
+      userEmail: "nusrat.jahan@mynztrip.com",
+      timestamp: new Date("2026-06-22T14:00:00"),
+    },
+  ],
+  cityType: "normal",
+});
+
+const DEMO_MERGED_CITY_ID = SYSTEM_CITIES.length;
+SYSTEM_CITIES.push({
+  id: DEMO_MERGED_CITY_ID,
+  name: "Liberty Metro",
+  state: null,
+  country: { name: "United States", code: "US" },
+  active: true,
+  history: [
+    {
+      operation: "Create",
+      name: "Liberty Metro",
+      description: `Name: Liberty Metro, Country: United States (US), Merged from: ${SYSTEM_CITIES[0].name} (ID: ${getSystemCityDisplayId(0)}), ${SYSTEM_CITIES[1].name} (ID: ${getSystemCityDisplayId(1)})`,
+      userName: "Rafiul Karim",
+      userEmail: "rafiul.karim@mynztrip.com",
+      timestamp: new Date("2026-06-23T09:30:00"),
+    },
+  ],
+  cityType: "merged",
+  mergedFrom: [0, 1],
+});
+
 // restore any edits/new/merged cities saved from a previous session
 hydrateArray(SYSTEM_CITIES, loadFromStorage("SYSTEM_CITIES"));
 
@@ -397,6 +447,7 @@ SYSTEM_HOTELS.forEach((h, i) => {
   h.id = i;
   h.history = [];
   h.active = true;
+  h.mappedCityIds = [];
 });
 const SEED_HOTEL_COUNT = SYSTEM_HOTELS.length;
 
@@ -405,6 +456,68 @@ const SEED_HOTEL_COUNT = SYSTEM_HOTELS.length;
 // ever shown side by side (e.g. a future Hotel Mapping page).
 function getSystemHotelDisplayId(id) {
   return String(50000000000 + id);
+}
+
+// Demo hotel directly added under the seeded New City above (Crestwood Bay)
+// — gives New City's Summary a real "Directly Added Hotels" example with
+// zero setup, same reasoning as the New City/Merged City seeding above.
+const DEMO_NEW_CITY_HOTEL_ID = SYSTEM_HOTELS.length;
+SYSTEM_HOTELS.push({
+  id: DEMO_NEW_CITY_HOTEL_ID,
+  name: "Crestwood Bay Grand Hotel",
+  address: "500 Bayfront Drive",
+  latitude: 27.9506,
+  longitude: -82.4572,
+  starRating: 4,
+  city: "Crestwood Bay",
+  state: "Florida",
+  country: { name: "United States", code: "US" },
+  systemCityId: DEMO_NEW_CITY_ID,
+  email: "reservations@crestwoodbaygrand.com",
+  phoneNumber: "+1 727 555 0110",
+  providerId: "PRV-1015",
+  active: true,
+  mappedCityIds: [],
+  history: [
+    {
+      operation: "Create",
+      description: "Name: Crestwood Bay Grand Hotel, City: Crestwood Bay, State: Florida, Country: United States (US)",
+      userName: "Nusrat Jahan",
+      userEmail: "nusrat.jahan@mynztrip.com",
+      timestamp: new Date("2026-06-22T14:30:00"),
+    },
+  ],
+});
+
+// Demo "additionally mapped" hotel — The Beverly Hilton's home city stays
+// Los Angeles (its own systemCityId, untouched), but it's also mapped to the
+// seeded New City above, so New City's Summary "Additionally Mapped Hotels"
+// group has a real example too. Logged on both sides, same dual-side
+// convention applyHotelCityMap() uses for a live Map action.
+// Looked up (not raw array-indexed) and guarded: SYSTEM_CITIES was already
+// hydrated from localStorage above (city section runs first in this file),
+// so on a browser with pre-existing saved data from before this demo seed
+// existed, DEMO_NEW_CITY_ID may not resolve to anything at all until Reset
+// Demo Data (same caveat as rule 40) — skip quietly instead of crashing the
+// whole page on an undefined `.history`.
+const demoNewCityForHotelDemo = SYSTEM_CITIES.find((c) => c.id === DEMO_NEW_CITY_ID && c.cityType === "normal");
+const demoMappedHotel = SYSTEM_HOTELS.find((h) => h.id === 1);
+if (demoNewCityForHotelDemo && demoMappedHotel) {
+  demoMappedHotel.mappedCityIds = [DEMO_NEW_CITY_ID];
+  demoMappedHotel.history.push({
+    operation: "Map",
+    description: `Mapped to city: ${getSystemCityHistoryLabel(DEMO_NEW_CITY_ID)}`,
+    userName: "Farhan Ahmed",
+    userEmail: "farhan.ahmed@mynztrip.com",
+    timestamp: new Date("2026-06-22T15:00:00"),
+  });
+  demoNewCityForHotelDemo.history.push({
+    operation: "Map",
+    description: `Mapped hotel: ${getSystemHotelHistoryLabel(demoMappedHotel.id)}`,
+    userName: "Farhan Ahmed",
+    userEmail: "farhan.ahmed@mynztrip.com",
+    timestamp: new Date("2026-06-22T15:00:00"),
+  });
 }
 
 hydrateArray(SYSTEM_HOTELS, loadFromStorage("SYSTEM_HOTELS"));
@@ -440,14 +553,19 @@ function resolveHotelLocation(hotel) {
   return { city: hotel.city, state: hotel.state, country: hotel.country };
 }
 
-// Full disambiguating label for a system hotel, mirroring getSystemCityLabel
-// — not called by anything yet, but the eventual Hotel Mapping feature will
-// need it the same way city-mapping.html needs getSystemCityLabel.
+// Full disambiguating label for a system hotel, mirroring getSystemCityLabel.
 function getSystemHotelLabel(id) {
   const hotel = SYSTEM_HOTELS.find((h) => h.id === id);
   if (!hotel) return null;
   const loc = resolveHotelLocation(hotel);
   return [hotel.name, loc.city, loc.state, getSystemCountryName(loc.country.code) || loc.country.name].filter(Boolean).join(", ");
+}
+
+// Same as getSystemHotelLabel, but with the id appended — used for Hotel
+// Mapping history entries, mirroring getSystemCityHistoryLabel below.
+function getSystemHotelHistoryLabel(id) {
+  const label = getSystemHotelLabel(id);
+  return label === null ? null : `${label} (ID: ${getSystemHotelDisplayId(id)})`;
 }
 
 // The seed cities (first SEED_CITY_COUNT, in their fixed definition order —
@@ -700,4 +818,122 @@ function getCityMappingSummary(systemCityId) {
       cities,
     };
   });
+}
+
+// ---------- Supplier Hotel ----------
+// Mirrors SYSTEM_HOTELS' own fields (name/address/city/state/country/star
+// rating/email/phone) but replaces Provider ID with a systemHotelId
+// reference to the matching SYSTEM_HOTELS record — unlike every other
+// supplier entity in this project (country/city), a supplier hotel is
+// read-only: hotel-supplier.html has no Map/Edit/History action for it, it's
+// purely a reference list of what each supplier's own hotel feed last
+// reported (hence updatedAt per row instead of a history array).
+const supplierHotels = {
+  agoda: [
+    { name: "Grand Plaza New York", address: "123 5th Ave", city: "New York", state: "New York", country: { name: "United States", code: "US" }, starRating: 5, email: "reservations@grandplazanewyork.com", phoneNumber: "+1 212 555 0101", systemHotelId: 0, active: true, updatedAt: new Date("2026-06-18T09:12:00") },
+    { name: "The Beverly Hilton", address: "9876 Wilshire Blvd", city: "Los Angeles", state: "California", country: { name: "United States", code: "US" }, starRating: 4, email: "info@beverlyhilton.com", phoneNumber: "+1 310 555 0172", systemHotelId: 1, active: true, updatedAt: new Date("2026-06-19T11:40:00") },
+    { name: "Ritz Paris Suites", address: "15 Place Vendome", city: "Paris", state: null, country: { name: "France", code: "FR" }, starRating: 5, email: "reservation@ritzparis.fr", phoneNumber: "+33 1 55 55 0145", systemHotelId: 5, active: true, updatedAt: new Date("2026-06-20T08:05:00") },
+    { name: "Agoda Exclusive Sentosa Resort", address: "8 Sentosa Gateway", city: "Singapore", state: null, country: { name: "Singapore", code: "SG" }, starRating: 4, email: "stay@sentosaresort.sg", phoneNumber: "+65 6555 0120", systemHotelId: null, active: true, updatedAt: new Date("2026-06-21T14:22:00") },
+    { name: "Downtown Chicago Inn", address: "220 E Superior St", city: "Chicago", state: "Illinois", country: { name: "United States", code: "US" }, starRating: 3, email: "frontdesk@downtownchicagoinn.com", phoneNumber: "+1 312 555 0199", systemHotelId: null, active: false, updatedAt: new Date("2026-06-15T16:50:00") },
+  ],
+  booking: [
+    { name: "Grand Plaza New York", address: "123 5th Ave", city: "New York", state: "New York", country: { name: "United States", code: "US" }, starRating: 5, email: "reservations@grandplazanewyork.com", phoneNumber: "+1 212 555 0101", systemHotelId: 0, active: true, updatedAt: new Date("2026-06-17T10:30:00") },
+    { name: "Hotel Adlon Berlin", address: "Pariser Platz 3", city: "Berlin", state: null, country: { name: "Germany", code: "DE" }, starRating: 5, email: "info@adlonberlin.de", phoneNumber: "+49 30 555 0187", systemHotelId: 6, active: true, updatedAt: new Date("2026-06-19T09:00:00") },
+    { name: "Booking Riverside Lodge", address: "44 Riverside Ave", city: "Toronto", state: "Ontario", country: { name: "Canada", code: "CA" }, starRating: 3, email: "stay@riversidelodge.ca", phoneNumber: "+1 416 555 0166", systemHotelId: null, active: true, updatedAt: new Date("2026-06-22T13:15:00") },
+    { name: "Manchester City Suites", address: "12 Deansgate", city: "Manchester", state: null, country: { name: "United Kingdom", code: "GB" }, starRating: 3, email: "reservations@manchestercitysuites.co.uk", phoneNumber: "+44 161 555 0110", systemHotelId: null, active: true, updatedAt: new Date("2026-06-14T09:45:00") },
+  ],
+  hotelbeds: [
+    { name: "Marina Bay Sands", address: "10 Bayfront Ave", city: "Singapore", state: null, country: { name: "Singapore", code: "SG" }, starRating: 5, email: "enquiry@marinabaysands.sg", phoneNumber: "+65 6555 0188", systemHotelId: 8, active: true, updatedAt: new Date("2026-06-20T17:10:00") },
+    { name: "Burj Al Arab", address: "Jumeirah St", city: "Dubai", state: null, country: { name: "United Arab Emirates", code: "AE" }, starRating: 5, email: "reservations@burjalarab.ae", phoneNumber: "+971 4 555 0199", systemHotelId: 10, active: true, updatedAt: new Date("2026-06-21T12:00:00") },
+    { name: "HotelBeds Desert Oasis Resort", address: "Al Maktoum Rd", city: "Dubai", state: null, country: { name: "United Arab Emirates", code: "AE" }, starRating: 4, email: "stay@desertoasisresort.ae", phoneNumber: "+971 4 555 0166", systemHotelId: null, active: true, updatedAt: new Date("2026-06-16T15:35:00") },
+  ],
+  tbo: [
+    { name: "Taj Mahal Palace", address: "Apollo Bunder", city: "Mumbai", state: null, country: { name: "India", code: "IN" }, starRating: 5, email: "tajmahalpalace.mumbai@tajhotels.in", phoneNumber: "+91 22 5555 0166", systemHotelId: 11, active: true, updatedAt: new Date("2026-06-18T14:40:00") },
+    { name: "Shangri-La Bangkok", address: "89 Soi Wat Suan Plu", city: "Bangkok", state: null, country: { name: "Thailand", code: "TH" }, starRating: 5, email: "sbk@shangri-la.th", phoneNumber: "+66 2 555 0177", systemHotelId: 12, active: true, updatedAt: new Date("2026-06-19T16:20:00") },
+    { name: "TBO Heritage Haveli", address: "Pink City Rd", city: "Jaipur", state: null, country: { name: "India", code: "IN" }, starRating: 3, email: "stay@heritagehaveli.in", phoneNumber: "+91 141 555 0122", systemHotelId: null, active: false, updatedAt: new Date("2026-06-13T10:05:00") },
+  ],
+};
+
+// A supplier hotel's id is whatever format that supplier's own system uses —
+// same reasoning as generateSupplierCityId above, deliberately different
+// shape per supplier.
+function generateSupplierHotelId(supplierKey, seq) {
+  const n = seq + 1;
+  switch (supplierKey) {
+    case "agoda":
+      return `AG-HTL-${String(n).padStart(3, "0")}`;
+    case "booking":
+      return String(80010000 + seq);
+    case "hotelbeds":
+      return `HB_HTL_${String(n).padStart(3, "0")}`;
+    case "tbo":
+      return `TBO-HTL-${String(n).padStart(3, "0")}`;
+    default:
+      return String(n);
+  }
+}
+
+Object.keys(supplierHotels).forEach((key) => {
+  supplierHotels[key].forEach((row, i) => {
+    row.id = generateSupplierHotelId(key, i);
+  });
+});
+
+// ---------- Hotel Mapping (New City) ----------
+// A New City has no supplier-city mapping (see #newCityInfo on
+// city-system.html) — instead, system hotels are mapped to it, either
+// directly (Add Hotel's own city field, hotel.systemCityId) or via this
+// separate many-to-many layer (hotel.mappedCityIds), reached from a New
+// City row's Map button (hotel-mapping.html?cityId=X). Unlike every other
+// mapping in this project, a hotel can be mapped to more than one city, so
+// there's no "remap" concept here — purely additive/removable.
+
+// Pushes/removes cityId onto/from hotel.mappedCityIds and logs matching
+// Map/Unmap history on BOTH sides (same dual-side convention as
+// applyMapping above / rule 9 in project history): hotel.history gets an
+// Edit-shaped Map/Unmap changelog line, city.history gets the mirrored
+// additive/removal line.
+function applyHotelCityMap(hotel, city, mapped) {
+  hotel.mappedCityIds = hotel.mappedCityIds || [];
+  const alreadyMapped = hotel.mappedCityIds.includes(city.id);
+  if (mapped === alreadyMapped) return;
+
+  const hotelLabel = getSystemHotelHistoryLabel(hotel.id);
+  const cityLabel = getSystemCityHistoryLabel(city.id);
+
+  if (mapped) {
+    hotel.mappedCityIds.push(city.id);
+  } else {
+    hotel.mappedCityIds = hotel.mappedCityIds.filter((id) => id !== city.id);
+  }
+
+  hotel.history.push({
+    operation: mapped ? "Map" : "Unmap",
+    description: `${mapped ? "Mapped to city" : "Unmapped from city"}: ${cityLabel}`,
+    userName: CURRENT_USER.name,
+    userEmail: CURRENT_USER.email,
+    timestamp: new Date(),
+  });
+  city.history.push({
+    operation: mapped ? "Map" : "Unmap",
+    description: `${mapped ? "Mapped hotel" : "Unmapped hotel"}: ${hotelLabel}`,
+    userName: CURRENT_USER.name,
+    userEmail: CURRENT_USER.email,
+    timestamp: new Date(),
+  });
+
+  saveToStorage("SYSTEM_HOTELS", SYSTEM_HOTELS);
+  saveToStorage("SYSTEM_CITIES", SYSTEM_CITIES);
+}
+
+// Hotel-based Summary for a New City: hotels attached directly (via Add
+// Hotel's own city field) vs hotels attached through the Map feature above.
+// Kept as two separate lists (rather than merged/deduped) since they're
+// added through two different actions and a city-system.html Summary
+// reader should be able to tell which is which.
+function getNewCityHotelSummary(cityId) {
+  return {
+    direct: SYSTEM_HOTELS.filter((h) => h.systemCityId === cityId),
+    mapped: SYSTEM_HOTELS.filter((h) => (h.mappedCityIds || []).includes(cityId)),
+  };
 }

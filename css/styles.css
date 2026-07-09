@@ -700,6 +700,27 @@ table.data-table {
   width: 120px;
 }
 
+.truncatable--systemhotel {
+  width: 220px;
+}
+
+.truncatable--updatedate {
+  width: 150px;
+}
+
+/* Same fixed-width/fade-on-overflow + "Show full values" reveal mechanism as
+   #hotelTable above, scoped to this page's own table id. */
+#supplierHotelTable {
+  overflow: hidden;
+}
+
+#supplierHotelTable.reveal-values .truncatable {
+  mask-image: none !important;
+  -webkit-mask-image: none !important;
+  width: auto !important;
+  overflow: visible;
+}
+
 .code-badge {
   display: inline-block;
   background: var(--bg-panel);

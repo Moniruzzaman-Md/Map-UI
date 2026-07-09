@@ -89,6 +89,7 @@
             </button>
             <div class="submenu-nested">
               <a class="submenu-item nested" href="hotel-system.html">System</a>
+              <a class="submenu-item nested" href="hotel-supplier.html">Supplier</a>
             </div>
           </div>
         </div>
@@ -446,8 +447,12 @@
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4L16.5 3.5z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
             </button>
             ${
-              c.cityType
+              c.cityType === "merged"
                 ? ""
+                : c.cityType === "normal"
+                ? `<a class="action-btn" href="hotel-mapping.html?cityId=${c.id}" target="_blank" rel="noopener" aria-label="Map hotels to ${c.name}">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M9 17l-4.5 2V7L9 5m0 12l6 2m-6-2V5m6 14l4.5-2V5L15 7m0 12V7m0 0L9 5" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+            </a>`
                 : `<a class="action-btn" href="city-mapping.html?cityId=${c.id}" target="_blank" rel="noopener" aria-label="Map supplier cities to ${c.name}">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M9 17l-4.5 2V7L9 5m0 12l6 2m-6-2V5m6 14l4.5-2V5L15 7m0 12V7m0 0L9 5" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
             </a>`
@@ -455,13 +460,9 @@
             <button class="action-btn" data-history-btn data-row-id="${c.id}" aria-label="View edit history for ${c.name}">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 109-9 9 9 0 00-7 3.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3 3.5V8h4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 7.5V12l3.2 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </button>
-            ${
-              c.cityType === "normal"
-                ? ""
-                : `<button class="action-btn" data-summary-btn data-row-id="${c.id}" aria-label="View mapping summary for ${c.name}">
+            <button class="action-btn" data-summary-btn data-row-id="${c.id}" aria-label="View mapping summary for ${c.name}">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="14" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="14" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/></svg>
-            </button>`
-            }
+            </button>
             <button class="action-btn" data-toggle-active-btn data-row-id="${c.id}" aria-label="${c.active ? "Deactivate" : "Activate"} ${c.name}">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 2v10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M6 5a8 8 0 106.5-1.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
             </button>
@@ -560,6 +561,48 @@
 
       document.getElementById("summaryCityName").textContent = `— ${record.name}`;
       const summaryList = document.getElementById("summaryList");
+
+      // A New City has no supplier-city mapping — its Summary instead shows
+      // the hotels attached to it, either directly (Add Hotel's own city
+      // field) or via the separate Map feature (hotel-mapping.html).
+      if (record.cityType === "normal") {
+        const { direct, mapped } = getNewCityHotelSummary(record.id);
+        const hotelGroupCard = (label, hotels) => `
+      <div class="history-entry">
+        <div class="history-entry-label">${label}</div>
+        <div class="history-card">
+          <table>
+            <tbody>
+              <tr>
+                <td class="history-row-label">Status</td>
+                <td class="history-row-sep">:</td>
+                <td class="history-row-value">${
+                  hotels.length
+                    ? `<span class="text-mapped">Mapped (${hotels.length})</span>`
+                    : '<span class="text-not-mapped">Not mapped</span>'
+                }</td>
+              </tr>
+              ${
+                hotels.length
+                  ? `
+              <tr>
+                <td class="history-row-label">Hotels</td>
+                <td class="history-row-sep">:</td>
+                <td class="history-row-value">${hotels
+                  .map((h) => `${h.name} — ID: ${getSystemHotelDisplayId(h.id)}`)
+                  .join("<br>")}</td>
+              </tr>`
+                  : ""
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>`;
+        summaryList.innerHTML = hotelGroupCard("Directly Added Hotels", direct) + hotelGroupCard("Additionally Mapped Hotels", mapped);
+        openModal(document.getElementById("summaryModal"));
+        return;
+      }
+
       const rows =
         record.cityType === "merged" ? getCityMappingSummary(record.mergedFrom) : getCityMappingSummary(record.id);
       const mergedCitiesCard =
