@@ -1373,8 +1373,14 @@ table.data-table {
 
 .modal-tabs {
   display: flex;
+  align-items: center;
   border-bottom: 1px solid var(--border-color);
   flex-shrink: 0;
+}
+
+.modal-tabs .info-icon-btn {
+  flex-shrink: 0;
+  margin-right: 10px;
 }
 
 .modal-tab {
@@ -1885,6 +1891,10 @@ table.data-table {
   font-size: 10px;
   margin-left: 6px;
   vertical-align: middle;
+}
+
+.popup-box-md {
+  max-width: 640px;
 }
 
 /* ---------- Save preview modal (4 sections side by side) ---------- */

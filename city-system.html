@@ -107,8 +107,8 @@
       <div class="page-header">
         <div class="breadcrumb">Hotel Map <span class="sep">/</span> City <span class="sep">/</span> System</div>
         <div class="page-title-row">
-          <h1 class="page-title">City List</h1>
-          <button class="info-icon-btn" data-info-target="#cityListInfo" data-info-title="City List" aria-label="About this page">
+          <h1 class="page-title">System City List</h1>
+          <button class="info-icon-btn" data-info-target="#cityListInfo" data-info-title="System City List" aria-label="About this page">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 11v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="8" r="1" fill="currentColor"/></svg>
           </button>
         </div>
@@ -124,14 +124,13 @@
           <li><strong>Edit</strong> — rename a city, or adjust which cities make up a merged one.</li>
           <li><strong>Map</strong> — jump to City Mapping with this city already pinned, to map supplier cities to it. Only available for prepopulated cities — cities created via New City or Merge Cities can't be mapped.</li>
           <li><strong>History</strong> — view every change: creation, renames, status changes, and merge composition changes, plus supplier cities mapped or unmapped to this city.</li>
-          <li><strong>Summary</strong> — see, per supplier, which of their cities are mapped to this one. Only available for prepopulated cities — cities created via New City or Merge Cities can't be mapped, so there's nothing to summarize for them.</li>
+          <li><strong>Summary</strong> — see, per supplier, which of their cities are mapped to this one. For a merged city, this instead shows every supplier city mapped to any of the system cities it was merged from. Not available for a single city added via New City — it has no mapping of its own to summarize.</li>
           <li><strong>Active/Inactive toggle</strong> — controls whether a city is available for booking.</li>
         </ul>
       </template>
 
       <section class="content-card">
         <div class="card-toolbar">
-          <h2>All Cities</h2>
           <div class="toolbar-controls">
             <div class="toolbar-search">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
@@ -307,6 +306,11 @@
   </div>
 </div>
 
+<template id="mergeCitiesInfo">
+  <p>A merged city groups two or more existing system cities into one entry. Since each of those system cities can already have several supplier cities mapped to it, a merged city ends up representing every hotel from every supplier city linked — directly or indirectly, through any of the cities it merges — to it.</p>
+  <p>Only cities from the original master list can be merged — a city created via <strong>Add City</strong> (New City or Merge Cities) can't be merged again.</p>
+</template>
+
 <!-- Add City Modal: New City / Merge Cities -->
 <div class="modal-overlay" id="addCityModal">
   <div class="modal">
@@ -319,6 +323,9 @@
     <div class="modal-tabs">
       <button class="modal-tab active" data-tab-btn="new">New City</button>
       <button class="modal-tab" data-tab-btn="merge">Merge Cities</button>
+      <button class="info-icon-btn" data-info-target="#mergeCitiesInfo" data-info-title="Merge Cities" data-tab-info="merge" style="display:none;" aria-label="About Merge Cities">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 11v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="8" r="1" fill="currentColor"/></svg>
+      </button>
     </div>
 
     <!-- New City panel -->
@@ -436,7 +443,7 @@
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 109-9 9 9 0 00-7 3.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3 3.5V8h4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 7.5V12l3.2 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </button>
             ${
-              c.cityType
+              c.cityType === "normal"
                 ? ""
                 : `<button class="action-btn" data-summary-btn data-row-id="${c.id}" aria-label="View mapping summary for ${c.name}">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="14" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="14" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/></svg>
@@ -540,8 +547,29 @@
 
       document.getElementById("summaryCityName").textContent = `— ${record.name}`;
       const summaryList = document.getElementById("summaryList");
-      const rows = getCityMappingSummary(record.id);
-      summaryList.innerHTML = rows
+      const rows =
+        record.cityType === "merged" ? getCityMappingSummary(record.mergedFrom) : getCityMappingSummary(record.id);
+      const mergedCitiesCard =
+        record.cityType === "merged"
+          ? `
+      <div class="history-entry">
+        <div class="history-entry-label">Merged System Cities</div>
+        <div class="history-card">
+          <table>
+            <tbody>
+              <tr>
+                <td class="history-row-label">Cities</td>
+                <td class="history-row-sep">:</td>
+                <td class="history-row-value">${record.mergedFrom
+                  .map((id) => `${getSystemCityLabel(id)} — ID: ${getSystemCityDisplayId(id)}`)
+                  .join("<br>")}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>`
+          : "";
+      summaryList.innerHTML = mergedCitiesCard + rows
         .map(
           (r) => `
       <div class="history-entry">
@@ -669,12 +697,12 @@
     return candidates;
   }
 
-  // Human-readable "City A, City B" list for merge history descriptions.
+  // Human-readable "City A (ID: X), City B (ID: Y)" list for merge history descriptions.
   function describeCityIds(ids) {
     return ids
       .map((cid) => SYSTEM_CITIES.find((c) => c.id === cid))
       .filter(Boolean)
-      .map((c) => c.name)
+      .map((c) => `${c.name} (ID: ${getSystemCityDisplayId(c.id)})`)
       .join(", ");
   }
 
@@ -759,6 +787,9 @@
     });
     document.querySelectorAll("[data-tab-footer]").forEach((btn) => {
       btn.style.display = btn.dataset.tabFooter === tab ? "" : "none";
+    });
+    document.querySelectorAll("[data-tab-info]").forEach((btn) => {
+      btn.style.display = btn.dataset.tabInfo === tab ? "" : "none";
     });
   }
 

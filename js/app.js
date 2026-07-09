@@ -126,7 +126,7 @@ function showInfoPopup(title, html) {
     overlay.id = "infoPopupModal";
     overlay.className = "modal-overlay popup-overlay";
     overlay.innerHTML = `
-      <div class="popup-box popup-box-lg">
+      <div class="popup-box popup-box-md">
         <div class="modal-header">
           <h3 id="infoPopupTitle"></h3>
           <button class="modal-close" data-modal-close aria-label="Close">

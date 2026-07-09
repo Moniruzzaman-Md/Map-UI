@@ -685,9 +685,14 @@ function applyMapping(supplierKey, row, newSystemCityId) {
 // to a given system country), a system city can have MANY supplier cities
 // mapped to it from the same supplier, so each entry carries a `cities`
 // array rather than a single match like getMappingSummary() does.
+// `systemCityId` also accepts an array of ids — a merged city has no supplier
+// cities mapped to it directly, so its Summary instead unions the mappings of
+// every system city it was merged from, showing every hotel indirectly linked
+// to it through any of those component cities.
 function getCityMappingSummary(systemCityId) {
+  const ids = Array.isArray(systemCityId) ? systemCityId : [systemCityId];
   return Object.keys(SUPPLIER_LABELS).map((key) => {
-    const cities = (supplierCities[key] || []).filter((row) => row.systemCityId === systemCityId);
+    const cities = (supplierCities[key] || []).filter((row) => ids.includes(row.systemCityId));
     return {
       supplierKey: key,
       supplierLabel: SUPPLIER_LABELS[key],
