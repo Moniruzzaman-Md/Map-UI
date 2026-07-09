@@ -111,6 +111,9 @@
           <button class="info-icon-btn" data-info-target="#supplierCountryInfo" data-info-title="Supplier Country List" aria-label="About this page">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 11v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="8" r="1" fill="currentColor"/></svg>
           </button>
+          <button class="info-icon-btn" data-info-target="#supplierCountryDevNotes" data-info-title="Developer Notes — Supplier Country List" aria-label="Developer notes for this page">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 8l-4 4 4 4M15 8l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
         </div>
       </div>
       <hr class="page-divider" />
@@ -122,6 +125,29 @@
           <li><strong>History</strong> — view every mapping made, changed, or removed, by whom and when.</li>
           <li><strong>View Cities</strong> — open this supplier's city list, filtered to this country.</li>
         </ul>
+      </template>
+
+      <template id="supplierCountryDevNotes">
+        <p>This is where each supplier's own country list gets matched to the system's master country list, so bookings from different suppliers can be reconciled to one record.</p>
+        <ul>
+          <li><strong>Map</strong> — pick which country on the master list a supplier's country corresponds to. Reassigning a country that's already mapped to a different one must show old vs. new and require explicit confirmation — never silent. Picking the same country it's already mapped to must not save or log anything.</li>
+          <li><strong>Unmap</strong> — clear an existing mapping. Must require confirmation before removing it.</li>
+          <li><strong>History</strong> — every entry has three parts: an <strong>operation name</strong>, a <strong>description</strong> written in that fixed pattern, and <strong>who + when</strong>. Logged the instant the change happens (never reconstructed later by comparing snapshots), newest entry first, on <strong>both</strong> sides of the mapping — no matter which screen made the change. On this supplier's own country record:
+            <ul>
+              <li>Operation <strong>Map</strong> — this is the first time this country has ever been linked to a master-list country. Description: <em>Mapped to: country name</em></li>
+              <li>Operation <strong>Remap</strong> — an existing link changed to a different country. Description: <em>Mapped to: old country → new country</em></li>
+              <li>Operation <strong>Unmap</strong> — an existing link was removed. Description: <em>Mapped to: old country → Not mapped</em></li>
+            </ul>
+            On the matching master-list country's own record (the same event, from its side):
+            <ul>
+              <li>Operation <strong>Map</strong> — this supplier's country became linked to it for the first time (it had no other country before). Description: <em>Mapped supplier country: Supplier — supplier's country name (code), ID</em></li>
+              <li>Operation <strong>Unmap</strong> — this supplier's country got unlinked entirely (not moved elsewhere). Description: <em>Unmapped supplier country: Supplier — supplier's country name (code), ID</em></li>
+              <li>Operation <strong>Remap</strong> — this supplier's country moved between two countries: the one it left, and the one it moved to, both log this as Remap (never Unmap/Map) — it's one event, not two. Same descriptions as Map/Unmap above, on whichever side applies.</li>
+            </ul>
+          </li>
+          <li><strong>View Cities</strong> — jumps to this supplier's city list, filtered to this country.</li>
+        </ul>
+        <p><strong>Everywhere:</strong> save immediately with clear success/error feedback, confirm before overwriting any existing relationship, and key relationships by permanent code/id — never by an editable name.</p>
       </template>
 
       <section class="content-card">
@@ -399,6 +425,8 @@
 
   function applySupplierCountryMapping(record, selected) {
     const oldValue = record.systemCountry;
+    const supplierCountryLabel = `${SUPPLIER_LABELS[state.supplier] || state.supplier} — ${record.name} (${record.code}) — ID: ${record.supplierId}`;
+
     record.systemCountry = selected;
     record.history.push({
       // "Remap" (not "Map") when replacing an existing mapping with a
@@ -414,7 +442,43 @@
       userEmail: CURRENT_USER.email,
       timestamp: new Date(),
     });
+
+    // Dual-side logging, same reasoning as country-system.html's own
+    // applyCountryMapping: the supplier country has one evolving value so
+    // it gets the Map/Remap/Unmap changelog above; each affected system
+    // country instead gets an additive/removal log line, since it can be
+    // the target of several different suppliers' countries over time. A
+    // remap (oldValue present, since `selected` is always present here —
+    // a true unmap goes through the separate Unmap handler below) is one
+    // event touching two country records, not two independent actions —
+    // both sides log it as Remap, not Unmap/Map.
+    const isRemap = Boolean(oldValue);
+
+    if (oldValue) {
+      const oldCountry = SYSTEM_COUNTRIES.find((c) => c.name === oldValue);
+      if (oldCountry) {
+        oldCountry.history.push({
+          operation: isRemap ? "Remap" : "Unmap",
+          description: `Unmapped supplier country: ${supplierCountryLabel}`,
+          userName: CURRENT_USER.name,
+          userEmail: CURRENT_USER.email,
+          timestamp: new Date(),
+        });
+      }
+    }
+    const newCountry = SYSTEM_COUNTRIES.find((c) => c.name === selected);
+    if (newCountry) {
+      newCountry.history.push({
+        operation: isRemap ? "Remap" : "Map",
+        description: `Mapped supplier country: ${supplierCountryLabel}`,
+        userName: CURRENT_USER.name,
+        userEmail: CURRENT_USER.email,
+        timestamp: new Date(),
+      });
+    }
+
     saveToStorage("supplierCountries", supplierCountries);
+    saveToStorage("SYSTEM_COUNTRIES", SYSTEM_COUNTRIES);
     render();
     document.getElementById("mapCountryModal").classList.remove("open");
     showToast("Country mapped successfully");
@@ -485,7 +549,21 @@
           userEmail: CURRENT_USER.email,
           timestamp: new Date(),
         });
+
+        const oldCountry = SYSTEM_COUNTRIES.find((c) => c.name === oldValue);
+        if (oldCountry) {
+          const supplierCountryLabel = `${SUPPLIER_LABELS[state.supplier] || state.supplier} — ${record.name} (${record.code}) — ID: ${record.supplierId}`;
+          oldCountry.history.push({
+            operation: "Unmap",
+            description: `Unmapped supplier country: ${supplierCountryLabel}`,
+            userName: CURRENT_USER.name,
+            userEmail: CURRENT_USER.email,
+            timestamp: new Date(),
+          });
+        }
+
         saveToStorage("supplierCountries", supplierCountries);
+        saveToStorage("SYSTEM_COUNTRIES", SYSTEM_COUNTRIES);
         render();
         modal.classList.remove("open");
         showToast(`${record.name} unmapped`);

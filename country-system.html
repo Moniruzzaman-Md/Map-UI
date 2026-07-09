@@ -135,11 +135,12 @@
           <li><strong>Code is permanent</strong> — never editable, and it's what everything else should key off. Only the name can change.</li>
           <li><strong>Edit</strong> — renaming must never break an existing mapping. Either mappings are keyed by the permanent code, or the rename updates every existing mapping in the same step. Empty names must be rejected with a clear error.</li>
           <li><strong>Map</strong> — reassigning a supplier's country that's already mapped elsewhere must show old vs. new and require explicit confirmation — never silent. Logged distinctly as a <strong>Remap</strong> (see History below), not a plain Map.</li>
-          <li><strong>History</strong> — every entry has three parts: an <strong>operation name</strong>, a <strong>description</strong> written in that fixed pattern, and <strong>who + when</strong>. Logged the instant the change happens (never reconstructed later by comparing snapshots), newest entry first. On the country's own record:
+          <li><strong>History</strong> — every entry has three parts: an <strong>operation name</strong>, a <strong>description</strong> written in that fixed pattern, and <strong>who + when</strong>. Logged the instant the change happens (never reconstructed later by comparing snapshots), newest entry first, on <strong>both</strong> sides of the mapping — no matter which screen made the change. On the country's own record:
             <ul>
               <li>Operation <strong>Edit</strong> — the name was changed. Description: <em>Name: old name → new name</em></li>
-              <li>Operation <strong>Map</strong> — a supplier's country just became linked to this country. Description: <em>Mapped supplier country: Supplier — supplier's country name (code), ID</em></li>
-              <li>Operation <strong>Unmap</strong> — a supplier's country that was linked to this country got unlinked, or moved to a different country. Description: <em>Unmapped supplier country: Supplier — supplier's country name (code), ID</em></li>
+              <li>Operation <strong>Map</strong> — a supplier's country became linked to this country for the first time (it had no other country before). Description: <em>Mapped supplier country: Supplier — supplier's country name (code), ID</em></li>
+              <li>Operation <strong>Unmap</strong> — a supplier's country that was linked to this country got unlinked entirely (not moved elsewhere). Description: <em>Unmapped supplier country: Supplier — supplier's country name (code), ID</em></li>
+              <li>Operation <strong>Remap</strong> — a supplier's country moved between two countries: the country it left, and the country it moved to, both log this as Remap (never Unmap/Map) — it's one event, not two. Same descriptions as Map/Unmap above, on whichever side applies.</li>
             </ul>
             On the supplier's own country record (the matching entry for the same event, from its side — never call this Edit/Create, those are only for renaming a country, not for a mapping change):
             <ul>
@@ -533,11 +534,17 @@
       timestamp: new Date(),
     });
 
+    // A remap (oldValue AND newSystemCountry both present) is one event
+    // touching two country records, not two independent actions — both
+    // sides log it as Remap, not Unmap/Map, so the audit trail reads as
+    // "this supplier country moved" rather than two unrelated changes.
+    const isRemap = Boolean(oldValue) && Boolean(newSystemCountry);
+
     if (oldValue) {
       const oldCountry = countries.find((c) => c.name === oldValue);
       if (oldCountry) {
         oldCountry.history.push({
-          operation: "Unmap",
+          operation: isRemap ? "Remap" : "Unmap",
           description: `Unmapped supplier country: ${supplierCountryLabel}`,
           userName: CURRENT_USER.name,
           userEmail: CURRENT_USER.email,
@@ -549,7 +556,7 @@
       const newCountry = countries.find((c) => c.name === newSystemCountry);
       if (newCountry) {
         newCountry.history.push({
-          operation: "Map",
+          operation: isRemap ? "Remap" : "Map",
           description: `Mapped supplier country: ${supplierCountryLabel}`,
           userName: CURRENT_USER.name,
           userEmail: CURRENT_USER.email,
