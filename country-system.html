@@ -121,9 +121,10 @@
       <template id="countryListInfo">
         <p>This page manages the <strong>master list of countries</strong> used everywhere else in the system — supplier country mappings and city records both reference these entries.</p>
         <ul>
-          <li><strong>Edit</strong> — rename a country.</li>
-          <li><strong>Map</strong> — for each supplier, see which of their countries (if any) maps to this system country, with an Unmap option, or pick one to map if none does yet.</li>
-          <li><strong>History</strong> — view every past name change, who made it, and when, plus supplier countries mapped or unmapped to this country.</li>
+          <li><strong>Code</strong> — the country's unique identifier (e.g. "US"). Set when the country is added and never changes.</li>
+          <li><strong>Edit</strong> — rename a country. The code stays the same.</li>
+          <li><strong>Map</strong> — for each supplier, see which of their countries (if any) maps to this system country, with an Unmap option, or pick one to map if none does yet. Reassigning a supplier's country that's already mapped elsewhere asks you to confirm first.</li>
+          <li><strong>History</strong> — every name change, and every supplier country mapped, remapped, or unmapped to this country, with who made the change and when.</li>
           <li><strong>Mapping Summary</strong> — see at a glance which suppliers have this country mapped.</li>
           <li><strong>View Cities</strong> — opens the System City List, filtered to this country.</li>
         </ul>
@@ -132,21 +133,22 @@
       <template id="countryDevNotes">
         <p>This is the master list of countries. Every supplier's own country list maps to one entry here, and city records reference this list too.</p>
         <ul>
-          <li><strong>Code is permanent</strong> — never editable, and it's what everything else should key off. Only the name can change.</li>
+          <li><strong>Code is permanent</strong> — set once when the country is added, never editable, and it's what everything else should key off. Only the name can change.</li>
           <li><strong>Edit</strong> — renaming must never break an existing mapping. Either mappings are keyed by the permanent code, or the rename updates every existing mapping in the same step. Empty names must be rejected with a clear error.</li>
-          <li><strong>Map</strong> — reassigning a supplier's country that's already mapped elsewhere must show old vs. new and require explicit confirmation — never silent. Logged distinctly as a <strong>Remap</strong> (see History below), not a plain Map.</li>
-          <li><strong>History</strong> — every entry has three parts: an <strong>operation name</strong>, a <strong>description</strong> written in that fixed pattern, and <strong>who + when</strong>. Logged the instant the change happens (never reconstructed later by comparing snapshots), newest entry first, on <strong>both</strong> sides of the mapping — no matter which screen made the change. On the country's own record:
+          <li><strong>Map</strong> — for each supplier, show either the country(ies) already mapped here (with Unmap), or a picker of that supplier's own countries (with Map). In the picker, any option already mapped to a different country must be labeled with its current target (e.g. "Deutschland (DE) — mapped to Austria") so that's visible before it's picked, not just after. Picking an already-mapped-elsewhere option must show old vs. new and require explicit confirmation before applying — never silent. Logged as a <strong>Remap</strong> (see History below), not a plain Map.</li>
+          <li><strong>History</strong> — every entry has three parts: an <strong>operation name</strong>, a <strong>description</strong> in that operation's fixed pattern, and <strong>who + when</strong>. Logged the instant the change happens (never reconstructed later by comparing snapshots), newest entry first. A mapping change always writes to <strong>two</strong> records — the country's own history AND the affected supplier country's own history — no matter which screen made the change.
+            <p><strong>On the country's own record:</strong></p>
             <ul>
-              <li>Operation <strong>Edit</strong> — the name was changed. Description: <em>Name: old name → new name</em></li>
-              <li>Operation <strong>Map</strong> — a supplier's country became linked to this country for the first time (it had no other country before). Description: <em>Mapped supplier country: Supplier — supplier's country name (code), ID</em></li>
-              <li>Operation <strong>Unmap</strong> — a supplier's country that was linked to this country got unlinked entirely (not moved elsewhere). Description: <em>Unmapped supplier country: Supplier — supplier's country name (code), ID</em></li>
-              <li>Operation <strong>Remap</strong> — a supplier's country moved between two countries: the country it left, and the country it moved to, both log this as Remap (never Unmap/Map) — it's one event, not two. Same descriptions as Map/Unmap above, on whichever side applies.</li>
+              <li><strong>Edit</strong> — the name was changed. Description: <em>Name: {old name} -&gt; {new name}</em></li>
+              <li><strong>Map</strong> — a supplier's country became linked to this country for the first time (it had no country before). Description: <em>{Supplier} — {supplier's country name} ({code}) — ID: {supplier's country ID}</em></li>
+              <li><strong>Unmap</strong> — a supplier's country that was linked to this country got unlinked entirely, with nothing put in its place. Description: <em>{Supplier} — {supplier's country name} ({code}) — ID: {supplier's country ID}</em></li>
+              <li><strong>Remap</strong> — a supplier's country moved between two countries. Both the country it left and the country it moved to log this as one Remap event, never as Unmap on one and Map on the other — and both log the exact same description, so either country's history is understandable on its own. Description: <em>{Supplier} — {supplier's country name} ({code}) — ID: {supplier's country ID} [{old country} ({code}) -&gt; {new country} ({code})]</em></li>
             </ul>
-            On the supplier's own country record (the matching entry for the same event, from its side — never call this Edit/Create, those are only for renaming a country, not for a mapping change):
+            <p><strong>On the supplier's own country record</strong> (the matching entry for the same event, from its side — always Map/Remap/Unmap, never Edit/Create, which are reserved for renaming a country, not a mapping change):</p>
             <ul>
-              <li>Operation <strong>Map</strong> — this is the first time this supplier's country has ever been linked to any country. Description: <em>Mapped to: country name</em></li>
-              <li>Operation <strong>Remap</strong> — an existing link changed to a different country. Description: <em>Mapped to: old country → new country</em></li>
-              <li>Operation <strong>Unmap</strong> — an existing link was removed. Description: <em>Mapped to: old country → Not mapped</em></li>
+              <li><strong>Map</strong> — this is the first time this supplier's country has ever been linked to any country. Description: <em>{new country} ({code})</em></li>
+              <li><strong>Remap</strong> — an existing link changed to a different country. Description: <em>{old country} ({code}) -&gt; {new country} ({code})</em></li>
+              <li><strong>Unmap</strong> — an existing link was removed, with nothing put in its place. Description: <em>{old country} ({code}) -&gt; Not mapped</em></li>
             </ul>
           </li>
           <li><strong>Mapping Summary</strong> — read-only, per-supplier mapped/unmapped overview.</li>
@@ -427,8 +429,8 @@
     const record = countries.find((c) => String(c.id) === btn.dataset.rowId);
     if (!record) return;
 
-    document.getElementById("historyCountryName").textContent = `— ${record.name}`;
-    document.getElementById("historyList").innerHTML = renderHistoryList(record.history, "No edit history yet");
+    document.getElementById("historyCountryName").textContent = `— ${record.name} (${record.code})`;
+    showHistoryList(record.history, "No edit history yet");
 
     openModal(document.getElementById("historyModal"));
   });
@@ -526,9 +528,9 @@
       systemCountry: newSystemCountry,
       description: newSystemCountry
         ? oldValue
-          ? `Mapped To: ${getSystemCountryNameWithCode(oldValue)} -> ${getSystemCountryNameWithCode(newSystemCountry)}`
-          : `Mapped To: ${getSystemCountryNameWithCode(newSystemCountry)}`
-        : `Mapped To: ${getSystemCountryNameWithCode(oldValue)} -> Not mapped`,
+          ? `${getSystemCountryNameWithCode(oldValue)} -> ${getSystemCountryNameWithCode(newSystemCountry)}`
+          : `${getSystemCountryNameWithCode(newSystemCountry)}`
+        : `${getSystemCountryNameWithCode(oldValue)} -> Not mapped`,
       userName: CURRENT_USER.name,
       userEmail: CURRENT_USER.email,
       timestamp: new Date(),
@@ -539,13 +541,19 @@
     // sides log it as Remap, not Unmap/Map, so the audit trail reads as
     // "this supplier country moved" rather than two unrelated changes.
     const isRemap = Boolean(oldValue) && Boolean(newSystemCountry);
+    // On a genuine remap, both affected countries' own history must say
+    // exactly where the supplier country moved from and to (not just that
+    // it changed) — same "old -> new" convention as the supplier country's
+    // own "old -> new" changelog above, appended so either country's
+    // history is legible on its own without cross-referencing the other.
+    const remapSuffix = isRemap ? ` [${getSystemCountryNameWithCode(oldValue)} -> ${getSystemCountryNameWithCode(newSystemCountry)}]` : "";
 
     if (oldValue) {
       const oldCountry = countries.find((c) => c.name === oldValue);
       if (oldCountry) {
         oldCountry.history.push({
           operation: isRemap ? "Remap" : "Unmap",
-          description: `Unmapped supplier country: ${supplierCountryLabel}`,
+          description: `${supplierCountryLabel}${remapSuffix}`,
           userName: CURRENT_USER.name,
           userEmail: CURRENT_USER.email,
           timestamp: new Date(),
@@ -557,7 +565,7 @@
       if (newCountry) {
         newCountry.history.push({
           operation: isRemap ? "Remap" : "Map",
-          description: `Mapped supplier country: ${supplierCountryLabel}`,
+          description: `${supplierCountryLabel}${remapSuffix}`,
           userName: CURRENT_USER.name,
           userEmail: CURRENT_USER.email,
           timestamp: new Date(),

@@ -310,13 +310,32 @@ function operationPillHtml(operation) {
   return `<span class="pill operation-pill ${cls}">${op}</span>`;
 }
 
-function formatTimestamp(date) {
+function formatDateOnly(date) {
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  return `${String(date.getDate()).padStart(2, "0")}-${months[date.getMonth()]}-${date.getFullYear()}`;
+}
+
+function formatTimeOnly(date) {
   let hours = date.getHours();
   const ampm = hours >= 12 ? "PM" : "AM";
   hours = hours % 12 || 12;
   const minutes = String(date.getMinutes()).padStart(2, "0");
-  return `${String(date.getDate()).padStart(2, "0")}-${months[date.getMonth()]}-${date.getFullYear()} ${String(hours).padStart(2, "0")}:${minutes} ${ampm}`;
+  return `${String(hours).padStart(2, "0")}:${minutes} ${ampm}`;
+}
+
+function formatTimestamp(date) {
+  return `${formatDateOnly(date)} ${formatTimeOnly(date)}`;
+}
+
+// Wraps a value in the same fixed-fade-truncate treatment used by the hotel
+// list tables (.truncatable/.truncatable-text/.is-overflowing, see
+// css/styles.css) so a long username/email fades out at the right edge
+// instead of wrapping or hard-clipping — full value is always available via
+// the native title tooltip on hover. Actual overflow detection (adding
+// .is-overflowing) happens after insertion, in showHistoryList() below,
+// since it needs real layout to measure against.
+function historyValueHtml(value) {
+  return `<div class="truncatable truncatable--historyvalue" title="${value}"><span class="truncatable-text">${value}</span></div>`;
 }
 
 // Shared card-per-entry history renderer, used by every "View History" drawer
@@ -324,31 +343,49 @@ function formatTimestamp(date) {
 // formed `description` string — a property snapshot for Create, or an
 // "old -> new" changelog for Edit/Status Change — built at the point the
 // action happened (see each page's save/toggle handlers). Newest entry first.
+// Entries that share a `groupId` (set by applyMapping() in js/data.js when
+// one batch Save touches several rows) are merged into a single card — one
+// "[Operation pill] description" line per entry in the group, since a group
+// can mix several different operations. An entry with no groupId (every
+// entity except a system city's batch-mapping history) is its own one-entry
+// group, so it still renders as a normal single-line card.
 function renderHistoryList(entries, emptyMessage = "No history yet") {
   if (!entries.length) {
     return `<p style="text-align:center; color:var(--text-muted); padding:28px 0;">${emptyMessage}</p>`;
   }
-  const ordered = [...entries].reverse();
+
+  const groups = [];
+  const groupIndexById = new Map();
+  entries.forEach((h) => {
+    if (h.groupId && groupIndexById.has(h.groupId)) {
+      groups[groupIndexById.get(h.groupId)].push(h);
+      return;
+    }
+    if (h.groupId) groupIndexById.set(h.groupId, groups.length);
+    groups.push([h]);
+  });
+
+  const ordered = [...groups].reverse();
   return ordered
     .map(
-      (h, i) => `
+      (group, i) => `
       <div class="history-entry">
-        <div class="history-entry-label">Entry ${i + 1} of ${entries.length}</div>
+        <div class="history-entry-label">Entry ${i + 1} of ${groups.length}</div>
         <div class="history-card">
           <table class="history-card-v2">
             <tbody>
-              <tr class="history-op-row">
-                <td>${operationPillHtml(h.operation)}</td>
-                <td class="history-time-cell">${formatTimestamp(h.timestamp)}</td>
+              <tr class="history-user-row">
+                <td class="history-value-cell history-user-name">${historyValueHtml(group[0].userName)}</td>
+                <td class="history-datetime-cell">${formatDateOnly(group[0].timestamp)}</td>
               </tr>
-              <tr>
-                <td colspan="2" class="history-user-cell">
-                  <div class="history-user-name">${h.userName}</div>
-                  <div class="history-user-email">${h.userEmail}</div>
-                </td>
+              <tr class="history-email-row">
+                <td class="history-value-cell history-user-email">${historyValueHtml(group[0].userEmail)}</td>
+                <td class="history-datetime-cell">${formatTimeOnly(group[0].timestamp)}</td>
               </tr>
               <tr class="history-description-row">
-                <td colspan="2" class="history-description-cell">${h.description || ""}</td>
+                <td colspan="2" class="history-description-cell">
+                  ${group.map((h) => `<div class="history-op-line">${operationPillHtml(h.operation)} ${h.description || ""}</div>`).join("")}
+                </td>
               </tr>
             </tbody>
           </table>
@@ -356,6 +393,22 @@ function renderHistoryList(entries, emptyMessage = "No history yet") {
       </div>`
     )
     .join("");
+}
+
+// Sets #historyList's content and measures real overflow on every
+// .truncatable value just inserted (username/email — see historyValueHtml
+// above), toggling the fade mask on. Safe to measure immediately even
+// before the History modal is opened: .modal-overlay uses
+// visibility:hidden while closed (not display:none), so scrollWidth/
+// clientWidth are already accurate. Use this instead of setting
+// #historyList.innerHTML directly so the fade never gets forgotten on a
+// new call site.
+function showHistoryList(entries, emptyMessage) {
+  const el = document.getElementById("historyList");
+  el.innerHTML = renderHistoryList(entries, emptyMessage);
+  el.querySelectorAll(".truncatable").forEach((t) => {
+    t.classList.toggle("is-overflowing", t.scrollWidth > t.clientWidth + 1);
+  });
 }
 
 function initTableSearch() {

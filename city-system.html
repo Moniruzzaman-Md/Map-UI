@@ -161,12 +161,12 @@
           <table class="data-table" id="cityTable">
             <thead>
               <tr>
-                <th style="width:14%">ID</th>
+                <th style="width:1%">ID</th>
                 <th style="width:18%">Name</th>
                 <th style="width:12%">State</th>
                 <th style="width:16%">Country</th>
                 <th style="width:12%">Status</th>
-                <th style="width:28%">Action</th>
+                <th style="width:1%">Action</th>
               </tr>
             </thead>
             <tbody>
@@ -439,10 +439,10 @@
           .map(
             (c) => `
       <tr data-row-id="${c.id}">
-        <td>${getSystemCityDisplayId(c.id)}</td>
+        <td style="white-space:nowrap"><span class="code-badge">${getSystemCityDisplayId(c.id)}</span></td>
         <td data-col="name">${c.name}${c.cityType ? ` <span class="pill city-type-badge ${c.cityType === "merged" ? "info" : "neutral"}" aria-label="${c.cityType === "merged" ? "Merged" : "New"}">${c.cityType === "merged" ? "M" : "N"}</span>` : ""}</td>
         <td>${c.state ? c.state : '<span style="color:var(--text-muted)">—</span>'}</td>
-        <td>${getSystemCountryName(c.country.code) || c.country.name} <span class="code-badge">${c.country.code}</span></td>
+        <td><span class="code-badge">${c.country.code}</span> ${getSystemCountryName(c.country.code) || c.country.name}</td>
         <td><span class="pill ${c.active ? "success" : "danger"}">${c.active ? "Active" : "Inactive"}</span></td>
         <td>
           <div class="row-actions">
@@ -562,7 +562,7 @@
       const record = SYSTEM_CITIES.find((c) => String(c.id) === historyBtn.dataset.rowId);
       if (!record) return;
       document.getElementById("historyCityName").textContent = `— ${record.name} (ID: ${getSystemCityDisplayId(record.id)})`;
-      document.getElementById("historyList").innerHTML = renderHistoryList(record.history, "No edit history yet");
+      showHistoryList(record.history, "No edit history yet");
       openModal(document.getElementById("historyModal"));
       return;
     }

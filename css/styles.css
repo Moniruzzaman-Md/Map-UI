@@ -610,15 +610,17 @@ table.data-table {
    horizontal scrollbar on .table-wrap even though every visible column
    already fits — scrolling all the way right lands on real, visible blank
    space past the actual last column. First found on #hotelTable (long
-   hotel names); recurred on #countryTable/#supplierCountryTable once their
-   Action column was narrowed to fit-content, leaving the last button's
-   centered tooltip with less buffer room before it pokes past the edge.
-   Scoped per-table (not the shared .data-table class) so no other page's
-   table is affected; the tooltip itself still renders on hover, just
-   clipped at the table's own (generous) width instead of table-wrap's. */
+   hotel names); recurred on #countryTable/#supplierCountryTable/#cityTable
+   once their Action (and ID) column was narrowed to fit-content, leaving
+   the last button's centered tooltip with less buffer room before it
+   pokes past the edge. Scoped per-table (not the shared .data-table class)
+   so no other page's table is affected; the tooltip itself still renders
+   on hover, just clipped at the table's own (generous) width instead of
+   table-wrap's. */
 #hotelTable,
 #countryTable,
-#supplierCountryTable {
+#supplierCountryTable,
+#cityTable {
   overflow: hidden;
 }
 
@@ -977,12 +979,11 @@ table.data-table {
 }
 
 .history-entry-label {
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
+  font-size: 11px;
+  font-weight: 500;
+  text-align: right;
   color: var(--text-muted);
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .history-card {
@@ -1023,43 +1024,62 @@ table.data-table {
   word-break: break-word;
 }
 
-/* ---------- History card v2: Operation/Timestamp, User, Description ---------- */
+/* ---------- History card v2: User/Email + Date/Time, Description ---------- */
+
+/* table-layout:fixed (with an explicit width on the datetime column below)
+   is required here, not just width:100% on the value cell — under the
+   default auto layout, a table sizes its columns to fit unbroken
+   (white-space:nowrap) content instead of respecting a percentage width,
+   so a long value would just grow the table/drawer instead of clipping. */
+.history-card-v2 {
+  width: 100%;
+  table-layout: fixed;
+}
 
 .history-card-v2 td {
   padding: 0;
   vertical-align: top;
 }
 
-.history-card-v2 .history-op-row td {
-  padding-bottom: 4px;
+.history-card-v2 .history-user-row td {
+  padding-top: 5px;
+  padding-bottom: 1px;
 }
 
-.history-card-v2 .history-time-cell {
-  text-align: right;
-  color: var(--text-muted);
-  font-size: 13px;
-  white-space: nowrap;
-}
-
-.history-card-v2 .history-user-cell {
+.history-card-v2 .history-email-row td {
   padding-bottom: 4px;
   border-bottom: 1px solid var(--border-color);
 }
 
-.history-user-name {
-  padding-top: 5px;
+/* Name + Date share one look, Email + Time share another — each row reads
+   as one visual pair rather than two mismatched fonts side by side. */
+.history-user-name .truncatable-text,
+.history-user-row .history-datetime-cell {
+  font-size: 14px;
   font-weight: 600;
   color: var(--text-dark);
 }
 
-.history-user-email {
+.history-user-email .truncatable-text,
+.history-email-row .history-datetime-cell {
   font-size: 12px;
+  font-weight: 400;
   color: var(--text-muted);
-  margin-top: 1px;
+}
+
+.history-datetime-cell {
+  width: 105px;
+  text-align: right;
+  white-space: nowrap;
+  padding-left: 12px;
+}
+
+.truncatable--historyvalue {
+  width: 100%;
 }
 
 .history-card-v2 .history-description-row td {
-  padding-top: 0;
+  padding-top: 8px;
 }
 
 .history-description-cell {
@@ -1067,6 +1087,17 @@ table.data-table {
   font-size: 14px;
   line-height: 1.6;
   word-break: break-word;
+}
+
+.history-op-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.history-op-line:last-child {
+  margin-bottom: 0;
 }
 
 .row-actions {
@@ -1282,8 +1313,11 @@ table.data-table {
   background: var(--warning);
 }
 
+/* Sharp corners for operation pills (History card description lines) — the
+   default .pill is fully rounded, used for Status/Type indicators. */
 .pill.operation-pill {
   border-radius: var(--radius-sm);
+  flex-shrink: 0;
 }
 
 /* ---------- Searchable select (every dropdown in the project) ---------- */

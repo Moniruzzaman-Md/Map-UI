@@ -452,7 +452,7 @@
     const city = SYSTEM_CITIES.find((c) => c.id === pinnedCityId);
     if (!city) return;
     document.getElementById("historyCityName").textContent = `— ${city.name} (ID: ${getSystemCityDisplayId(city.id)})`;
-    document.getElementById("historyList").innerHTML = renderHistoryList(city.history, "No history yet");
+    showHistoryList(city.history, "No history yet");
     openModal(document.getElementById("historyModal"));
   });
 
@@ -570,7 +570,7 @@
       const row = supplierCities[supplierKey].find((r) => String(r.id) === historyBtn.dataset.rowId);
       if (!row) return;
       document.getElementById("historyCityName").textContent = `— ${SUPPLIER_LABELS[supplierKey]} / ${row.name} (ID: ${row.id})`;
-      document.getElementById("historyList").innerHTML = renderHistoryList(row.history, "No mapping history yet");
+      showHistoryList(row.history, "No mapping history yet");
       openModal(document.getElementById("historyModal"));
     }
   });
@@ -1046,8 +1046,13 @@
     }
 
     function doApply() {
-      addedRows.forEach((row) => applyMapping(rightState.supplier, row, pinnedCityId));
-      removedRows.forEach((row) => applyMapping(rightState.supplier, row, null));
+      // One shared group id for every row this Save touches (always the
+      // same supplier, per rightState — see applyMapping's own comment in
+      // js/data.js) so the pinned system city's history can show this whole
+      // batch as one grouped event instead of one entry per row.
+      const groupId = generateHistoryGroupId();
+      addedRows.forEach((row) => applyMapping(rightState.supplier, row, pinnedCityId, groupId));
+      removedRows.forEach((row) => applyMapping(rightState.supplier, row, null, groupId));
 
       const parts = [];
       if (addedRows.length) parts.push(`${addedRows.length} mapped`);

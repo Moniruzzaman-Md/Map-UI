@@ -507,7 +507,7 @@
       const record = SYSTEM_HOTELS.find((h) => String(h.id) === historyBtn.dataset.rowId);
       if (!record) return;
       document.getElementById("historyHotelName").textContent = `— ${record.name} (ID: ${getSystemHotelDisplayId(record.id)})`;
-      document.getElementById("historyList").innerHTML = renderHistoryList(record.history, "No edit history yet");
+      showHistoryList(record.history, "No edit history yet");
       openModal(document.getElementById("historyModal"));
       return;
     }

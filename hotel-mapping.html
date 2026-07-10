@@ -286,7 +286,7 @@
 
     document.getElementById("pinnedCityHistoryBtn").addEventListener("click", () => {
       document.getElementById("historyCityName").textContent = `— ${pinnedCity.name} (ID: ${getSystemCityDisplayId(pinnedCity.id)})`;
-      document.getElementById("historyList").innerHTML = renderHistoryList(pinnedCity.history, "No history yet");
+      showHistoryList(pinnedCity.history, "No history yet");
       openModal(document.getElementById("historyModal"));
     });
 

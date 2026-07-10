@@ -56,8 +56,8 @@ SYSTEM_COUNTRIES[0].history.push(
   // seeded "Create" entries below (same users/timestamps), viewed from the
   // system country's side — see SYSTEM_CITIES' matching comment above for
   // why this demo needs both sides pre-seeded rather than created live.
-  { operation: "Map", description: "Mapped supplier country: Agoda — United States (US) — ID: AG-US-001", userName: "Farhan Ahmed", userEmail: "farhan.ahmed@mynztrip.com", timestamp: new Date("2026-06-18T09:12:00") },
-  { operation: "Map", description: "Mapped supplier country: HotelBeds — USA (US) — ID: HB_USA", userName: "Rafiul Karim", userEmail: "rafiul.karim@mynztrip.com", timestamp: new Date("2026-06-25T15:30:00") }
+  { operation: "Map", description: "Agoda — United States (US) — ID: AG-US-001", userName: "Farhan Ahmed", userEmail: "farhan.ahmed@mynztrip.com", timestamp: new Date("2026-06-18T09:12:00") },
+  { operation: "Map", description: "HotelBeds — USA (US) — ID: HB_USA", userName: "Rafiul Karim", userEmail: "rafiul.karim@mynztrip.com", timestamp: new Date("2026-06-25T15:30:00") }
 );
 SYSTEM_COUNTRIES[4].history.push(
   { operation: "Edit", name: "India", description: "Name: Bharat -> India", userName: "Rafiul Karim", userEmail: "rafiul.karim@mynztrip.com", timestamp: new Date("2026-05-30T11:05:00") }
@@ -169,7 +169,7 @@ Object.keys(supplierCountries).forEach((key) => {
 supplierCountries.agoda[0].history.push({
   operation: "Map",
   systemCountry: "United States",
-  description: "Mapped To: United States (US)",
+  description: "United States (US)",
   userName: "Farhan Ahmed",
   userEmail: "farhan.ahmed@mynztrip.com",
   timestamp: new Date("2026-06-18T09:12:00"),
@@ -177,7 +177,7 @@ supplierCountries.agoda[0].history.push({
 supplierCountries.hotelbeds[0].history.push({
   operation: "Map",
   systemCountry: "United States",
-  description: "Mapped To: United States (US)",
+  description: "United States (US)",
   userName: "Rafiul Karim",
   userEmail: "rafiul.karim@mynztrip.com",
   timestamp: new Date("2026-06-25T15:30:00"),
@@ -316,21 +316,21 @@ SYSTEM_CITIES[0].history.push({
 // created live.
 SYSTEM_CITIES[0].history.push({
   operation: "Map",
-  description: "Mapped supplier city: Agoda — New York City (US) — ID: AG-US-001",
+  description: "Agoda — New York City (US) — ID: AG-US-001",
   userName: "Farhan Ahmed",
   userEmail: "farhan.ahmed@mynztrip.com",
   timestamp: new Date("2026-06-19T13:40:00"),
 });
 SYSTEM_CITIES[0].history.push({
   operation: "Map",
-  description: "Mapped supplier city: Booking.com — New York (US) — ID: 20050000",
+  description: "Booking.com — New York (US) — ID: 20050000",
   userName: "Rafiul Karim",
   userEmail: "rafiul.karim@mynztrip.com",
   timestamp: new Date("2026-06-20T09:15:00"),
 });
 SYSTEM_CITIES[0].history.push({
   operation: "Map",
-  description: "Mapped supplier city: Agoda — Manhattan (US) — ID: AG-US-009",
+  description: "Agoda — Manhattan (US) — ID: AG-US-009",
   userName: "Farhan Ahmed",
   userEmail: "farhan.ahmed@mynztrip.com",
   timestamp: new Date("2026-06-21T11:05:00"),
@@ -718,7 +718,7 @@ Object.keys(supplierCities).forEach((key) => {
 // live mapping first (this is a static, serverless demo, so there's no
 // shared backend session to generate that history on the fly).
 supplierCities.agoda[0].history.push({
-  operation: "Create",
+  operation: "Map",
   systemCityLabel: getSystemCityLabel(0),
   description: `Mapped To: ${getSystemCityHistoryLabel(0)}`,
   userName: "Farhan Ahmed",
@@ -726,7 +726,7 @@ supplierCities.agoda[0].history.push({
   timestamp: new Date("2026-06-19T13:40:00"),
 });
 supplierCities.booking[0].history.push({
-  operation: "Create",
+  operation: "Map",
   systemCityLabel: getSystemCityLabel(0),
   description: `Mapped To: ${getSystemCityHistoryLabel(0)}`,
   userName: "Rafiul Karim",
@@ -734,7 +734,7 @@ supplierCities.booking[0].history.push({
   timestamp: new Date("2026-06-20T09:15:00"),
 });
 supplierCities.agoda[8].history.push({
-  operation: "Create",
+  operation: "Map",
   systemCityLabel: getSystemCityLabel(0),
   description: `Mapped To: ${getSystemCityHistoryLabel(0)}`,
   userName: "Farhan Ahmed",
@@ -742,42 +742,147 @@ supplierCities.agoda[8].history.push({
   timestamp: new Date("2026-06-21T11:05:00"),
 });
 
+// Illustrative example of a grouped batch, pre-seeded so it's demoable
+// without performing a live action: city-mapping.html's Save is always
+// scoped to one supplier at a time, but within that one supplier it can
+// map/remap/unmap several of that supplier's own cities against the same
+// pinned system city in a single click — Los Angeles's own history should
+// show all 3 as one grouped card (see renderHistoryList() in
+// js/app.js), not three disconnected entries. Story: Agoda's "Toronto" row
+// had been mis-mapped to Los Angeles by mistake and got corrected over to
+// the real Toronto system city in the same sitting a newly-found Agoda
+// city was mapped in and a duplicate/test entry was removed.
+supplierCities.agoda[9].systemCityId = 1; // final state must match the "Map" entry below
+{
+  const laLabel = getSystemCityHistoryLabel(1);
+  const torontoLabel = getSystemCityHistoryLabel(10);
+  const groupId = "grp-demo-la-cleanup";
+  const timestamp = new Date("2026-06-27T16:00:00");
+  const userName = "Farhan Ahmed";
+  const userEmail = "farhan.ahmed@mynztrip.com";
+
+  const torontoRow = supplierCities.agoda[2]; // was mapped to LA, corrected to the real Toronto
+  const freshRow = supplierCities.agoda[9]; // freshly mapped to LA in the same batch
+  const removedRow = supplierCities.agoda[10]; // unmapped from LA in the same batch
+
+  torontoRow.history.push({
+    operation: "Remap",
+    description: `Mapped To: ${laLabel} -> ${torontoLabel}`,
+    userName,
+    userEmail,
+    timestamp,
+  });
+  freshRow.history.push({
+    operation: "Map",
+    description: `Mapped To: ${laLabel}`,
+    userName,
+    userEmail,
+    timestamp,
+  });
+  removedRow.history.push({
+    operation: "Unmap",
+    description: `Mapped To: ${laLabel} -> Not mapped`,
+    userName,
+    userEmail,
+    timestamp,
+  });
+
+  SYSTEM_CITIES[1].history.push(
+    {
+      operation: "Remap",
+      description: `${SUPPLIER_LABELS.agoda} — ${torontoRow.name} (${torontoRow.countryCode}) — ID: ${torontoRow.id}`,
+      userName,
+      userEmail,
+      timestamp,
+      groupId,
+    },
+    {
+      operation: "Map",
+      description: `${SUPPLIER_LABELS.agoda} — ${freshRow.name} (${freshRow.countryCode}) — ID: ${freshRow.id}`,
+      userName,
+      userEmail,
+      timestamp,
+      groupId,
+    },
+    {
+      operation: "Unmap",
+      description: `${SUPPLIER_LABELS.agoda} — ${removedRow.name} (${removedRow.countryCode}) — ID: ${removedRow.id}`,
+      userName,
+      userEmail,
+      timestamp,
+      groupId,
+    }
+  );
+  SYSTEM_CITIES[10].history.push({
+    operation: "Remap",
+    description: `${SUPPLIER_LABELS.agoda} — ${torontoRow.name} (${torontoRow.countryCode}) — ID: ${torontoRow.id}`,
+    userName,
+    userEmail,
+    timestamp,
+    groupId,
+  });
+}
+
 // restore any mappings saved from a previous session
 hydrateObject(supplierCities, loadFromStorage("supplierCities"));
+
+// Ties together every history entry created by one user action (e.g. every
+// row touched by a single city-mapping.html Save click) so the frontend can
+// merge them into one card on the system city's side — see
+// renderHistoryList() in js/app.js. Doesn't change the entry shape
+// itself, just tags related entries; entries with no groupId (a single
+// quick action, or old seed data) simply render as their own one-entry group.
+let historyGroupCounter = 0;
+function generateHistoryGroupId() {
+  return `grp${++historyGroupCounter}-${Date.now()}`;
+}
 
 // Shared by every page that maps/unmaps a supplier city to a system city
 // (city-mapping.html, city-supplier.html) — assigns (or clears) the
 // mapping and logs it from BOTH sides. The supplier city has one evolving
-// value (its systemCityId), so it gets an old -> new changelog entry, same
-// as every other Edit. A system city instead has a *set* of supplier cities
-// mapped to it, so it gets additive/removal log lines (Map/Unmap) rather
-// than a changelog — a remap (city A -> city B) therefore writes 3 entries
-// total: one Edit on the supplier city, one Unmap on A, one Map on B.
-function applyMapping(supplierKey, row, newSystemCityId) {
+// value (its systemCityId), so it gets a Map (first time) / Remap (changed
+// to a different city) / Unmap (cleared) changelog entry — never Edit/Create,
+// which are reserved for entity-property changes, not mapping actions (same
+// vocabulary as applyCountryMapping's country-mapping equivalent). A system
+// city instead has a *set* of supplier cities mapped to it, so each affected
+// system city gets its own additive/removal log line — but a remap (city A
+// -> city B) is one event touching two records, not two independent actions,
+// so BOTH A and B log it as Remap too, not Unmap/Map. `groupId` is optional —
+// callers that apply several rows in one batch (city-mapping.html's Save,
+// always scoped to one supplier at a time) generate one shared id and pass
+// it into every call so the affected system city's history can show them as
+// one grouped event instead of several disconnected entries; a caller that
+// only ever changes one row at a time (every other call site) can omit it
+// and this function makes its own.
+function applyMapping(supplierKey, row, newSystemCityId, groupId) {
   const oldId = row.systemCityId;
   if (oldId === newSystemCityId) return;
   const oldLabel = oldId !== null && oldId !== undefined ? getSystemCityHistoryLabel(oldId) : null;
   const newLabel = newSystemCityId !== null ? getSystemCityHistoryLabel(newSystemCityId) : null;
   const supplierCityLabel = `${SUPPLIER_LABELS[supplierKey]} — ${row.name} (${row.countryCode}) — ID: ${row.id}`;
+  const isRemap = Boolean(oldLabel) && Boolean(newLabel);
+  const resolvedGroupId = groupId || generateHistoryGroupId();
+  const timestamp = new Date();
 
   row.systemCityId = newSystemCityId;
   row.history.push({
-    operation: oldLabel ? "Edit" : "Create",
+    operation: !oldLabel ? "Map" : newLabel ? "Remap" : "Unmap",
     description: newLabel ? (oldLabel ? `Mapped To: ${oldLabel} -> ${newLabel}` : `Mapped To: ${newLabel}`) : `Mapped To: ${oldLabel} -> Not mapped`,
     userName: CURRENT_USER.name,
     userEmail: CURRENT_USER.email,
-    timestamp: new Date(),
+    timestamp,
   });
 
   if (oldId !== null && oldId !== undefined) {
     const oldCity = SYSTEM_CITIES.find((c) => c.id === oldId);
     if (oldCity) {
       oldCity.history.push({
-        operation: "Unmap",
-        description: `Unmapped supplier city: ${supplierCityLabel}`,
+        operation: isRemap ? "Remap" : "Unmap",
+        description: supplierCityLabel,
         userName: CURRENT_USER.name,
         userEmail: CURRENT_USER.email,
-        timestamp: new Date(),
+        timestamp,
+        groupId: resolvedGroupId,
       });
     }
   }
@@ -785,11 +890,12 @@ function applyMapping(supplierKey, row, newSystemCityId) {
     const newCity = SYSTEM_CITIES.find((c) => c.id === newSystemCityId);
     if (newCity) {
       newCity.history.push({
-        operation: "Map",
-        description: `Mapped supplier city: ${supplierCityLabel}`,
+        operation: isRemap ? "Remap" : "Map",
+        description: supplierCityLabel,
         userName: CURRENT_USER.name,
         userEmail: CURRENT_USER.email,
-        timestamp: new Date(),
+        timestamp,
+        groupId: resolvedGroupId,
       });
     }
   }
