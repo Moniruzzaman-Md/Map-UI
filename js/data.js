@@ -84,11 +84,11 @@ function getSystemCountryName(code) {
 
 // Appends a system country's code to its name for mapping-history text
 // (e.g. "India (IN)") — used instead of a bare name wherever a supplier
-// country's own "Mapped To:" history references the system-country side,
-// mirroring how the city version's "Mapped To:" already carries the system
-// city's own identifying details via getSystemCityHistoryLabel(). Falls
-// back to the bare name if the code can't be resolved (e.g. a stale name
-// snapshot that predates a rename no longer in SYSTEM_COUNTRY_CODES).
+// country's own changelog references the system-country side, mirroring how
+// the city version's changelog already carries the system city's own
+// identifying details via getSystemCityHistoryLabel(). Falls back to the
+// bare name if the code can't be resolved (e.g. a stale name snapshot that
+// predates a rename no longer in SYSTEM_COUNTRY_CODES).
 function getSystemCountryNameWithCode(name) {
   if (!name) return name;
   const code = SYSTEM_COUNTRY_CODES[name];
@@ -386,6 +386,26 @@ SYSTEM_CITIES.push({
   mergedFrom: [0, 1],
 });
 
+// Matching component-side entries for the Liberty Metro demo above — same
+// user/timestamp as its own Create entry, so New York's and Los Angeles's
+// own History views show they were folded into it (see the dual-side
+// Merged/Unmerged convention in city-system.html's saveMergeCityBtn/
+// saveEditMergeBtn handlers).
+SYSTEM_CITIES[0].history.push({
+  operation: "Merged",
+  description: `Merged into: Liberty Metro (ID: ${getSystemCityDisplayId(DEMO_MERGED_CITY_ID)})`,
+  userName: "Rafiul Karim",
+  userEmail: "rafiul.karim@mynztrip.com",
+  timestamp: new Date("2026-06-23T09:30:00"),
+});
+SYSTEM_CITIES[1].history.push({
+  operation: "Merged",
+  description: `Merged into: Liberty Metro (ID: ${getSystemCityDisplayId(DEMO_MERGED_CITY_ID)})`,
+  userName: "Rafiul Karim",
+  userEmail: "rafiul.karim@mynztrip.com",
+  timestamp: new Date("2026-06-23T09:30:00"),
+});
+
 // restore any edits/new/merged cities saved from a previous session
 hydrateArray(SYSTEM_CITIES, loadFromStorage("SYSTEM_CITIES"));
 
@@ -506,14 +526,14 @@ if (demoNewCityForHotelDemo && demoMappedHotel) {
   demoMappedHotel.mappedCityIds = [DEMO_NEW_CITY_ID];
   demoMappedHotel.history.push({
     operation: "Map",
-    description: `Mapped to city: ${getSystemCityHistoryLabel(DEMO_NEW_CITY_ID)}`,
+    description: getSystemCityHistoryLabel(DEMO_NEW_CITY_ID),
     userName: "Farhan Ahmed",
     userEmail: "farhan.ahmed@mynztrip.com",
     timestamp: new Date("2026-06-22T15:00:00"),
   });
   demoNewCityForHotelDemo.history.push({
     operation: "Map",
-    description: `Mapped hotel: ${getSystemHotelHistoryLabel(demoMappedHotel.id)}`,
+    description: getSystemHotelHistoryLabel(demoMappedHotel.id),
     userName: "Farhan Ahmed",
     userEmail: "farhan.ahmed@mynztrip.com",
     timestamp: new Date("2026-06-22T15:00:00"),
@@ -561,11 +581,19 @@ function getSystemHotelLabel(id) {
   return [hotel.name, loc.city, loc.state, getSystemCountryName(loc.country.code) || loc.country.name].filter(Boolean).join(", ");
 }
 
-// Same as getSystemHotelLabel, but with the id appended — used for Hotel
-// Mapping history entries, mirroring getSystemCityHistoryLabel below.
+// Same as getSystemHotelLabel, but with the id appended and the country
+// shown as its permanent code rather than its full name — used for Hotel
+// Mapping history entries specifically (every call site is a history
+// entry), same reasoning/pattern as getSystemCityHistoryLabel above. Kept
+// separate from getSystemHotelLabel itself, which is also used in
+// non-history UI (hotel-supplier.html's own list) where the full country
+// name reads better and the id would just be clutter.
 function getSystemHotelHistoryLabel(id) {
-  const label = getSystemHotelLabel(id);
-  return label === null ? null : `${label} (ID: ${getSystemHotelDisplayId(id)})`;
+  const hotel = SYSTEM_HOTELS.find((h) => h.id === id);
+  if (!hotel) return null;
+  const loc = resolveHotelLocation(hotel);
+  const parts = [hotel.name, loc.city, loc.state, loc.country.code].filter(Boolean);
+  return `${parts.join(", ")} (ID: ${getSystemHotelDisplayId(id)})`;
 }
 
 // The seed cities (first SEED_CITY_COUNT, in their fixed definition order —
@@ -594,16 +622,20 @@ function getSystemCityDisplayId(id) {
   return String(10000000000 + id);
 }
 
-// Same as getSystemCityLabel, but with the id appended — used specifically
-// for mapping History entries/modal headers (city-system.html,
-// city-supplier.html, city-mapping.html), so a city's history stays
-// unambiguous even if it's later renamed. Kept separate from
-// getSystemCityLabel itself since that one is also used in non-history UI
-// (checklist notes, remap preview, pinned-city meta) where the id would
-// just be clutter.
+// Same as getSystemCityLabel, but with the id appended and the country
+// shown as its permanent code rather than its (renameable, longer) full
+// name — used specifically for History descriptions (every call site is a
+// history entry, seeded or live), so a city's history stays unambiguous
+// even if it's later renamed, and doesn't run as long as getSystemCityLabel
+// would once an id is added on top. Kept separate from getSystemCityLabel
+// itself since that one is also used in non-history UI (checklist notes,
+// remap preview, pinned-city meta) where the full country name reads
+// better and the id would just be clutter.
 function getSystemCityHistoryLabel(id) {
-  const label = getSystemCityLabel(id);
-  return label === null ? null : `${label} (ID: ${getSystemCityDisplayId(id)})`;
+  const city = SYSTEM_CITIES.find((c) => c.id === id);
+  if (!city) return null;
+  const parts = [city.name, city.state, city.country.code].filter(Boolean);
+  return `${parts.join(", ")} (ID: ${getSystemCityDisplayId(id)})`;
 }
 
 // ---------- Supplier City ----------
@@ -720,7 +752,7 @@ Object.keys(supplierCities).forEach((key) => {
 supplierCities.agoda[0].history.push({
   operation: "Map",
   systemCityLabel: getSystemCityLabel(0),
-  description: `Mapped To: ${getSystemCityHistoryLabel(0)}`,
+  description: getSystemCityHistoryLabel(0),
   userName: "Farhan Ahmed",
   userEmail: "farhan.ahmed@mynztrip.com",
   timestamp: new Date("2026-06-19T13:40:00"),
@@ -728,7 +760,7 @@ supplierCities.agoda[0].history.push({
 supplierCities.booking[0].history.push({
   operation: "Map",
   systemCityLabel: getSystemCityLabel(0),
-  description: `Mapped To: ${getSystemCityHistoryLabel(0)}`,
+  description: getSystemCityHistoryLabel(0),
   userName: "Rafiul Karim",
   userEmail: "rafiul.karim@mynztrip.com",
   timestamp: new Date("2026-06-20T09:15:00"),
@@ -736,7 +768,7 @@ supplierCities.booking[0].history.push({
 supplierCities.agoda[8].history.push({
   operation: "Map",
   systemCityLabel: getSystemCityLabel(0),
-  description: `Mapped To: ${getSystemCityHistoryLabel(0)}`,
+  description: getSystemCityHistoryLabel(0),
   userName: "Farhan Ahmed",
   userEmail: "farhan.ahmed@mynztrip.com",
   timestamp: new Date("2026-06-21T11:05:00"),
@@ -767,21 +799,21 @@ supplierCities.agoda[9].systemCityId = 1; // final state must match the "Map" en
 
   torontoRow.history.push({
     operation: "Remap",
-    description: `Mapped To: ${laLabel} -> ${torontoLabel}`,
+    description: `${laLabel} -> ${torontoLabel}`,
     userName,
     userEmail,
     timestamp,
   });
   freshRow.history.push({
     operation: "Map",
-    description: `Mapped To: ${laLabel}`,
+    description: laLabel,
     userName,
     userEmail,
     timestamp,
   });
   removedRow.history.push({
     operation: "Unmap",
-    description: `Mapped To: ${laLabel} -> Not mapped`,
+    description: `${laLabel} -> Not mapped`,
     userName,
     userEmail,
     timestamp,
@@ -790,7 +822,7 @@ supplierCities.agoda[9].systemCityId = 1; // final state must match the "Map" en
   SYSTEM_CITIES[1].history.push(
     {
       operation: "Remap",
-      description: `${SUPPLIER_LABELS.agoda} — ${torontoRow.name} (${torontoRow.countryCode}) — ID: ${torontoRow.id}`,
+      description: `${SUPPLIER_LABELS.agoda} — ${torontoRow.name} (${torontoRow.countryCode}) — ID: ${torontoRow.id}${HISTORY_LINE_BREAK}${laLabel} -> ${torontoLabel}`,
       userName,
       userEmail,
       timestamp,
@@ -815,7 +847,7 @@ supplierCities.agoda[9].systemCityId = 1; // final state must match the "Map" en
   );
   SYSTEM_CITIES[10].history.push({
     operation: "Remap",
-    description: `${SUPPLIER_LABELS.agoda} — ${torontoRow.name} (${torontoRow.countryCode}) — ID: ${torontoRow.id}`,
+    description: `${SUPPLIER_LABELS.agoda} — ${torontoRow.name} (${torontoRow.countryCode}) — ID: ${torontoRow.id}${HISTORY_LINE_BREAK}${laLabel} -> ${torontoLabel}`,
     userName,
     userEmail,
     timestamp,
@@ -863,11 +895,19 @@ function applyMapping(supplierKey, row, newSystemCityId, groupId) {
   const isRemap = Boolean(oldLabel) && Boolean(newLabel);
   const resolvedGroupId = groupId || generateHistoryGroupId();
   const timestamp = new Date();
+  // On a genuine remap, both affected system cities' own history must say
+  // exactly where the supplier city moved from and to, including each
+  // city's own ID (same ID-suffixed getSystemCityHistoryLabel used for
+  // oldLabel/newLabel above) — same "old -> new" convention as country
+  // mapping. HISTORY_LINE_BREAK (js/app.js) puts this on its own line
+  // instead of cramming the "who" and the "old -> new" (now with two IDs)
+  // into one dense sentence.
+  const remapSuffix = isRemap ? `${HISTORY_LINE_BREAK}${getSystemCityHistoryLabel(oldId)} -> ${getSystemCityHistoryLabel(newSystemCityId)}` : "";
 
   row.systemCityId = newSystemCityId;
   row.history.push({
     operation: !oldLabel ? "Map" : newLabel ? "Remap" : "Unmap",
-    description: newLabel ? (oldLabel ? `Mapped To: ${oldLabel} -> ${newLabel}` : `Mapped To: ${newLabel}`) : `Mapped To: ${oldLabel} -> Not mapped`,
+    description: newLabel ? (oldLabel ? `${oldLabel} -> ${newLabel}` : `${newLabel}`) : `${oldLabel} -> Not mapped`,
     userName: CURRENT_USER.name,
     userEmail: CURRENT_USER.email,
     timestamp,
@@ -878,7 +918,7 @@ function applyMapping(supplierKey, row, newSystemCityId, groupId) {
     if (oldCity) {
       oldCity.history.push({
         operation: isRemap ? "Remap" : "Unmap",
-        description: supplierCityLabel,
+        description: `${supplierCityLabel}${remapSuffix}`,
         userName: CURRENT_USER.name,
         userEmail: CURRENT_USER.email,
         timestamp,
@@ -891,7 +931,7 @@ function applyMapping(supplierKey, row, newSystemCityId, groupId) {
     if (newCity) {
       newCity.history.push({
         operation: isRemap ? "Remap" : "Map",
-        description: supplierCityLabel,
+        description: `${supplierCityLabel}${remapSuffix}`,
         userName: CURRENT_USER.name,
         userEmail: CURRENT_USER.email,
         timestamp,
@@ -998,14 +1038,23 @@ Object.keys(supplierHotels).forEach((key) => {
 // Map/Unmap history on BOTH sides (same dual-side convention as
 // applyMapping above / rule 9 in project history): hotel.history gets an
 // Edit-shaped Map/Unmap changelog line, city.history gets the mirrored
-// additive/removal line.
-function applyHotelCityMap(hotel, city, mapped) {
+// additive/removal line. `groupId` is optional, same convention as
+// applyMapping's own — hotel-mapping.html's Save is always scoped to one
+// pinned city, but can map/unmap several different hotels against it in one
+// click, so the city (the "one" side several entries land on in a batch)
+// needs a shared id to show them as one grouped card; a caller that only
+// ever changes one hotel at a time can omit it and this function makes its
+// own. Never added to the hotel's own entry — a single hotel only ever gets
+// one entry per batch, nothing to group there.
+function applyHotelCityMap(hotel, city, mapped, groupId) {
   hotel.mappedCityIds = hotel.mappedCityIds || [];
   const alreadyMapped = hotel.mappedCityIds.includes(city.id);
   if (mapped === alreadyMapped) return;
 
   const hotelLabel = getSystemHotelHistoryLabel(hotel.id);
   const cityLabel = getSystemCityHistoryLabel(city.id);
+  const resolvedGroupId = groupId || generateHistoryGroupId();
+  const timestamp = new Date();
 
   if (mapped) {
     hotel.mappedCityIds.push(city.id);
@@ -1015,17 +1064,18 @@ function applyHotelCityMap(hotel, city, mapped) {
 
   hotel.history.push({
     operation: mapped ? "Map" : "Unmap",
-    description: `${mapped ? "Mapped to city" : "Unmapped from city"}: ${cityLabel}`,
+    description: cityLabel,
     userName: CURRENT_USER.name,
     userEmail: CURRENT_USER.email,
-    timestamp: new Date(),
+    timestamp,
   });
   city.history.push({
     operation: mapped ? "Map" : "Unmap",
-    description: `${mapped ? "Mapped hotel" : "Unmapped hotel"}: ${hotelLabel}`,
+    description: hotelLabel,
     userName: CURRENT_USER.name,
     userEmail: CURRENT_USER.email,
-    timestamp: new Date(),
+    timestamp,
+    groupId: resolvedGroupId,
   });
 
   saveToStorage("SYSTEM_HOTELS", SYSTEM_HOTELS);

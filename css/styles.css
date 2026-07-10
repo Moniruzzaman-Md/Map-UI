@@ -1091,13 +1091,42 @@ table.data-table {
 
 .history-op-line {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
   margin-bottom: 4px;
 }
 
 .history-op-line:last-child {
   margin-bottom: 0;
+}
+
+/* Stacks multiple descriptions under one shared operation pill, when a
+   batch group has several entries with the same operation — see
+   renderHistoryDescriptionLines() in js/app.js. Looser gap than
+   .history-op-desc-entry's own internal gap below, so entry boundaries
+   still read as the primary grouping even when every entry only has one
+   line (no divider needed to tell those apart, just breathing room). */
+.history-op-desc-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* One history entry's own lines (its description split on
+   HISTORY_LINE_BREAK) — kept visually tight so they read as one thought,
+   and separated from the next entry by a dashed divider whenever a cluster
+   has more than one entry. Without this, a 2-entry Remap cluster (each
+   entry itself 2 lines) rendered as 4 flat, identical-looking lines with no
+   way to tell where one entry ended and the next began. */
+.history-op-desc-entry {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.history-op-desc-entry:not(:last-child) {
+  padding-bottom: 6px;
+  border-bottom: 1px dashed var(--border-color);
 }
 
 .row-actions {
@@ -1652,7 +1681,11 @@ table.data-table {
    selected-list/checklist split. */
 .mapping-layout {
   display: grid;
-  grid-template-columns: 1fr 1.3fr;
+  /* minmax(0, ...) not bare 1fr — a bare 1fr track's minimum width is its
+     content's natural size, so one wide, unbreakable child (e.g. a filter
+     dropdown) can force the whole grid, and the page, to scroll sideways
+     even though every text row inside already truncates correctly. */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
   gap: 20px;
 }
 
@@ -1767,16 +1800,78 @@ table.data-table {
   display: none;
 }
 
+/* Same Full Screen toggle, scoped to hotel-mapping.html's own <main>. */
+#hotelMappingMain.chrome-hidden .page-header,
+#hotelMappingMain.chrome-hidden .page-divider {
+  display: none;
+}
+
+/* Makes hotel-mapping.html's single panel body a flex column so its
+   already-shared .mapping-layout-bottom (flex:1;min-height:0, see below)
+   actually takes effect here too — without this, the grid just sizes to
+   its own content instead of filling the panel, and the right-hand hotel
+   checklist can't grow past its old fixed max-height. */
+#hotelMappingBody {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Green/red left bar replacing the old "Active"/"Inactive" text pill on
+   each hotel checkbox row (hotel-mapping.html only — every other
+   Active/Inactive pill in the project is a list-table cell, unrelated).
+   3px taken out of .merge-list-item's own 12px left padding so content
+   doesn't shift. */
+.merge-list-item--hotel-active,
+.merge-list-item--hotel-inactive {
+  padding-left: 9px;
+}
+
+.merge-list-item--hotel-active {
+  border-left: 3px solid var(--success);
+}
+
+.merge-list-item--hotel-inactive {
+  border-left: 3px solid var(--accent-red);
+}
+
 .mapping-bottom-col {
   display: flex;
   flex-direction: column;
   min-height: 0;
+  min-width: 0;
+}
+
+/* hotel-mapping.html only: 50/50 columns instead of the shared 1fr/1.3fr
+   ratio above (city-mapping.html keeps that ratio). */
+#hotelMappingBody .mapping-layout-bottom {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+/* "Contained" list treatment: sized to its own content (flex-grow:0, so it
+   never stretches to fill unused space, unlike .mapping-list-group below)
+   but still capped at whatever room is actually left in the column
+   (min-height:0 lets it shrink under pressure) — the .merge-list inside it
+   is what actually scrolls once content exceeds that, not the whole column.
+   Used for hotel-mapping.html's left "Selected Hotels" list, which must
+   stay bounded to the page height without being force-stretched to match
+   the right column the way .mapping-list-group's lists are. */
+.mapping-list-contained {
+  display: flex;
+  flex-direction: column;
+  flex: 0 1 auto;
+  min-height: 0;
+}
+
+.mapping-list-contained .merge-list {
+  flex: 1;
+  min-height: 0;
+  max-height: none;
 }
 
 /* Makes the bottom section's body a bounded flex column instead of the
    default "auto-height content, scroll the whole body if it overflows"
-   behavior .mapping-panel-body normally has (still correct for the top
-   section's two panels, which keep the base rule) — scoped via this
+   behavior .mapping-panel-body normally has (still correct for the "1. Pin
+   a System City" panel, which keeps the base rule) — scoped via this
    compound selector so only the bottom panel opts into it. #rightPanelContent
    (unique to this page) is the direct child that actually holds the 3 rows
    (filters / grid / save bar); it also needs to be a flex column, with only
@@ -1784,6 +1879,15 @@ table.data-table {
    instead of ballooning to fit hundreds of checklist rows (the classic
    flexbox "every ancestor needs min-height:0" trap). */
 .mapping-bottom-panel .mapping-panel-body {
+  display: flex;
+  flex-direction: column;
+}
+
+/* "2. Existing Mapping with Pinned City" panel: same flex-column treatment,
+   so its list (.mapping-list-group .merge-list below) can grow to fill the
+   panel instead of stopping at .merge-list's normal 220px cap and leaving
+   empty space below a small scrolling box. */
+.mapping-existing-panel .mapping-panel-body {
   display: flex;
   flex-direction: column;
 }
@@ -2074,6 +2178,7 @@ table.data-table {
   border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
   background: var(--bg-panel);
+  flex-shrink: 0;
 }
 
 .pinned-city-card .pinned-city-name {

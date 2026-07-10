@@ -134,6 +134,7 @@
           <li><strong>Map</strong> — pick which country on the master list a supplier's country corresponds to. Reassigning a country that's already mapped to a different one must show old vs. new and require explicit confirmation — never silent. Picking the same country it's already mapped to must not save or log anything.</li>
           <li><strong>Unmap</strong> — clear an existing mapping, leaving the supplier's country unmapped. Must require confirmation before removing it.</li>
           <li><strong>History</strong> — every entry has three parts: an <strong>operation name</strong>, a <strong>description</strong> in that operation's fixed pattern, and <strong>who + when</strong>. Logged the instant the change happens (never reconstructed later by comparing snapshots), newest entry first. A mapping change always writes to <strong>two</strong> records — this supplier's country AND the affected master-list country — no matter which screen made the change.
+            <p>When a description needs to show more than one distinct fact — e.g. who made the change, and separately what it changed from/to — separate the facts with a single pipe character <code>|</code>. The history view splits on <code>|</code> and puts each part on its own line, so a card stays easy to scan instead of one dense run-on sentence. Only insert <code>|</code> between genuinely distinct facts, and never for any other purpose — it's reserved as the line-break marker.</p>
             <p><strong>On this supplier's own country record:</strong></p>
             <ul>
               <li><strong>Map</strong> — this is the first time this country has ever been linked to a master-list country. Description: <em>{new country} ({code})</em></li>
@@ -144,7 +145,7 @@
             <ul>
               <li><strong>Map</strong> — this supplier's country became linked to it for the first time (it had no country before). Description: <em>{Supplier} — {supplier's country name} ({code}) — ID: {supplier's country ID}</em></li>
               <li><strong>Unmap</strong> — this supplier's country got unlinked entirely, with nothing put in its place. Description: <em>{Supplier} — {supplier's country name} ({code}) — ID: {supplier's country ID}</em></li>
-              <li><strong>Remap</strong> — this supplier's country moved between two countries. Both the country it left and the country it moved to log this as one Remap event, never as Unmap on one and Map on the other — and both log the exact same description, so either country's history is understandable on its own. Description: <em>{Supplier} — {supplier's country name} ({code}) — ID: {supplier's country ID} [{old country} ({code}) -&gt; {new country} ({code})]</em></li>
+              <li><strong>Remap</strong> — this supplier's country moved between two countries. Both the country it left and the country it moved to log this as one Remap event, never as Unmap on one and Map on the other — and both log the exact same description, so either country's history is understandable on its own. Description: <em>{Supplier} — {supplier's country name} ({code}) — ID: {supplier's country ID}|{old country} ({code}) -&gt; {new country} ({code})</em> (two lines: who, then what changed)</li>
             </ul>
           </li>
           <li><strong>View Cities</strong> — jumps to this supplier's city list, filtered to this country.</li>
@@ -157,7 +158,7 @@
           <div class="toolbar-controls">
             <div class="toolbar-search">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-              <input type="text" id="countrySearch" placeholder="Search by country name..." disabled />
+              <input type="text" id="countrySearch" placeholder="Search by country name or ID..." disabled />
             </div>
             <div class="toolbar-filters">
               <select class="filter-select" id="supplierFilter">
@@ -303,7 +304,7 @@
     if (state.mapped === "mapped") rows = rows.filter((r) => r.systemCountry);
     if (state.mapped === "unmapped") rows = rows.filter((r) => !r.systemCountry);
     const q = state.query.trim().toLowerCase();
-    if (q) rows = rows.filter((r) => r.name.toLowerCase().includes(q));
+    if (q) rows = rows.filter((r) => r.name.toLowerCase().includes(q) || r.supplierId.toLowerCase().includes(q));
     return rows;
   }
 
@@ -460,7 +461,9 @@
     // it changed) — same "old -> new" convention as this supplier country's
     // own "old -> new" changelog above, appended so either country's
     // history is legible on its own without cross-referencing the other.
-    const remapSuffix = isRemap ? ` [${getSystemCountryNameWithCode(oldValue)} -> ${getSystemCountryNameWithCode(selected)}]` : "";
+    // HISTORY_LINE_BREAK (js/app.js) puts this on its own line instead of
+    // cramming the "who" and the "old -> new" into one dense sentence.
+    const remapSuffix = isRemap ? `${HISTORY_LINE_BREAK}${getSystemCountryNameWithCode(oldValue)} -> ${getSystemCountryNameWithCode(selected)}` : "";
 
     if (oldValue) {
       const oldCountry = SYSTEM_COUNTRIES.find((c) => c.name === oldValue);

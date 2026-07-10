@@ -572,7 +572,7 @@
       const record = SYSTEM_CITIES.find((c) => String(c.id) === summaryBtn.dataset.rowId);
       if (!record) return;
 
-      document.getElementById("summaryCityName").textContent = `— ${record.name}`;
+      document.getElementById("summaryCityName").textContent = `— ${record.name} (ID: ${getSystemCityDisplayId(record.id)})`;
       const summaryList = document.getElementById("summaryList");
 
       // A New City has no supplier-city mapping — its Summary instead shows
@@ -924,8 +924,10 @@
     }
     const meta = SYSTEM_COUNTRIES.find((c) => c.name === countryName);
     const mergeStateValue = mergeResultState.disabled ? null : mergeResultState.value || null;
+    const newCityId = SYSTEM_CITIES.length;
+    const timestamp = new Date();
     SYSTEM_CITIES.push({
-      id: SYSTEM_CITIES.length,
+      id: newCityId,
       name,
       state: mergeStateValue,
       country: { name: meta.name, code: meta.code },
@@ -944,11 +946,26 @@
             .join(", "),
           userName: CURRENT_USER.name,
           userEmail: CURRENT_USER.email,
-          timestamp: new Date(),
+          timestamp,
         },
       ],
       cityType: "merged",
       mergedFrom: [...mergeSelectedIds],
+    });
+    // Each component city's own history should show it was folded into this
+    // merge too — not a Map (see the dedicated Merged/Unmerged operations,
+    // js/app.js), just a plain note of its own composition membership.
+    [...mergeSelectedIds].forEach((cid) => {
+      const componentCity = SYSTEM_CITIES.find((c) => c.id === cid);
+      if (componentCity) {
+        componentCity.history.push({
+          operation: "Merged",
+          description: `Merged into: ${name} (ID: ${getSystemCityDisplayId(newCityId)})`,
+          userName: CURRENT_USER.name,
+          userEmail: CURRENT_USER.email,
+          timestamp,
+        });
+      }
     });
     saveToStorage("SYSTEM_CITIES", SYSTEM_CITIES);
     render();
@@ -1033,6 +1050,7 @@
       const newIds = [...editMergeSelectedIds];
       const added = newIds.filter((cid) => !previousIds.includes(cid));
       const removed = previousIds.filter((cid) => !newIds.includes(cid));
+      const timestamp = new Date();
 
       const changeParts = [];
       if (oldName !== name) changeParts.push(`Name: ${oldName} -> ${name}`);
@@ -1050,12 +1068,44 @@
         record.history.push({
           operation: "Edit",
           name,
-          description: changeParts.join(", "),
+          // A rename, a state move, and a composition change can all land in
+          // one save — HISTORY_LINE_BREAK (js/app.js) puts each on its own
+          // line instead of one dense comma-joined sentence.
+          description: changeParts.join(HISTORY_LINE_BREAK),
           userName: CURRENT_USER.name,
           userEmail: CURRENT_USER.email,
-          timestamp: new Date(),
+          timestamp,
         });
       }
+
+      // Each added/removed component city's own history should show it too
+      // — a plain Merged/Unmerged note (see js/app.js), not a Map/Remap/Unmap,
+      // since this isn't a mapping relationship.
+      added.forEach((cid) => {
+        const c = SYSTEM_CITIES.find((x) => x.id === cid);
+        if (c) {
+          c.history.push({
+            operation: "Merged",
+            description: `Merged into: ${record.name} (ID: ${getSystemCityDisplayId(record.id)})`,
+            userName: CURRENT_USER.name,
+            userEmail: CURRENT_USER.email,
+            timestamp,
+          });
+        }
+      });
+      removed.forEach((cid) => {
+        const c = SYSTEM_CITIES.find((x) => x.id === cid);
+        if (c) {
+          c.history.push({
+            operation: "Unmerged",
+            description: `Removed from merged city: ${record.name} (ID: ${getSystemCityDisplayId(record.id)})`,
+            userName: CURRENT_USER.name,
+            userEmail: CURRENT_USER.email,
+            timestamp,
+          });
+        }
+      });
+
       saveToStorage("SYSTEM_CITIES", SYSTEM_CITIES);
       render();
       closeModal(document.getElementById("editMergedCityModal"));
@@ -1066,6 +1116,22 @@
       showConfirm(
         "A merged city must contain at least 2 cities. Saving now will delete this merged city entirely. Continue?",
         () => {
+          // The merge is being destroyed entirely, so every one of its
+          // current members (not just the ones the user unchecked) is being
+          // freed — each gets its own Unmerged entry before the record disappears.
+          const timestamp = new Date();
+          (record.mergedFrom || []).forEach((cid) => {
+            const c = SYSTEM_CITIES.find((x) => x.id === cid);
+            if (c) {
+              c.history.push({
+                operation: "Unmerged",
+                description: `Removed from merged city: ${record.name} (ID: ${getSystemCityDisplayId(record.id)})`,
+                userName: CURRENT_USER.name,
+                userEmail: CURRENT_USER.email,
+                timestamp,
+              });
+            }
+          });
           const idx = SYSTEM_CITIES.findIndex((c) => c.id === record.id);
           if (idx !== -1) SYSTEM_CITIES.splice(idx, 1);
           saveToStorage("SYSTEM_CITIES", SYSTEM_CITIES);

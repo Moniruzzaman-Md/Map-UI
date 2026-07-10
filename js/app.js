@@ -302,7 +302,20 @@ function debounce(fn, delay = 350) {
 // Shared identity + formatting for history entries across all pages.
 const CURRENT_USER = { name: "Admin User", email: "admin@mynztrip.com" };
 
-const OPERATION_PILL_CLASS = { Create: "success", Edit: "info", "Status Change": "neutral", Map: "success", Remap: "info", Unmap: "danger" };
+// "Merged"/"Unmerged" are for a city's own merge-composition membership
+// changing (added to / removed from a merged city's mergedFrom list) — kept
+// distinct from Map/Remap/Unmap since a merge isn't a mapping relationship,
+// just this city's own property. Same green/red as the analogous
+// addition/removal pair Map/Unmap already use.
+const OPERATION_PILL_CLASS = { Create: "success", Edit: "info", "Status Change": "neutral", Map: "success", Remap: "info", Unmap: "danger", Merged: "success", Unmerged: "danger" };
+
+// The one reserved marker for "start a new line here" inside a history
+// description string — used when one description needs to show more than
+// one distinct fact (e.g. who made a mapping change, and separately what it
+// changed from/to) instead of cramming both into one dense run-on line. The
+// renderer below splits on this and puts each part on its own line. Never
+// use this character in a description for any other purpose.
+const HISTORY_LINE_BREAK = "|";
 
 function operationPillHtml(operation) {
   const op = operation || "Edit";
@@ -338,17 +351,75 @@ function historyValueHtml(value) {
   return `<div class="truncatable truncatable--historyvalue" title="${value}"><span class="truncatable-text">${value}</span></div>`;
 }
 
+// Splits one description on HISTORY_LINE_BREAK into its separate facts
+// (e.g. "who mapped it" and "what it changed from/to"), trimming the
+// incidental whitespace a template literal like `${a}${HISTORY_LINE_BREAK}${b}`
+// doesn't leave, but a hand-written one might. A description with no marker
+// in it just comes back as a single-item array.
+function splitDescriptionLines(description) {
+  return (description || "")
+    .split(HISTORY_LINE_BREAK)
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+// Within one grouped card (see renderHistoryList below), clusters that
+// group's entries by operation — a batch Save can easily produce several
+// entries with the *same* operation (e.g. mapping 3 new cities in one click
+// is 3 "Map" entries), and repeating an identical pill 3 times in a row read
+// as noisy/unorganized. Clusters preserve first-seen order across the group
+// (not alphabetical), so the card still roughly follows the order the batch
+// was applied in. Every entry's own description is also split on
+// HISTORY_LINE_BREAK (see splitDescriptionLines above), so a single dense
+// description (e.g. a Remap's "who" + "old -> new") reads as separate lines
+// too. Once both of these apply at once — several entries sharing one
+// operation, each of which ALSO splits into several lines — flattening
+// everything into one plain list of lines made it impossible to tell where
+// one entry's lines ended and the next entry's began. Each entry's own
+// lines are now kept together in their own `.history-op-desc-entry` group;
+// `.history-op-desc-entry:not(:last-child)` (css/styles.css) draws a dashed
+// divider + extra spacing between entries, while lines within one entry
+// keep the original tight spacing — so a 2-entry Remap cluster reads as two
+// visually distinct blocks instead of 4 run-together lines. A cluster that
+// resolves to exactly one line total still renders exactly as before (pill,
+// then that line, on the same line, no wrapper at all).
+function renderHistoryDescriptionLines(group) {
+  const order = [];
+  const byOperation = new Map();
+  group.forEach((h) => {
+    const op = h.operation || "Edit";
+    if (!byOperation.has(op)) {
+      byOperation.set(op, []);
+      order.push(op);
+    }
+    byOperation.get(op).push(splitDescriptionLines(h.description));
+  });
+  return order
+    .map((op) => {
+      const entries = byOperation.get(op).filter((lines) => lines.length);
+      const totalLines = entries.reduce((sum, lines) => sum + lines.length, 0);
+      const body =
+        totalLines > 1
+          ? `<div class="history-op-desc-list">${entries
+              .map((lines) => `<div class="history-op-desc-entry">${lines.map((l) => `<div>${l}</div>`).join("")}</div>`)
+              .join("")}</div>`
+          : entries[0]?.[0];
+      return `<div class="history-op-line">${operationPillHtml(op)}${body}</div>`;
+    })
+    .join("");
+}
+
 // Shared card-per-entry history renderer, used by every "View History" drawer
 // project-wide. Every history entry is expected to already carry a fully
 // formed `description` string — a property snapshot for Create, or an
 // "old -> new" changelog for Edit/Status Change — built at the point the
 // action happened (see each page's save/toggle handlers). Newest entry first.
 // Entries that share a `groupId` (set by applyMapping() in js/data.js when
-// one batch Save touches several rows) are merged into a single card — one
-// "[Operation pill] description" line per entry in the group, since a group
-// can mix several different operations. An entry with no groupId (every
-// entity except a system city's batch-mapping history) is its own one-entry
-// group, so it still renders as a normal single-line card.
+// one batch Save touches several rows) are merged into a single card — see
+// renderHistoryDescriptionLines above for how same-operation entries within
+// that group are organized. An entry with no groupId (every entity except a
+// system city's batch-mapping history) is its own one-entry group, so it
+// still renders as a normal single-line card.
 function renderHistoryList(entries, emptyMessage = "No history yet") {
   if (!entries.length) {
     return `<p style="text-align:center; color:var(--text-muted); padding:28px 0;">${emptyMessage}</p>`;
@@ -384,7 +455,7 @@ function renderHistoryList(entries, emptyMessage = "No history yet") {
               </tr>
               <tr class="history-description-row">
                 <td colspan="2" class="history-description-cell">
-                  ${group.map((h) => `<div class="history-op-line">${operationPillHtml(h.operation)} ${h.description || ""}</div>`).join("")}
+                  ${renderHistoryDescriptionLines(group)}
                 </td>
               </tr>
             </tbody>

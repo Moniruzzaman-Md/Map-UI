@@ -137,12 +137,13 @@
           <li><strong>Edit</strong> — renaming must never break an existing mapping. Either mappings are keyed by the permanent code, or the rename updates every existing mapping in the same step. Empty names must be rejected with a clear error.</li>
           <li><strong>Map</strong> — for each supplier, show either the country(ies) already mapped here (with Unmap), or a picker of that supplier's own countries (with Map). In the picker, any option already mapped to a different country must be labeled with its current target (e.g. "Deutschland (DE) — mapped to Austria") so that's visible before it's picked, not just after. Picking an already-mapped-elsewhere option must show old vs. new and require explicit confirmation before applying — never silent. Logged as a <strong>Remap</strong> (see History below), not a plain Map.</li>
           <li><strong>History</strong> — every entry has three parts: an <strong>operation name</strong>, a <strong>description</strong> in that operation's fixed pattern, and <strong>who + when</strong>. Logged the instant the change happens (never reconstructed later by comparing snapshots), newest entry first. A mapping change always writes to <strong>two</strong> records — the country's own history AND the affected supplier country's own history — no matter which screen made the change.
+            <p>When a description needs to show more than one distinct fact — e.g. who made the change, and separately what it changed from/to — separate the facts with a single pipe character <code>|</code>. The history view splits on <code>|</code> and puts each part on its own line, so a card stays easy to scan instead of one dense run-on sentence. Only insert <code>|</code> between genuinely distinct facts, and never for any other purpose — it's reserved as the line-break marker.</p>
             <p><strong>On the country's own record:</strong></p>
             <ul>
               <li><strong>Edit</strong> — the name was changed. Description: <em>Name: {old name} -&gt; {new name}</em></li>
               <li><strong>Map</strong> — a supplier's country became linked to this country for the first time (it had no country before). Description: <em>{Supplier} — {supplier's country name} ({code}) — ID: {supplier's country ID}</em></li>
               <li><strong>Unmap</strong> — a supplier's country that was linked to this country got unlinked entirely, with nothing put in its place. Description: <em>{Supplier} — {supplier's country name} ({code}) — ID: {supplier's country ID}</em></li>
-              <li><strong>Remap</strong> — a supplier's country moved between two countries. Both the country it left and the country it moved to log this as one Remap event, never as Unmap on one and Map on the other — and both log the exact same description, so either country's history is understandable on its own. Description: <em>{Supplier} — {supplier's country name} ({code}) — ID: {supplier's country ID} [{old country} ({code}) -&gt; {new country} ({code})]</em></li>
+              <li><strong>Remap</strong> — a supplier's country moved between two countries. Both the country it left and the country it moved to log this as one Remap event, never as Unmap on one and Map on the other — and both log the exact same description, so either country's history is understandable on its own. Description: <em>{Supplier} — {supplier's country name} ({code}) — ID: {supplier's country ID}|{old country} ({code}) -&gt; {new country} ({code})</em> (two lines: who, then what changed)</li>
             </ul>
             <p><strong>On the supplier's own country record</strong> (the matching entry for the same event, from its side — always Map/Remap/Unmap, never Edit/Create, which are reserved for renaming a country, not a mapping change):</p>
             <ul>
@@ -546,7 +547,9 @@
     // it changed) — same "old -> new" convention as the supplier country's
     // own "old -> new" changelog above, appended so either country's
     // history is legible on its own without cross-referencing the other.
-    const remapSuffix = isRemap ? ` [${getSystemCountryNameWithCode(oldValue)} -> ${getSystemCountryNameWithCode(newSystemCountry)}]` : "";
+    // HISTORY_LINE_BREAK (js/app.js) puts this on its own line instead of
+    // cramming the "who" and the "old -> new" into one dense sentence.
+    const remapSuffix = isRemap ? `${HISTORY_LINE_BREAK}${getSystemCountryNameWithCode(oldValue)} -> ${getSystemCountryNameWithCode(newSystemCountry)}` : "";
 
     if (oldValue) {
       const oldCountry = countries.find((c) => c.name === oldValue);

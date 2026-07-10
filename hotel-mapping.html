@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Hotel Mapping – Hotel Map | mynztrip.com</title>
+<title>Hotel Mapping to New City – Hotel Map | mynztrip.com</title>
 <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
@@ -104,11 +104,11 @@
     </aside>
 
     <!-- Main content -->
-    <main class="main-content">
+    <main class="main-content" id="hotelMappingMain">
       <div class="page-header">
         <div class="page-title-row">
-          <h1 class="page-title">Hotel Mapping</h1>
-          <button class="info-icon-btn" data-info-target="#hotelMappingInfo" data-info-title="Hotel Mapping" aria-label="About this page">
+          <h1 class="page-title">Hotel Mapping to New City</h1>
+          <button class="info-icon-btn" data-info-target="#hotelMappingInfo" data-info-title="Hotel Mapping to New City" aria-label="About this page">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 11v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="8" r="1" fill="currentColor"/></svg>
           </button>
         </div>
@@ -118,36 +118,44 @@
       <template id="hotelMappingInfo">
         <p>Maps <strong>system hotels</strong> to a New City. Unlike every other mapping in this project, a hotel can be mapped to more than one city — there's no "remap" here, just check to map and uncheck to unmap.</p>
         <ul>
-          <li>Filter by Country/State/City to narrow down the hotel list — these filter the hotel's own location, not the pinned city.</li>
+          <li>Filter by Country/State/City to narrow down the hotel list — these filter the hotel's own location, not the pinned city. The hotel checklist stays empty until a <strong>City</strong> is chosen (State is optional) — the full hotel list can run into the millions, so nothing loads until it's narrowed to one city.</li>
           <li>On the left, <strong>Already Mapped</strong> lists hotels currently mapped to this city — its <strong>Unmap</strong> button queues a removal without the row disappearing, so you can change your mind (the button becomes <strong>Undo</strong>) right up until Save. <strong>New Selection</strong> lists your fresh picks from the checklist on the right.</li>
           <li><strong>Show only unmapped</strong> hides hotels already mapped to this city, so you can see what's still available.</li>
           <li><strong>Save Mapping</strong> always opens a preview first — Previously Saved, New Map, and Unmap — before applying anything, and logs a Map/Unmap entry on both the hotel's and this city's History.</li>
+          <li>Tick <strong>"Full Screen"</strong> (top-right) to hide the page title too, giving the hotel checklist the entire screen.</li>
         </ul>
       </template>
 
-      <section class="mapping-panel" style="flex:1; min-height:0;">
-        <div class="mapping-panel-header">
-          <h2>Hotel Mapping</h2>
-          <p>Select which system hotels are mapped to this New City.</p>
-        </div>
-        <div class="mapping-panel-body" id="hotelMappingBody">
-          <div class="pinned-city-card" id="pinnedCityCard" style="margin-top:0;">
-            <div class="pinned-city-name" id="pinnedCityName"></div>
-            <div class="pinned-city-meta" id="pinnedCityMeta"></div>
-            <div class="pinned-city-actions">
-              <span class="pill neutral" id="pinnedCityMappedCount">0 mapped</span>
-              <button class="action-btn" id="pinnedCityHistoryBtn" aria-label="View history for this city">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 109-9 9 9 0 00-7 3.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3 3.5V8h4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 7.5V12l3.2 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </button>
-            </div>
-          </div>
+      <div class="mapping-nav-fabs">
+        <button type="button" class="mapping-nav-fab mapping-chrome-toggle" id="hotelMappingChromeToggleBtn" aria-label="Hide page title for full-height checklist">
+          <svg class="icon-expand" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg class="icon-collapse" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>Full Screen</span>
+        </button>
+      </div>
 
-          <div class="mapping-layout mapping-layout-bottom" style="margin-top:16px;">
-            <!-- Left: Already Mapped / New Selection -->
+      <section class="mapping-panel" style="flex:1; min-height:0;">
+        <div class="mapping-panel-body" id="hotelMappingBody">
+          <div class="mapping-layout mapping-layout-bottom">
+            <!-- Left: pinned city + Already Mapped / New Selection — both
+                 contained to their own content height (not stretched to
+                 match the right column; the right checklist is the one
+                 that should fill the page, starting at the same top edge
+                 as this column instead of below a full-width city card). -->
             <div class="mapping-bottom-col">
-              <div class="form-group mapping-list-group">
+              <div class="pinned-city-card" id="pinnedCityCard" style="margin-top:0;">
+                <div class="pinned-city-name" id="pinnedCityName"></div>
+                <div class="pinned-city-meta" id="pinnedCityMeta"></div>
+                <div class="pinned-city-actions">
+                  <span class="pill neutral" id="pinnedCityMappedCount">0 mapped</span>
+                  <button class="action-btn" id="pinnedCityHistoryBtn" aria-label="View history for this city">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 109-9 9 9 0 00-7 3.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3 3.5V8h4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 7.5V12l3.2 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </button>
+                </div>
+              </div>
+              <div class="form-group mapping-list-contained" style="margin-top:16px;">
                 <label>Selected Hotels</label>
-                <div class="merge-list" style="max-height:460px;">
+                <div class="merge-list">
                   <details class="mapping-collapsible-inline" open>
                     <summary class="mapping-collapsible-header mapping-collapsible-header--warning">
                       <span>Already Mapped (<span id="hotelAlreadyMappedCount">0</span>)</span>
@@ -178,10 +186,6 @@
                 <select class="filter-select" id="hotelMapCityFilter" disabled>
                   <option value="">All Cities</option>
                 </select>
-                <button class="btn btn-danger" id="resetHotelMapFilterBtn">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 109-9 9 9 0 00-7 3.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3 3.5V8h4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                  Reset
-                </button>
               </div>
 
               <div class="mapping-header-row" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
@@ -204,7 +208,7 @@
                   </div>
                   <button class="btn btn-primary" id="saveHotelMappingBtn">Save Mapping</button>
                 </div>
-                <div class="merge-list" id="hotelMapList" style="max-height:460px;"></div>
+                <div class="merge-list" id="hotelMapList"></div>
               </div>
             </div>
           </div>
@@ -271,6 +275,22 @@
   const newSelectionCount = document.getElementById("hotelNewSelectionCount");
   const selectionSummary = document.getElementById("hotelMapSelectionSummary");
 
+  // "Full Screen" toggle — hides the title/divider so the checklist can
+  // claim that space too. Scoped to #hotelMappingMain (this page's own
+  // <main> id) so it can't leak into any other page. Same mechanism as
+  // city-mapping.html's own toggle, but simpler: this page has one panel
+  // already sized by plain flex:1, so there's no section height to
+  // recompute after the title disappears.
+  const hotelMappingMain = document.getElementById("hotelMappingMain");
+  const hotelMappingChromeToggleBtn = document.getElementById("hotelMappingChromeToggleBtn");
+  hotelMappingChromeToggleBtn.addEventListener("click", () => {
+    const hidden = !hotelMappingMain.classList.contains("chrome-hidden");
+    hotelMappingMain.classList.toggle("chrome-hidden", hidden);
+    hotelMappingChromeToggleBtn.classList.toggle("active", hidden);
+    hotelMappingChromeToggleBtn.querySelector("span").textContent = hidden ? "Exit Full Screen" : "Full Screen";
+    hotelMappingChromeToggleBtn.setAttribute("aria-label", hidden ? "Show page title" : "Hide page title for full-height checklist");
+  });
+
   if (!pinnedCity) {
     // A live-created New City only exists in localStorage — some browsers
     // (Firefox) partition that per file:// document, so a fresh New City's
@@ -335,8 +355,14 @@
 
     // "Mapped: n/x" is scoped to country/state only (not city/search/toggle),
     // same rule-14 convention used elsewhere: a stat shouldn't shift with the
-    // very filter it's describing.
+    // very filter it's describing. Still gated behind a City pick (see
+    // renderHotelList below) — a real hotel table can run into the millions,
+    // so nothing scans it, not even for a count, until narrowed to one city.
     function updateMappedStat() {
+      if (!state.city) {
+        mappedStat.textContent = "";
+        return;
+      }
       let rows = SYSTEM_HOTELS;
       if (state.country)
         rows = rows.filter((h) => (getSystemCountryName(resolveHotelLocation(h).country.code) || resolveHotelLocation(h).country.name) === state.country);
@@ -345,8 +371,23 @@
       mappedStat.textContent = `Mapped: ${mappedCount}/${rows.length}`;
     }
 
+    // The hotel checklist only ever renders once a City is picked (Country
+    // and State alone aren't enough) — a real hotel table can run into the
+    // millions, so nothing gets queried/rendered here until the filter is
+    // narrow enough to be a reasonable result set. Search and "Show only
+    // unmapped" are disabled until then too, since there's nothing yet for
+    // them to act on.
+    unmappedOnlyToggle.disabled = true;
+    searchInput.disabled = true;
+
     function renderHotelList() {
       updateMappedStat();
+      unmappedOnlyToggle.disabled = !state.city;
+      searchInput.disabled = !state.city;
+      if (!state.city) {
+        hotelMapList.innerHTML = `<div class="empty-state">Select a country and city to see hotels — hotel lists can run into the millions, so nothing loads until narrowed to one city.</div>`;
+        return;
+      }
       let rows = candidatesForFilters();
       const q = state.query.trim().toLowerCase();
       if (q) rows = rows.filter((h) => h.name.toLowerCase().includes(q));
@@ -360,13 +401,12 @@
         ? rows
             .map(
               (h) => `
-      <label class="merge-list-item">
+      <label class="merge-list-item ${h.active ? "merge-list-item--hotel-active" : "merge-list-item--hotel-inactive"}" title="${h.active ? "Active" : "Inactive"}">
         <input type="checkbox" data-hotel-id="${h.id}" ${pendingChecked.has(h.id) ? "checked" : ""} />
         <span class="meta">
           <span class="merge-list-name" title="${h.name}">${h.name}</span>
           <span class="sub">${hotelMetaSub(h)}</span>
         </span>
-        <span class="pill ${h.active ? "success" : "danger"}">${h.active ? "Active" : "Inactive"}</span>
       </label>`
             )
             .join("")
@@ -501,19 +541,6 @@
       renderHotelList();
     });
 
-    document.getElementById("resetHotelMapFilterBtn").addEventListener("click", () => {
-      countryFilterSelect.value = "";
-      state.country = "";
-      state.hotelState = "";
-      state.city = "";
-      state.query = "";
-      searchInput.value = "";
-      unmappedOnlyToggle.checked = false;
-      updateStateFilterOptions();
-      updateCityFilterOptions();
-      renderHotelList();
-    });
-
     // ---------- Save preview (3 buckets: Previously Saved / New Map / Unmap) ----------
     // No Remap bucket — unlike every other mapping in this project, a hotel
     // isn't limited to one city, so a freshly-checked hotel is always a
@@ -575,12 +602,17 @@
       const keptRows = keptIds.map((id) => SYSTEM_HOTELS.find((h) => h.id === id)).filter(Boolean);
 
       function doApply() {
+        // One shared group id for every hotel this Save touches (always the
+        // same pinned city) so its own history can show the whole batch as
+        // one grouped card instead of one entry per hotel — same convention
+        // as city-mapping.html's own doApply().
+        const groupId = generateHistoryGroupId();
         addedRows.forEach((h) => {
-          applyHotelCityMap(h, pinnedCity, true);
+          applyHotelCityMap(h, pinnedCity, true, groupId);
           initialMappedIds.add(h.id);
         });
         removedRows.forEach((h) => {
-          applyHotelCityMap(h, pinnedCity, false);
+          applyHotelCityMap(h, pinnedCity, false, groupId);
           initialMappedIds.delete(h.id);
         });
         updatePinnedCount();
