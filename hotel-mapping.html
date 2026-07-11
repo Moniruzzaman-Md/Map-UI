@@ -111,6 +111,9 @@
           <button class="info-icon-btn" data-info-target="#hotelMappingInfo" data-info-title="Hotel Mapping to New City" aria-label="About this page">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 11v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="8" r="1" fill="currentColor"/></svg>
           </button>
+          <button class="info-icon-btn" data-info-target="#hotelMappingDevNotes" data-info-title="Developer Notes — Hotel Mapping to New City" aria-label="Developer notes for this page">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 8l-4 4 4 4M15 8l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
         </div>
       </div>
       <hr class="page-divider" />
@@ -118,12 +121,39 @@
       <template id="hotelMappingInfo">
         <p>Maps <strong>system hotels</strong> to a New City. Unlike every other mapping in this project, a hotel can be mapped to more than one city — there's no "remap" here, just check to map and uncheck to unmap.</p>
         <ul>
-          <li>Filter by Country/State/City to narrow down the hotel list — these filter the hotel's own location, not the pinned city. The hotel checklist stays empty until a <strong>City</strong> is chosen (State is optional) — the full hotel list can run into the millions, so nothing loads until it's narrowed to one city.</li>
+          <li>Filter by Country/State/City to narrow down the hotel list — these filter the hotel's own location, not the pinned city. The hotel checklist stays empty until a <strong>Country</strong> is chosen (State and City are optional, further narrowing filters) — the full hotel list can run into the millions, so nothing loads with no filter at all.</li>
+          <li>The checklist loads 50 hotels at a time — scroll to the bottom of the list to automatically load more of the current filter/search results.</li>
+          <li>Tick <strong>Fuzzy search</strong> to match a hotel name loosely (forgiving of typos or skipped letters) instead of requiring an exact substring match.</li>
           <li>On the left, <strong>Already Mapped</strong> lists hotels currently mapped to this city — its <strong>Unmap</strong> button queues a removal without the row disappearing, so you can change your mind (the button becomes <strong>Undo</strong>) right up until Save. <strong>New Selection</strong> lists your fresh picks from the checklist on the right.</li>
           <li><strong>Show only unmapped</strong> hides hotels already mapped to this city, so you can see what's still available.</li>
           <li><strong>Save Mapping</strong> always opens a preview first — Previously Saved, New Map, and Unmap — before applying anything, and logs a Map/Unmap entry on both the hotel's and this city's History.</li>
           <li>Tick <strong>"Full Screen"</strong> (top-right) to hide the page title too, giving the hotel checklist the entire screen.</li>
         </ul>
+      </template>
+
+      <template id="hotelMappingDevNotes">
+        <p>This screen links system hotels to a New City. A New City has no supplier-city mapping of its own — hotels are attached to it directly instead, and unlike every other mapping in this project, one hotel can be linked to several different cities at once, so there is no "remap" concept here, only additive map/unmap.</p>
+        <ul>
+          <li><strong>Loading the list</strong> — the hotel checklist must require at least a Country selection before it queries or renders anything; a real hotel table can run into the millions, so nothing should ever be scanned with zero filters applied. State and City are optional narrowing filters on top of Country, never a requirement of their own.</li>
+          <li><strong>Keeping a large result set from hanging the screen</strong> — even after a Country is picked, a big market can still match thousands of hotels, and rendering all of them at once is what actually freezes the page, not the filtering itself. The list loads and displays results in bounded pages of 50 at a time, never the whole matching set in one go. Reaching the bottom of the currently-loaded rows must trigger loading the next page automatically, with a brief loading indicator while it fetches — the newly loaded rows must be appended below the existing ones without disturbing the checklist's current scroll position or re-rendering rows already on screen, since jumping the scroll position or reshuffling existing rows could shift a checkbox out from under someone who's about to click it. Once every matching hotel has been loaded, the bottom of the list must show a clear "end of list" state and stop trying to load further. Picking anything already checked on an earlier page stays checked as later pages load in. Both the Country/State/City filters and the name search apply to the full matching set before that page split happens, so a search finds a match anywhere in the result set, not just among rows already loaded — and starts back at the first page, same as picking a new filter does.</li>
+          <li><strong>Fuzzy search</strong> — when off, the search box must match hotel names by plain substring. When on, it must match loosely: every typed character has to appear in the hotel name in the same order, but not necessarily next to each other (so a shortened or slightly misspelled query can still find the right hotel). Search input must be debounced rather than re-querying on every keystroke, and typing a new query while an earlier search is still in flight must not let that stale response overwrite the newer one.</li>
+          <li><strong>Already Mapped / New Selection</strong> — Already Mapped must reflect the hotels mapped to this city as of when the screen was opened; unchecking one queues an unmap (shown as "Undo" so it's reversible) without removing the row from view until Save actually runs. New Selection must only ever show hotels newly checked this session, not the full mapped set.</li>
+          <li><strong>Save Mapping</strong> — must always show a review step first, split into three groups: hotels staying mapped, hotels being newly mapped, and hotels being unmapped. Nothing is written until this review is explicitly confirmed. If nothing changed, saving must be blocked with a clear message rather than silently succeeding.</li>
+          <li><strong>History</strong> — every entry has an <strong>operation name</strong>, a <strong>description</strong> in that operation's fixed pattern, and <strong>who + when</strong>, logged the instant the change happens, newest first. Every map/unmap always writes to <strong>two</strong> records — the hotel's own history AND this city's own history — in the same action, whether it's one hotel or a whole batch from one Save.
+            <p><strong>On the hotel's own record:</strong></p>
+            <ul>
+              <li><strong>Map</strong> — this hotel became linked to a city it wasn't linked to before. Description: <em>{city name}, {state}, {country code} (ID: {city's identifier})</em></li>
+              <li><strong>Unmap</strong> — an existing link to a city was removed. Description: <em>{city name}, {state}, {country code} (ID: {city's identifier})</em></li>
+            </ul>
+            <p><strong>On the city's own record</strong> (the matching entry for the same event, from its side):</p>
+            <ul>
+              <li><strong>Map</strong> — a hotel became linked to this city. Description: <em>{hotel name}, {city}, {state}, {country code} (ID: {hotel's identifier})</em></li>
+              <li><strong>Unmap</strong> — a hotel's link to this city was removed. Description: <em>{hotel name}, {city}, {state}, {country code} (ID: {hotel's identifier})</em></li>
+            </ul>
+            <p>When one Save maps or unmaps several hotels against the same pinned city in one action, every resulting entry on the city's own record must share one batch identifier so its history can display them together as a single grouped event, not as unrelated single entries.</p>
+          </li>
+        </ul>
+        <p><strong>Everywhere:</strong> save immediately with clear success/error feedback, and never let a checkbox change silently fail to be reflected in both the Already Mapped/New Selection lists and the Mapped count.</p>
       </template>
 
       <div class="mapping-nav-fabs">
@@ -185,16 +215,24 @@
                 <select class="filter-select" id="hotelMapCityFilter" disabled>
                   <option value="">All Cities</option>
                 </select>
-                <label class="toggle-row" for="hotelMapUnmappedOnlyToggle" style="margin-bottom:0;">
-                  <input type="checkbox" id="hotelMapUnmappedOnlyToggle" />
-                  Show only unmapped
-                </label>
-                <span class="hint" id="hotelMapMappedStat" style="margin-top:0; margin-left:auto;">Mapped: 0/0</span>
+                <div class="toggle-group">
+                  <label class="toggle-row" for="hotelMapUnmappedOnlyToggle" style="margin-bottom:0;">
+                    <input type="checkbox" id="hotelMapUnmappedOnlyToggle" />
+                    Show only unmapped
+                  </label>
+                  <label class="toggle-row" for="hotelMapFuzzyToggle" style="margin-bottom:0;">
+                    <input type="checkbox" id="hotelMapFuzzyToggle" />
+                    Fuzzy search
+                  </label>
+                </div>
               </div>
 
               <div class="form-group mapping-list-group">
                 <div class="mapping-search-actions-row" style="margin-bottom:6px;">
-                  <label style="margin-bottom:0;">Hotels</label>
+                  <div style="display:flex; align-items:center; gap:10px;">
+                    <label style="margin-bottom:0;">Hotels</label>
+                    <span class="hint" id="hotelMapMappedStat" style="margin-top:0;">Mapped: 0/0</span>
+                  </div>
                   <span class="mapping-save-summary" id="hotelMapSelectionSummary">No pending changes</span>
                 </div>
                 <div class="mapping-search-actions-row">
@@ -262,6 +300,7 @@
   const stateFilterSelect = document.getElementById("hotelMapStateFilter");
   const cityFilterSelect = document.getElementById("hotelMapCityFilter");
   const unmappedOnlyToggle = document.getElementById("hotelMapUnmappedOnlyToggle");
+  const fuzzyToggle = document.getElementById("hotelMapFuzzyToggle");
   const mappedStat = document.getElementById("hotelMapMappedStat");
   const searchInput = document.getElementById("hotelMapSearch");
   const hotelMapList = document.getElementById("hotelMapList");
@@ -310,7 +349,26 @@
       countryFilterSelect.insertAdjacentHTML("beforeend", `<option value="${c.name}">${c.name} (${c.code})</option>`);
     });
 
-    const state = { country: "", hotelState: "", city: "", query: "" };
+    // Bounded page size for the hotel checklist — a country-wide result can
+    // run into the thousands, so only one page renders at a time; scrolling
+    // to the bottom of the list loads the next page, see renderHotelList/
+    // loadMoreHotelRows below.
+    const HOTEL_PAGE_SIZE = 50;
+    const state = { country: "", hotelState: "", city: "", query: "", fuzzy: false, visibleCount: HOTEL_PAGE_SIZE };
+    let hotelScrollObserver = null;
+    let isLoadingMoreHotels = false;
+
+    // Subsequence match: every character of the query must appear in the
+    // name in order, not necessarily contiguous (e.g. "grpz" matches "Grand
+    // Plaza"). Loose on purpose — "fuzzy" here means forgiving of typos/
+    // skipped letters, not a ranked/scored match.
+    function fuzzyMatches(name, query) {
+      let i = 0;
+      for (let j = 0; j < name.length && i < query.length; j++) {
+        if (name[j] === query[i]) i++;
+      }
+      return i === query.length;
+    }
     const initialMappedIds = new Set(SYSTEM_HOTELS.filter((h) => (h.mappedCityIds || []).includes(pinnedCityId)).map((h) => h.id));
     const pendingChecked = new Set(initialMappedIds);
 
@@ -351,11 +409,11 @@
 
     // "Mapped: n/x" is scoped to country/state only (not city/search/toggle),
     // same rule-14 convention used elsewhere: a stat shouldn't shift with the
-    // very filter it's describing. Still gated behind a City pick (see
+    // very filter it's describing. Still gated behind a Country pick (see
     // renderHotelList below) — a real hotel table can run into the millions,
-    // so nothing scans it, not even for a count, until narrowed to one city.
+    // so nothing scans it, not even for a count, until narrowed down from "all".
     function updateMappedStat() {
-      if (!state.city) {
+      if (!state.country) {
         mappedStat.textContent = "";
         return;
       }
@@ -367,57 +425,149 @@
       mappedStat.textContent = `Mapped: ${mappedCount}/${rows.length}`;
     }
 
-    // The hotel checklist only ever renders once a City is picked (Country
-    // and State alone aren't enough) — a real hotel table can run into the
-    // millions, so nothing gets queried/rendered here until the filter is
-    // narrow enough to be a reasonable result set. Search and "Show only
-    // unmapped" are disabled until then too, since there's nothing yet for
-    // them to act on.
+    // The hotel checklist only ever renders once a Country is picked — State
+    // and City stay optional, further-narrowing filters (same "state/city
+    // never gate the load" convention as city-mapping.html) — a real hotel
+    // table can run into the millions, so nothing gets queried/rendered here
+    // with zero filters at all. Search and "Show only unmapped" are disabled
+    // until then too, since there's nothing yet for them to act on.
     unmappedOnlyToggle.disabled = true;
+    fuzzyToggle.disabled = true;
     searchInput.disabled = true;
 
-    function renderHotelList() {
-      updateMappedStat();
-      unmappedOnlyToggle.disabled = !state.city;
-      searchInput.disabled = !state.city;
-      if (!state.city) {
-        hotelMapList.innerHTML = `<div class="empty-state">Select a country and city to see hotels — hotel lists can run into the millions, so nothing loads until narrowed to one city.</div>`;
-        return;
-      }
+    // Combines every active filter (country/state/city + search + "show
+    // only unmapped") into the one matching set — shared by the initial
+    // render and by loadMoreHotelRows below, so a scroll-triggered load
+    // pages through exactly the same result set the list is already showing.
+    function getMatchingHotelRows() {
       let rows = candidatesForFilters();
       const q = state.query.trim().toLowerCase();
-      if (q) rows = rows.filter((h) => h.name.toLowerCase().includes(q));
+      if (q) rows = rows.filter((h) => (state.fuzzy ? fuzzyMatches(h.name.toLowerCase(), q) : h.name.toLowerCase().includes(q)));
       // Hide only rows that are "previously saved and still mapped" — a
       // freshly-checked hotel (pending New Map) or one just unchecked
       // (pending Unmap) must stay visible, since hiding it here would make
       // it impossible to review or undo that pending change from this list.
       if (unmappedOnlyToggle.checked) rows = rows.filter((h) => !(initialMappedIds.has(h.id) && pendingChecked.has(h.id)));
+      return rows;
+    }
 
-      hotelMapList.innerHTML = rows.length
-        ? rows
-            .map(
-              (h) => `
+    function hotelRowHtml(h) {
+      return `
       <label class="merge-list-item ${h.active ? "merge-list-item--hotel-active" : "merge-list-item--hotel-inactive"}" title="${h.active ? "Active" : "Inactive"}">
         <input type="checkbox" data-hotel-id="${h.id}" ${pendingChecked.has(h.id) ? "checked" : ""} />
         <span class="meta">
           <span class="merge-list-name" title="${h.name}">${h.name}</span>
           <span class="sub">${hotelMetaSub(h)}</span>
         </span>
-      </label>`
-            )
-            .join("")
+      </label>`;
+    }
+
+    // Guarded by data-wired so this is safe to call on the same checkbox
+    // twice — renderHotelList and loadMoreHotelRows both call it after
+    // touching the DOM, and only the latter's newly-inserted rows actually
+    // need binding.
+    function wireHotelCheckbox(checkbox) {
+      if (checkbox.dataset.wired) return;
+      checkbox.dataset.wired = "1";
+      checkbox.addEventListener("change", () => {
+        const id = Number(checkbox.dataset.hotelId);
+        if (checkbox.checked) pendingChecked.add(id);
+        else pendingChecked.delete(id);
+        updateMappedStat();
+        renderSelectedHotelsList();
+        updateSelectionSummary();
+      });
+    }
+
+    // Trailing status row inside the scrollable checklist: blank/invisible
+    // (just a small trigger buffer) until scrolled into view, at which
+    // point loadMoreHotelRows below shows the spinner in it. Only rendered
+    // at all when more rows remain past the current page.
+    function scrollStatusHtml() {
+      return `<div class="hotel-list-scroll-status" id="hotelMapScrollStatus"><span class="scroll-status-spinner"></span><span class="scroll-status-label"></span></div>`;
+    }
+
+    function endOfListHtml() {
+      return `<div class="hotel-list-scroll-status hotel-list-scroll-status--end">You've reached the end of the list</div>`;
+    }
+
+    // Scoped to #hotelMapList itself as the intersection root — that's the
+    // element that actually scrolls here (.mapping-list-group .merge-list
+    // is flex:1/max-height:none, so the checklist box scrolls internally
+    // rather than the page around it). rows/sentinel are captured in this
+    // closure so a stale observer from a since-replaced render can never
+    // append onto the wrong (currently-rendered) list — see
+    // loadMoreHotelRows's isConnected guard for the other half of that.
+    function observeHotelScrollStatus(rows) {
+      const sentinel = document.getElementById("hotelMapScrollStatus");
+      if (!sentinel) return;
+      hotelScrollObserver = new IntersectionObserver(
+        (entries) => {
+          if (entries[0].isIntersecting) loadMoreHotelRows(sentinel, rows);
+        },
+        { root: hotelMapList, rootMargin: "0px 0px 60px 0px", threshold: 0 }
+      );
+      hotelScrollObserver.observe(sentinel);
+    }
+
+    function loadMoreHotelRows(sentinel, rows) {
+      if (isLoadingMoreHotels) return;
+      isLoadingMoreHotels = true;
+      sentinel.classList.add("is-loading");
+      sentinel.querySelector(".scroll-status-label").textContent = "Loading more hotels…";
+      // Brief, deliberate pause so the loading state is actually
+      // perceivable — this mock already holds every hotel in memory, so
+      // without it the spinner would flash for under a frame.
+      setTimeout(() => {
+        isLoadingMoreHotels = false;
+        // A filter/search change already replaced the whole list while this
+        // was in flight — that render started its own fresh observer, so
+        // this stale one must not touch the (now different) live list.
+        if (!sentinel.isConnected) return;
+
+        const nextRows = rows.slice(state.visibleCount, state.visibleCount + HOTEL_PAGE_SIZE);
+        state.visibleCount += HOTEL_PAGE_SIZE;
+        sentinel.insertAdjacentHTML("beforebegin", nextRows.map(hotelRowHtml).join(""));
+        hotelMapList.querySelectorAll("[data-hotel-id]").forEach(wireHotelCheckbox);
+
+        if (state.visibleCount < rows.length) {
+          sentinel.classList.remove("is-loading");
+          sentinel.querySelector(".scroll-status-label").textContent = "";
+        } else {
+          sentinel.outerHTML = endOfListHtml();
+          if (hotelScrollObserver) {
+            hotelScrollObserver.disconnect();
+            hotelScrollObserver = null;
+          }
+        }
+      }, 450);
+    }
+
+    function renderHotelList() {
+      updateMappedStat();
+      unmappedOnlyToggle.disabled = !state.country;
+      fuzzyToggle.disabled = !state.country;
+      searchInput.disabled = !state.country;
+      if (hotelScrollObserver) {
+        hotelScrollObserver.disconnect();
+        hotelScrollObserver = null;
+      }
+      isLoadingMoreHotels = false;
+      if (!state.country) {
+        hotelMapList.innerHTML = `<div class="empty-state">Select a country to see hotels — hotel lists can run into the millions, so nothing loads until narrowed down from "all".</div>`;
+        return;
+      }
+      const rows = getMatchingHotelRows();
+      state.visibleCount = HOTEL_PAGE_SIZE;
+      const visibleRows = rows.slice(0, state.visibleCount);
+
+      hotelMapList.innerHTML = visibleRows.length
+        ? visibleRows.map(hotelRowHtml).join("") + (rows.length > visibleRows.length ? scrollStatusHtml() : "")
         : `<div class="empty-state">No hotels match this filter</div>`;
 
-      hotelMapList.querySelectorAll("[data-hotel-id]").forEach((checkbox) => {
-        checkbox.addEventListener("change", () => {
-          const id = Number(checkbox.dataset.hotelId);
-          if (checkbox.checked) pendingChecked.add(id);
-          else pendingChecked.delete(id);
-          updateMappedStat();
-          renderSelectedHotelsList();
-          updateSelectionSummary();
-        });
-      });
+      hotelMapList.querySelectorAll("[data-hotel-id]").forEach(wireHotelCheckbox);
+
+      if (visibleRows.length && rows.length > visibleRows.length) observeHotelScrollStatus(rows);
     }
 
     // ---------- Left column: Already Mapped / New Selection ----------
@@ -530,11 +680,22 @@
       renderHotelList();
     });
 
-    unmappedOnlyToggle.addEventListener("change", renderHotelList);
+    unmappedOnlyToggle.addEventListener("change", () => renderHotelList());
 
-    searchInput.addEventListener("input", () => {
-      state.query = searchInput.value;
+    fuzzyToggle.addEventListener("change", () => {
+      state.fuzzy = fuzzyToggle.checked;
       renderHotelList();
+    });
+
+    // Debounced so a full list re-render + per-row listener rebind doesn't
+    // fire on every single keystroke — only once typing pauses.
+    let searchDebounceTimer;
+    searchInput.addEventListener("input", () => {
+      clearTimeout(searchDebounceTimer);
+      searchDebounceTimer = setTimeout(() => {
+        state.query = searchInput.value;
+        renderHotelList();
+      }, 150);
     });
 
     // ---------- Save preview (3 buckets: Previously Saved / New Map / Unmap) ----------

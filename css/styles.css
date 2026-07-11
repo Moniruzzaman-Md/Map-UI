@@ -1514,7 +1514,57 @@ table.data-table {
   border-radius: var(--radius-sm);
 }
 
-.merge-list-item {
+/* Trailing row inside a scrollable checklist (hotel-mapping.html's
+   #hotelMapList) that IntersectionObserver watches to trigger loading the
+   next page — blank/invisible until .is-loading is toggled on, so nothing
+   is visible until the user actually scrolls to the bottom. */
+.hotel-list-scroll-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 24px;
+  padding: 8px 0;
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+
+.scroll-status-spinner {
+  display: none;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--border-color);
+  border-top-color: var(--accent-blue);
+  border-radius: 50%;
+  animation: hotel-scroll-spin 0.7s linear infinite;
+}
+
+.hotel-list-scroll-status.is-loading {
+  min-height: 40px;
+}
+
+.hotel-list-scroll-status.is-loading .scroll-status-spinner {
+  display: inline-block;
+}
+
+@keyframes hotel-scroll-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.hotel-list-scroll-status--end {
+  border-top: 1px solid var(--border-color);
+  padding: 10px 0;
+}
+
+/* label.merge-list-item is listed alongside the plain class selector so a
+   row rendered as an actual <label> (the checkbox-list rows) keeps its flex
+   layout even inside a .form-group ancestor — .form-group label (line
+   ~1146) is a class+tag selector, which otherwise outranks a class-only
+   .merge-list-item and silently forces display:block on the row. */
+.merge-list-item,
+label.merge-list-item {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -1845,6 +1895,48 @@ table.data-table {
    ratio above (city-mapping.html keeps that ratio). */
 #hotelMappingBody .mapping-layout-bottom {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+/* hotel-mapping.html only: fill the filter row as an even 2-column grid
+   (Country/State, then City/checkbox-group) instead of the shared
+   .toolbar-filters flex-wrap behavior, which left dead space whenever a
+   fixed-width dropdown wrapped alone onto its own line. minmax(0, 1fr) —
+   not bare 1fr — for the same reason as .mapping-layout above: a bare 1fr
+   track's minimum width is its content's natural size, which would stop a
+   column from ever shrinking below a dropdown's intrinsic width. */
+#hotelMappingBody .toolbar-filters {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px 20px;
+}
+
+/* Every direct child (each searchable-select wrapper, and .toggle-group)
+   stretches to fill its column — overrides the shared .searchable-select's
+   display:inline-block, which otherwise shrink-wraps to the trigger
+   button's own width and leaves the column's remainder empty. */
+#hotelMappingBody .toolbar-filters > * {
+  width: 100%;
+  min-width: 0;
+}
+
+/* The shared .filter-select's 190px min-width floor is exactly what caused
+   the dead space (a short "All Cities" label still reserved a rigid 190px
+   box); dropped to 0 here, scoped to this page only, so the column can
+   shrink to fit its grid track. .searchable-select-label's existing
+   text-overflow:ellipsis already handles long country/state/city names. */
+#hotelMappingBody .filter-select {
+  width: 100%;
+  min-width: 0;
+}
+
+/* Groups the 2 checkboxes into one grid cell so the filter row has exactly
+   4 logical items (Country, State, City, toggle-group) — a clean 2x2 grid
+   with no orphaned 5th cell. */
+#hotelMappingBody .toggle-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 /* Makes the bottom section's body a bounded flex column instead of the

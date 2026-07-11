@@ -111,6 +111,9 @@
           <button class="info-icon-btn" data-info-target="#cityMappingInfo" data-info-title="City Mapping" aria-label="About this page">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 11v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="8" r="1" fill="currentColor"/></svg>
           </button>
+          <button class="info-icon-btn" data-info-target="#cityMappingDevNotes" data-info-title="Developer Notes — City Mapping" aria-label="Developer notes for this page">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 8l-4 4 4 4M15 8l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
         </div>
       </div>
       <hr class="page-divider" />
@@ -122,13 +125,40 @@
           <li>State is always an optional extra filter, never required — the pin city list loads as soon as a Country is chosen, and the supplier city list loads as soon as Supplier + Country are chosen.</li>
           <li>Top-right shows every supplier city currently mapped to the pinned city, filterable by a single supplier via the dropdown ("All Suppliers" by default). Its History/Unmap buttons act immediately, one row at a time — for quick single fixes, not batch review.</li>
           <li>A city already mapped to a <em>different</em> system city is highlighted below, with a small "Mapped: City, State, Country" note under its name. Checking it never interrupts you — any actual changes are reviewed together in one place at Save time.</li>
-          <li>On the left, <strong>Already Mapped</strong> lists this supplier's cities already mapped to the pinned city — its <strong>Unmap</strong> button queues a removal without the row disappearing, so you can change your mind (the button becomes <strong>Undo</strong>) right up until Save. <strong>New Selection</strong> lists your fresh picks from the checklist on the right — tagged <strong>Remap</strong> if that city is already mapped elsewhere, or <strong>New</strong> if it isn't mapped anywhere yet. Both sections collapse independently.</li>
-          <li><strong>Save Mapping</strong> always opens a preview before anything is applied, organized into up to four sections: <strong>Previously Saved</strong> (unchanged, for context), <strong>New Map</strong>, <strong>Remap</strong> (cities being reassigned from a different system city), and <strong>Unmap</strong>.</li>
+          <li>On the left, <strong>Already Mapped</strong> lists this supplier's cities already mapped to the pinned city — its <strong>Unmap</strong> button queues a removal without the row disappearing, so you can change your mind (the button becomes <strong>Undo</strong>) right up until Save. <strong>New Selection</strong> lists your fresh picks from the checklist on the right — tagged <strong>Remap</strong> if that city is already mapped elsewhere and a system city is pinned, <strong>Locked</strong> if it's mapped elsewhere but nothing is pinned yet to compare against, or <strong>New</strong> if it isn't mapped anywhere yet. Both sections collapse independently.</li>
+          <li><strong>Save Mapping</strong> always opens a preview before anything is applied, organized into up to four sections: <strong>Previously Saved</strong> (unchanged, for context), <strong>New Map</strong>, <strong>Remap</strong> (cities being reassigned from a different system city, shown as an old-vs-new comparison), and <strong>Unmap</strong>.</li>
           <li>Tick <strong>"Show only cities not yet mapped"</strong> on the right to hide supplier cities that already map to some system city — unlike a system city, a supplier city maps to at most one, so this narrows the list to what's still available.</li>
           <li>Each section below fills a full screen's worth of space — use the up/down buttons floating at the top-right to jump straight between the Pin/Existing Mapping section and the Map Supplier Cities section.</li>
           <li>The Map Supplier Cities section header shows a compact "Pinned: City — State, Country" reminder of which system city you're currently mapping into, so you don't lose that context after jumping down here.</li>
           <li>Tick <strong>"Full Screen"</strong> (top-right) to hide the page title too, giving each section the entire screen — the toggle itself stays floating and reachable so you can turn it back off.</li>
         </ul>
+      </template>
+
+      <template id="cityMappingDevNotes">
+        <p>This screen maps supplier cities to system cities. A supplier city can be mapped to at most one system city at a time; a system city can have many supplier cities mapped to it. The pin (which system city) and the supplier selection (which cities to map) work fully independently of each other — either can be set up first, in any order — and only need to agree with each other once Save actually runs.</p>
+        <ul>
+          <li><strong>Pinning a system city</strong> — only cities from the original prepopulated master list may be pinned; any city created or merged via Add City must be excluded from this picker. Country is required before the city picker loads; State is always an optional narrowing filter, never part of the gate.</li>
+          <li><strong>Existing mapping panel</strong> — must show every supplier city currently mapped to the pinned city, across every supplier, with a total count that stays independent of the supplier filter below it (the filter narrows only the visible list, not the count). Its History and Unmap actions apply immediately, one row at a time — this panel is for quick single fixes, not batch review.</li>
+          <li><strong>Map Supplier Cities panel</strong> — Supplier and Country are both required before the checklist loads or the search box is usable; State is an optional narrowing filter on top, same rule as the pin panel. A supplier city already mapped to a different system city must still be selectable here, never blocked — highlight it and show what it's currently mapped to, but don't interrupt the click with a confirmation; any real reassignment is reviewed together with everything else at Save.</li>
+          <li><strong>Already Mapped / New Selection</strong> — Already Mapped must reflect the mapping baseline as of when this supplier (and the current pin) were last loaded; unchecking one queues an unmap (offered as "Undo", reversible) without removing the row from view until Save actually runs. New Selection must only ever show rows freshly checked this session, tagged New (not mapped anywhere yet), Remap (mapped elsewhere, and a system city is currently pinned to compare against), or Locked (mapped elsewhere, but nothing is pinned yet, so whether it ends up a Remap can't be decided).</li>
+          <li><strong>Save Mapping</strong> — must always show a review step first, split into four groups: previously saved (context only, nothing changes), new maps, remaps (each shown as an explicit "currently mapped to" vs "will map to" comparison), and unmaps. Nothing is written until this review is explicitly confirmed. If nothing changed, saving must be blocked with a clear message rather than silently succeeding.</li>
+          <li><strong>History</strong> — every entry has an <strong>operation name</strong>, a <strong>description</strong> in that operation's fixed pattern, and <strong>who + when</strong>, logged the instant the change happens, newest first. When a description needs to show more than one distinct fact, the facts are separated by a single pipe character, and the history view puts each on its own line. A mapping change always writes to <strong>two</strong> records — the supplier city's own history, and the affected system city's own history (both the old and new system city, for a Remap) — in the same action.
+            <p><strong>On the supplier city's own record:</strong></p>
+            <ul>
+              <li><strong>Map</strong> — this city became linked to a system city for the first time. Description: <em>{system city name}, {state}, {country code} (ID: {system city's identifier})</em></li>
+              <li><strong>Remap</strong> — an existing link changed to a different system city. Description: <em>{old system city label} -&gt; {new system city label}</em></li>
+              <li><strong>Unmap</strong> — an existing link was removed, with nothing put in its place. Description: <em>{old system city label} -&gt; Not mapped</em></li>
+            </ul>
+            <p><strong>On the system city's own record</strong> (one entry per system city actually affected — a Remap logs on both the city it left and the city it moved to, using the exact same description on both sides so either city's history is understandable on its own):</p>
+            <ul>
+              <li><strong>Map</strong> — a supplier city became linked to this city for the first time. Description: <em>{Supplier} — {city name} ({country code}) — ID: {supplier city's identifier}</em></li>
+              <li><strong>Remap</strong> — a supplier city already linked elsewhere moved to or from this city. Description: <em>{Supplier} — {city name} ({country code}) — ID: {supplier city's identifier}|{old system city label} -&gt; {new system city label}</em></li>
+              <li><strong>Unmap</strong> — a supplier city linked to this city got unlinked entirely. Description: <em>{Supplier} — {city name} ({country code}) — ID: {supplier city's identifier}</em></li>
+            </ul>
+            <p>When one Save maps, remaps, or unmaps several supplier cities in one action, every resulting entry on a system city's own record from that same Save must share one batch identifier, so its history can display them together as a single grouped event.</p>
+          </li>
+        </ul>
+        <p><strong>Everywhere:</strong> save immediately with clear success/error feedback, never let a checkbox change silently fail to be reflected in both the Already Mapped/New Selection lists and the Mapped count, and key every relationship by permanent identifier, never by an editable name.</p>
       </template>
 
       <div class="mapping-nav-fabs">
