@@ -463,6 +463,60 @@ const SYSTEM_HOTELS = [
   },
 ];
 
+// Bulk demo hotels — every one of the SEED_CITY_COUNT seed cities (the 36
+// hand-authored ones and the 200 generated US filler ones) gets at least one
+// hotel, and the 36 hand-authored/"named" cities get 2 more each on top of
+// whatever's hand-authored above, since a handful of real-sounding cities
+// carrying several hotels reads better than every city having exactly one.
+// This is also what makes bulk supplier hotels (further below) able to
+// resolve a Provider ID match in most of the real system cities they land
+// in, not just the ~15 hand-authored ones. Provider IDs continue the
+// PRV-10xx sequence used by the hand-authored hotels above (next free number
+// is 1016 — 1001-1014 are hand-authored, 1015 belongs to the New City demo
+// hotel pushed further below).
+const HOTEL_NAME_WORDS = ["Grand", "Royal", "Regal", "Imperial", "Golden", "Silver", "Crown", "Central", "Riverside", "Hillside", "Garden", "Sunset", "Harbor", "Palm", "Ocean", "Skyline", "Heritage", "Continental", "Premier", "Boutique", "National", "Downtown", "Coastal", "Emerald", "Crystal", "Summit", "Meridian", "Landmark", "Plaza", "Metropolitan"];
+const HOTEL_TYPE_WORDS = ["Hotel", "Inn", "Suites", "Resort", "Lodge", "Towers", "Residency", "Palace", "Manor"];
+
+// Deterministic name generator shared by both the bulk system hotels below
+// and the bulk supplier hotels further down this file — same idea as
+// generateBulkCityNames above, a `seed` offset rather than a shared counter
+// so the two call sites can't accidentally collide on the same sequence.
+function generateBulkHotelName(cityName, seed) {
+  const word = HOTEL_NAME_WORDS[seed % HOTEL_NAME_WORDS.length];
+  const type = HOTEL_TYPE_WORDS[Math.floor(seed / HOTEL_NAME_WORDS.length) % HOTEL_TYPE_WORDS.length];
+  return `${word} ${type} ${cityName}`;
+}
+
+let nextBulkProviderIdNum = 1016;
+function generateBulkSystemHotel(city, seed) {
+  return {
+    name: generateBulkHotelName(city.name, seed),
+    address: `${100 + (seed % 900)} Main Street`,
+    latitude: Number((((seed * 37) % 180) - 90).toFixed(4)),
+    longitude: Number((((seed * 53) % 360) - 180).toFixed(4)),
+    starRating: 3 + (seed % 3),
+    city: city.name,
+    state: city.state,
+    country: { name: city.country.name, code: city.country.code },
+    systemCityId: city.id,
+    email: null,
+    phoneNumber: null,
+    providerId: `PRV-${nextBulkProviderIdNum++}`,
+  };
+}
+
+{
+  const eligibleHotelCities = SYSTEM_CITIES.slice(0, SEED_CITY_COUNT);
+  let bulkSeed = 0;
+  eligibleHotelCities.forEach((city) => {
+    SYSTEM_HOTELS.push(generateBulkSystemHotel(city, bulkSeed++));
+  });
+  eligibleHotelCities.slice(0, 36).forEach((city) => {
+    SYSTEM_HOTELS.push(generateBulkSystemHotel(city, bulkSeed++));
+    SYSTEM_HOTELS.push(generateBulkSystemHotel(city, bulkSeed++));
+  });
+}
+
 SYSTEM_HOTELS.forEach((h, i) => {
   h.id = i;
   h.history = [];
@@ -594,6 +648,19 @@ function getSystemHotelHistoryLabel(id) {
   const loc = resolveHotelLocation(hotel);
   const parts = [hotel.name, loc.city, loc.state, loc.country.code].filter(Boolean);
   return `${parts.join(", ")} (ID: ${getSystemHotelDisplayId(id)})`;
+}
+
+// Resolves a supplier hotel's Provider ID against SYSTEM_HOTELS — used by
+// hotel-supplier.html in place of a stored id reference (unlike City/Country,
+// a supplier hotel is read-only reference data straight off that supplier's
+// feed, and a real feed can only ever report the provider id it was given,
+// never one of this project's own internal ids). Multiple supplier hotels —
+// even from different suppliers — legitimately resolve to the same system
+// hotel this way, exactly like two suppliers both reporting the same real
+// hotel's provider id.
+function findSystemHotelByProviderId(providerId) {
+  if (!providerId) return null;
+  return SYSTEM_HOTELS.find((h) => h.providerId === providerId) || null;
 }
 
 // The seed cities (first SEED_CITY_COUNT, in their fixed definition order —
@@ -968,37 +1035,146 @@ function getCityMappingSummary(systemCityId) {
 
 // ---------- Supplier Hotel ----------
 // Mirrors SYSTEM_HOTELS' own fields (name/address/city/state/country/star
-// rating/email/phone) but replaces Provider ID with a systemHotelId
-// reference to the matching SYSTEM_HOTELS record — unlike every other
-// supplier entity in this project (country/city), a supplier hotel is
+// rating/email/phone), plus its own providerId — the id this supplier's feed
+// reports for the hotel, matched against SYSTEM_HOTELS' own providerId via
+// findSystemHotelByProviderId() rather than stored as a direct reference
+// (unlike every other supplier entity in this project, a supplier hotel is
 // read-only: hotel-supplier.html has no Map/Edit/History action for it, it's
 // purely a reference list of what each supplier's own hotel feed last
-// reported (hence updatedAt per row instead of a history array).
+// reported (hence updatedAt per row instead of a history array), and a real
+// feed can only ever report the provider id it was given — never one of
+// this project's own internal ids).
 const supplierHotels = {
   agoda: [
-    { name: "Grand Plaza New York", address: "123 5th Ave", city: "New York", state: "New York", country: { name: "United States", code: "US" }, starRating: 5, email: "reservations@grandplazanewyork.com", phoneNumber: "+1 212 555 0101", systemHotelId: 0, active: true, updatedAt: new Date("2026-06-18T09:12:00") },
-    { name: "The Beverly Hilton", address: "9876 Wilshire Blvd", city: "Los Angeles", state: "California", country: { name: "United States", code: "US" }, starRating: 4, email: "info@beverlyhilton.com", phoneNumber: "+1 310 555 0172", systemHotelId: 1, active: true, updatedAt: new Date("2026-06-19T11:40:00") },
-    { name: "Ritz Paris Suites", address: "15 Place Vendome", city: "Paris", state: null, country: { name: "France", code: "FR" }, starRating: 5, email: "reservation@ritzparis.fr", phoneNumber: "+33 1 55 55 0145", systemHotelId: 5, active: true, updatedAt: new Date("2026-06-20T08:05:00") },
-    { name: "Agoda Exclusive Sentosa Resort", address: "8 Sentosa Gateway", city: "Singapore", state: null, country: { name: "Singapore", code: "SG" }, starRating: 4, email: "stay@sentosaresort.sg", phoneNumber: "+65 6555 0120", systemHotelId: null, active: true, updatedAt: new Date("2026-06-21T14:22:00") },
-    { name: "Downtown Chicago Inn", address: "220 E Superior St", city: "Chicago", state: "Illinois", country: { name: "United States", code: "US" }, starRating: 3, email: "frontdesk@downtownchicagoinn.com", phoneNumber: "+1 312 555 0199", systemHotelId: null, active: false, updatedAt: new Date("2026-06-15T16:50:00") },
+    { name: "Grand Plaza New York", address: "123 5th Ave", city: "New York", state: "New York", country: { name: "United States", code: "US" }, starRating: 5, email: "reservations@grandplazanewyork.com", phoneNumber: "+1 212 555 0101", providerId: "PRV-1001", active: true, updatedAt: new Date("2026-06-18T09:12:00") },
+    { name: "The Beverly Hilton", address: "9876 Wilshire Blvd", city: "Los Angeles", state: "California", country: { name: "United States", code: "US" }, starRating: 4, email: "info@beverlyhilton.com", phoneNumber: "+1 310 555 0172", providerId: "PRV-1002", active: true, updatedAt: new Date("2026-06-19T11:40:00") },
+    { name: "Ritz Paris Suites", address: "15 Place Vendome", city: "Paris", state: null, country: { name: "France", code: "FR" }, starRating: 5, email: "reservation@ritzparis.fr", phoneNumber: "+33 1 55 55 0145", providerId: "PRV-1006", active: true, updatedAt: new Date("2026-06-20T08:05:00") },
+    { name: "Agoda Exclusive Sentosa Resort", address: "8 Sentosa Gateway", city: "Singapore", state: null, country: { name: "Singapore", code: "SG" }, starRating: 4, email: "stay@sentosaresort.sg", phoneNumber: "+65 6555 0120", providerId: null, active: true, updatedAt: new Date("2026-06-21T14:22:00") },
+    { name: "Downtown Chicago Inn", address: "220 E Superior St", city: "Chicago", state: "Illinois", country: { name: "United States", code: "US" }, starRating: 3, email: "frontdesk@downtownchicagoinn.com", phoneNumber: "+1 312 555 0199", providerId: null, active: false, updatedAt: new Date("2026-06-15T16:50:00") },
   ],
   booking: [
-    { name: "Grand Plaza New York", address: "123 5th Ave", city: "New York", state: "New York", country: { name: "United States", code: "US" }, starRating: 5, email: "reservations@grandplazanewyork.com", phoneNumber: "+1 212 555 0101", systemHotelId: 0, active: true, updatedAt: new Date("2026-06-17T10:30:00") },
-    { name: "Hotel Adlon Berlin", address: "Pariser Platz 3", city: "Berlin", state: null, country: { name: "Germany", code: "DE" }, starRating: 5, email: "info@adlonberlin.de", phoneNumber: "+49 30 555 0187", systemHotelId: 6, active: true, updatedAt: new Date("2026-06-19T09:00:00") },
-    { name: "Booking Riverside Lodge", address: "44 Riverside Ave", city: "Toronto", state: "Ontario", country: { name: "Canada", code: "CA" }, starRating: 3, email: "stay@riversidelodge.ca", phoneNumber: "+1 416 555 0166", systemHotelId: null, active: true, updatedAt: new Date("2026-06-22T13:15:00") },
-    { name: "Manchester City Suites", address: "12 Deansgate", city: "Manchester", state: null, country: { name: "United Kingdom", code: "GB" }, starRating: 3, email: "reservations@manchestercitysuites.co.uk", phoneNumber: "+44 161 555 0110", systemHotelId: null, active: true, updatedAt: new Date("2026-06-14T09:45:00") },
+    { name: "Grand Plaza New York", address: "123 5th Ave", city: "New York", state: "New York", country: { name: "United States", code: "US" }, starRating: 5, email: "reservations@grandplazanewyork.com", phoneNumber: "+1 212 555 0101", providerId: "PRV-1001", active: true, updatedAt: new Date("2026-06-17T10:30:00") },
+    { name: "Hotel Adlon Berlin", address: "Pariser Platz 3", city: "Berlin", state: null, country: { name: "Germany", code: "DE" }, starRating: 5, email: "info@adlonberlin.de", phoneNumber: "+49 30 555 0187", providerId: "PRV-1007", active: true, updatedAt: new Date("2026-06-19T09:00:00") },
+    { name: "Booking Riverside Lodge", address: "44 Riverside Ave", city: "Toronto", state: "Ontario", country: { name: "Canada", code: "CA" }, starRating: 3, email: "stay@riversidelodge.ca", phoneNumber: "+1 416 555 0166", providerId: null, active: true, updatedAt: new Date("2026-06-22T13:15:00") },
+    { name: "Manchester City Suites", address: "12 Deansgate", city: "Manchester", state: null, country: { name: "United Kingdom", code: "GB" }, starRating: 3, email: "reservations@manchestercitysuites.co.uk", phoneNumber: "+44 161 555 0110", providerId: null, active: true, updatedAt: new Date("2026-06-14T09:45:00") },
   ],
   hotelbeds: [
-    { name: "Marina Bay Sands", address: "10 Bayfront Ave", city: "Singapore", state: null, country: { name: "Singapore", code: "SG" }, starRating: 5, email: "enquiry@marinabaysands.sg", phoneNumber: "+65 6555 0188", systemHotelId: 8, active: true, updatedAt: new Date("2026-06-20T17:10:00") },
-    { name: "Burj Al Arab", address: "Jumeirah St", city: "Dubai", state: null, country: { name: "United Arab Emirates", code: "AE" }, starRating: 5, email: "reservations@burjalarab.ae", phoneNumber: "+971 4 555 0199", systemHotelId: 10, active: true, updatedAt: new Date("2026-06-21T12:00:00") },
-    { name: "HotelBeds Desert Oasis Resort", address: "Al Maktoum Rd", city: "Dubai", state: null, country: { name: "United Arab Emirates", code: "AE" }, starRating: 4, email: "stay@desertoasisresort.ae", phoneNumber: "+971 4 555 0166", systemHotelId: null, active: true, updatedAt: new Date("2026-06-16T15:35:00") },
+    { name: "Marina Bay Sands", address: "10 Bayfront Ave", city: "Singapore", state: null, country: { name: "Singapore", code: "SG" }, starRating: 5, email: "enquiry@marinabaysands.sg", phoneNumber: "+65 6555 0188", providerId: "PRV-1009", active: true, updatedAt: new Date("2026-06-20T17:10:00") },
+    { name: "Burj Al Arab", address: "Jumeirah St", city: "Dubai", state: null, country: { name: "United Arab Emirates", code: "AE" }, starRating: 5, email: "reservations@burjalarab.ae", phoneNumber: "+971 4 555 0199", providerId: "PRV-1011", active: true, updatedAt: new Date("2026-06-21T12:00:00") },
+    { name: "HotelBeds Desert Oasis Resort", address: "Al Maktoum Rd", city: "Dubai", state: null, country: { name: "United Arab Emirates", code: "AE" }, starRating: 4, email: "stay@desertoasisresort.ae", phoneNumber: "+971 4 555 0166", providerId: null, active: true, updatedAt: new Date("2026-06-16T15:35:00") },
   ],
   tbo: [
-    { name: "Taj Mahal Palace", address: "Apollo Bunder", city: "Mumbai", state: null, country: { name: "India", code: "IN" }, starRating: 5, email: "tajmahalpalace.mumbai@tajhotels.in", phoneNumber: "+91 22 5555 0166", systemHotelId: 11, active: true, updatedAt: new Date("2026-06-18T14:40:00") },
-    { name: "Shangri-La Bangkok", address: "89 Soi Wat Suan Plu", city: "Bangkok", state: null, country: { name: "Thailand", code: "TH" }, starRating: 5, email: "sbk@shangri-la.th", phoneNumber: "+66 2 555 0177", systemHotelId: 12, active: true, updatedAt: new Date("2026-06-19T16:20:00") },
-    { name: "TBO Heritage Haveli", address: "Pink City Rd", city: "Jaipur", state: null, country: { name: "India", code: "IN" }, starRating: 3, email: "stay@heritagehaveli.in", phoneNumber: "+91 141 555 0122", systemHotelId: null, active: false, updatedAt: new Date("2026-06-13T10:05:00") },
+    { name: "Taj Mahal Palace", address: "Apollo Bunder", city: "Mumbai", state: null, country: { name: "India", code: "IN" }, starRating: 5, email: "tajmahalpalace.mumbai@tajhotels.in", phoneNumber: "+91 22 5555 0166", providerId: "PRV-1012", active: true, updatedAt: new Date("2026-06-18T14:40:00") },
+    { name: "Shangri-La Bangkok", address: "89 Soi Wat Suan Plu", city: "Bangkok", state: null, country: { name: "Thailand", code: "TH" }, starRating: 5, email: "sbk@shangri-la.th", phoneNumber: "+66 2 555 0177", providerId: "PRV-1013", active: true, updatedAt: new Date("2026-06-19T16:20:00") },
+    { name: "TBO Heritage Haveli", address: "Pink City Rd", city: "Jaipur", state: null, country: { name: "India", code: "IN" }, starRating: 3, email: "stay@heritagehaveli.in", phoneNumber: "+91 141 555 0122", providerId: null, active: false, updatedAt: new Date("2026-06-13T10:05:00") },
   ],
 };
+
+// Bulk demo hotels for pagination/search/filter volume — brings every
+// supplier's own list to 300+ rows on top of the hand-authored examples
+// above, split across two independent axes:
+//  - City: most rows sit in a real SYSTEM_CITIES city (name/state/country
+//    copied straight from that city, same as every hand-authored row
+//    above); a minority sit in a city the system has no record of at all
+//    (NON_SYSTEM_DEMO_CITIES below), same idea as the hand-authored "TBO
+//    Heritage Haveli" in Jaipur.
+//  - Hotel: of the rows in a real system city, most carry a Provider ID
+//    copied from one of that city's own SYSTEM_HOTELS (mirroring a real
+//    supplier feed reporting the same provider id the system already
+//    knows), so they resolve to a System Hotel match via
+//    findSystemHotelByProviderId(); some deliberately don't — either the
+//    row has no Provider ID at all (the feed never sent one), or it sits in
+//    a system city but is a supplier-only property with no system-side
+//    counterpart yet (same case as the hand-authored Downtown Chicago Inn /
+//    Booking Riverside Lodge / HotelBeds Desert Oasis Resort rows above). A
+//    Provider ID can and does repeat across rows — even across different
+//    suppliers — exactly like Grand Plaza New York being reported by both
+//    Agoda and Booking.com above.
+const NON_SYSTEM_DEMO_CITIES = [
+  { name: "Rio de Janeiro", country: { name: "Brazil", code: "BR" } },
+  { name: "Amsterdam", country: { name: "Netherlands", code: "NL" } },
+  { name: "Zurich", country: { name: "Switzerland", code: "CH" } },
+  { name: "Stockholm", country: { name: "Sweden", code: "SE" } },
+  { name: "Oslo", country: { name: "Norway", code: "NO" } },
+  { name: "Jakarta", country: { name: "Indonesia", code: "ID" } },
+  { name: "Auckland", country: { name: "New Zealand", code: "NZ" } },
+  { name: "Seoul", country: { name: "South Korea", code: "KR" } },
+  { name: "Cape Town", country: { name: "South Africa", code: "ZA" } },
+  { name: "Cancun", country: { name: "Mexico", code: "MX" } },
+  { name: "Istanbul", country: { name: "Turkey", code: "TR" } },
+  { name: "Doha", country: { name: "Qatar", code: "QA" } },
+  { name: "Riyadh", country: { name: "Saudi Arabia", code: "SA" } },
+  { name: "Cairo", country: { name: "Egypt", code: "EG" } },
+  { name: "Lisbon", country: { name: "Portugal", code: "PT" } },
+  { name: "Dublin", country: { name: "Ireland", code: "IE" } },
+  { name: "Athens", country: { name: "Greece", code: "GR" } },
+  { name: "Hanoi", country: { name: "Vietnam", code: "VN" } },
+  { name: "Manila", country: { name: "Philippines", code: "PH" } },
+  { name: "Jaipur", country: { name: "India", code: "IN" } },
+];
+
+const BULK_SUPPLIER_HOTEL_COUNT = 310; // per supplier — comfortably over the 300 minimum
+
+// Small deterministic hash, keyed by an extra `salt` — used below instead of
+// plain `seed % n` for every independent choice. Several of those choices
+// share a divisor with each other (e.g. "which of the 36 named cities" and
+// "1-of-4 candidate hotels in that city" both fit evenly into 36), so
+// picking straight off `seed % n` for both makes one fully determined by the
+// other (always the same candidate for a given city) instead of varying
+// independently. A different salt per call gives independent-looking picks
+// from the same seed.
+function hashSeed(seed, salt) {
+  let x = (seed * 2654435761 + salt * 40503) >>> 0;
+  x = (x ^ (x >>> 15)) >>> 0;
+  x = (x * 0x45d9f3b) >>> 0;
+  x = (x ^ (x >>> 13)) >>> 0;
+  return x;
+}
+
+// ~80% of rows land in a real system city (weighted toward the 36
+// hand-authored/"named" ones so results read like real destinations, not
+// just the 200 generated US filler towns), ~20% in a city the system has no
+// record of at all.
+function pickBulkHotelCity(seed) {
+  if (hashSeed(seed, 1) % 5 === 4) {
+    const demoCity = NON_SYSTEM_DEMO_CITIES[hashSeed(seed, 2) % NON_SYSTEM_DEMO_CITIES.length];
+    return { name: demoCity.name, state: null, country: demoCity.country, systemCity: null };
+  }
+  const namedCities = SYSTEM_CITIES.slice(0, 36);
+  const pool = hashSeed(seed, 3) % 3 === 0 ? SYSTEM_CITIES.slice(0, SEED_CITY_COUNT) : namedCities;
+  const city = pool[hashSeed(seed, 4) % pool.length];
+  return { name: city.name, state: city.state, country: city.country, systemCity: city };
+}
+
+Object.keys(supplierHotels).forEach((key, supplierIndex) => {
+  for (let i = 0; i < BULK_SUPPLIER_HOTEL_COUNT; i++) {
+    const seed = supplierIndex * 1000 + i;
+    const place = pickBulkHotelCity(seed);
+    let providerId = null;
+    if (place.systemCity) {
+      const candidates = SYSTEM_HOTELS.filter((h) => h.systemCityId === place.systemCity.id);
+      // ~75% of rows in a real system city resolve to one of that city's
+      // system hotels; the rest are supplier-only properties with no system
+      // counterpart (yet).
+      if (candidates.length && hashSeed(seed, 5) % 4 !== 3) {
+        providerId = candidates[hashSeed(seed, 6) % candidates.length].providerId;
+      }
+    }
+    supplierHotels[key].push({
+      name: generateBulkHotelName(place.name, seed + 7), // +7 offset so these don't line up name-for-name with the bulk system hotels in the same city
+      address: `${100 + (seed % 900)} ${place.name} Road`,
+      city: place.name,
+      state: place.state,
+      country: { name: place.country.name, code: place.country.code },
+      starRating: 3 + (seed % 3),
+      email: null,
+      phoneNumber: null,
+      providerId,
+      active: hashSeed(seed, 7) % 9 !== 8,
+      updatedAt: new Date(2026, 5, 1 + (seed % 28), 8 + (seed % 10), (seed * 7) % 60),
+    });
+  }
+});
 
 // A supplier hotel's id is whatever format that supplier's own system uses —
 // same reasoning as generateSupplierCityId above, deliberately different

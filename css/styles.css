@@ -1847,27 +1847,6 @@ table.data-table {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 }
 
-/* "Contained" list treatment: sized to its own content (flex-grow:0, so it
-   never stretches to fill unused space, unlike .mapping-list-group below)
-   but still capped at whatever room is actually left in the column
-   (min-height:0 lets it shrink under pressure) — the .merge-list inside it
-   is what actually scrolls once content exceeds that, not the whole column.
-   Used for hotel-mapping.html's left "Selected Hotels" list, which must
-   stay bounded to the page height without being force-stretched to match
-   the right column the way .mapping-list-group's lists are. */
-.mapping-list-contained {
-  display: flex;
-  flex-direction: column;
-  flex: 0 1 auto;
-  min-height: 0;
-}
-
-.mapping-list-contained .merge-list {
-  flex: 1;
-  min-height: 0;
-  max-height: none;
-}
-
 /* Makes the bottom section's body a bounded flex column instead of the
    default "auto-height content, scroll the whole body if it overflows"
    behavior .mapping-panel-body normally has (still correct for the "1. Pin

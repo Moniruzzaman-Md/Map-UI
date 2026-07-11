@@ -118,7 +118,8 @@
       <template id="supplierHotelInfo">
         <p>Read-only reference list of each supplier's own hotel feed, alongside which <strong>system hotel</strong> (if any) it corresponds to.</p>
         <ul>
-          <li><strong>System Hotel</strong> — the matching entry in the System Hotel List, in place of a raw Provider ID.</li>
+          <li><strong>Provider ID</strong> — the id this supplier's feed reports for the hotel. A blank Provider ID means the feed never sent one for this row.</li>
+          <li><strong>System Hotel</strong> — resolved automatically by matching this row's Provider ID against the System Hotel List's own Provider ID (not a stored link). A row with no Provider ID, or one that doesn't match any System Hotel yet, shows "Not mapped".</li>
           <li><strong>Update Date</strong> — when the supplier last reported this hotel's data.</li>
           <li>This list can't be edited here — there's no Map, Edit, or History action for it.</li>
         </ul>
@@ -174,6 +175,7 @@
                 <th>Star Rating</th>
                 <th>Email</th>
                 <th>Phone Number</th>
+                <th>Provider ID</th>
                 <th>System Hotel</th>
                 <th>Status</th>
                 <th>Update Date</th>
@@ -182,7 +184,7 @@
             </thead>
             <tbody>
               <tr>
-                <td colspan="13" class="empty-state">Select a supplier to view its hotel list</td>
+                <td colspan="14" class="empty-state">Select a supplier to view its hotel list</td>
               </tr>
             </tbody>
           </table>
@@ -266,7 +268,7 @@
 
   function render() {
     if (!state.supplier) {
-      tbody.innerHTML = `<tr><td colspan="13" class="empty-state">Select a supplier to view its hotel list</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="14" class="empty-state">Select a supplier to view its hotel list</td></tr>`;
       paginationBar.innerHTML = "";
       return;
     }
@@ -282,10 +284,8 @@
           .map((r) => {
             const countryName = getSystemCountryName(r.country.code) || r.country.name;
             const countryPlain = `${countryName} (${r.country.code})`;
-            const systemHotelPlain =
-              r.systemHotelId !== null && r.systemHotelId !== undefined
-                ? `${getSystemHotelLabel(r.systemHotelId)} (ID: ${getSystemHotelDisplayId(r.systemHotelId)})`
-                : "";
+            const matchedHotel = findSystemHotelByProviderId(r.providerId);
+            const systemHotelPlain = matchedHotel ? `${getSystemHotelLabel(matchedHotel.id)} (ID: ${getSystemHotelDisplayId(matchedHotel.id)})` : "";
             return `
       <tr>
         <td><span class="code-badge">${r.id}</span></td>
@@ -301,10 +301,11 @@
         <td>${truncatableCell(`${r.starRating} ★`, "starrating")}</td>
         <td>${truncatableCell(r.email, "email")}</td>
         <td>${truncatableCell(r.phoneNumber, "phone")}</td>
+        <td>${truncatableCell(r.providerId, "providerid")}</td>
         <td>${
-          systemHotelPlain
+          matchedHotel
             ? `<div class="truncatable truncatable--systemhotel" title="${systemHotelPlain}">
-                 <span class="truncatable-text">${getSystemHotelLabel(r.systemHotelId)} <span class="code-badge">${getSystemHotelDisplayId(r.systemHotelId)}</span></span>
+                 <span class="truncatable-text">${getSystemHotelLabel(matchedHotel.id)} <span class="code-badge">${getSystemHotelDisplayId(matchedHotel.id)}</span></span>
                </div>`
             : '<span class="text-not-mapped">Not mapped</span>'
         }</td>
@@ -314,7 +315,7 @@
       </tr>`;
           })
           .join("")
-      : `<tr><td colspan="13" class="empty-state">No hotels match this filter</td></tr>`;
+      : `<tr><td colspan="14" class="empty-state">No hotels match this filter</td></tr>`;
 
     renderPagination(paginationBar, {
       total: filtered.length,

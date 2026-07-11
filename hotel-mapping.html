@@ -137,11 +137,10 @@
       <section class="mapping-panel" style="flex:1; min-height:0;">
         <div class="mapping-panel-body" id="hotelMappingBody">
           <div class="mapping-layout mapping-layout-bottom">
-            <!-- Left: pinned city + Already Mapped / New Selection — both
-                 contained to their own content height (not stretched to
-                 match the right column; the right checklist is the one
-                 that should fill the page, starting at the same top edge
-                 as this column instead of below a full-width city card). -->
+            <!-- Left: pinned city + Already Mapped / New Selection — the
+                 Selected Hotels box stretches to fill the column height,
+                 same as the right checklist, so neither column trails off
+                 into bare page background while the other is still full. -->
             <div class="mapping-bottom-col">
               <div class="pinned-city-card" id="pinnedCityCard" style="margin-top:0;">
                 <div class="pinned-city-name" id="pinnedCityName"></div>
@@ -153,7 +152,7 @@
                   </button>
                 </div>
               </div>
-              <div class="form-group mapping-list-contained" style="margin-top:16px;">
+              <div class="form-group mapping-list-group" style="margin-top:16px;">
                 <label>Selected Hotels</label>
                 <div class="merge-list">
                   <details class="mapping-collapsible-inline" open>
@@ -186,14 +185,11 @@
                 <select class="filter-select" id="hotelMapCityFilter" disabled>
                   <option value="">All Cities</option>
                 </select>
-              </div>
-
-              <div class="mapping-header-row" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
                 <label class="toggle-row" for="hotelMapUnmappedOnlyToggle" style="margin-bottom:0;">
                   <input type="checkbox" id="hotelMapUnmappedOnlyToggle" />
                   Show only unmapped
                 </label>
-                <span class="hint" id="hotelMapMappedStat" style="margin-top:0;">Mapped: 0/0</span>
+                <span class="hint" id="hotelMapMappedStat" style="margin-top:0; margin-left:auto;">Mapped: 0/0</span>
               </div>
 
               <div class="form-group mapping-list-group">
