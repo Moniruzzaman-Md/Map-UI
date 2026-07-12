@@ -2,6 +2,7 @@
 
 document.addEventListener("DOMContentLoaded", () => {
   initSidebarAccordion();
+  initSidebarCollapse();
   initModals();
   initTableSearch();
   initResetDemoData();
@@ -82,6 +83,43 @@ function initSidebarAccordion() {
     trigger.addEventListener("click", () => {
       group.classList.toggle("open");
     });
+  });
+}
+
+// Collapses the sidebar entirely (not to an icon-only rail — only the
+// top-level "Hotel Map" nav item has its own icon, every nested City/
+// Country/Hotel group and its System/Supplier/City Mapping links are plain
+// text, so a narrow rail would have nothing meaningful to show for most of
+// the menu). Toggled from the topbar's hamburger "Menu" button, which
+// otherwise has no behavior wired to it. This is a multi-page app (every
+// nav click is a real page load, not client-side routing), so the choice
+// is persisted in localStorage — same mynztrip:-prefixed convention
+// saveToStorage/loadFromStorage use for saved data — and re-applied on
+// every page's own DOMContentLoaded so it stays collapsed across pages
+// until explicitly re-expanded.
+const SIDEBAR_COLLAPSED_KEY = STORAGE_PREFIX + "sidebarCollapsed";
+
+function initSidebarCollapse() {
+  const appBody = document.querySelector(".app-body");
+  const menuBtn = document.querySelector('.topbar .icon-btn[aria-label="Menu"]');
+  if (!appBody || !menuBtn) return;
+
+  function applyCollapsed(collapsed) {
+    appBody.classList.toggle("sidebar-collapsed", collapsed);
+    menuBtn.setAttribute("aria-expanded", String(!collapsed));
+    menuBtn.setAttribute("aria-label", collapsed ? "Show menu" : "Hide menu");
+  }
+
+  applyCollapsed(localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "1");
+
+  menuBtn.addEventListener("click", () => {
+    const collapsed = !appBody.classList.contains("sidebar-collapsed");
+    applyCollapsed(collapsed);
+    try {
+      localStorage.setItem(SIDEBAR_COLLAPSED_KEY, collapsed ? "1" : "0");
+    } catch (e) {
+      console.warn("Could not save sidebar collapse state:", e);
+    }
   });
 }
 

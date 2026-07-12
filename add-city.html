@@ -1,0 +1,1166 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Add City – Hotel Map | mynztrip.com</title>
+<link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- Top bar -->
+  <header class="topbar">
+    <div class="topbar-brand">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2L2 8l10 4 10-4-10-6z" fill="#fff"/>
+        <path d="M2 16l10 4 10-4M2 12l10 4 10-4" stroke="#fff" stroke-width="1.6" fill="none"/>
+      </svg>
+      mynztrip.com
+    </div>
+
+    <button class="icon-btn" aria-label="Menu">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+
+    <button class="icon-btn accent-red" aria-label="Messages">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" stroke="#fff" stroke-width="1.8" fill="none"/></svg>
+    </button>
+
+    <div class="topbar-search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <input type="text" placeholder="Booking ID, PNR, Ticket No..." />
+      <button type="button">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#fff" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+        Search
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+
+    <div class="topbar-right">
+      <button class="icon-btn" aria-label="Notifications">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9z" stroke="#fff" stroke-width="1.8" fill="none"/><path d="M13.7 21a2 2 0 01-3.4 0" stroke="#fff" stroke-width="1.8"/></svg>
+      </button>
+      <svg class="avatar" width="38" height="38" viewBox="0 0 38 38" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="19" cy="19" r="19" fill="#c7cbe8"/>
+        <circle cx="19" cy="15" r="6" fill="#7c82b0"/>
+        <path d="M6 34c1.5-7 8-10 13-10s11.5 3 13 10" fill="#7c82b0"/>
+      </svg>
+    </div>
+  </header>
+
+  <div class="app-body">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <!-- Hotel Map (mother menu for this project's pages) -->
+      <nav class="nav-group open">
+        <button class="nav-item active">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 4L4 6v14l5-2 6 2 5-2V4l-5 2-6-2z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 4v14M15 6v14" stroke="currentColor" stroke-width="1.6"/></svg>
+          Hotel Map
+          <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="submenu">
+          <div class="submenu-group">
+            <button class="submenu-item submenu-toggle">
+              Country
+              <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="submenu-nested">
+              <a class="submenu-item nested" href="country-system.html">System</a>
+              <a class="submenu-item nested" href="country-supplier.html">Supplier</a>
+            </div>
+          </div>
+          <div class="submenu-group">
+            <button class="submenu-item submenu-toggle">
+              City
+              <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="submenu-nested">
+              <a class="submenu-item nested" href="city-system.html">System</a>
+              <a class="submenu-item nested" href="city-supplier.html">Supplier</a>
+            </div>
+          </div>
+          <a class="submenu-item" href="city-mapping.html">City Mapping</a>
+          <div class="submenu-group">
+            <button class="submenu-item submenu-toggle">
+              Hotel
+              <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="submenu-nested">
+              <a class="submenu-item nested" href="hotel-system.html">System</a>
+              <a class="submenu-item nested" href="hotel-supplier.html">Supplier</a>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="reset-demo-btn" id="resetDemoDataBtn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 109-9 9 9 0 00-7 3.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3 3.5V8h4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Reset Demo Data
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main-content" id="addCityMain">
+      <div class="page-header">
+        <div class="page-title-row page-title-row-dual">
+          <!-- A real <button> can't contain other <button>s (the info/dev-notes
+               icons) — the parser would silently close it early and mangle the
+               DOM. Each title block is a div acting as a button instead
+               (role="button" + tabindex, click/keydown handled in JS below). -->
+          <div class="page-title-block active" id="newCityTitleBlock" role="button" tabindex="0">
+            <span class="page-title">New City</span>
+            <span class="page-title-icons">
+              <button class="info-icon-btn" data-info-target="#newCityInfo" data-info-title="New City" aria-label="About New City">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 11v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="8" r="1" fill="currentColor"/></svg>
+              </button>
+              <button class="info-icon-btn" data-info-target="#newCityDevNotes" data-info-title="Developer Notes — New City" aria-label="Developer notes for New City">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 8l-4 4 4 4M15 8l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+            </span>
+          </div>
+          <span class="page-title-sep" aria-hidden="true">/</span>
+          <div class="page-title-block" id="mergeCityTitleBlock" role="button" tabindex="0">
+            <span class="page-title">Merge Cities</span>
+            <span class="page-title-icons">
+              <button class="info-icon-btn" data-info-target="#mergeCityInfo" data-info-title="Merge Cities" aria-label="About Merge Cities">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 11v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="8" r="1" fill="currentColor"/></svg>
+              </button>
+              <button class="info-icon-btn" data-info-target="#mergeCityDevNotes" data-info-title="Developer Notes — Merge Cities" aria-label="Developer notes for Merge Cities">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 8l-4 4 4 4M15 8l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+            </span>
+          </div>
+        </div>
+      </div>
+      <hr class="page-divider" />
+
+      <template id="newCityInfo">
+        <p>A city added here isn't linked to any supplier city — it has no supplier-city mapping step, unlike prepopulated or merged cities. Instead, system hotels are mapped to it directly.</p>
+        <p>After Save, a card shows what was just created with a <strong>Map Hotels to This City</strong> button that opens Hotel Mapping to New City, already pinned to it.</p>
+        <p><strong>Example:</strong> You add "Riverside" as a New City, then add a hotel directly to it via the System Hotel List. When a user selects "Riverside" while searching for hotels (matched by hotel id), that hotel comes back — but nothing from any supplier's own city list, since no supplier city is mapped to "Riverside".</p>
+      </template>
+
+      <template id="newCityDevNotes">
+        <p>Adds a single record to <code>SYSTEM_CITIES</code> with <code>cityType: "normal"</code> — Country is required, State is optional (only shown once the chosen country has states), Name is required. On save: pushes the record with a "Create" history entry, shows a success toast, resets the form in place so another city can be added right away without leaving the page, and updates a "just created" card below the form with that city's name/state-country/id and a <strong>Map Hotels to This City</strong> link to <code>hotel-mapping.html?cityId=&lt;id&gt;</code>. That card reflects whichever city was created most recently this session — it's overwritten by the next create, not accumulated into a list, and stays visible (not hidden again) until the page reloads. There's no edit mode here — renaming an existing New City stays on the System City List's own Edit action.</p>
+      </template>
+
+      <template id="mergeCityInfo">
+        <p>A merged city groups two or more existing system cities into one entry. Since each of those system cities can already have several supplier cities mapped to it, a merged city ends up representing every hotel from every supplier city linked — directly or indirectly, through any of the cities it merges — to it.</p>
+        <ul>
+          <li>Only cities from the original master list can be merged — a city already created via <strong>New City</strong> or <strong>Merge Cities</strong> can't be merged again.</li>
+          <li>Pick a <strong>Country</strong> first — the candidate list loads once it's chosen, and the merged city belongs to that country permanently.</li>
+          <li>Check at least 2 cities, give the result a <strong>Name</strong> (and optional <strong>State</strong>), then <strong>Save</strong> — you'll see a review of what's changing before anything is written.</li>
+          <li>Opening this page again for an existing merged city (via its row's Edit action on the System City List) lets you add or remove member cities the same way — Country is fixed once a merge exists.</li>
+          <li>If you remove cities until fewer than 2 remain, the merged city automatically becomes <strong>Inactive</strong>. Add cities back to 2 or more and Save again, and you'll be asked whether to reactivate it.</li>
+        </ul>
+        <p><strong>Example:</strong> You merge "New York" and "Brooklyn" into "Greater New York". When a user selects "Greater New York" while searching for hotels (matched by hotel id), the hotel ids returned are every supplier city mapped to New York or Brooklyn.</p>
+      </template>
+
+      <template id="mergeCityDevNotes">
+        <p>This section creates a merged city or edits an existing one's composition — the same flow either way, since pinning/creating a merged city and adjusting its members is one continuous process, not two separate modes. Only cities from the original prepopulated master list (no <code>cityType</code>) are eligible members — a city already created via New City or Merge Cities can't itself be folded into another merge.</p>
+        <ul>
+          <li><strong>Country gating</strong> — in create mode, Country is a live required select: nothing else in this section is usable until it's chosen, since the merged city's own country and the candidate pool's country are the same value. In edit mode, Country is fixed context (can never be changed for an existing merged city) and the candidate pool is scoped to it automatically.</li>
+          <li><strong>Candidate list pagination</strong> — loads and displays in bounded pages of 50 at a time, never the whole matching set at once; reaching the bottom of the loaded rows triggers loading the next page automatically with a brief loading indicator, appended without disturbing scroll position or re-rendering existing rows. Once every matching city is loaded, the list shows a clear "end of list" state. A checked box on an earlier page stays checked as later pages load. Search re-applies to the full matching set before the page split, and restarts at page 1, same as changing Country does.</li>
+          <li><strong>Already in Merge / New Additions</strong> — Already in Merge reflects the members as of when the section was opened (empty in create mode); removing one queues a removal (shown as "Undo" so it's reversible) without leaving the list until Save runs. It's paginated the same way the candidate list is — bounded pages of 50, its own scroll box, scroll-triggered loading, "end of list" state — since an existing merge can realistically have more members than fit on screen; every re-render (a checkbox change, Undo, or a fresh Save) resets it back to page 1. New Additions only shows freshly checked cities this session and isn't paginated.</li>
+          <li><strong>Save</strong> — always requires at least 2 total selected cities and a non-empty name; if fewer than 2 are selected, or nothing at all changed (name, state, and membership all unchanged) in edit mode, Save is blocked with a toast rather than silently succeeding or doing something destructive. A valid Save always shows a review step first — Already in Merge / New Additions / Removed — before writing anything.</li>
+          <li><strong>Dropping below 2 members</strong> — in edit mode, Save works even down to 0 or 1 remaining members (create still requires >=2 to begin with). The review step (Save's preview) is always 3 vertically-stacked sections — Already in Merge / New Additions / Removed — plus a conditional 4th "Status Change" section whenever this particular save has an Active/Inactive consequence, so the whole decision happens in that one review-and-confirm step, never a second popup afterward. If the save would leave fewer than 2 members on a currently-Active record, that 4th section is a plain warning (deactivation isn't optional once under 2 members) — confirming the whole review sets the record Inactive and logs a "Status Change" entry sharing that save's groupId. If the save would bring a currently-Inactive record back up to 2+ members, that section instead shows an unchecked "Reactivate this merged city" checkbox — leaving it unchecked and confirming applies every other part of the save (composition, name, state) while leaving the record Inactive; checking it also flips it back to Active, logged in that same save's grouped history card. This appears any time an edit-mode save results in >=2 members on an Inactive record, regardless of why it was Inactive (composition-driven or manually toggled from the City List) — an unchecked-by-default checkbox is what lets the user correctly decline in the manual case.</li>
+          <li><strong>History</strong> — every entry has an operation name, a description in that operation's fixed pattern, and who + when, newest first.
+            <p><strong>On a component city's own record:</strong></p>
+            <ul>
+              <li><strong>Merged</strong> — folded into this merge. Description: <em>Merged into: {merged city name}, {state}, {country code} (ID: {merged city's identifier})</em></li>
+              <li><strong>Unmerged</strong> — removed from this merge. Description: <em>Removed from merged city: {merged city name}, {state}, {country code} (ID: {merged city's identifier})</em></li>
+            </ul>
+            <p><strong>On the merged city's own record:</strong></p>
+            <ul>
+              <li><strong>Create/Edit</strong> — its own identity changed (name/state).</li>
+              <li><strong>Merged/Unmerged</strong> — a component city was added/removed. Description on both: the plain component-city label, <em>{name}, {state}, {country code} (ID: {identifier})</em> — the pill already conveys direction.</li>
+            </ul>
+            <p>When one Save changes several members and/or renames the merged city in the same action, every resulting entry on the merged city's own record shares one batch identifier so its history displays them together as a single grouped card.</p>
+          </li>
+        </ul>
+        <p><strong>Everywhere:</strong> save immediately with clear success/error feedback, and never let a checkbox or field change silently fail to be reflected in the Already-in-Merge/New-Additions lists and the member count.</p>
+      </template>
+
+      <div class="mapping-nav-fabs">
+        <button type="button" class="mapping-nav-fab mapping-chrome-toggle" id="addCityChromeToggleBtn" aria-label="Hide page title for full-height sections">
+          <svg class="icon-expand" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg class="icon-collapse" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>Full Screen</span>
+        </button>
+      </div>
+
+      <div class="mapping-page-layout">
+
+        <!-- New City section -->
+        <section class="mapping-panel mapping-layout-top" id="newCitySection">
+          <div class="mapping-panel-header">
+            <h2>New City</h2>
+            <p>Add a single new city under a country.</p>
+          </div>
+          <div class="mapping-panel-body">
+            <div class="form-group">
+              <label for="newCityCountry">Country</label>
+              <select id="newCityCountry" class="filter-select" style="width:100%; min-width:0;">
+                <option value="">Select country</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="newCityState">State</label>
+              <select id="newCityState" class="filter-select" style="width:100%; min-width:0;" disabled>
+                <option value="">Select country first</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="newCityName">City Name</label>
+              <input type="text" id="newCityName" placeholder="e.g. Boston" />
+            </div>
+            <button class="btn btn-primary" id="saveNewCityBtn" style="margin-top:6px;">Save City</button>
+
+            <!-- Reflects whichever New City was most recently created this
+                 session — stays visible (updated in place) across repeated
+                 creates, not hidden again until the page reloads. -->
+            <div class="new-city-created-banner" id="newCityCreatedCard" style="display:none;">
+              <svg class="new-city-created-check" width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span class="new-city-created-text">
+                <strong id="newCityCreatedName"></strong> — <span id="newCityCreatedMeta"></span>
+                <span class="new-city-created-id">(ID: <span id="newCityCreatedIdPill"></span>)</span>
+              </span>
+              <a class="btn btn-secondary btn-compact" id="newCityMapHotelsBtn" href="#" target="_blank" rel="noopener">Map Hotels to This City</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- Merge Cities section -->
+        <section class="mapping-panel mapping-bottom-panel" id="mergeCitySection">
+          <div class="mapping-panel-body" id="mergeCityBody">
+            <!-- Full-width fields card, above the 2-column grid below it —
+                 Country/State on one row, Name + status/history on the next,
+                 so these fields get the section's whole width instead of
+                 being confined to the left column alongside the checklist. -->
+            <div class="pinned-city-card" id="mergeEntityCard" style="margin-top:0;">
+              <div class="mapping-merge-fields-row-1">
+                <div class="form-group" id="mergeCountryGroup" style="margin-bottom:0;">
+                  <label for="mergeCountrySelect">Country</label>
+                  <select id="mergeCountrySelect" class="filter-select" style="width:100%; min-width:0;">
+                    <option value="">Select country</option>
+                  </select>
+                </div>
+                <div class="form-group" id="mergeCountryFixedGroup" style="margin-bottom:0; display:none;">
+                  <label for="mergeCountryFixed">Country</label>
+                  <input type="text" id="mergeCountryFixed" disabled />
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                  <label for="mergeStateSelect">State</label>
+                  <select id="mergeStateSelect" class="filter-select" style="width:100%; min-width:0;" disabled>
+                    <option value="">Select country first</option>
+                  </select>
+                </div>
+              </div>
+              <div class="mapping-merge-fields-row-2">
+                <div class="form-group" style="margin-bottom:0; flex:1;">
+                  <label for="mergeNameInput">Merged City Name</label>
+                  <input type="text" id="mergeNameInput" placeholder="Resulting city name" />
+                </div>
+                <div class="pinned-city-actions" style="margin-top:0;">
+                  <span class="pill neutral" id="mergeMemberCount">0 cities</span>
+                  <span class="pill success" id="mergeActiveStatusPill">Active</span>
+                  <button class="action-btn" id="mergeHistoryBtn" disabled aria-label="History available after this merged city is saved">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 109-9 9 9 0 00-7 3.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3 3.5V8h4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 7.5V12l3.2 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="mapping-layout mapping-layout-bottom" style="margin-top:16px;">
+              <!-- Left: Already in Merge / New Additions -->
+              <div class="mapping-bottom-col">
+                <div class="form-group mapping-list-group">
+                  <label>Cities in This Merge</label>
+                  <div class="merge-list">
+                    <details class="mapping-collapsible-inline" open>
+                      <summary class="mapping-collapsible-header mapping-collapsible-header--warning">
+                        <span>Already in Merge (<span id="mergeAlreadyCount">0</span>)</span>
+                        <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      </summary>
+                      <div id="mergeAlreadyList"></div>
+                    </details>
+                    <details class="mapping-collapsible-inline" open>
+                      <summary class="mapping-collapsible-header mapping-collapsible-header--info">
+                        <span>New Additions (<span id="mergeNewCount">0</span>)</span>
+                        <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      </summary>
+                      <div id="mergeNewList"></div>
+                    </details>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right: candidate search + checklist -->
+              <div class="mapping-bottom-col">
+                <div class="form-group mapping-list-group">
+                  <div class="mapping-search-actions-row" style="margin-bottom:6px;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                      <label style="margin-bottom:0;">Candidate Cities</label>
+                      <span class="hint" id="mergeCandidateStat" style="margin-top:0;">Select a country first</span>
+                    </div>
+                    <span class="mapping-save-summary" id="mergeSelectionSummary">No pending changes</span>
+                  </div>
+                  <div class="mapping-search-actions-row">
+                    <div class="toolbar-search mapping-search-half">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                      <input type="text" id="mergeCandidateSearch" placeholder="Search cities..." disabled />
+                    </div>
+                    <button class="btn btn-primary" id="saveMergeCityBtn">Save Merged City</button>
+                  </div>
+                  <div class="merge-list" id="mergeCandidateList"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- History Modal (card design) -->
+<div class="modal-overlay" id="historyModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Edit History <span id="historyCityName" style="color:var(--text-muted); font-weight:600;"></span></h3>
+      <button class="modal-close" data-modal-close aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="history-list" id="historyList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Save preview: 3 vertically-stacked sections (no Remap bucket — a base
+     city belongs to at most one merge, so every checked-but-not-yet-member
+     candidate is unambiguously new), plus a conditional 4th "Status Change"
+     section when this save would deactivate/reactivate the merge — see
+     buildPreviewSectionsHtml() below. Reuses the same .popup-box-lg shell
+     hotel-mapping.html and city-mapping.html's own Save previews use, but
+     with its own #mergePreviewSections layout (vertical, not their
+     side-by-side #previewSections). -->
+<div class="modal-overlay popup-overlay" id="mergeCityPreviewModal">
+  <div class="popup-box popup-box-lg">
+    <div class="modal-header">
+      <h3>Review Merge Changes</h3>
+      <button class="modal-close" data-modal-close aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div id="mergePreviewSections"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" data-modal-close>Cancel</button>
+      <button class="btn btn-primary" id="mergePreviewConfirmBtn">Confirm &amp; Save</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+<script src="js/data.js"></script>
+<script>
+  // Shared by both sections below (identical cascade behavior for a plain
+  // country -> state pick, whether it's the New City's own country or the
+  // Merge section's create-mode country) — declared once here rather than
+  // twice, since two same-named top-level function declarations on one page
+  // would just silently shadow each other.
+  function populateCountrySelect(select) {
+    select.insertAdjacentHTML(
+      "beforeend",
+      SYSTEM_COUNTRIES.map((c) => `<option value="${c.name}">${c.name} (${c.code})</option>`).join("")
+    );
+  }
+
+  function populateStatesForCountry(stateSelect, countryName) {
+    const meta = SYSTEM_COUNTRIES.find((c) => c.name === countryName);
+    const states = meta ? getStatesForCountryCode(meta.code) : [];
+    if (states.length) {
+      stateSelect.disabled = false;
+      stateSelect.innerHTML =
+        `<option value="">Select state</option>` + states.map((s) => `<option value="${s}">${s}</option>`).join("");
+    } else {
+      stateSelect.disabled = true;
+      stateSelect.innerHTML = `<option value="">${meta ? "No state required" : "Select country first"}</option>`;
+    }
+  }
+
+  // ---------- New City section ----------
+
+  const newCityCountry = document.getElementById("newCityCountry");
+  const newCityState = document.getElementById("newCityState");
+  const newCityName = document.getElementById("newCityName");
+  populateCountrySelect(newCityCountry);
+  newCityCountry.addEventListener("change", () => populateStatesForCountry(newCityState, newCityCountry.value));
+
+  document.getElementById("saveNewCityBtn").addEventListener("click", () => {
+    const name = newCityName.value.trim();
+    const countryName = newCityCountry.value;
+    if (!countryName) {
+      showToast("Please select a country", "error");
+      return;
+    }
+    if (!name) {
+      showToast("City name is required", "error");
+      return;
+    }
+    const meta = SYSTEM_COUNTRIES.find((c) => c.name === countryName);
+    const newCityStateValue = newCityState.disabled ? null : newCityState.value || null;
+    const newId = SYSTEM_CITIES.length;
+    SYSTEM_CITIES.push({
+      id: newId,
+      name,
+      state: newCityStateValue,
+      country: { name: meta.name, code: meta.code },
+      active: true,
+      history: [
+        {
+          operation: "Create",
+          name,
+          description: [`Name: ${name}`, newCityStateValue ? `State: ${newCityStateValue}` : null, `Country: ${meta.name} (${meta.code})`]
+            .filter(Boolean)
+            .join(", "),
+          userName: CURRENT_USER.name,
+          userEmail: CURRENT_USER.email,
+          timestamp: new Date(),
+        },
+      ],
+      cityType: "normal",
+    });
+    saveToStorage("SYSTEM_CITIES", SYSTEM_CITIES);
+    showToast("City added successfully");
+
+    // Show what was just created, with a way straight to Hotel Mapping —
+    // a New City has no supplier-city mapping step, hotels are attached to
+    // it directly there instead. Updated in place on every create, not just
+    // shown once, so repeated creates each get their own confirmation.
+    document.getElementById("newCityCreatedName").textContent = name;
+    document.getElementById("newCityCreatedMeta").textContent = [newCityStateValue, meta.name].filter(Boolean).join(", ");
+    document.getElementById("newCityCreatedIdPill").textContent = getSystemCityDisplayId(newId);
+    document.getElementById("newCityMapHotelsBtn").href = `hotel-mapping.html?cityId=${newId}`;
+    document.getElementById("newCityCreatedCard").style.display = "";
+
+    // No edit mode to send a New City into (unlike a merge, which redirects
+    // into editing itself) — reset in place so another can be added right away.
+    newCityName.value = "";
+    newCityCountry.value = "";
+    newCityCountry.dispatchEvent(new Event("change"));
+  });
+
+  // ---------- Full-screen sections: dynamic height + dual title scroll-spy ----------
+  // Same mechanism as city-mapping.html's own two-section layout, generalized
+  // so the section-jump control IS the dual page title instead of separate
+  // floating nav buttons — clicking a title scrolls to its section, and an
+  // IntersectionObserver keeps whichever title matches the section currently
+  // in view bold/full-opacity with its icons showing (see .page-title-block
+  // CSS), the other dimmed with its icons hidden.
+
+  const newCityTitleBlock = document.getElementById("newCityTitleBlock");
+  const mergeCityTitleBlock = document.getElementById("mergeCityTitleBlock");
+  const newCitySection = document.getElementById("newCitySection");
+  const mergeCitySection = document.getElementById("mergeCitySection");
+
+  function scrollToSection(section) {
+    section.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  // Title blocks are role="button" divs (see markup comment above), so both
+  // click and Enter/Space need wiring by hand — a real <button> would get
+  // the latter for free.
+  function wireTitleBlockNav(block, section) {
+    block.addEventListener("click", (e) => {
+      if (e.target.closest(".info-icon-btn")) return;
+      scrollToSection(section);
+    });
+    block.addEventListener("keydown", (e) => {
+      if (e.target.closest(".info-icon-btn")) return;
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        scrollToSection(section);
+      }
+    });
+  }
+  wireTitleBlockNav(newCityTitleBlock, newCitySection);
+  wireTitleBlockNav(mergeCityTitleBlock, mergeCitySection);
+
+  const addCityPageLayout = document.querySelector(".mapping-page-layout");
+
+  function syncAddCitySectionHeight() {
+    document.documentElement.style.setProperty("--mapping-section-height", `${addCityPageLayout.clientHeight}px`);
+  }
+  syncAddCitySectionHeight();
+  window.addEventListener("resize", debounce(syncAddCitySectionHeight, 150));
+
+  const sectionTitleObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        const block = entry.target === newCitySection ? newCityTitleBlock : mergeCityTitleBlock;
+        block.classList.toggle("active", entry.isIntersecting);
+      });
+    },
+    { root: addCityPageLayout, threshold: 0.5 }
+  );
+  sectionTitleObserver.observe(newCitySection);
+  sectionTitleObserver.observe(mergeCitySection);
+
+  const addCityMain = document.getElementById("addCityMain");
+  const addCityChromeToggleBtn = document.getElementById("addCityChromeToggleBtn");
+  addCityChromeToggleBtn.addEventListener("click", () => {
+    const hidden = !addCityMain.classList.contains("chrome-hidden");
+    addCityMain.classList.toggle("chrome-hidden", hidden);
+    addCityChromeToggleBtn.classList.toggle("active", hidden);
+    addCityChromeToggleBtn.querySelector("span").textContent = hidden ? "Exit Full Screen" : "Full Screen";
+    addCityChromeToggleBtn.setAttribute("aria-label", hidden ? "Show page title" : "Hide page title for full-height sections");
+    syncAddCitySectionHeight();
+  });
+
+  // ---------- Merge Cities section ----------
+
+  const params = new URLSearchParams(window.location.search);
+  const isEdit = params.has("cityId");
+  const editCityId = isEdit ? Number(params.get("cityId")) : null;
+  const mergedCity = isEdit ? SYSTEM_CITIES.find((c) => c.id === editCityId && c.cityType === "merged") : null;
+
+  // Deep-linked from a merged city's Edit action on the System City List —
+  // land straight on this section instead of leaving the page at New City.
+  // No smooth animation: this is establishing where the page lands on load.
+  if (isEdit) {
+    mergeCitySection.scrollIntoView({ block: "start" });
+  }
+
+  if (isEdit && !mergedCity) {
+    // A live-created merged city only exists in localStorage — some browsers
+    // (Firefox) partition that per file:// document, so a fresh merge's Edit
+    // link can silently fail to resolve when the project is opened as local
+    // files instead of served over http. Doesn't affect a real deployment
+    // (one shared http origin) or the pre-seeded demo cities.
+    document.getElementById("mergeCityBody").innerHTML = `<div class="empty-state">No merged city found for this link. If you just created this merge, make sure you're testing over http:// (not file://) or using Chrome/Edge — Firefox partitions local-file storage per page, so brand-new data may not carry over yet. Otherwise, go back to the System City List and use a merged city's Edit button.</div>`;
+  } else {
+    const mergeCountrySelect = document.getElementById("mergeCountrySelect");
+    const mergeCountryFixed = document.getElementById("mergeCountryFixed");
+    const mergeCountryGroup = document.getElementById("mergeCountryGroup");
+    const mergeCountryFixedGroup = document.getElementById("mergeCountryFixedGroup");
+    const mergeStateSelect = document.getElementById("mergeStateSelect");
+    const mergeNameInput = document.getElementById("mergeNameInput");
+    const memberCountEl = document.getElementById("mergeMemberCount");
+    const activeStatusPill = document.getElementById("mergeActiveStatusPill");
+    const historyBtn = document.getElementById("mergeHistoryBtn");
+    const alreadyCountEl = document.getElementById("mergeAlreadyCount");
+    const alreadyListEl = document.getElementById("mergeAlreadyList");
+    const newCountEl = document.getElementById("mergeNewCount");
+    const newListEl = document.getElementById("mergeNewList");
+    const candidateStat = document.getElementById("mergeCandidateStat");
+    const selectionSummaryEl = document.getElementById("mergeSelectionSummary");
+    const candidateSearch = document.getElementById("mergeCandidateSearch");
+    const candidateList = document.getElementById("mergeCandidateList");
+    const saveBtn = document.getElementById("saveMergeCityBtn");
+
+    populateCountrySelect(mergeCountrySelect);
+
+    let initialMemberIds = new Set(isEdit ? mergedCity.mergedFrom || [] : []);
+    let pendingChecked = new Set(initialMemberIds);
+
+    if (isEdit) {
+      mergeCountryGroup.style.display = "none";
+      mergeCountryFixedGroup.style.display = "";
+      const countryName = getSystemCountryName(mergedCity.country.code) || mergedCity.country.name;
+      mergeCountryFixed.value = `${countryName} (${mergedCity.country.code})`;
+      populateStatesForCountry(mergeStateSelect, countryName);
+      mergeStateSelect.value = mergedCity.state || "";
+      mergeNameInput.value = mergedCity.name;
+      memberCountEl.textContent = `${initialMemberIds.size} cities`;
+      historyBtn.disabled = false;
+      historyBtn.setAttribute("aria-label", "View history for this merged city");
+    } else {
+      memberCountEl.textContent = "0 cities";
+      historyBtn.disabled = true;
+      historyBtn.setAttribute("aria-label", "History available after this merged city is saved");
+    }
+
+    // History and the status pill stay visible (never display:none) in both
+    // create and edit mode — hiding them shifted the row's layout between
+    // the two, since the Name field (flex:1) would reflow to fill the freed
+    // space. History is just disabled pre-save instead (nothing to show
+    // yet); the pill previews "Active", the state a fresh merge always
+    // starts in, until edit mode overwrites it with the real status below.
+    // No delete action — a merge with fewer than 2 members just goes
+    // Inactive (see the Save handler) rather than being removed, so this
+    // pill is the only place that status is surfaced within the section
+    // itself (also mirrored on the City List's own Active/Inactive column).
+    function updateActiveStatusPill() {
+      if (!isEdit) return;
+      activeStatusPill.textContent = mergedCity.active ? "Active" : "Inactive";
+      activeStatusPill.className = `pill ${mergedCity.active ? "success" : "danger"}`;
+    }
+    updateActiveStatusPill();
+
+    function getActiveCountryName() {
+      return isEdit ? getSystemCountryName(mergedCity.country.code) || mergedCity.country.name : mergeCountrySelect.value;
+    }
+
+    // A city that was itself created via Add City (single or merged) can't
+    // be folded into another merge — only cities from the original master
+    // list are eligible merge candidates.
+    function getMergeCandidates(countryName, query) {
+      const meta = SYSTEM_COUNTRIES.find((c) => c.name === countryName);
+      let candidates = meta ? SYSTEM_CITIES.filter((c) => c.country.code === meta.code && !c.cityType) : [];
+      const q = query.trim().toLowerCase();
+      if (q) candidates = candidates.filter((c) => c.name.toLowerCase().includes(q));
+      return candidates;
+    }
+
+    function cityMetaSub(c) {
+      return [c.state, getSystemCountryName(c.country.code) || c.country.name].filter(Boolean).join(", ");
+    }
+
+    // Always wired, not just in edit mode — a disabled button never
+    // dispatches click events, so this is safe even before mergedCity exists.
+    historyBtn.addEventListener("click", () => {
+      document.getElementById("historyCityName").textContent = `— ${mergedCity.name} (ID: ${getSystemCityDisplayId(mergedCity.id)})`;
+      showHistoryList(mergedCity.history, "No history yet");
+      openModal(document.getElementById("historyModal"));
+    });
+
+    // ---------- Candidate checklist (bounded pages of 50, scroll-loaded) ----------
+
+    const MERGE_PAGE_SIZE = 50;
+    let visibleCount = MERGE_PAGE_SIZE;
+    let candidateScrollObserver = null;
+    let isLoadingMoreCandidates = false;
+
+    function candidateRowHtml(c) {
+      return `
+      <label class="merge-list-item ${c.active ? "merge-list-item--city-active" : "merge-list-item--city-inactive"}" title="${c.active ? "Active" : "Inactive"}">
+        <input type="checkbox" data-city-id="${c.id}" ${pendingChecked.has(c.id) ? "checked" : ""} />
+        <span class="meta">
+          <span class="merge-list-name" title="${c.name}">${c.name}</span>
+          <span class="sub">${cityMetaSub(c)}</span>
+        </span>
+      </label>`;
+    }
+
+    function wireCandidateCheckbox(checkbox) {
+      if (checkbox.dataset.wired) return;
+      checkbox.dataset.wired = "1";
+      checkbox.addEventListener("change", () => {
+        const id = Number(checkbox.dataset.cityId);
+        if (checkbox.checked) pendingChecked.add(id);
+        else pendingChecked.delete(id);
+        updateCandidateStat();
+        renderSelectedCitiesLists();
+        updateSelectionSummary();
+      });
+    }
+
+    // Shared by both paginated lists below (Candidate Cities, Already in
+    // Merge) — id-parametrized so each gets its own sentinel to observe.
+    function scrollStatusHtml(id) {
+      return `<div class="hotel-list-scroll-status" id="${id}"><span class="scroll-status-spinner"></span><span class="scroll-status-label"></span></div>`;
+    }
+
+    function endOfListHtml() {
+      return `<div class="hotel-list-scroll-status hotel-list-scroll-status--end">You've reached the end of the list</div>`;
+    }
+
+    function observeCandidateScrollStatus(rows) {
+      const sentinel = document.getElementById("mergeCandidateScrollStatus");
+      if (!sentinel) return;
+      candidateScrollObserver = new IntersectionObserver(
+        (entries) => {
+          if (entries[0].isIntersecting) loadMoreCandidateRows(sentinel, rows);
+        },
+        { root: candidateList, rootMargin: "0px 0px 60px 0px", threshold: 0 }
+      );
+      candidateScrollObserver.observe(sentinel);
+    }
+
+    function loadMoreCandidateRows(sentinel, rows) {
+      if (isLoadingMoreCandidates) return;
+      isLoadingMoreCandidates = true;
+      sentinel.classList.add("is-loading");
+      sentinel.querySelector(".scroll-status-label").textContent = "Loading more cities…";
+      setTimeout(() => {
+        isLoadingMoreCandidates = false;
+        if (!sentinel.isConnected) return;
+
+        const nextRows = rows.slice(visibleCount, visibleCount + MERGE_PAGE_SIZE);
+        visibleCount += MERGE_PAGE_SIZE;
+        sentinel.insertAdjacentHTML("beforebegin", nextRows.map(candidateRowHtml).join(""));
+        candidateList.querySelectorAll("[data-city-id]").forEach(wireCandidateCheckbox);
+
+        if (visibleCount < rows.length) {
+          sentinel.classList.remove("is-loading");
+          sentinel.querySelector(".scroll-status-label").textContent = "";
+        } else {
+          sentinel.outerHTML = endOfListHtml();
+          if (candidateScrollObserver) {
+            candidateScrollObserver.disconnect();
+            candidateScrollObserver = null;
+          }
+        }
+      }, 450);
+    }
+
+    function updateCandidateStat() {
+      const countryName = getActiveCountryName();
+      if (!countryName) {
+        candidateStat.textContent = "Select a country first";
+        return;
+      }
+      const all = getMergeCandidates(countryName, "");
+      const selected = all.filter((c) => pendingChecked.has(c.id)).length;
+      candidateStat.textContent = `Selected: ${selected}/${all.length}`;
+    }
+
+    function renderCandidateList() {
+      updateCandidateStat();
+      const countryName = getActiveCountryName();
+      candidateSearch.disabled = !countryName;
+      if (candidateScrollObserver) {
+        candidateScrollObserver.disconnect();
+        candidateScrollObserver = null;
+      }
+      isLoadingMoreCandidates = false;
+      if (!countryName) {
+        candidateList.innerHTML = `<div class="empty-state">Select a country first</div>`;
+        return;
+      }
+      const rows = getMergeCandidates(countryName, candidateSearch.value);
+      visibleCount = MERGE_PAGE_SIZE;
+      const visibleRows = rows.slice(0, visibleCount);
+
+      candidateList.innerHTML = visibleRows.length
+        ? visibleRows.map(candidateRowHtml).join("") +
+          (rows.length > visibleRows.length ? scrollStatusHtml("mergeCandidateScrollStatus") : "")
+        : `<div class="empty-state">No cities in this country match your search</div>`;
+
+      candidateList.querySelectorAll("[data-city-id]").forEach(wireCandidateCheckbox);
+
+      if (visibleRows.length && rows.length > visibleRows.length) observeCandidateScrollStatus(rows);
+    }
+
+    // ---------- Left column: Already in Merge / New Additions ----------
+    // Already in Merge gets the same bounded-pages-of-50, scroll-triggered
+    // loading as the Candidate Cities checklist above (its own state/
+    // functions, mirroring candidateScrollObserver/loadMoreCandidateRows
+    // exactly) — a large existing merge can realistically have more members
+    // than fit on screen. New Additions only ever holds cities checked this
+    // session, so it stays a plain unpaginated list.
+
+    const ALREADY_PAGE_SIZE = 50;
+    let alreadyVisibleCount = ALREADY_PAGE_SIZE;
+    let alreadyScrollObserver = null;
+    let isLoadingMoreAlready = false;
+
+    function renderSelectedCitiesLists() {
+      const alreadyRows = [...initialMemberIds].map((id) => SYSTEM_CITIES.find((c) => c.id === id)).filter(Boolean);
+      const newRows = [...pendingChecked]
+        .filter((id) => !initialMemberIds.has(id))
+        .map((id) => SYSTEM_CITIES.find((c) => c.id === id))
+        .filter(Boolean);
+      renderAlreadyList(alreadyRows);
+      renderNewList(newRows);
+    }
+
+    function alreadyRowHtml(c) {
+      const queuedForRemoval = !pendingChecked.has(c.id);
+      return `
+      <div class="merge-list-item">
+        <span class="meta">
+          <span class="merge-list-name" title="${c.name}">${c.name}</span>
+          <span class="sub">${cityMetaSub(c)}</span>
+        </span>
+        <div class="row-actions">
+          <button class="btn btn-secondary btn-compact" data-toggle-remove-id="${c.id}">${queuedForRemoval ? "Undo" : "Remove"}</button>
+        </div>
+      </div>`;
+    }
+
+    function wireAlreadyRemoveButton(btn) {
+      if (btn.dataset.wired) return;
+      btn.dataset.wired = "1";
+      btn.addEventListener("click", () => {
+        const id = Number(btn.dataset.toggleRemoveId);
+        if (pendingChecked.has(id)) pendingChecked.delete(id);
+        else pendingChecked.add(id);
+        renderCandidateList();
+        renderSelectedCitiesLists();
+        updateSelectionSummary();
+      });
+    }
+
+    function observeAlreadyScrollStatus(rows) {
+      const sentinel = document.getElementById("mergeAlreadyScrollStatus");
+      if (!sentinel) return;
+      alreadyScrollObserver = new IntersectionObserver(
+        (entries) => {
+          if (entries[0].isIntersecting) loadMoreAlreadyRows(sentinel, rows);
+        },
+        { root: alreadyListEl, rootMargin: "0px 0px 60px 0px", threshold: 0 }
+      );
+      alreadyScrollObserver.observe(sentinel);
+    }
+
+    function loadMoreAlreadyRows(sentinel, rows) {
+      if (isLoadingMoreAlready) return;
+      isLoadingMoreAlready = true;
+      sentinel.classList.add("is-loading");
+      sentinel.querySelector(".scroll-status-label").textContent = "Loading more cities…";
+      setTimeout(() => {
+        isLoadingMoreAlready = false;
+        if (!sentinel.isConnected) return;
+
+        const nextRows = rows.slice(alreadyVisibleCount, alreadyVisibleCount + ALREADY_PAGE_SIZE);
+        alreadyVisibleCount += ALREADY_PAGE_SIZE;
+        sentinel.insertAdjacentHTML("beforebegin", nextRows.map(alreadyRowHtml).join(""));
+        alreadyListEl.querySelectorAll("[data-toggle-remove-id]").forEach(wireAlreadyRemoveButton);
+
+        if (alreadyVisibleCount < rows.length) {
+          sentinel.classList.remove("is-loading");
+          sentinel.querySelector(".scroll-status-label").textContent = "";
+        } else {
+          sentinel.outerHTML = endOfListHtml();
+          if (alreadyScrollObserver) {
+            alreadyScrollObserver.disconnect();
+            alreadyScrollObserver = null;
+          }
+        }
+      }, 450);
+    }
+
+    function renderAlreadyList(rows) {
+      alreadyCountEl.textContent = rows.length;
+      if (alreadyScrollObserver) {
+        alreadyScrollObserver.disconnect();
+        alreadyScrollObserver = null;
+      }
+      isLoadingMoreAlready = false;
+      alreadyVisibleCount = ALREADY_PAGE_SIZE;
+      const visibleRows = rows.slice(0, alreadyVisibleCount);
+
+      alreadyListEl.innerHTML = visibleRows.length
+        ? visibleRows.map(alreadyRowHtml).join("") +
+          (rows.length > visibleRows.length ? scrollStatusHtml("mergeAlreadyScrollStatus") : "")
+        : `<div class="empty-state">No cities in this merge yet</div>`;
+
+      alreadyListEl.querySelectorAll("[data-toggle-remove-id]").forEach(wireAlreadyRemoveButton);
+
+      if (visibleRows.length && rows.length > visibleRows.length) observeAlreadyScrollStatus(rows);
+    }
+
+    function renderNewList(rows) {
+      newCountEl.textContent = rows.length;
+      newListEl.innerHTML = rows.length
+        ? rows
+            .map(
+              (c) => `
+      <div class="merge-list-item">
+        <span class="meta">
+          <span class="merge-list-name" title="${c.name}">${c.name} <span class="pill info pill-tag">New</span></span>
+          <span class="sub">${cityMetaSub(c)}</span>
+        </span>
+        <div class="row-actions">
+          <button class="action-btn" data-deselect-city-id="${c.id}" aria-label="Remove ${c.name} from selection">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+      </div>`
+            )
+            .join("")
+        : `<div class="empty-state">No new cities selected yet</div>`;
+
+      newListEl.querySelectorAll("[data-deselect-city-id]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          pendingChecked.delete(Number(btn.dataset.deselectCityId));
+          renderCandidateList();
+          renderSelectedCitiesLists();
+          updateSelectionSummary();
+        });
+      });
+    }
+
+    function updateSelectionSummary() {
+      const added = [...pendingChecked].filter((id) => !initialMemberIds.has(id)).length;
+      const removed = [...initialMemberIds].filter((id) => !pendingChecked.has(id)).length;
+      const parts = [];
+      if (added) parts.push(`${added} to add`);
+      if (removed) parts.push(`${removed} to remove`);
+      selectionSummaryEl.textContent = parts.length ? parts.join(", ") : "No pending changes";
+    }
+
+    if (!isEdit) {
+      mergeCountrySelect.addEventListener("change", () => {
+        pendingChecked = new Set();
+        populateStatesForCountry(mergeStateSelect, mergeCountrySelect.value);
+        candidateSearch.value = "";
+        renderCandidateList();
+        renderSelectedCitiesLists();
+        updateSelectionSummary();
+      });
+    }
+
+    // Debounced so a full list re-render + per-row listener rebind doesn't
+    // fire on every single keystroke — only once typing pauses.
+    let candidateSearchDebounceTimer;
+    candidateSearch.addEventListener("input", () => {
+      clearTimeout(candidateSearchDebounceTimer);
+      candidateSearchDebounceTimer = setTimeout(() => renderCandidateList(), 150);
+    });
+
+    // ---------- Save preview (3 buckets: Already in Merge / New Additions / Removed) ----------
+
+    function previewRowHtml(c) {
+      return `
+      <div class="merge-list-item">
+        <span class="meta">
+          <span>${c.name}</span>
+          <span class="sub">${cityMetaSub(c)}</span>
+        </span>
+      </div>`;
+    }
+
+    function previewSectionHtml(title, rows) {
+      return `
+      <div class="preview-section">
+        <div class="preview-section-title">${title} (${rows.length})</div>
+        ${rows.length ? `<div class="merge-list">${rows.map(previewRowHtml).join("")}</div>` : `<div class="empty-state">None</div>`}
+      </div>`;
+    }
+
+    function previewStatusBannerHtml(text, tone) {
+      return `<div class="preview-status-banner preview-status-banner--${tone}">${text}</div>`;
+    }
+
+    // 4th section, only present when this save has an Active/Inactive
+    // consequence — folds the reactivate decision into this same review
+    // step (a checkbox here) instead of a second popup after Save runs.
+    function statusChangeSectionHtml(kind) {
+      if (kind === "deactivate") {
+        return `
+      <div class="preview-section">
+        <div class="preview-section-title">Status Change</div>
+        ${previewStatusBannerHtml(
+          "Saving will leave fewer than 2 cities in this merge, so it will become <strong>Inactive</strong>.",
+          "warning"
+        )}
+      </div>`;
+      }
+      if (kind === "reactivate") {
+        return `
+      <div class="preview-section">
+        <div class="preview-section-title">Status Change</div>
+        ${previewStatusBannerHtml("This merged city is currently <strong>Inactive</strong>.", "info")}
+        <label class="toggle-row" style="margin-bottom:0;">
+          <input type="checkbox" id="mergeReactivateCheckbox" />
+          Reactivate this merged city now that it has 2 or more cities again
+        </label>
+      </div>`;
+      }
+      return "";
+    }
+
+    function buildPreviewSectionsHtml({ keptRows, addedRows, removedRows, statusChangeKind }) {
+      // Status Change is a full-width row on its own at the top — it's the
+      // most consequential thing on this screen (does this save deactivate/
+      // reactivate the merge?). The 3 composition buckets go below it,
+      // side by side as columns (x-axis split), not stacked under it.
+      return (
+        statusChangeSectionHtml(statusChangeKind) +
+        `<div class="preview-buckets-row">
+          ${previewSectionHtml("Already in Merge", keptRows)}
+          ${previewSectionHtml("New Additions", addedRows)}
+          ${previewSectionHtml("Removed", removedRows)}
+        </div>`
+      );
+    }
+
+    let pendingPreviewConfirm = null;
+    function openMergePreview(buckets, onConfirm) {
+      document.getElementById("mergePreviewSections").innerHTML = buildPreviewSectionsHtml(buckets);
+      pendingPreviewConfirm = onConfirm;
+      openModal(document.getElementById("mergeCityPreviewModal"));
+    }
+    document.getElementById("mergePreviewConfirmBtn").addEventListener("click", () => {
+      const action = pendingPreviewConfirm;
+      pendingPreviewConfirm = null;
+      closeModal(document.getElementById("mergeCityPreviewModal"));
+      if (action) action();
+    });
+
+    saveBtn.addEventListener("click", () => {
+      const countryName = getActiveCountryName();
+      if (!countryName) {
+        showToast("Please select a country first", "error");
+        return;
+      }
+      // Create still needs >=2 to begin with — a merge is by definition
+      // combining at least 2 cities. Edit has no such floor any more: saving
+      // down to fewer than 2 is allowed and just goes Inactive below,
+      // instead of being blocked or deleting the record.
+      if (!isEdit && pendingChecked.size < 2) {
+        showToast("Select at least 2 cities to merge", "error");
+        return;
+      }
+      const name = mergeNameInput.value.trim();
+      if (!name) {
+        showToast("Merged city name is required", "error");
+        return;
+      }
+
+      const addedIds = [...pendingChecked].filter((id) => !initialMemberIds.has(id));
+      const removedIds = [...initialMemberIds].filter((id) => !pendingChecked.has(id));
+      const stateValue = mergeStateSelect.disabled ? null : mergeStateSelect.value || null;
+      const nameChanged = isEdit && mergedCity.name !== name;
+      const stateChanged = isEdit && (mergedCity.state || null) !== stateValue;
+
+      if (isEdit && !addedIds.length && !removedIds.length && !nameChanged && !stateChanged) {
+        showToast("No changes to save", "error");
+        return;
+      }
+
+      const keptRows = [...initialMemberIds]
+        .filter((id) => pendingChecked.has(id))
+        .map((id) => SYSTEM_CITIES.find((c) => c.id === id))
+        .filter(Boolean);
+      const addedRows = addedIds.map((id) => SYSTEM_CITIES.find((c) => c.id === id)).filter(Boolean);
+      const removedRows = removedIds.map((id) => SYSTEM_CITIES.find((c) => c.id === id)).filter(Boolean);
+      const meta = SYSTEM_COUNTRIES.find((c) => c.name === countryName);
+
+      // Surface the Active/Inactive consequence as this preview's 4th
+      // section, before anything is written — deactivation is shown as a
+      // plain warning (not optional, nothing to decide), reactivation gets
+      // an inline checkbox so that decision is part of this same Save
+      // instead of a second popup appearing afterward.
+      let statusChangeKind = null;
+      if (isEdit && pendingChecked.size < 2 && mergedCity.active) {
+        statusChangeKind = "deactivate";
+      } else if (isEdit && pendingChecked.size >= 2 && !mergedCity.active) {
+        statusChangeKind = "reactivate";
+      }
+
+      openMergePreview({ keptRows, addedRows, removedRows, statusChangeKind }, () => {
+        const groupId = generateHistoryGroupId();
+        const timestamp = new Date();
+
+        if (!isEdit) {
+          const newId = SYSTEM_CITIES.length;
+          const newRecord = {
+            id: newId,
+            name,
+            state: stateValue,
+            country: { name: meta.name, code: meta.code },
+            active: true,
+            history: [],
+            cityType: "merged",
+            mergedFrom: [],
+          };
+          newRecord.history.push({
+            operation: "Create",
+            name,
+            description: [`Name: ${name}`, stateValue ? `State: ${stateValue}` : null, `Country: ${meta.name} (${meta.code})`]
+              .filter(Boolean)
+              .join(", "),
+            userName: CURRENT_USER.name,
+            userEmail: CURRENT_USER.email,
+            timestamp,
+            groupId,
+          });
+          SYSTEM_CITIES.push(newRecord);
+          addedIds.forEach((cid) => applyCityMerge(newRecord, SYSTEM_CITIES.find((c) => c.id === cid), true, groupId));
+          saveToStorage("SYSTEM_CITIES", SYSTEM_CITIES);
+          showToast("Cities merged successfully");
+          // Brief pause so the success toast is actually visible before the
+          // page navigates away — an immediate location.href would unload
+          // the document before the toast's fade-in transition ever paints.
+          setTimeout(() => {
+            location.href = `add-city.html?cityId=${newId}`;
+          }, 600);
+          return;
+        }
+
+        const changeParts = [];
+        if (nameChanged) changeParts.push(`Name: ${mergedCity.name} -> ${name}`);
+        if (stateChanged) changeParts.push(`State: ${mergedCity.state || "—"} -> ${stateValue || "—"}`);
+        mergedCity.name = name;
+        mergedCity.state = stateValue;
+        if (changeParts.length) {
+          mergedCity.history.push({
+            operation: "Edit",
+            name,
+            description: changeParts.join(HISTORY_LINE_BREAK),
+            userName: CURRENT_USER.name,
+            userEmail: CURRENT_USER.email,
+            timestamp,
+            groupId,
+          });
+        }
+        addedIds.forEach((cid) => applyCityMerge(mergedCity, SYSTEM_CITIES.find((c) => c.id === cid), true, groupId));
+        removedIds.forEach((cid) => applyCityMerge(mergedCity, SYSTEM_CITIES.find((c) => c.id === cid), false, groupId));
+
+        // No delete action any more — dropping below 2 members just marks
+        // the merge Inactive (nothing destructive happened), and regaining
+        // 2+ while Inactive only reactivates if the 4th preview section's
+        // checkbox was ticked — both decided as part of this one Save, not
+        // a follow-up prompt, since the record could just as easily be
+        // Inactive for an unrelated reason (e.g. manually toggled from the
+        // City List) and the checkbox already gave the user a chance to say no.
+        const newMemberCount = (mergedCity.mergedFrom || []).length;
+        if (newMemberCount < 2 && mergedCity.active) {
+          mergedCity.active = false;
+          mergedCity.history.push({
+            operation: "Status Change",
+            status: false,
+            description: "Status: Active -> Inactive (fewer than 2 cities)",
+            userName: CURRENT_USER.name,
+            userEmail: CURRENT_USER.email,
+            timestamp,
+            groupId,
+          });
+        } else if (newMemberCount >= 2 && !mergedCity.active) {
+          const reactivateCheckbox = document.getElementById("mergeReactivateCheckbox");
+          if (reactivateCheckbox && reactivateCheckbox.checked) {
+            mergedCity.active = true;
+            mergedCity.history.push({
+              operation: "Status Change",
+              status: true,
+              description: "Status: Inactive -> Active",
+              userName: CURRENT_USER.name,
+              userEmail: CURRENT_USER.email,
+              timestamp,
+              groupId,
+            });
+          }
+        }
+        saveToStorage("SYSTEM_CITIES", SYSTEM_CITIES);
+
+        initialMemberIds = new Set(mergedCity.mergedFrom || []);
+        pendingChecked = new Set(initialMemberIds);
+        memberCountEl.textContent = `${initialMemberIds.size} cities`;
+        updateActiveStatusPill();
+        renderCandidateList();
+        renderSelectedCitiesLists();
+        updateSelectionSummary();
+        showToast("Merged city updated successfully");
+      });
+    });
+
+    renderCandidateList();
+    renderSelectedCitiesLists();
+    updateSelectionSummary();
+  }
+</script>
+</body>
+</html>

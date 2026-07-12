@@ -1269,3 +1269,51 @@ function getNewCityHotelSummary(cityId) {
     mapped: SYSTEM_HOTELS.filter((h) => (h.mappedCityIds || []).includes(cityId)),
   };
 }
+
+// ---------- City Merge (System) ----------
+
+// Shared by add-city.html's Merge Cities section for both creating a merged
+// city and editing an existing one's composition — mirrors applyHotelCityMap's
+// exact shape (entity, entity, boolean, groupId) even though this relationship
+// is composition membership, not a hotel/city map. `included`: true = being
+// added to mergedCity.mergedFrom (Merged), false = being removed
+// (Unmerged) — never Map/Unmap, a merge isn't a mapping relationship.
+// `groupId` is optional; a caller touching several component cities in one
+// save (the Merge Cities section's Save, always scoped to one merged city) passes
+// one shared id so the merged city's own history renders the whole batch —
+// including a co-occurring name/state rename pushed under the same id — as
+// one grouped card. Never stamped on componentCity's own entry: a single
+// component city only ever gets one entry per batch, nothing to group there
+// (same rule as applyHotelCityMap's hotel side).
+function applyCityMerge(mergedCity, componentCity, included, groupId) {
+  mergedCity.mergedFrom = mergedCity.mergedFrom || [];
+  const alreadyIncluded = mergedCity.mergedFrom.includes(componentCity.id);
+  if (included === alreadyIncluded) return;
+
+  const mergedCityLabel = getSystemCityHistoryLabel(mergedCity.id);
+  const componentLabel = getSystemCityHistoryLabel(componentCity.id);
+  const resolvedGroupId = groupId || generateHistoryGroupId();
+  const timestamp = new Date();
+
+  mergedCity.mergedFrom = included
+    ? [...mergedCity.mergedFrom, componentCity.id]
+    : mergedCity.mergedFrom.filter((id) => id !== componentCity.id);
+
+  componentCity.history.push({
+    operation: included ? "Merged" : "Unmerged",
+    description: included ? `Merged into: ${mergedCityLabel}` : `Removed from merged city: ${mergedCityLabel}`,
+    userName: CURRENT_USER.name,
+    userEmail: CURRENT_USER.email,
+    timestamp,
+  });
+  mergedCity.history.push({
+    operation: included ? "Merged" : "Unmerged",
+    description: componentLabel,
+    userName: CURRENT_USER.name,
+    userEmail: CURRENT_USER.email,
+    timestamp,
+    groupId: resolvedGroupId,
+  });
+
+  saveToStorage("SYSTEM_CITIES", SYSTEM_CITIES);
+}
