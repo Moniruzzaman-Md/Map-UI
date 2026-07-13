@@ -111,46 +111,64 @@
           <button class="info-icon-btn" data-info-target="#supplierHotelInfo" data-info-title="Supplier Hotel List" aria-label="About this page">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 11v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="8" r="1" fill="currentColor"/></svg>
           </button>
+          <button class="info-icon-btn" data-info-target="#supplierHotelDevNotes" data-info-title="Developer Notes — Supplier Hotel List" aria-label="Developer notes for this page">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 8l-4 4 4 4M15 8l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
         </div>
       </div>
       <hr class="page-divider" />
 
       <template id="supplierHotelInfo">
-        <p>Read-only reference list of each supplier's own hotel feed, alongside which <strong>system hotel</strong> (if any) it corresponds to.</p>
+        <p>Read-only reference list of each supplier's own hotel feed. Pick a <strong>Supplier</strong> first — nothing else on this page works until one is chosen. Two independent ways to reach a system city from here: via <strong>Supplier City</strong> (this supplier's own city list) or via <strong>System Hotel</strong> (matched by Provider ID) — they don't have to agree, since they're resolved completely differently.</p>
         <ul>
           <li><strong>Provider ID</strong> — the id this supplier's feed reports for the hotel. A blank Provider ID means the feed never sent one for this row.</li>
+          <li><strong>Supplier City</strong> — which of this supplier's own cities (see the Supplier City List) this hotel belongs to, and that city's own mapped system city underneath. Shows "Not linked" when this hotel isn't tied to any of this supplier's own cities, or "Not mapped" underneath a known supplier city that isn't itself mapped to a system city yet.</li>
           <li><strong>System Hotel</strong> — resolved automatically by matching this row's Provider ID against the System Hotel List's own Provider ID (not a stored link). A row with no Provider ID, or one that doesn't match any System Hotel yet, shows "Not mapped".</li>
           <li><strong>Update Date</strong> — when the supplier last reported this hotel's data.</li>
           <li>This list can't be edited here — there's no Map, Edit, or History action for it.</li>
+          <li>Type a name and tick <strong>Fuzzy</strong> to match it loosely (forgiving of typos or skipped letters) instead of requiring an exact substring.</li>
+          <li>Nothing you type or pick filters the list right away — click <strong>Search</strong> (or press Enter in a search box) to apply it. Click <strong>Filters</strong> to reveal the rest: ID, Provider ID, Country/State/City (this row's own raw location fields), Supplier City, System City (independent of Country/State/City), and Status. While collapsed, anything you've set shows as a removable chip — click a chip's × to clear just that one filter. <strong>Reset</strong> clears everything and shows the full list immediately, no Search needed.</li>
+        </ul>
+      </template>
+
+      <template id="supplierHotelDevNotes">
+        <p>Read-only mirror of each supplier's own hotel feed. Nothing works until a <strong>Supplier</strong> is picked — every row/filter below is scoped to that one supplier's own array. There's no Map/Edit/History here because a real feed is exactly what the supplier last reported — this project doesn't get to change it, only reference it.</p>
+        <ul>
+          <li><strong>ID</strong> — this supplier's own generated identifier (e.g. <code>AG-HTL-001</code>), permanent.</li>
+          <li><strong>Two independent paths to a system city:</strong>
+            <ul>
+              <li><strong>Supplier Hotel → Supplier City → System City</strong> — <code>row.supplierCityId</code> links to a <code>supplierCities[key]</code> row (<code>resolveSupplierHotelCity()</code>, <code>js/data.js</code>), whose own <code>systemCityId</code> (set via City Mapping) reaches the system city. <code>null</code> when this supplier's own city list has no entry for this hotel's city at all — a real case, not a data gap (e.g. Agoda's own city list has no Chicago entry, so its "Downtown Chicago Inn" can't link to one).</li>
+              <li><strong>Supplier Hotel → System Hotel → System City</strong> — <code>findSystemHotelByProviderId()</code> matches this row's Provider ID against <code>SYSTEM_HOTELS</code>' own Provider ID (not a stored reference), and that system hotel's own <code>systemCityId</code>/<code>resolveHotelLocation()</code> reaches the system city from there.</li>
+            </ul>
+            These two paths are resolved completely independently and are never reconciled against each other — a hotel's Supplier City and its System Hotel's city can legitimately disagree (or one can be known while the other isn't).
+          </li>
+          <li><strong>Filters</strong> — nothing in the toolbar re-queries the list on its own; every field only updates the pending state and the live Filters count pill / chip summary (visible once the panel is collapsed). The list itself only re-queries on <strong>Search</strong> (or Enter in the Name/ID/Provider ID search box), <strong>Reset</strong>, or picking a <strong>Supplier</strong> — the latter two bypass the wait-for-Search gate and re-render immediately, since the page is non-functional without a supplier and "start over" should show results right away. Country/State/City (the hotel's own raw location fields) is one cascade; Supplier City and System City are each flat, independent facets — not a second Country/State/City cascade, since that would just duplicate the existing one over a slightly different field.</li>
         </ul>
       </template>
 
       <section class="content-card">
         <div class="card-toolbar">
           <div class="toolbar-controls">
+            <select class="filter-select" id="supplierFilter">
+              <option value="">Select Supplier</option>
+            </select>
             <div class="toolbar-search">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
               <input type="text" id="hotelSearch" placeholder="Search by hotel name..." disabled />
             </div>
-            <div class="toolbar-filters">
-              <select class="filter-select" id="supplierFilter">
-                <option value="">Select Supplier</option>
-              </select>
-              <select class="filter-select" id="hotelCountryFilter" disabled>
-                <option value="">All Countries</option>
-              </select>
-              <select class="filter-select" id="hotelStateFilter" disabled>
-                <option value="">All States</option>
-              </select>
-              <select class="filter-select" id="hotelCityFilter" disabled>
-                <option value="">All Cities</option>
-              </select>
-              <select class="filter-select" id="hotelStatusFilter" disabled>
-                <option value="all">All Status</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-              </select>
-            </div>
+            <label class="toggle-row" for="supplierHotelFuzzyToggle" style="margin-bottom:0;">
+              <input type="checkbox" id="supplierHotelFuzzyToggle" disabled />
+              Fuzzy
+            </label>
+            <button class="btn btn-primary" id="supplierHotelSearchBtn" disabled>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#fff" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+              Search
+            </button>
+            <button type="button" class="filters-toggle-btn" id="supplierHotelFiltersToggleBtn" aria-expanded="false" aria-controls="supplierHotelFiltersPanel" disabled>
+              Filters
+              <span class="pill info" id="supplierHotelActiveFilterCount" style="display:none;">0</span>
+              <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
             <button class="btn btn-danger" id="resetSupplierHotelFilterBtn">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 109-9 9 9 0 00-7 3.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3 3.5V8h4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
               Reset
@@ -159,6 +177,66 @@
               <input type="checkbox" id="hotelRevealValuesToggle" disabled />
               Show full values
             </label>
+          </div>
+
+          <!-- Shown only while the panel below is collapsed and at least one of
+               its fields is active — see updateFiltersSummary(). -->
+          <div class="filters-summary" id="supplierHotelFiltersSummary" style="display:none;"></div>
+
+          <!-- Collapsed by default. -->
+          <div class="filters-panel" id="supplierHotelFiltersPanel" style="display:none;">
+            <div class="filter-field">
+              <label for="supplierHotelIdSearch">ID</label>
+              <div class="toolbar-search">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                <input type="text" id="supplierHotelIdSearch" placeholder="Search by ID..." />
+              </div>
+            </div>
+            <div class="filter-field">
+              <label for="supplierHotelProviderIdSearch">Provider ID</label>
+              <div class="toolbar-search">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                <input type="text" id="supplierHotelProviderIdSearch" placeholder="Search by Provider ID..." />
+              </div>
+            </div>
+            <div class="filter-field">
+              <label for="hotelCountryFilter">Country</label>
+              <select class="filter-select" id="hotelCountryFilter">
+                <option value="">All Countries</option>
+              </select>
+            </div>
+            <div class="filter-field">
+              <label for="hotelStateFilter">State</label>
+              <select class="filter-select" id="hotelStateFilter" disabled>
+                <option value="">All States</option>
+              </select>
+            </div>
+            <div class="filter-field">
+              <label for="hotelCityFilter">City</label>
+              <select class="filter-select" id="hotelCityFilter" disabled>
+                <option value="">All Cities</option>
+              </select>
+            </div>
+            <div class="filter-field">
+              <label for="supplierCityFilter">Supplier City</label>
+              <select class="filter-select" id="supplierCityFilter">
+                <option value="">All Supplier Cities</option>
+              </select>
+            </div>
+            <div class="filter-field">
+              <label for="sysCityFilter">System City</label>
+              <select class="filter-select" id="sysCityFilter">
+                <option value="">All System Cities</option>
+              </select>
+            </div>
+            <div class="filter-field">
+              <label for="hotelStatusFilter">Status</label>
+              <select class="filter-select" id="hotelStatusFilter">
+                <option value="all">All Status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -176,6 +254,7 @@
                 <th>Email</th>
                 <th>Phone Number</th>
                 <th>Provider ID</th>
+                <th>Supplier City</th>
                 <th>System Hotel</th>
                 <th>Status</th>
                 <th>Update Date</th>
@@ -184,7 +263,7 @@
             </thead>
             <tbody>
               <tr>
-                <td colspan="14" class="empty-state">Select a supplier to view its hotel list</td>
+                <td colspan="15" class="empty-state">Select a supplier to view its hotel list</td>
               </tr>
             </tbody>
           </table>
@@ -210,16 +289,47 @@
   const countryFilterSelect = document.getElementById("hotelCountryFilter");
   const stateFilterSelect = document.getElementById("hotelStateFilter");
   const cityFilterSelect = document.getElementById("hotelCityFilter");
+  const supplierCityFilterSelect = document.getElementById("supplierCityFilter");
+  const sysCityFilterSelect = document.getElementById("sysCityFilter");
   const statusFilterSelect = document.getElementById("hotelStatusFilter");
   const hotelSearch = document.getElementById("hotelSearch");
+  const supplierHotelFuzzyToggle = document.getElementById("supplierHotelFuzzyToggle");
+  const supplierHotelSearchBtn = document.getElementById("supplierHotelSearchBtn");
+  const supplierHotelIdSearch = document.getElementById("supplierHotelIdSearch");
+  const supplierHotelProviderIdSearch = document.getElementById("supplierHotelProviderIdSearch");
   const revealValuesToggle = document.getElementById("hotelRevealValuesToggle");
   const tbody = document.querySelector("#supplierHotelTable tbody");
   const paginationBar = document.getElementById("paginationBar");
 
-  let state = { page: 1, pageSize: 10, supplier: "", country: "", hotelState: "", city: "", status: "all", query: "" };
+  let state = {
+    page: 1,
+    pageSize: 10,
+    supplier: "",
+    query: "",
+    fuzzy: false,
+    idQuery: "",
+    providerIdQuery: "",
+    country: "",
+    hotelState: "",
+    city: "",
+    supplierCity: "",
+    sysCity: "",
+    status: "all",
+  };
 
   function currentRows() {
     return state.supplier ? supplierHotels[state.supplier] || [] : [];
+  }
+
+  // Subsequence match: every character of the query must appear in the name
+  // in order, not necessarily contiguous — same convention as
+  // hotel-system.html's own Fuzzy search.
+  function fuzzyMatches(name, query) {
+    let i = 0;
+    for (let j = 0; j < name.length && i < query.length; j++) {
+      if (name[j] === query[i]) i++;
+    }
+    return i === query.length;
   }
 
   function candidatesForFilters() {
@@ -248,12 +358,66 @@
     cityFilterSelect.disabled = !state.supplier || cities.length === 0;
   }
 
+  // Supplier City / System City are a second, independent facet from the
+  // Country/State/City above — over each row's own resolved supplierCityId
+  // (see resolveSupplierHotelCity() in js/data.js), not its raw city/state/
+  // country strings. Deliberately flat (not their own Country/State/City
+  // cascade) rather than duplicating the existing location filters over a
+  // slightly different field.
+  function updateSupplierCityFilterOptions() {
+    const rows = currentRows();
+    const cities = [...new Map(rows.map((r) => [r.supplierCityId, resolveSupplierHotelCity(state.supplier, r)]).filter(([id]) => id !== null)).values()]
+      .filter(Boolean)
+      .sort((a, b) => a.name.localeCompare(b.name));
+    const current = state.supplierCity;
+    supplierCityFilterSelect.innerHTML =
+      `<option value="">All Supplier Cities</option>` + cities.map((c) => `<option value="${c.id}">${c.name}</option>`).join("");
+    if (cities.some((c) => c.id === current)) {
+      supplierCityFilterSelect.value = current;
+    } else {
+      state.supplierCity = "";
+    }
+  }
+
+  function updateSysCityFilterOptions() {
+    const rows = currentRows();
+    const systemCities = [
+      ...new Map(
+        rows
+          .map((r) => resolveSupplierHotelCity(state.supplier, r))
+          .filter((c) => c && c.systemCityId !== null)
+          .map((c) => [c.systemCityId, SYSTEM_CITIES.find((sc) => sc.id === c.systemCityId)])
+      ).values(),
+    ]
+      .filter(Boolean)
+      .sort((a, b) => a.name.localeCompare(b.name));
+    const current = state.sysCity;
+    sysCityFilterSelect.innerHTML =
+      `<option value="">All System Cities</option>` + systemCities.map((c) => `<option value="${c.id}">${c.name}</option>`).join("");
+    if (systemCities.some((c) => String(c.id) === current)) {
+      sysCityFilterSelect.value = current;
+    } else {
+      state.sysCity = "";
+    }
+  }
+
   function getFiltered() {
     let rows = candidatesForFilters();
+    const q = state.query.trim().toLowerCase();
+    if (q) rows = rows.filter((r) => (state.fuzzy ? fuzzyMatches(r.name.toLowerCase(), q) : r.name.toLowerCase().includes(q)));
+    const idQ = state.idQuery.trim().toLowerCase();
+    if (idQ) rows = rows.filter((r) => r.id.toLowerCase().includes(idQ));
+    const providerIdQ = state.providerIdQuery.trim().toLowerCase();
+    if (providerIdQ) rows = rows.filter((r) => (r.providerId || "").toLowerCase().includes(providerIdQ));
+    if (state.supplierCity) rows = rows.filter((r) => r.supplierCityId === state.supplierCity);
+    if (state.sysCity) {
+      rows = rows.filter((r) => {
+        const c = resolveSupplierHotelCity(state.supplier, r);
+        return c && String(c.systemCityId) === state.sysCity;
+      });
+    }
     if (state.status === "active") rows = rows.filter((r) => r.active);
     if (state.status === "inactive") rows = rows.filter((r) => !r.active);
-    const q = state.query.trim().toLowerCase();
-    if (q) rows = rows.filter((r) => r.name.toLowerCase().includes(q));
     return rows;
   }
 
@@ -268,8 +432,9 @@
 
   function render() {
     if (!state.supplier) {
-      tbody.innerHTML = `<tr><td colspan="14" class="empty-state">Select a supplier to view its hotel list</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="15" class="empty-state">Select a supplier to view its hotel list</td></tr>`;
       paginationBar.innerHTML = "";
+      updateFiltersSummary();
       return;
     }
 
@@ -286,6 +451,20 @@
             const countryPlain = `${countryName} (${r.country.code})`;
             const matchedHotel = findSystemHotelByProviderId(r.providerId);
             const systemHotelPlain = matchedHotel ? `${getSystemHotelLabel(matchedHotel.id)} (ID: ${getSystemHotelDisplayId(matchedHotel.id)})` : "";
+            // The "Supplier Hotel -> Supplier City -> System City" chain,
+            // shown in one stacked cell: this row's own resolved supplier
+            // city on top, that supplier city's own mapped system city (or
+            // "Not mapped") underneath — the other, independent path to a
+            // system city besides the Provider-ID-based System Hotel
+            // column. "Not linked" (not "Not mapped") when there's no
+            // supplierCityId at all, since that's a different case: no
+            // known supplier city, vs. a known one that just isn't mapped.
+            const supplierCity = resolveSupplierHotelCity(state.supplier, r);
+            const supplierCitySystemCity = supplierCity && supplierCity.systemCityId !== null ? SYSTEM_CITIES.find((c) => c.id === supplierCity.systemCityId) : null;
+            const supplierCityCell = supplierCity
+              ? `<div style="font-weight:600;">${supplierCity.name}</div>
+                 <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">${supplierCitySystemCity ? getSystemCityLabel(supplierCitySystemCity.id) : "Not mapped"}</div>`
+              : '<span class="text-not-mapped">Not linked</span>';
             return `
       <tr>
         <td><span class="code-badge">${r.id}</span></td>
@@ -302,6 +481,7 @@
         <td>${truncatableCell(r.email, "email")}</td>
         <td>${truncatableCell(r.phoneNumber, "phone")}</td>
         <td>${truncatableCell(r.providerId, "providerid")}</td>
+        <td>${supplierCityCell}</td>
         <td>${
           matchedHotel
             ? `<div class="truncatable truncatable--systemhotel" title="${systemHotelPlain}">
@@ -315,7 +495,7 @@
       </tr>`;
           })
           .join("")
-      : `<tr><td colspan="14" class="empty-state">No hotels match this filter</td></tr>`;
+      : `<tr><td colspan="15" class="empty-state">No hotels match this filter</td></tr>`;
 
     renderPagination(paginationBar, {
       total: filtered.length,
@@ -329,6 +509,7 @@
     });
 
     refreshValueOverflowState();
+    updateFiltersSummary();
   }
 
   // Re-measures every .truncatable cell after each render() — only cells
@@ -341,20 +522,153 @@
     });
   }
 
+  // Human-readable label + clear-handler for every pending search/filter
+  // value, keyed the same way they're read in getFiltered() above — used
+  // to build the live summary chips (pending selections, not necessarily
+  // what the table is currently showing — see runSearchNow()) and to let
+  // each chip clear just its own field.
+  const supplierHotelFiltersToggleBtn = document.getElementById("supplierHotelFiltersToggleBtn");
+  const supplierHotelFiltersPanel = document.getElementById("supplierHotelFiltersPanel");
+  const supplierHotelFiltersSummary = document.getElementById("supplierHotelFiltersSummary");
+  const supplierHotelActiveFilterCount = document.getElementById("supplierHotelActiveFilterCount");
+
+  function activeFilterEntries() {
+    const entries = [];
+    if (state.query.trim()) entries.push({ key: "query", label: state.fuzzy ? "Name (fuzzy)" : "Name", value: state.query.trim() });
+    if (state.idQuery.trim()) entries.push({ key: "idQuery", label: "ID", value: state.idQuery.trim() });
+    if (state.providerIdQuery.trim()) entries.push({ key: "providerIdQuery", label: "Provider ID", value: state.providerIdQuery.trim() });
+    if (state.country) entries.push({ key: "country", label: "Country", value: state.country });
+    if (state.hotelState) entries.push({ key: "hotelState", label: "State", value: state.hotelState });
+    if (state.city) entries.push({ key: "city", label: "City", value: state.city });
+    if (state.supplierCity) {
+      const c = currentRows().map((r) => resolveSupplierHotelCity(state.supplier, r)).find((c) => c && c.id === state.supplierCity);
+      entries.push({ key: "supplierCity", label: "Supplier City", value: c ? c.name : state.supplierCity });
+    }
+    if (state.sysCity) entries.push({ key: "sysCity", label: "System City", value: SYSTEM_CITIES.find((c) => String(c.id) === state.sysCity)?.name || state.sysCity });
+    if (state.status !== "all") entries.push({ key: "status", label: "Status", value: state.status === "active" ? "Active" : "Inactive" });
+    return entries;
+  }
+
+  // Clearing any chip only ever updates `state` + the summary itself — it
+  // never touches the table directly, consistent with every other pending
+  // change (Search/Enter/Reset/picking a Supplier are still the only things
+  // that actually re-query). Select-backed filters reuse that select's own
+  // existing change handler by resetting its value and dispatching a real
+  // "change" event, instead of duplicating that logic here.
+  const FILTER_CLEARERS = {
+    query: () => {
+      state.query = "";
+      hotelSearch.value = "";
+      updateFiltersSummary();
+    },
+    idQuery: () => {
+      state.idQuery = "";
+      supplierHotelIdSearch.value = "";
+      updateFiltersSummary();
+    },
+    providerIdQuery: () => {
+      state.providerIdQuery = "";
+      supplierHotelProviderIdSearch.value = "";
+      updateFiltersSummary();
+    },
+    country: () => {
+      countryFilterSelect.value = "";
+      countryFilterSelect.dispatchEvent(new Event("change"));
+    },
+    hotelState: () => {
+      stateFilterSelect.value = "";
+      stateFilterSelect.dispatchEvent(new Event("change"));
+    },
+    city: () => {
+      cityFilterSelect.value = "";
+      cityFilterSelect.dispatchEvent(new Event("change"));
+    },
+    supplierCity: () => {
+      supplierCityFilterSelect.value = "";
+      supplierCityFilterSelect.dispatchEvent(new Event("change"));
+    },
+    sysCity: () => {
+      sysCityFilterSelect.value = "";
+      sysCityFilterSelect.dispatchEvent(new Event("change"));
+    },
+    status: () => {
+      statusFilterSelect.value = "all";
+      statusFilterSelect.dispatchEvent(new Event("change"));
+    },
+  };
+
+  supplierHotelFiltersSummary.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-clear-filter]");
+    if (btn) FILTER_CLEARERS[btn.dataset.clearFilter]?.();
+  });
+
+  // Called from every field's own change/input handler (so the count pill
+  // and, while collapsed, the summary chips update live) and also once at
+  // the end of render() (so a Search/Reset/Supplier change that updates
+  // `state` in bulk stays in sync too).
+  function updateFiltersSummary() {
+    const entries = activeFilterEntries();
+
+    supplierHotelActiveFilterCount.textContent = String(entries.length);
+    supplierHotelActiveFilterCount.style.display = entries.length ? "" : "none";
+
+    const isOpen = supplierHotelFiltersPanel.style.display !== "none";
+    if (isOpen || !entries.length) {
+      supplierHotelFiltersSummary.style.display = "none";
+      supplierHotelFiltersSummary.innerHTML = "";
+    } else {
+      supplierHotelFiltersSummary.style.display = "";
+      supplierHotelFiltersSummary.innerHTML = entries
+        .map(
+          (e) =>
+            `<span class="filter-chip">${e.label}: ${e.value}<button type="button" data-clear-filter="${e.key}" aria-label="Clear ${e.label} filter">×</button></span>`
+        )
+        .join("");
+    }
+  }
+
+  function setFiltersPanelOpen(open) {
+    supplierHotelFiltersPanel.style.display = open ? "grid" : "none";
+    supplierHotelFiltersToggleBtn.classList.toggle("open", open);
+    supplierHotelFiltersToggleBtn.setAttribute("aria-expanded", String(open));
+    updateFiltersSummary();
+  }
+
+  supplierHotelFiltersToggleBtn.addEventListener("click", () => {
+    setFiltersPanelOpen(supplierHotelFiltersPanel.style.display === "none");
+  });
+
+  // Picking a Supplier is the one thing (besides Reset) that still renders
+  // immediately, bypassing the "wait for Search" gate below — the table is
+  // entirely non-functional without one, so showing *something* right away
+  // matters more than staying consistent with the deferred convention here.
   supplierFilter.addEventListener("change", () => {
     state.supplier = supplierFilter.value;
     state.page = 1;
     state.country = "";
     state.hotelState = "";
     state.city = "";
+    state.supplierCity = "";
+    state.sysCity = "";
     state.status = "all";
     state.query = "";
+    state.fuzzy = false;
+    state.idQuery = "";
+    state.providerIdQuery = "";
     hotelSearch.value = "";
+    supplierHotelFuzzyToggle.checked = false;
+    supplierHotelIdSearch.value = "";
+    supplierHotelProviderIdSearch.value = "";
     statusFilterSelect.value = "all";
     hotelSearch.disabled = !state.supplier;
-    statusFilterSelect.disabled = !state.supplier;
+    supplierHotelFuzzyToggle.disabled = !state.supplier;
+    supplierHotelSearchBtn.disabled = !state.supplier;
+    supplierHotelFiltersToggleBtn.disabled = !state.supplier;
     revealValuesToggle.disabled = !state.supplier;
+    if (!state.supplier) setFiltersPanelOpen(false);
     updateFilterOptions();
+    updateSupplierCityFilterOptions();
+    updateSysCityFilterOptions();
     render();
   });
 
@@ -363,46 +677,92 @@
     refreshValueOverflowState();
   });
 
+  // Reset is the other action (besides Search/Enter/picking a Supplier)
+  // that touches the table immediately — "start over" should show the
+  // supplier's unfiltered list right away, not leave stale results shown.
   document.getElementById("resetSupplierHotelFilterBtn").addEventListener("click", () => {
     supplierFilter.value = "";
     supplierFilter.dispatchEvent(new Event("change"));
   });
 
+  // Everything below only updates `state` + the live Filters badge/chip
+  // summary (updateFiltersSummary()) — never render() directly. The table
+  // only ever re-queries via runSearchNow() (Search button / Enter in a
+  // search box) or Reset/picking a Supplier (above). Cascading option
+  // population (Country -> State -> City) still happens live here, since
+  // that's populating the pickers themselves, not filtering the table.
+
   countryFilterSelect.addEventListener("change", () => {
     state.country = countryFilterSelect.value;
     state.hotelState = "";
     state.city = "";
-    state.page = 1;
     updateFilterOptions();
-    render();
+    updateFiltersSummary();
   });
 
   stateFilterSelect.addEventListener("change", () => {
     state.hotelState = stateFilterSelect.value;
     state.city = "";
-    state.page = 1;
     updateFilterOptions();
-    render();
+    updateFiltersSummary();
   });
 
   cityFilterSelect.addEventListener("change", () => {
     state.city = cityFilterSelect.value;
-    state.page = 1;
-    render();
+    updateFiltersSummary();
+  });
+
+  supplierCityFilterSelect.addEventListener("change", () => {
+    state.supplierCity = supplierCityFilterSelect.value;
+    updateFiltersSummary();
+  });
+
+  sysCityFilterSelect.addEventListener("change", () => {
+    state.sysCity = sysCityFilterSelect.value;
+    updateFiltersSummary();
   });
 
   statusFilterSelect.addEventListener("change", () => {
     state.status = statusFilterSelect.value;
-    state.page = 1;
-    render();
+    updateFiltersSummary();
   });
 
-  const runSearch = debounce(() => {
+  hotelSearch.addEventListener("input", () => {
     state.query = hotelSearch.value;
-    state.page = 1;
-    render();
+    updateFiltersSummary();
   });
-  hotelSearch.addEventListener("input", runSearch);
+
+  supplierHotelFuzzyToggle.addEventListener("change", () => {
+    state.fuzzy = supplierHotelFuzzyToggle.checked;
+    updateFiltersSummary();
+  });
+
+  supplierHotelIdSearch.addEventListener("input", () => {
+    state.idQuery = supplierHotelIdSearch.value;
+    updateFiltersSummary();
+  });
+
+  supplierHotelProviderIdSearch.addEventListener("input", () => {
+    state.providerIdQuery = supplierHotelProviderIdSearch.value;
+    updateFiltersSummary();
+  });
+
+  function runSearchNow() {
+    state.page = 1;
+    setFiltersPanelOpen(false);
+    render();
+  }
+
+  supplierHotelSearchBtn.addEventListener("click", runSearchNow);
+
+  function onEnterKey(input, handler) {
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") handler();
+    });
+  }
+  onEnterKey(hotelSearch, runSearchNow);
+  onEnterKey(supplierHotelIdSearch, runSearchNow);
+  onEnterKey(supplierHotelProviderIdSearch, runSearchNow);
 
   render();
 </script>

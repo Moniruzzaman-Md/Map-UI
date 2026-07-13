@@ -118,7 +118,6 @@
       <template id="hotelListInfo">
         <p>This page manages the <strong>master list of hotels</strong> used across the system.</p>
         <ul>
-          <li><strong>+ Add Hotel</strong> — create a new hotel: name, address, latitude/longitude, star rating, country/state/city, email, phone number, and a provider id (required — email and phone number are optional).</li>
           <li><strong>Edit</strong> — every field is editable except the hotel's <strong>Id</strong> and <strong>Provider Id</strong>, which are fixed once the hotel is created.</li>
           <li><strong>History</strong> — view every change: creation, edits, and status changes.</li>
           <li><strong>Active/Inactive toggle</strong> — controls whether a hotel is available for booking. Changes immediately, no confirmation needed, and is logged to History.</li>
@@ -132,31 +131,90 @@
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
               <input type="text" id="hotelSearch" placeholder="Search by hotel name..." />
             </div>
-            <div class="toolbar-filters">
+            <label class="toggle-row" for="hotelFuzzyToggle" style="margin-bottom:0;">
+              <input type="checkbox" id="hotelFuzzyToggle" />
+              Fuzzy
+            </label>
+            <button class="btn btn-primary" id="hotelSearchBtn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#fff" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+              Search
+            </button>
+            <button type="button" class="filters-toggle-btn" id="hotelFiltersToggleBtn" aria-expanded="false" aria-controls="hotelFiltersPanel">
+              Filters
+              <span class="pill info" id="hotelActiveFilterCount" style="display:none;">0</span>
+              <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <button class="btn btn-danger" id="resetHotelFilterBtn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 109-9 9 9 0 00-7 3.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3 3.5V8h4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Reset
+            </button>
+            <label class="toggle-row" for="hotelRevealValuesToggle" style="margin-bottom:0;">
+              <input type="checkbox" id="hotelRevealValuesToggle" />
+              Show full values
+            </label>
+          </div>
+
+          <!-- Shown only while the panel below is collapsed and at least one of
+               its filters is active, so a collapsed filter set isn't silently
+               invisible — see updateFiltersSummary(). -->
+          <div class="filters-summary" id="hotelFiltersSummary" style="display:none;"></div>
+
+          <!-- Collapsed by default: ID/Provider ID search + the Country/State/
+               City/Star Rating/Status selects. Same ids/behavior as before,
+               just relocated out of the always-visible row above. -->
+          <div class="filters-panel" id="hotelFiltersPanel" style="display:none;">
+            <div class="filter-field">
+              <label for="hotelIdSearch">ID</label>
+              <div class="toolbar-search">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                <input type="text" id="hotelIdSearch" placeholder="Search by ID..." />
+              </div>
+            </div>
+            <div class="filter-field">
+              <label for="hotelProviderIdSearch">Provider ID</label>
+              <div class="toolbar-search">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                <input type="text" id="hotelProviderIdSearch" placeholder="Search by Provider ID..." />
+              </div>
+            </div>
+            <div class="filter-field">
+              <label for="hotelCountryFilter">Country</label>
               <select class="filter-select" id="hotelCountryFilter">
                 <option value="">All Countries</option>
               </select>
+            </div>
+            <div class="filter-field">
+              <label for="hotelStateFilter">State</label>
               <select class="filter-select" id="hotelStateFilter" disabled>
                 <option value="">Select State</option>
               </select>
+            </div>
+            <div class="filter-field">
+              <label for="hotelCityFilter">City</label>
               <select class="filter-select" id="hotelCityFilter" disabled>
                 <option value="">All Cities</option>
               </select>
+            </div>
+            <div class="filter-field">
+              <label for="hotelStarRatingFilter">Star Rating</label>
+              <select class="filter-select" id="hotelStarRatingFilter">
+                <option value="">All Ratings</option>
+                <option value="5">5 ★</option>
+                <option value="4">4 ★</option>
+                <option value="3">3 ★</option>
+                <option value="2">2 ★</option>
+                <option value="1">1 ★</option>
+                <option value="0">0 ★</option>
+              </select>
+            </div>
+            <div class="filter-field">
+              <label for="hotelStatusFilter">Status</label>
               <select class="filter-select" id="hotelStatusFilter">
                 <option value="all">All Status</option>
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
               </select>
             </div>
-            <button class="btn btn-danger" id="resetHotelFilterBtn">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 109-9 9 9 0 00-7 3.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3 3.5V8h4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              Reset
-            </button>
-            <button class="btn btn-primary" id="addHotelBtn">+ Add Hotel</button>
-            <label class="toggle-row" for="hotelRevealValuesToggle" style="margin-bottom:0;">
-              <input type="checkbox" id="hotelRevealValuesToggle" />
-              Show full values
-            </label>
           </div>
         </div>
 
@@ -190,12 +248,11 @@
   </div>
 </div>
 
-<!-- Add / Edit Hotel Modal — one shared form since every field (except id)
-     is editable both ways, unlike City's more restrictive Edit modal. -->
+<!-- Edit Hotel Modal — every field is editable except id/provider id. -->
 <div class="modal-overlay" id="hotelFormModal">
   <div class="modal">
     <div class="modal-header">
-      <h3 id="hotelFormTitle">Add Hotel</h3>
+      <h3 id="hotelFormTitle">Edit Hotel</h3>
       <button class="modal-close" data-modal-close aria-label="Close">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       </button>
@@ -242,6 +299,7 @@
       <div class="form-group">
         <label for="hotelFormStarRating">Star Rating</label>
         <select id="hotelFormStarRating" class="filter-select" style="width:100%; min-width:0;">
+          <option value="0">0</option>
           <option value="1">1</option>
           <option value="2">2</option>
           <option value="3">3</option>
@@ -295,22 +353,57 @@
 
   const stateFilterSelect = document.getElementById("hotelStateFilter");
   const cityFilterSelect = document.getElementById("hotelCityFilter");
+  const starRatingFilterSelect = document.getElementById("hotelStarRatingFilter");
   const statusFilterSelect = document.getElementById("hotelStatusFilter");
   const tbody = document.querySelector("#hotelTable tbody");
   const paginationBar = document.getElementById("paginationBar");
   const hotelSearch = document.getElementById("hotelSearch");
+  const hotelFuzzyToggle = document.getElementById("hotelFuzzyToggle");
+  const hotelSearchBtn = document.getElementById("hotelSearchBtn");
+  const hotelIdSearch = document.getElementById("hotelIdSearch");
+  const hotelProviderIdSearch = document.getElementById("hotelProviderIdSearch");
   const hotelTableEl = document.getElementById("hotelTable");
   const revealValuesToggle = document.getElementById("hotelRevealValuesToggle");
 
-  let state = { page: 1, pageSize: 10, query: "", country: "", hotelState: "", city: "", status: "all" };
+  let state = {
+    page: 1,
+    pageSize: 10,
+    query: "",
+    fuzzy: false,
+    idQuery: "",
+    providerIdQuery: "",
+    country: "",
+    hotelState: "",
+    city: "",
+    starRating: "",
+    status: "all",
+  };
+
+  // Subsequence match: every character of the query must appear in the name
+  // in order, not necessarily contiguous (e.g. "grpz" matches "Grand
+  // Plaza") — same convention as hotel-mapping.html's own Fuzzy search.
+  // Loose on purpose: forgiving of typos/skipped letters, not a ranked
+  // match.
+  function fuzzyMatches(name, query) {
+    let i = 0;
+    for (let j = 0; j < name.length && i < query.length; j++) {
+      if (name[j] === query[i]) i++;
+    }
+    return i === query.length;
+  }
 
   function getFiltered() {
     let rows = SYSTEM_HOTELS;
     const q = state.query.trim().toLowerCase();
-    if (q) rows = rows.filter((h) => h.name.toLowerCase().includes(q));
+    if (q) rows = rows.filter((h) => (state.fuzzy ? fuzzyMatches(h.name.toLowerCase(), q) : h.name.toLowerCase().includes(q)));
+    const idQ = state.idQuery.trim().toLowerCase();
+    if (idQ) rows = rows.filter((h) => getSystemHotelDisplayId(h.id).toLowerCase().includes(idQ));
+    const providerIdQ = state.providerIdQuery.trim().toLowerCase();
+    if (providerIdQ) rows = rows.filter((h) => (h.providerId || "").toLowerCase().includes(providerIdQ));
     if (state.country) rows = rows.filter((h) => (getSystemCountryName(resolveHotelLocation(h).country.code) || resolveHotelLocation(h).country.name) === state.country);
     if (state.hotelState) rows = rows.filter((h) => resolveHotelLocation(h).state === state.hotelState);
     if (state.city) rows = rows.filter((h) => resolveHotelLocation(h).city === state.city);
+    if (state.starRating) rows = rows.filter((h) => String(h.starRating) === state.starRating);
     if (state.status === "active") rows = rows.filter((h) => h.active);
     if (state.status === "inactive") rows = rows.filter((h) => !h.active);
     return rows;
@@ -367,7 +460,7 @@
           .map((h) => {
             const loc = resolveHotelLocation(h);
             const countryName = getSystemCountryName(loc.country.code) || loc.country.name;
-            const countryPlain = `${countryName} (${loc.country.code})`;
+            const countryPlain = `${loc.country.code} - ${countryName}`;
             return `
       <tr data-row-id="${h.id}">
         <td>${truncatableCell(getSystemHotelDisplayId(h.id), "id")}</td>
@@ -377,10 +470,10 @@
         <td>${truncatableCell(loc.state, "state")}</td>
         <td>
           <div class="truncatable truncatable--country" title="${countryPlain}">
-            <span class="truncatable-text">${countryName} <span class="code-badge">${loc.country.code}</span></span>
+            <span class="truncatable-text"><span class="code-badge">${loc.country.code}</span> ${countryName}</span>
           </div>
         </td>
-        <td>${truncatableCell(`${h.starRating} ★`, "starrating")}</td>
+        <td>${truncatableCell("⭐".repeat(h.starRating), "starrating")}</td>
         <td>${truncatableCell(h.email, "email")}</td>
         <td>${truncatableCell(h.phoneNumber, "phone")}</td>
         <td>${truncatableCell(h.providerId, "providerid")}</td>
@@ -415,7 +508,120 @@
     });
 
     refreshValueOverflowState();
+    updateFiltersSummary();
   }
+
+  // Human-readable label + clear-handler for every pending search/filter
+  // value — the Name search (+ Fuzzy) in the always-visible row as well as
+  // the collapsible panel's fields — keyed the same way they're read in
+  // getFiltered() above. Used to build the live summary chips (which track
+  // *pending* selections, not necessarily what the table is currently
+  // showing — see runSearchNow()) and to let each chip clear just its own
+  // field.
+  const hotelFiltersToggleBtn = document.getElementById("hotelFiltersToggleBtn");
+  const hotelFiltersPanel = document.getElementById("hotelFiltersPanel");
+  const hotelFiltersSummary = document.getElementById("hotelFiltersSummary");
+  const hotelActiveFilterCount = document.getElementById("hotelActiveFilterCount");
+
+  function activeFilterEntries() {
+    const entries = [];
+    if (state.query.trim()) entries.push({ key: "query", label: state.fuzzy ? "Name (fuzzy)" : "Name", value: state.query.trim() });
+    if (state.idQuery.trim()) entries.push({ key: "idQuery", label: "ID", value: state.idQuery.trim() });
+    if (state.providerIdQuery.trim()) entries.push({ key: "providerIdQuery", label: "Provider ID", value: state.providerIdQuery.trim() });
+    if (state.country) entries.push({ key: "country", label: "Country", value: state.country });
+    if (state.hotelState) entries.push({ key: "hotelState", label: "State", value: state.hotelState });
+    if (state.city) entries.push({ key: "city", label: "City", value: state.city });
+    if (state.starRating) entries.push({ key: "starRating", label: "Star Rating", value: `${state.starRating} ★` });
+    if (state.status !== "all") entries.push({ key: "status", label: "Status", value: state.status === "active" ? "Active" : "Inactive" });
+    return entries;
+  }
+
+  // Clearing any chip only ever updates `state` + the summary itself, same
+  // as typing/selecting does elsewhere on this page — it never touches the
+  // table directly, so clearing a chip is consistent with every other
+  // pending change (Search/Enter/Reset are still the only things that
+  // actually re-query). Select-backed filters reuse that select's own
+  // existing change handler (cascading State/City resets,
+  // updateCityFilterOptions(), etc.) by resetting its value and dispatching
+  // a real "change" event, instead of duplicating that logic here.
+  const FILTER_CLEARERS = {
+    query: () => {
+      state.query = "";
+      hotelSearch.value = "";
+      updateFiltersSummary();
+    },
+    idQuery: () => {
+      state.idQuery = "";
+      hotelIdSearch.value = "";
+      updateFiltersSummary();
+    },
+    providerIdQuery: () => {
+      state.providerIdQuery = "";
+      hotelProviderIdSearch.value = "";
+      updateFiltersSummary();
+    },
+    country: () => {
+      countryFilterSelect.value = "";
+      countryFilterSelect.dispatchEvent(new Event("change"));
+    },
+    hotelState: () => {
+      stateFilterSelect.value = "";
+      stateFilterSelect.dispatchEvent(new Event("change"));
+    },
+    city: () => {
+      cityFilterSelect.value = "";
+      cityFilterSelect.dispatchEvent(new Event("change"));
+    },
+    starRating: () => {
+      starRatingFilterSelect.value = "";
+      starRatingFilterSelect.dispatchEvent(new Event("change"));
+    },
+    status: () => {
+      statusFilterSelect.value = "all";
+      statusFilterSelect.dispatchEvent(new Event("change"));
+    },
+  };
+
+  hotelFiltersSummary.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-clear-filter]");
+    if (btn) FILTER_CLEARERS[btn.dataset.clearFilter]?.();
+  });
+
+  // Called from every field's own change/input handler (so the count pill
+  // and, while collapsed, the summary chips update live as soon as you
+  // type or pick something) and also once at the end of render() (so a
+  // Search/Reset that changed `state` in bulk stays in sync too).
+  function updateFiltersSummary() {
+    const entries = activeFilterEntries();
+
+    hotelActiveFilterCount.textContent = String(entries.length);
+    hotelActiveFilterCount.style.display = entries.length ? "" : "none";
+
+    const isOpen = hotelFiltersPanel.style.display !== "none";
+    if (isOpen || !entries.length) {
+      hotelFiltersSummary.style.display = "none";
+      hotelFiltersSummary.innerHTML = "";
+    } else {
+      hotelFiltersSummary.style.display = "";
+      hotelFiltersSummary.innerHTML = entries
+        .map(
+          (e) =>
+            `<span class="filter-chip">${e.label}: ${e.value}<button type="button" data-clear-filter="${e.key}" aria-label="Clear ${e.label} filter">×</button></span>`
+        )
+        .join("");
+    }
+  }
+
+  function setFiltersPanelOpen(open) {
+    hotelFiltersPanel.style.display = open ? "grid" : "none";
+    hotelFiltersToggleBtn.classList.toggle("open", open);
+    hotelFiltersToggleBtn.setAttribute("aria-expanded", String(open));
+    updateFiltersSummary();
+  }
+
+  hotelFiltersToggleBtn.addEventListener("click", () => {
+    setFiltersPanelOpen(hotelFiltersPanel.style.display === "none");
+  });
 
   // Re-measures every .truncatable cell after each render() (search/filter/
   // pagination change) and after the "Show full values" toggle flips —
@@ -433,16 +639,57 @@
     refreshValueOverflowState();
   });
 
-  const runSearch = debounce(() => {
-    state.query = hotelSearch.value;
+  // Nothing here re-filters the table — every field below only updates
+  // `state` + the live Filters badge/chip summary (updateFiltersSummary()).
+  // The table itself only ever re-queries on runSearchNow() (the Search
+  // button or Enter in a search box) or Reset, which both call render()
+  // directly. Cascading option population (Country -> State -> City) still
+  // happens live here since that's populating the pickers themselves, not
+  // filtering the table.
+  function runSearchNow() {
     state.page = 1;
+    setFiltersPanelOpen(false);
     render();
+  }
+
+  hotelSearchBtn.addEventListener("click", runSearchNow);
+
+  function onEnterKey(input, handler) {
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") handler();
+    });
+  }
+  onEnterKey(hotelSearch, runSearchNow);
+  onEnterKey(hotelIdSearch, runSearchNow);
+  onEnterKey(hotelProviderIdSearch, runSearchNow);
+
+  hotelSearch.addEventListener("input", () => {
+    state.query = hotelSearch.value;
+    updateFiltersSummary();
   });
-  hotelSearch.addEventListener("input", runSearch);
+
+  hotelFuzzyToggle.addEventListener("change", () => {
+    state.fuzzy = hotelFuzzyToggle.checked;
+    updateFiltersSummary();
+  });
+
+  hotelIdSearch.addEventListener("input", () => {
+    state.idQuery = hotelIdSearch.value;
+    updateFiltersSummary();
+  });
+
+  hotelProviderIdSearch.addEventListener("input", () => {
+    state.providerIdQuery = hotelProviderIdSearch.value;
+    updateFiltersSummary();
+  });
+
+  starRatingFilterSelect.addEventListener("change", () => {
+    state.starRating = starRatingFilterSelect.value;
+    updateFiltersSummary();
+  });
 
   countryFilterSelect.addEventListener("change", () => {
     state.country = countryFilterSelect.value;
-    state.page = 1;
     state.hotelState = "";
 
     const countryMeta = SYSTEM_COUNTRIES.find((c) => c.name === state.country);
@@ -457,41 +704,86 @@
       stateFilterSelect.innerHTML = `<option value="">${countryMeta ? "No state required" : "Select State"}</option>`;
     }
     updateCityFilterOptions();
-    render();
+    updateFiltersSummary();
   });
 
   stateFilterSelect.addEventListener("change", () => {
     state.hotelState = stateFilterSelect.value;
-    state.page = 1;
     updateCityFilterOptions();
-    render();
+    updateFiltersSummary();
   });
 
   cityFilterSelect.addEventListener("change", () => {
     state.city = cityFilterSelect.value;
-    state.page = 1;
-    render();
+    updateFiltersSummary();
   });
 
   statusFilterSelect.addEventListener("change", () => {
     state.status = statusFilterSelect.value;
-    state.page = 1;
-    render();
+    updateFiltersSummary();
   });
 
+  // Reset is the one other action (besides Search/Enter) that touches the
+  // table immediately — "start over" should show the unfiltered list right
+  // away, not just clear the pending fields and leave stale results shown.
   document.getElementById("resetHotelFilterBtn").addEventListener("click", () => {
     hotelSearch.value = "";
+    hotelFuzzyToggle.checked = false;
+    hotelIdSearch.value = "";
+    hotelProviderIdSearch.value = "";
     countryFilterSelect.value = "";
     stateFilterSelect.disabled = true;
     stateFilterSelect.innerHTML = `<option value="">Select State</option>`;
+    starRatingFilterSelect.value = "";
     statusFilterSelect.value = "all";
-    state = { ...state, page: 1, query: "", country: "", hotelState: "", city: "", status: "all" };
+    state = {
+      ...state,
+      page: 1,
+      query: "",
+      fuzzy: false,
+      idQuery: "",
+      providerIdQuery: "",
+      country: "",
+      hotelState: "",
+      city: "",
+      starRating: "",
+      status: "all",
+    };
     updateCityFilterOptions();
     render();
   });
 
   updateCityFilterOptions();
-  render();
+
+  // Deep-linked from city-system.html's "View Hotels" row action
+  // (?cityId=X) — pre-fill Country/State/City to that system city and run
+  // the search immediately, same as if the user had set those 3 filters
+  // and pressed Search themselves. Falls back to the normal unfiltered
+  // load when there's no (or an unrecognized) cityId param.
+  const deepLinkCityId = new URLSearchParams(window.location.search).get("cityId");
+  const deepLinkCity = deepLinkCityId !== null ? SYSTEM_CITIES.find((c) => c.id === Number(deepLinkCityId)) : null;
+
+  if (deepLinkCity) {
+    const countryName = getSystemCountryName(deepLinkCity.country.code) || deepLinkCity.country.name;
+    countryFilterSelect.value = countryName;
+    countryFilterSelect.dispatchEvent(new Event("change"));
+
+    if (deepLinkCity.state) {
+      stateFilterSelect.value = deepLinkCity.state;
+      stateFilterSelect.dispatchEvent(new Event("change"));
+    }
+
+    // Only takes effect if this city actually has a hotel assigned to it —
+    // the City select's own options are built from hotels' resolved
+    // locations (see updateCityFilterOptions() above), not from
+    // SYSTEM_CITIES directly, same as every other use of this filter.
+    cityFilterSelect.value = deepLinkCity.name;
+    cityFilterSelect.dispatchEvent(new Event("change"));
+
+    runSearchNow();
+  } else {
+    render();
+  }
 
   // ---------- Row actions: Edit / History / Toggle Active ----------
 
@@ -607,43 +899,37 @@
     populateHotelFormCities(hotelFormCountry.value, hotelFormState.value, null);
   });
 
-  // Opens the shared form in either mode: no argument (or falsy) = Add, a
-  // hotel record = Edit with every field pre-filled. Add and Edit use the
-  // exact same field set here (unlike City, where Edit only allows renaming)
-  // since the user asked for every field except id and provider id to be
-  // editable — id is always disabled (assigned on save), and provider id is
-  // free-text on Add but locked (disabled) once the hotel exists, same
-  // "not editable after creation" rule as id.
+  // Edit-only — there's no Add Hotel flow, so this is always called with a
+  // real hotel record and every field is pre-filled from it. Provider Id is
+  // locked (disabled) here, same "not editable after creation" rule as Id.
   function openHotelForm(record) {
-    hotelFormModal.dataset.activeRow = record ? record.id : "";
-    hotelFormTitle.textContent = record ? "Edit Hotel" : "Add Hotel";
+    hotelFormModal.dataset.activeRow = record.id;
+    hotelFormTitle.textContent = "Edit Hotel";
 
     // Resolved live rather than read off the record's own snapshot, so a
     // rename on city-system.html/country-system.html since this hotel was
     // last saved doesn't leave the Country/City selects unable to match any
     // option (a stale name wouldn't be found among the freshly-populated
     // <option>s below).
-    const loc = record ? resolveHotelLocation(record) : null;
-    const countryName = loc ? getSystemCountryName(loc.country.code) || loc.country.name : "";
+    const loc = resolveHotelLocation(record);
+    const countryName = getSystemCountryName(loc.country.code) || loc.country.name;
 
-    hotelFormId.value = record ? getSystemHotelDisplayId(record.id) : "";
-    hotelFormName.value = record ? record.name : "";
-    hotelFormAddress.value = record ? record.address : "";
-    hotelFormLatitude.value = record ? record.latitude : "";
-    hotelFormLongitude.value = record ? record.longitude : "";
-    hotelFormStarRating.value = record ? String(record.starRating) : "5";
-    hotelFormEmail.value = record ? record.email || "" : "";
-    hotelFormPhone.value = record ? record.phoneNumber || "" : "";
-    hotelFormProviderId.value = record ? record.providerId || "" : "";
-    hotelFormProviderId.disabled = Boolean(record);
+    hotelFormId.value = getSystemHotelDisplayId(record.id);
+    hotelFormName.value = record.name;
+    hotelFormAddress.value = record.address;
+    hotelFormLatitude.value = record.latitude;
+    hotelFormLongitude.value = record.longitude;
+    hotelFormStarRating.value = String(record.starRating);
+    hotelFormEmail.value = record.email || "";
+    hotelFormPhone.value = record.phoneNumber || "";
+    hotelFormProviderId.value = record.providerId || "";
+    hotelFormProviderId.disabled = true;
     hotelFormCountry.value = countryName;
-    populateHotelFormStates(countryName, loc ? loc.state : "");
-    populateHotelFormCities(countryName, loc ? loc.state : "", record ? record.systemCityId : null);
+    populateHotelFormStates(countryName, loc.state);
+    populateHotelFormCities(countryName, loc.state, record.systemCityId);
 
     openModal(hotelFormModal);
   }
-
-  document.getElementById("addHotelBtn").addEventListener("click", () => openHotelForm(null));
 
   document.getElementById("saveHotelBtn").addEventListener("click", () => {
     const name = hotelFormName.value.trim();
@@ -661,10 +947,6 @@
       showToast("Please select a city", "error");
       return;
     }
-    if (!hotelFormProviderId.value.trim()) {
-      showToast("Provider ID is required", "error");
-      return;
-    }
 
     const meta = SYSTEM_COUNTRIES.find((c) => c.name === countryName);
     const city = cityRecord.name;
@@ -676,106 +958,62 @@
     const starRating = Number(hotelFormStarRating.value);
     const email = hotelFormEmail.value.trim();
     const phoneNumber = hotelFormPhone.value.trim();
-    const providerId = hotelFormProviderId.value.trim();
 
+    // Edit only — build an old -> new changelog only for fields that
+    // actually changed, matching this project's history-description
+    // convention.
     const rowId = hotelFormModal.dataset.activeRow;
+    const record = SYSTEM_HOTELS.find((h) => String(h.id) === String(rowId));
+    if (!record) return;
 
-    if (rowId === "") {
-      // Add
-      SYSTEM_HOTELS.push({
-        id: SYSTEM_HOTELS.length,
-        name,
-        address,
-        latitude,
-        longitude,
-        starRating,
-        city,
-        state: newState,
-        country: { name: meta.name, code: meta.code },
-        systemCityId,
-        email,
-        phoneNumber,
-        providerId,
-        active: true,
-        history: [
-          {
-            operation: "Create",
-            name,
-            description: [
-              `Name: ${name}`,
-              `Address: ${address}`,
-              `City: ${city}`,
-              newState ? `State: ${newState}` : null,
-              `Country: ${meta.name} (${meta.code})`,
-              `Star Rating: ${starRating}`,
-              email ? `Email: ${email}` : null,
-              phoneNumber ? `Phone Number: ${phoneNumber}` : null,
-              providerId ? `Provider ID: ${providerId}` : null,
-            ]
-              .filter(Boolean)
-              .join(", "),
-            userName: CURRENT_USER.name,
-            userEmail: CURRENT_USER.email,
-            timestamp: new Date(),
-          },
-        ],
-      });
-      showToast("Hotel added successfully");
-    } else {
-      // Edit — build an old -> new changelog only for fields that actually
-      // changed, matching this project's history-description convention.
-      const record = SYSTEM_HOTELS.find((h) => String(h.id) === String(rowId));
-      if (!record) return;
-
-      const changes = [];
-      function diff(label, oldVal, newVal) {
-        if (oldVal !== newVal) changes.push(`${label}: ${oldVal ?? "—"} -> ${newVal ?? "—"}`);
-      }
-      // Compare against the resolved-live location, not the raw stored
-      // snapshot — otherwise re-saving a hotel whose city/country was
-      // renamed elsewhere logs a misleading "you changed City/Country"
-      // entry for a change the user never made here.
-      const oldLoc = resolveHotelLocation(record);
-      const oldCountryName = getSystemCountryName(oldLoc.country.code) || oldLoc.country.name;
-      diff("Name", record.name, name);
-      diff("Address", record.address, address);
-      diff("City", oldLoc.city, city);
-      diff("State", oldLoc.state, newState);
-      diff("Country", oldCountryName, meta.name);
-      diff("Latitude", record.latitude, latitude);
-      diff("Longitude", record.longitude, longitude);
-      diff("Star Rating", record.starRating, starRating);
-      diff("Email", record.email || null, email || null);
-      diff("Phone Number", record.phoneNumber || null, phoneNumber || null);
-      // Id and Provider Id are intentionally excluded here — both are fixed
-      // at creation and not editable, so record.providerId is never
-      // reassigned below (hotelFormProviderId is disabled while editing,
-      // matching hotelFormId).
-
-      record.name = name;
-      record.address = address;
-      record.city = city;
-      record.state = newState;
-      record.country = { name: meta.name, code: meta.code };
-      record.systemCityId = systemCityId;
-      record.latitude = latitude;
-      record.longitude = longitude;
-      record.starRating = starRating;
-      record.email = email;
-      record.phoneNumber = phoneNumber;
-
-      if (changes.length) {
-        record.history.push({
-          operation: "Edit",
-          name,
-          description: changes.join(", "),
-          userName: CURRENT_USER.name,
-          userEmail: CURRENT_USER.email,
-          timestamp: new Date(),
-        });
-      }
-      showToast("Hotel updated successfully");
+    const changes = [];
+    function diff(label, oldVal, newVal) {
+      if (oldVal !== newVal) changes.push(`${label}: ${oldVal ?? "—"} -> ${newVal ?? "—"}`);
     }
+    // Compare against the resolved-live location, not the raw stored
+    // snapshot — otherwise re-saving a hotel whose city/country was
+    // renamed elsewhere logs a misleading "you changed City/Country"
+    // entry for a change the user never made here.
+    const oldLoc = resolveHotelLocation(record);
+    const oldCountryName = getSystemCountryName(oldLoc.country.code) || oldLoc.country.name;
+    diff("Name", record.name, name);
+    diff("Address", record.address, address);
+    diff("City", oldLoc.city, city);
+    diff("State", oldLoc.state, newState);
+    diff("Country", oldCountryName, meta.name);
+    diff("Latitude", record.latitude, latitude);
+    diff("Longitude", record.longitude, longitude);
+    diff("Star Rating", record.starRating, starRating);
+    diff("Email", record.email || null, email || null);
+    diff("Phone Number", record.phoneNumber || null, phoneNumber || null);
+    // Id and Provider Id are intentionally excluded here — both are fixed
+    // at creation and not editable, so record.providerId is never
+    // reassigned below (hotelFormProviderId is disabled while editing,
+    // matching hotelFormId).
+
+    record.name = name;
+    record.address = address;
+    record.city = city;
+    record.state = newState;
+    record.country = { name: meta.name, code: meta.code };
+    record.systemCityId = systemCityId;
+    record.latitude = latitude;
+    record.longitude = longitude;
+    record.starRating = starRating;
+    record.email = email;
+    record.phoneNumber = phoneNumber;
+
+    if (changes.length) {
+      record.history.push({
+        operation: "Edit",
+        name,
+        description: changes.join(", "),
+        userName: CURRENT_USER.name,
+        userEmail: CURRENT_USER.email,
+        timestamp: new Date(),
+      });
+    }
+    showToast("Hotel updated successfully");
 
     saveToStorage("SYSTEM_HOTELS", SYSTEM_HOTELS);
     updateCityFilterOptions();

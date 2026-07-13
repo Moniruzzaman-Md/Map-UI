@@ -111,6 +111,9 @@
           <button class="info-icon-btn" data-info-target="#cityListInfo" data-info-title="System City List" aria-label="About this page">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 11v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="8" r="1" fill="currentColor"/></svg>
           </button>
+          <button class="info-icon-btn" data-info-target="#cityListDevNotes" data-info-title="Developer Notes — System City List" aria-label="Developer notes for this page">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 8l-4 4 4 4M15 8l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
         </div>
       </div>
       <hr class="page-divider" />
@@ -123,10 +126,31 @@
           <li><strong>Merge Cities</strong> — combine two or more existing cities into one entry, on the same Add City page as New City (its own section, below). Only cities from the original master list can be merged; cities you've already created or merged can't be merged again.</li>
           <li><strong>Edit</strong> — rename a city. For a merged city, Edit instead opens the Add City page's Merge Cities section to adjust which cities make it up — dropping it below 2 cities makes it Inactive automatically rather than deleting it.</li>
           <li><strong>Map</strong> — jump to City Mapping with this city already pinned, to map supplier cities to it. Only available for prepopulated cities — cities created via New City or Merge Cities can't be mapped.</li>
+          <li><strong>Hotels</strong> — jump to the System Hotel List with Country/State/City already filtered (and searched) to this city, showing every hotel directly assigned to it. Only available for prepopulated cities — cities created via New City or Merge Cities aren't a hotel's own direct city (New City hotels are linked via Map on Hotel Mapping instead, and a merged city can never be a hotel's direct city at all), so there's nothing meaningful for this button to filter to for either.</li>
           <li><strong>History</strong> — view every change: creation, renames, status changes, and merge composition changes, plus supplier cities mapped or unmapped to this city.</li>
-          <li><strong>Summary</strong> — see, per supplier, which of their cities are mapped to this one. For a merged city, this instead shows every supplier city mapped to any of the system cities it was merged from. Not available for a single city added via New City — it has no mapping of its own to summarize.</li>
+          <li><strong>Summary</strong> — see, per supplier, which of their cities are mapped to this one. For a merged city, this instead shows every supplier city mapped to any of the system cities it was merged from, plus the list of cities it was merged out of. For a city added via New City, this instead shows every hotel mapped to it. Any list here that runs long loads 50 rows at a time — scroll to the bottom of that list to automatically load more.</li>
           <li><strong>Active/Inactive toggle</strong> — controls whether a city is available for booking.</li>
         </ul>
+      </template>
+
+      <template id="cityListDevNotes">
+        <p>This is the master list of system cities. Every city here is one of 3 types, which changes what its <strong>Edit</strong>, <strong>Map</strong>, <strong>Hotels</strong>, and <strong>Summary</strong> actions do: a <strong>prepopulated</strong> city (no <code>cityType</code>, from the original seed data), a <strong>New City</strong> (<code>cityType: "normal"</code>, added via Add City), or a <strong>Merged city</strong> (<code>cityType: "merged"</code>, also from Add City).</p>
+        <ul>
+          <li><strong>ID</strong> — permanent, system-generated, never editable.</li>
+          <li><strong>Edit</strong> — prepopulated and New City rename in place here. A merged city instead deep-links to Add City's Merge Cities section (<code>add-city.html?cityId=X</code>) to adjust its composition — dropping it below 2 member cities must set it Inactive automatically rather than deleting the record.</li>
+          <li><strong>Map</strong> (<code>city-mapping.html?cityId=X</code>) — prepopulated cities only. Cities created or merged via Add City must be excluded, since supplier-city mapping only makes sense against the original master-list geography.</li>
+          <li><strong>Hotels</strong> (<code>hotel-system.html?cityId=X</code>) — prepopulated cities only. Deep-links to the System Hotel List with Country/State/City pre-filled from this city and the search already run (collapsing that page's own Filters panel, same as if the user had set those 3 filters and pressed Search themselves). Excluded for New City and Merged: a hotel's own direct city (<code>systemCityId</code>) can be a New City but is never a merged city, and a New City's real hotel relationship is mostly via the separate Map overlay (<code>mappedCityIds</code>, set from hotel-mapping.html) rather than this direct-city filter, so this button would show an incomplete or always-empty result for either.</li>
+          <li><strong>History</strong> — every entry has an <strong>operation name</strong>, a <strong>description</strong>, and <strong>who + when</strong>, logged the instant the change happens, newest first: <strong>Create</strong> (initial fields), <strong>Edit</strong> (a rename), <strong>Status Change</strong> (Active/Inactive, including the automatic deactivation when a merge drops below 2 members), and merge composition changes (members added/removed on a merged city). A supplier city mapped or unmapped to this city from City Mapping also logs here, on this city's own record, in the same action as the supplier city's own history entry.</li>
+          <li><strong>Summary</strong> — 3 different views depending on city type, all read from live data, never a stored snapshot:
+            <ul>
+              <li><strong>Prepopulated</strong> — one card per supplier, each showing whether any of that supplier's cities are mapped to this one, and if so, a table of them.</li>
+              <li><strong>Merged</strong> — the same per-supplier view as prepopulated, but aggregated across every one of its <code>mergedFrom</code> member cities, plus its own card listing those member cities.</li>
+              <li><strong>New City</strong> — one table of every hotel attached to it: directly (the hotel's own <code>systemCityId</code>) or via Map on hotel-mapping.html (<code>mappedCityIds</code>), deduped by hotel id so a hotel that's somehow both never appears twice.</li>
+            </ul>
+            Every list in this modal (Mapped Hotels, each supplier's Mapped Cities, Merged System Cities' member list) loads in bounded pages of 50, scroll-triggered off that list's own box — same convention as hotel-mapping.html's/city-mapping.html's checklists: a spinner while the next page loads, appended below the existing rows without resetting that list's scroll position, and a clear "end of list" state once nothing remains. Applied uniformly to all 3 lists even though only Mapped Hotels and per-supplier Mapped Cities realistically grow large in practice — the merged-members list stays small today, but pagination isn't skipped there just because of that.</li>
+          <li><strong>Active/Inactive toggle</strong> — applies immediately, no confirmation, logged to History as a Status Change.</li>
+        </ul>
+        <p><strong>Everywhere:</strong> key every relationship by permanent id, never by an editable name, and resolve a city's country/state live (via its country code) rather than trusting a name snapshot that might be stale after a rename elsewhere.</p>
       </template>
 
       <section class="content-card">
@@ -312,6 +336,13 @@
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M9 17l-4.5 2V7L9 5m0 12l6 2m-6-2V5m6 14l4.5-2V5L15 7m0 12V7m0 0L9 5" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
             </a>`
             }
+            ${
+              c.cityType
+                ? ""
+                : `<a class="action-btn" href="hotel-system.html?cityId=${c.id}" target="_blank" rel="noopener" aria-label="View hotels in ${c.name}">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M4 21V10l8-5 8 5v11" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 21v-6h6v6" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 12h.01M15 12h.01M12 8h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            </a>`
+            }
             <button class="action-btn" data-history-btn data-row-id="${c.id}" aria-label="View edit history for ${c.name}">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 109-9 9 9 0 00-7 3.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3 3.5V8h4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 7.5V12l3.2 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </button>
@@ -388,6 +419,126 @@
     render();
   });
 
+  // ---------- Summary modal: paginated tables (Mapped Hotels, Merged
+  // System Cities, each supplier's Mapped Cities) ----------
+
+  const SUMMARY_PAGE_SIZE = 50;
+
+  // <tr>-based sentinel/end-caption (see .summary-list-scroll-status in
+  // css/styles.css) — these lists are <tr>s inside a <table><tbody>, not
+  // flat <div> rows inside a .merge-list like the mapping pages' own
+  // pagination, so the trailing row has to be a real <tr> for
+  // insertAdjacentHTML("beforebegin", …) to insert new rows at the right
+  // level.
+  function summaryScrollStatusRowHtml(id) {
+    return `<tr class="summary-list-scroll-status" id="${id}"><td colspan="2"><span class="scroll-status-spinner"></span><span class="scroll-status-label"></span></td></tr>`;
+  }
+
+  function summaryEndOfListRowHtml() {
+    return `<tr class="summary-list-scroll-status summary-list-scroll-status--end"><td colspan="2">You've reached the end of the list</td></tr>`;
+  }
+
+  // Shell only — an empty <tbody> inside a bounded, independently-
+  // scrollable box (.summary-list-scroll, the IntersectionObserver root
+  // renderPaginatedSummaryTable() below uses). Rows are populated
+  // afterward via renderPaginatedSummaryTable(), once this shell actually
+  // exists in the DOM (summaryList.innerHTML as a whole is assigned in one
+  // shot, so nothing here can render synchronously before that happens).
+  function summaryListTableShellHtml(scrollRootId, tbodyId, columnLabel) {
+    return `
+      <div class="summary-list-scroll" id="${scrollRootId}">
+        <table class="summary-list-table">
+          <thead>
+            <tr>
+              <th class="summary-list-num">#</th>
+              <th>${columnLabel}</th>
+            </tr>
+          </thead>
+          <tbody id="${tbodyId}"></tbody>
+        </table>
+      </div>`;
+  }
+
+  // Shared row shape for every summary list on this page (Mapped Hotels,
+  // Merged System Cities, each supplier's Mapped Cities) — a bold
+  // name/label on top, a muted meta line underneath, one bordered row per
+  // entry (same look .summary-list-table has always had).
+  function summaryListRowHtml(item, i) {
+    return `
+      <tr>
+        <td class="summary-list-num">${i + 1}</td>
+        <td>
+          <div class="summary-list-name">${item.name}</div>
+          <div class="summary-list-meta">${item.meta}</div>
+        </td>
+      </tr>`;
+  }
+
+  // Renders `rows` into the <tbody> at `tbodyId` (already an empty shell
+  // inside a .summary-list-scroll wrapper with id `scrollRootId`) as
+  // bounded pages of 50, scroll-triggered off that wrapper — same
+  // bounded-pages/spinner/end-caption convention already used on
+  // hotel-mapping.html/city-mapping.html/add-city.html, but simplified
+  // since every summary list here is read-only (no checkbox/selection
+  // state to carry across pages, so each call is fully self-contained —
+  // unlike those pages, nothing here needs to survive a re-render).
+  function renderPaginatedSummaryTable(scrollRootId, tbodyId, rows, rowHtml) {
+    const scrollRoot = document.getElementById(scrollRootId);
+    const tbody = document.getElementById(tbodyId);
+    if (!scrollRoot || !tbody) return;
+
+    let visibleCount = SUMMARY_PAGE_SIZE;
+    let observer = null;
+    let isLoading = false;
+    const sentinelId = `${tbodyId}-scroll-status`;
+
+    function loadMore(sentinel) {
+      if (isLoading) return;
+      isLoading = true;
+      sentinel.classList.add("is-loading");
+      sentinel.querySelector(".scroll-status-label").textContent = "Loading more…";
+      setTimeout(() => {
+        isLoading = false;
+        if (!sentinel.isConnected) return;
+
+        const startIdx = visibleCount;
+        const nextRows = rows.slice(startIdx, startIdx + SUMMARY_PAGE_SIZE);
+        visibleCount += SUMMARY_PAGE_SIZE;
+        sentinel.insertAdjacentHTML("beforebegin", nextRows.map((item, i) => rowHtml(item, startIdx + i)).join(""));
+
+        if (visibleCount < rows.length) {
+          sentinel.classList.remove("is-loading");
+          sentinel.querySelector(".scroll-status-label").textContent = "";
+        } else {
+          sentinel.outerHTML = summaryEndOfListRowHtml();
+          if (observer) {
+            observer.disconnect();
+            observer = null;
+          }
+        }
+      }, 450);
+    }
+
+    function observeSentinel() {
+      const sentinel = document.getElementById(sentinelId);
+      if (!sentinel) return;
+      observer = new IntersectionObserver(
+        (entries) => {
+          if (entries[0].isIntersecting) loadMore(sentinel);
+        },
+        { root: scrollRoot, rootMargin: "0px 0px 60px 0px", threshold: 0 }
+      );
+      observer.observe(sentinel);
+    }
+
+    const visibleRows = rows.slice(0, visibleCount);
+    tbody.innerHTML =
+      visibleRows.map((item, i) => rowHtml(item, i)).join("") +
+      (rows.length > visibleRows.length ? summaryScrollStatusRowHtml(sentinelId) : "");
+
+    if (visibleRows.length && rows.length > visibleRows.length) observeSentinel();
+  }
+
   document.addEventListener("click", (e) => {
     const editBtn = e.target.closest("[data-edit-btn]");
     if (editBtn) {
@@ -463,69 +614,24 @@
               </tr>
             </tbody>
           </table>
-          ${
-            hotels.length
-              ? `
-          <table class="summary-list-table">
-            <thead>
-              <tr>
-                <th class="summary-list-num">#</th>
-                <th>Hotel</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${hotels
-                .map(
-                  (h, i) => `
-              <tr>
-                <td class="summary-list-num">${i + 1}</td>
-                <td>
-                  <div class="summary-list-name">${h.name}</div>
-                  <div class="summary-list-meta">ID: ${getSystemHotelDisplayId(h.id)} — ${hotelAddressLine(h)}</div>
-                </td>
-              </tr>`
-                )
-                .join("")}
-            </tbody>
-          </table>`
-              : ""
-          }
+          ${hotels.length ? summaryListTableShellHtml("summaryHotelsScroll", "summaryHotelsBody", "Hotel") : ""}
         </div>
       </div>`;
+        if (hotels.length) {
+          renderPaginatedSummaryTable(
+            "summaryHotelsScroll",
+            "summaryHotelsBody",
+            hotels.map((h) => ({ name: h.name, meta: `ID: ${getSystemHotelDisplayId(h.id)} — ${hotelAddressLine(h)}` })),
+            summaryListRowHtml
+          );
+        }
         openModal(document.getElementById("summaryModal"));
         return;
       }
 
       const rows =
         record.cityType === "merged" ? getCityMappingSummary(record.mergedFrom) : getCityMappingSummary(record.id);
-      // Same numbered-table row shape as .summary-list-table above, reused
-      // here for system-city rows (Merged System Cities) and supplier-city
-      // rows (each supplier's Mapped Cities) — a bold name/label on top, a
-      // muted state/country/ID line underneath, one clearly-bordered row
-      // per entry instead of a single <br>-joined line.
-      const summaryListTableHtml = (columnLabel, items) => `
-      <table class="summary-list-table">
-        <thead>
-          <tr>
-            <th class="summary-list-num">#</th>
-            <th>${columnLabel}</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${items
-            .map(
-              (item, i) => `
-          <tr>
-            <td class="summary-list-num">${i + 1}</td>
-            <td>
-              <div class="summary-list-name">${item.name}</div>
-              <div class="summary-list-meta">${item.meta}</div>
-            </td>
-          </tr>`
-            )
-            .join("")}
-        </tbody>
-      </table>`;
+
       const mergedCitiesCard =
         record.cityType === "merged"
           ? `
@@ -541,24 +647,15 @@
               </tr>
             </tbody>
           </table>
-          ${summaryListTableHtml(
-            "City",
-            record.mergedFrom
-              .map((id) => SYSTEM_CITIES.find((c) => c.id === id))
-              .filter(Boolean)
-              .map((c) => ({
-                name: c.name,
-                meta: [c.state, getSystemCountryName(c.country.code) || c.country.name, `ID: ${getSystemCityDisplayId(c.id)}`]
-                  .filter(Boolean)
-                  .join(", "),
-              }))
-          )}
+          ${summaryListTableShellHtml("summaryMergedCitiesScroll", "summaryMergedCitiesBody", "City")}
         </div>
       </div>`
           : "";
-      summaryList.innerHTML = mergedCitiesCard + rows
-        .map(
-          (r) => `
+      summaryList.innerHTML =
+        mergedCitiesCard +
+        rows
+          .map(
+            (r) => `
       <div class="history-entry">
         <div class="history-entry-label">${r.supplierLabel}</div>
         <div class="history-card">
@@ -575,21 +672,39 @@
               </tr>
             </tbody>
           </table>
-          ${
-            r.mapped
-              ? summaryListTableHtml(
-                  "City",
-                  r.cities.map((city) => ({
-                    name: city.name,
-                    meta: [city.state, city.countryCode, `ID: ${city.id}`].filter(Boolean).join(", "),
-                  }))
-                )
-              : ""
-          }
+          ${r.mapped ? summaryListTableShellHtml(`summaryCitiesScroll-${r.supplierKey}`, `summaryCitiesBody-${r.supplierKey}`, "City") : ""}
         </div>
       </div>`
-        )
-        .join("");
+          )
+          .join("");
+
+      // Hydrate every shell now that it actually exists in the DOM — the
+      // merged-from cities list (merged only) and one call per supplier
+      // that has anything mapped.
+      if (record.cityType === "merged") {
+        const mergedCityItems = record.mergedFrom
+          .map((id) => SYSTEM_CITIES.find((c) => c.id === id))
+          .filter(Boolean)
+          .map((c) => ({
+            name: c.name,
+            meta: [c.state, getSystemCountryName(c.country.code) || c.country.name, `ID: ${getSystemCityDisplayId(c.id)}`]
+              .filter(Boolean)
+              .join(", "),
+          }));
+        renderPaginatedSummaryTable("summaryMergedCitiesScroll", "summaryMergedCitiesBody", mergedCityItems, summaryListRowHtml);
+      }
+      rows.forEach((r) => {
+        if (!r.mapped) return;
+        renderPaginatedSummaryTable(
+          `summaryCitiesScroll-${r.supplierKey}`,
+          `summaryCitiesBody-${r.supplierKey}`,
+          r.cities.map((city) => ({
+            name: city.name,
+            meta: [city.state, city.countryCode, `ID: ${city.id}`].filter(Boolean).join(", "),
+          })),
+          summaryListRowHtml
+        );
+      });
 
       openModal(document.getElementById("summaryModal"));
       return;

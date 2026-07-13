@@ -572,6 +572,145 @@ button {
   min-width: 190px;
 }
 
+/* Collapsible "Filters" toggle (e.g. hotel-system.html) — same visual
+   weight as .btn-secondary, but with its own rotating chevron (same
+   transform:rotate(180deg) convention already used for the sidebar's and
+   mapping pages' chevrons) so opening the panel below reads consistently
+   with the rest of the project. */
+.filters-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  background: #fff;
+  color: var(--text-dark);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.filters-toggle-btn:hover {
+  background: var(--bg-panel);
+}
+
+.filters-toggle-btn .chevron {
+  transition: transform 0.15s ease;
+}
+
+.filters-toggle-btn.open .chevron {
+  transform: rotate(180deg);
+}
+
+/* Collapsed-state readout of whatever's currently filtering the table —
+   one removable chip per active filter (see updateFiltersSummary() in
+   hotel-system.html), only rendered when the panel below is closed and at
+   least one filter is active, so a filtered table never looks unfiltered
+   just because the controls are tucked away. */
+.filters-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  /* .card-toolbar (its flex parent) is flex-wrap:wrap, itself designed for
+     a single controls row — flex-basis:100% forces this onto its own full-
+     width line below .toolbar-controls instead of sitting beside it. */
+  flex-basis: 100%;
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px 5px 10px;
+  border-radius: 999px;
+  background: rgba(43, 62, 209, 0.08);
+  color: var(--text-dark);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.filter-chip button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(43, 62, 209, 0.15);
+  color: var(--accent-blue);
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.filter-chip button:hover {
+  background: var(--accent-blue);
+  color: #fff;
+}
+
+/* The collapsible panel itself: a tinted card (instead of a bare
+   border-top) so it reads as a distinct grouped section once expanded,
+   laid out as a responsive label+field grid rather than the old loose
+   flex-wrap row. */
+.filters-panel {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+  padding: 16px;
+  background: var(--bg-panel);
+  border-radius: var(--radius-sm);
+  /* Same reasoning as .filters-summary above — forces this onto its own
+     full-width line within the flex-wrap .card-toolbar parent. */
+  flex-basis: 100%;
+}
+
+/* Label style mirrors .preview-section-title's uppercase-caption
+   convention (used for the Save-preview modal's bucket titles), reused
+   here so a filter field reads as a labeled form field rather than a bare
+   dropdown. */
+.filter-field label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.filter-field .toolbar-search,
+.filter-field .filter-select {
+  width: 100%;
+  min-width: 0;
+}
+
+/* Every .filter-select in this project gets replaced at runtime (app.js)
+   with a hidden native <select> + a visible .searchable-select-trigger
+   button, both wrapped in a .searchable-select <div> that's
+   display:inline-block by default (shrink-wraps to the trigger's own
+   content width — see .searchable-select above). The rule above targets
+   .filter-select itself, which doesn't reach that wrapper, so without this
+   the Country/State/City/Star Rating/Status fields visibly failed to fill
+   their grid column while the ID/Provider ID search boxes did — same
+   dead-space issue #hotelMappingBody .toolbar-filters already works around
+   for hotel-mapping.html's own filter row. */
+.filter-field .searchable-select {
+  display: block;
+  width: 100%;
+}
+
+/* .toolbar-search (36px) and the select trigger (39px) render at slightly
+   different heights by default — fine in the old loosely-wrapped row, but
+   visibly misaligned once every field lines up in a rigid grid. Matches
+   the trigger's own 39px (padding 9px 14px) rather than shrinking the
+   trigger, since 39px is this project's standard control height. */
+.filter-field .toolbar-search {
+  height: 39px;
+  box-sizing: border-box;
+}
+
 .filter-select:focus {
   border-color: var(--accent-blue);
   box-shadow: 0 0 0 3px rgba(43, 62, 209, 0.12);
@@ -749,7 +888,7 @@ table.data-table {
 }
 
 .truncatable--starrating {
-  width: 70px;
+  width: 110px;
 }
 
 .truncatable--email {
@@ -1693,6 +1832,48 @@ table.data-table {
 .hotel-list-scroll-status--end {
   border-top: 1px solid var(--border-color);
   padding: 10px 0;
+}
+
+/* Bounded, independently-scrollable box for city-system.html's Summary
+   modal tables (Mapped Hotels, Merged System Cities, each supplier's
+   Mapped Cities) — the IntersectionObserver root for
+   renderPaginatedSummaryTable()'s scroll-triggered pagination, same idea
+   as .merge-list on the mapping pages. */
+.summary-list-scroll {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+/* <tr>-based variant of .hotel-list-scroll-status/.hotel-list-scroll-status
+   --end above — these summary tables are <tr>s inside a <table><tbody>,
+   not flat <div> rows inside a .merge-list, so the sentinel/end-caption
+   have to be real table rows. display:flex lives on the <td> (a table row
+   itself can't safely take display:flex without breaking table layout),
+   while the id/.is-loading toggle stays on the <tr> so
+   insertAdjacentHTML("beforebegin", …) keeps inserting new sibling <tr>s
+   at the correct level. Visually matches .hotel-list-scroll-status. */
+.summary-list-scroll-status td {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 0;
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+
+.summary-list-scroll-status.is-loading td {
+  min-height: 40px;
+}
+
+.summary-list-scroll-status.is-loading .scroll-status-spinner {
+  display: inline-block;
+}
+
+.summary-list-scroll-status--end td {
+  border-top: 1px solid var(--border-color);
+  padding: 10px 0;
+  justify-content: center;
 }
 
 /* label.merge-list-item is listed alongside the plain class selector so a
