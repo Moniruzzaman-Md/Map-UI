@@ -123,11 +123,11 @@
         <ul>
           <li>Only prepopulated system cities can be pinned here — cities added or merged via <strong>Add City</strong> on the City List page aren't eligible.</li>
           <li>State is always an optional extra filter, never required — the pin city list loads as soon as a Country is chosen, and the supplier city list loads as soon as Supplier + Country are chosen.</li>
-          <li>Top-right shows every supplier city currently mapped to the pinned city, filterable by a single supplier via the dropdown ("All Suppliers" by default). Its History/Unmap buttons act immediately, one row at a time — for quick single fixes, not batch review.</li>
+          <li>Top-right shows every supplier city currently mapped to the pinned city, filterable by a single supplier via the dropdown ("All Suppliers" by default). Its History/Unmap buttons act immediately, one row at a time — for quick single fixes, not batch review. Loads 50 at a time — scroll to the bottom to automatically load more.</li>
           <li>A city already mapped to a <em>different</em> system city is highlighted below, with a small "Mapped: City, State, Country" note under its name. Checking it never interrupts you — any actual changes are reviewed together in one place at Save time.</li>
-          <li>On the left, <strong>Already Mapped</strong> lists this supplier's cities already mapped to the pinned city — its <strong>Unmap</strong> button queues a removal without the row disappearing, so you can change your mind (the button becomes <strong>Undo</strong>) right up until Save. <strong>New Selection</strong> lists your fresh picks from the checklist on the right — tagged <strong>Remap</strong> if that city is already mapped elsewhere and a system city is pinned, <strong>Locked</strong> if it's mapped elsewhere but nothing is pinned yet to compare against, or <strong>New</strong> if it isn't mapped anywhere yet. Both sections collapse independently.</li>
+          <li>On the left, <strong>Already Mapped</strong> lists this supplier's cities already mapped to the pinned city — its <strong>Unmap</strong> button queues a removal without the row disappearing, so you can change your mind (the button becomes <strong>Undo</strong>) right up until Save. It also loads 50 at a time, scroll-triggered the same way. <strong>New Selection</strong> lists your fresh picks from the checklist on the right — tagged <strong>Remap</strong> if that city is already mapped elsewhere and a system city is pinned, <strong>Locked</strong> if it's mapped elsewhere but nothing is pinned yet to compare against, or <strong>New</strong> if it isn't mapped anywhere yet. Both sections collapse independently.</li>
           <li><strong>Save Mapping</strong> always opens a preview before anything is applied, organized into up to four sections: <strong>Previously Saved</strong> (unchanged, for context), <strong>New Map</strong>, <strong>Remap</strong> (cities being reassigned from a different system city, shown as an old-vs-new comparison), and <strong>Unmap</strong>.</li>
-          <li>Tick <strong>"Show only cities not yet mapped"</strong> on the right to hide supplier cities that already map to some system city — unlike a system city, a supplier city maps to at most one, so this narrows the list to what's still available.</li>
+          <li>Tick <strong>"Show only cities not yet mapped"</strong> on the right to hide supplier cities that already map to some system city — unlike a system city, a supplier city maps to at most one, so this narrows the list to what's still available. Each candidate row's left edge is green for an Active supplier city, red for Inactive. This checklist also loads 50 at a time — scroll to the bottom to automatically load more of the current filter/search results.</li>
           <li>Each section below fills a full screen's worth of space — use the up/down buttons floating at the top-right to jump straight between the Pin/Existing Mapping section and the Map Supplier Cities section.</li>
           <li>The Map Supplier Cities section header shows a compact "Pinned: City — State, Country" reminder of which system city you're currently mapping into, so you don't lose that context after jumping down here.</li>
           <li>Tick <strong>"Full Screen"</strong> (top-right) to hide the page title too, giving each section the entire screen — the toggle itself stays floating and reachable so you can turn it back off.</li>
@@ -138,9 +138,10 @@
         <p>This screen maps supplier cities to system cities. A supplier city can be mapped to at most one system city at a time; a system city can have many supplier cities mapped to it. The pin (which system city) and the supplier selection (which cities to map) work fully independently of each other — either can be set up first, in any order — and only need to agree with each other once Save actually runs.</p>
         <ul>
           <li><strong>Pinning a system city</strong> — only cities from the original prepopulated master list may be pinned; any city created or merged via Add City must be excluded from this picker. Country is required before the city picker loads; State is always an optional narrowing filter, never part of the gate.</li>
+          <li><strong>Keeping a large result set from hanging the screen</strong> — all 3 lists on this page (Existing Mapping panel, Map Supplier Cities checklist, and its own Already Mapped sub-list) load and display results in bounded pages of 50 at a time, never the whole matching set in one go — same convention as hotel-mapping.html's checklist and add-city.html's Merge Cities lists. Reaching the bottom of a list's currently-loaded rows triggers loading its next page automatically, with a brief spinner, appending below the existing rows without disturbing that list's own scroll position or re-rendering rows already on screen. Once a list is fully loaded, its bottom shows a clear "end of list" state and stops trying to load further. Changing any filter/search/pin resets the affected list back to its first page.</li>
           <li><strong>Existing mapping panel</strong> — must show every supplier city currently mapped to the pinned city, across every supplier, with a total count that stays independent of the supplier filter below it (the filter narrows only the visible list, not the count). Its History and Unmap actions apply immediately, one row at a time — this panel is for quick single fixes, not batch review.</li>
-          <li><strong>Map Supplier Cities panel</strong> — Supplier and Country are both required before the checklist loads or the search box is usable; State is an optional narrowing filter on top, same rule as the pin panel. A supplier city already mapped to a different system city must still be selectable here, never blocked — highlight it and show what it's currently mapped to, but don't interrupt the click with a confirmation; any real reassignment is reviewed together with everything else at Save.</li>
-          <li><strong>Already Mapped / New Selection</strong> — Already Mapped must reflect the mapping baseline as of when this supplier (and the current pin) were last loaded; unchecking one queues an unmap (offered as "Undo", reversible) without removing the row from view until Save actually runs. New Selection must only ever show rows freshly checked this session, tagged New (not mapped anywhere yet), Remap (mapped elsewhere, and a system city is currently pinned to compare against), or Locked (mapped elsewhere, but nothing is pinned yet, so whether it ends up a Remap can't be decided).</li>
+          <li><strong>Map Supplier Cities panel</strong> — Supplier and Country are both required before the checklist loads or the search box is usable; State is an optional narrowing filter on top, same rule as the pin panel. A supplier city already mapped to a different system city must still be selectable here, never blocked — highlight it and show what it's currently mapped to, but don't interrupt the click with a confirmation; any real reassignment is reviewed together with everything else at Save. Each row's left edge is a colored bar (green for Active, red for Inactive) instead of the text pill used elsewhere in the project — a pill would shift the row's checkbox/name content.</li>
+          <li><strong>Already Mapped / New Selection</strong> — Already Mapped must reflect the mapping baseline as of when this supplier (and the current pin) were last loaded; unchecking one queues an unmap (offered as "Undo", reversible) without removing the row from view until Save actually runs. New Selection must only ever show rows freshly checked this session, tagged New (not mapped anywhere yet), Remap (mapped elsewhere, and a system city is currently pinned to compare against), or Locked (mapped elsewhere, but nothing is pinned yet, so whether it ends up a Remap can't be decided). Already Mapped and the top Existing Mapping panel both answer "who's mapped to the pinned city," but at different, independent scopes (this supplier only, vs. every supplier) — they can show entirely different rows depending on the supplier selected here vs. the top panel's own filter dropdown, and are rendered, paginated, and refreshed completely separately.</li>
           <li><strong>Save Mapping</strong> — must always show a review step first, split into four groups: previously saved (context only, nothing changes), new maps, remaps (each shown as an explicit "currently mapped to" vs "will map to" comparison), and unmaps. Nothing is written until this review is explicitly confirmed. If nothing changed, saving must be blocked with a clear message rather than silently succeeding.</li>
           <li><strong>History</strong> — every entry has an <strong>operation name</strong>, a <strong>description</strong> in that operation's fixed pattern, and <strong>who + when</strong>, logged the instant the change happens, newest first. When a description needs to show more than one distinct fact, the facts are separated by a single pipe character, and the history view puts each on its own line. A mapping change always writes to <strong>two</strong> records — the supplier city's own history, and the affected system city's own history (both the old and new system city, for a Remap) — in the same action.
             <p><strong>On the supplier city's own record:</strong></p>
@@ -535,29 +536,32 @@
     return rows;
   }
 
-  function renderMappedCitiesSummary() {
-    const hasPin = pinnedCityId !== null;
-    mappedCitiesEmptyState.style.display = hasPin ? "none" : "";
-    mappedCitiesSection.style.display = hasPin ? "" : "none";
-    if (!hasPin) return;
+  // Shared by all 3 paginated lists on this page (#mappedCitiesList,
+  // #mapCityList, #alreadyMappedList) — id-parametrized so each gets its own
+  // sentinel to observe. Same markup/behavior as the single copy each of
+  // hotel-mapping.html and add-city.html already carry for their own 2 lists.
+  function scrollStatusHtml(id) {
+    return `<div class="hotel-list-scroll-status" id="${id}"><span class="scroll-status-spinner"></span><span class="scroll-status-label"></span></div>`;
+  }
 
-    // Total mapped count (the pill) always reflects every supplier,
-    // regardless of the filter below — only the list itself narrows.
-    const allMapped = getSupplierCitiesMappedTo(pinnedCityId);
-    pinnedCityMappedCount.textContent = `${allMapped.length} mapped`;
+  function endOfListHtml() {
+    return `<div class="hotel-list-scroll-status hotel-list-scroll-status--end">You've reached the end of the list</div>`;
+  }
 
-    const filterValue = mappedSupplierFilter.value;
-    const mapped = filterValue ? allMapped.filter(({ supplierKey }) => supplierKey === filterValue) : allMapped;
-    mappedCitiesList.innerHTML = !mapped.length
-      ? `<div class="empty-state">No mappings for the selected supplier</div>`
-      : mapped
-          .map(({ supplierKey, row }) => {
-            // "City address" is state+country (state optional), never the
-            // country code badge already shown next to the name — reuses
-            // getSupplierCountryName() (same helper the bottom checklist
-            // uses) rather than a second country-name lookup.
-            const address = [row.state, getSupplierCountryName(supplierKey, row.countryCode)].filter(Boolean).join(", ");
-            return `
+  // ---------- Existing Mapping panel (bounded pages of 50, scroll-loaded) ----------
+
+  const MAPPED_CITIES_PAGE_SIZE = 50;
+  let mappedCitiesVisibleCount = MAPPED_CITIES_PAGE_SIZE;
+  let mappedCitiesScrollObserver = null;
+  let isLoadingMoreMappedCities = false;
+
+  // "City address" is state+country (state optional), never the country code
+  // badge already shown next to the name — reuses getSupplierCountryName()
+  // (same helper the bottom checklist uses) rather than a second
+  // country-name lookup.
+  function mappedCityRowHtml(supplierKey, row) {
+    const address = [row.state, getSupplierCountryName(supplierKey, row.countryCode)].filter(Boolean).join(", ");
+    return `
       <div class="merge-list-item">
         <span class="meta">
           <span class="merge-list-name" title="${row.name}">${row.name} <span class="code-badge">${row.countryCode}</span></span>
@@ -572,8 +576,77 @@
           </button>
         </div>
       </div>`;
-          })
-          .join("");
+  }
+
+  // No per-row wiring needed for appended rows — History/Unmap already use
+  // one delegated listener on #mappedCitiesList itself (see below), which
+  // covers rows inserted later by loadMoreMappedCitiesRows() for free.
+  function observeMappedCitiesScrollStatus(rows) {
+    const sentinel = document.getElementById("mappedCitiesScrollStatus");
+    if (!sentinel) return;
+    mappedCitiesScrollObserver = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) loadMoreMappedCitiesRows(sentinel, rows);
+      },
+      { root: mappedCitiesList, rootMargin: "0px 0px 60px 0px", threshold: 0 }
+    );
+    mappedCitiesScrollObserver.observe(sentinel);
+  }
+
+  function loadMoreMappedCitiesRows(sentinel, rows) {
+    if (isLoadingMoreMappedCities) return;
+    isLoadingMoreMappedCities = true;
+    sentinel.classList.add("is-loading");
+    sentinel.querySelector(".scroll-status-label").textContent = "Loading more cities…";
+    setTimeout(() => {
+      isLoadingMoreMappedCities = false;
+      if (!sentinel.isConnected) return;
+
+      const nextRows = rows.slice(mappedCitiesVisibleCount, mappedCitiesVisibleCount + MAPPED_CITIES_PAGE_SIZE);
+      mappedCitiesVisibleCount += MAPPED_CITIES_PAGE_SIZE;
+      sentinel.insertAdjacentHTML("beforebegin", nextRows.map(({ supplierKey, row }) => mappedCityRowHtml(supplierKey, row)).join(""));
+
+      if (mappedCitiesVisibleCount < rows.length) {
+        sentinel.classList.remove("is-loading");
+        sentinel.querySelector(".scroll-status-label").textContent = "";
+      } else {
+        sentinel.outerHTML = endOfListHtml();
+        if (mappedCitiesScrollObserver) {
+          mappedCitiesScrollObserver.disconnect();
+          mappedCitiesScrollObserver = null;
+        }
+      }
+    }, 450);
+  }
+
+  function renderMappedCitiesSummary() {
+    const hasPin = pinnedCityId !== null;
+    mappedCitiesEmptyState.style.display = hasPin ? "none" : "";
+    mappedCitiesSection.style.display = hasPin ? "" : "none";
+    if (!hasPin) return;
+
+    // Total mapped count (the pill) always reflects every supplier,
+    // regardless of the filter below — only the list itself narrows.
+    const allMapped = getSupplierCitiesMappedTo(pinnedCityId);
+    pinnedCityMappedCount.textContent = `${allMapped.length} mapped`;
+
+    const filterValue = mappedSupplierFilter.value;
+    const mapped = filterValue ? allMapped.filter(({ supplierKey }) => supplierKey === filterValue) : allMapped;
+
+    if (mappedCitiesScrollObserver) {
+      mappedCitiesScrollObserver.disconnect();
+      mappedCitiesScrollObserver = null;
+    }
+    isLoadingMoreMappedCities = false;
+    mappedCitiesVisibleCount = MAPPED_CITIES_PAGE_SIZE;
+    const visibleRows = mapped.slice(0, mappedCitiesVisibleCount);
+
+    mappedCitiesList.innerHTML = !visibleRows.length
+      ? `<div class="empty-state">No mappings for the selected supplier</div>`
+      : visibleRows.map(({ supplierKey, row }) => mappedCityRowHtml(supplierKey, row)).join("") +
+        (mapped.length > visibleRows.length ? scrollStatusHtml("mappedCitiesScrollStatus") : "");
+
+    if (visibleRows.length && mapped.length > visibleRows.length) observeMappedCitiesScrollStatus(mapped);
   }
 
   mappedCitiesList.addEventListener("click", (e) => {
@@ -660,18 +733,30 @@
     updateSelectionSummary();
   }
 
+  // Cities from the currently-selected supplier that are mapped to the
+  // pinned system city — the baseline that Save Mapping diffs against.
+  // Deliberately scoped to just this supplier's own array: the top
+  // "Existing Mapping" panel (renderMappedCitiesSummary, all suppliers) and
+  // this bottom "Already Mapped" list are 2 independently-scoped,
+  // independently-filtered lists, not the same data shown twice — they can
+  // show completely different rows depending on which supplier is selected
+  // here vs. which supplier the top panel's dropdown is filtered to.
+  function currentSupplierMappedIds() {
+    if (pinnedCityId === null || !rightState.supplier) return new Set();
+    return new Set(
+      (supplierCities[rightState.supplier] || [])
+        .filter((r) => r.systemCityId === pinnedCityId)
+        .map((r) => r.id)
+    );
+  }
+
   // Recomputes which of the current supplier's cities are already mapped to
   // the pinned system city — the baseline that Save Mapping diffs against.
   // Hard reset: only correct when the *supplier* just changed, since
   // pendingChecked's ids are only meaningful within one supplier's array.
   function refreshRightPanelBaseline() {
     if (!rightState.supplier) return;
-    initialMappedIds =
-      pinnedCityId === null
-        ? new Set()
-        : new Set(
-            (supplierCities[rightState.supplier] || []).filter((r) => r.systemCityId === pinnedCityId).map((r) => r.id)
-          );
+    initialMappedIds = currentSupplierMappedIds();
     pendingChecked = new Set(initialMappedIds);
     renderCityList();
     renderSelectedCitiesList();
@@ -694,12 +779,7 @@
       renderCityList();
       return;
     }
-    const newBaseline =
-      pinnedCityId === null
-        ? new Set()
-        : new Set(
-            (supplierCities[rightState.supplier] || []).filter((r) => r.systemCityId === pinnedCityId).map((r) => r.id)
-          );
+    const newBaseline = currentSupplierMappedIds();
     const preserved = [...pendingChecked].filter((id) => !initialMappedIds.has(id));
     pendingChecked = new Set([...preserved, ...newBaseline]);
     initialMappedIds = newBaseline;
@@ -803,8 +883,103 @@
     stat.textContent = `Mapped: ${mapped}/${rows.length}`;
   }
 
+  // ---------- Bottom-right: map candidates checklist (bounded pages of 50, scroll-loaded) ----------
+
+  const MAP_PAGE_SIZE = 50;
+  let mapVisibleCount = MAP_PAGE_SIZE;
+  let mapScrollObserver = null;
+  let isLoadingMoreMapCities = false;
+
+  function mapCityRowHtml(r) {
+    const checked = pendingChecked.has(r.id);
+    const mappedToOtherId = r.systemCityId !== null && r.systemCityId !== pinnedCityId ? r.systemCityId : null;
+    const activeClass = r.active ? "merge-list-item--supplier-active" : "merge-list-item--supplier-inactive";
+    const rowClass = mappedToOtherId !== null ? `merge-list-item mapped-elsewhere ${activeClass}` : `merge-list-item ${activeClass}`;
+    const mappedNote =
+      mappedToOtherId !== null ? `<span class="mapped-elsewhere-note">Mapped: ${getSystemCityLabel(mappedToOtherId)}</span>` : "";
+    // Whether this row is already mapped to *anything* can't be resolved
+    // into "will this be a Remap or does it match the pin" until a system
+    // city is actually pinned — lock the checkbox rather than let the user
+    // create that ambiguous state (see renderNewSelectionSection()'s
+    // matching guard).
+    const locked = pinnedCityId === null && r.systemCityId !== null;
+    return `
+      <label class="${rowClass}" title="${r.active ? "Active" : "Inactive"}">
+        <input type="checkbox" data-map-city-id="${r.id}" ${checked ? "checked" : ""} ${locked ? "disabled" : ""} />
+        <span class="meta">
+          <span>${r.name} <span class="code-badge">${r.countryCode}</span></span>
+          <span class="sub">${getSupplierCountryName(rightState.supplier, r.countryCode)}${r.state ? ` · ${r.state}` : ""}</span>
+          ${mappedNote}
+        </span>
+      </label>`;
+  }
+
+  // No per-checkbox interruption — checking a city that's already mapped
+  // elsewhere is allowed freely here (this panel works independently of the
+  // left pin, so there may not even be a target to compare against yet).
+  // Any actual re-maps get reviewed together in one batch confirmation at
+  // Save time instead — see saveCityMappingBtn below. Guarded by
+  // data-wired so it's safe to call on the same row twice (initial render
+  // vs. incremental append from loadMoreMapRows).
+  function wireMapCityCheckbox(checkbox) {
+    if (checkbox.dataset.wired) return;
+    checkbox.dataset.wired = "1";
+    checkbox.addEventListener("change", () => {
+      const id = checkbox.dataset.mapCityId;
+      if (checkbox.checked) pendingChecked.add(id);
+      else pendingChecked.delete(id);
+      renderSelectedCitiesList();
+      updateSelectionSummary();
+    });
+  }
+
+  function observeMapScrollStatus(rows) {
+    const sentinel = document.getElementById("mapCityScrollStatus");
+    if (!sentinel) return;
+    mapScrollObserver = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) loadMoreMapRows(sentinel, rows);
+      },
+      { root: mapCityList, rootMargin: "0px 0px 60px 0px", threshold: 0 }
+    );
+    mapScrollObserver.observe(sentinel);
+  }
+
+  function loadMoreMapRows(sentinel, rows) {
+    if (isLoadingMoreMapCities) return;
+    isLoadingMoreMapCities = true;
+    sentinel.classList.add("is-loading");
+    sentinel.querySelector(".scroll-status-label").textContent = "Loading more cities…";
+    setTimeout(() => {
+      isLoadingMoreMapCities = false;
+      if (!sentinel.isConnected) return;
+
+      const nextRows = rows.slice(mapVisibleCount, mapVisibleCount + MAP_PAGE_SIZE);
+      mapVisibleCount += MAP_PAGE_SIZE;
+      sentinel.insertAdjacentHTML("beforebegin", nextRows.map(mapCityRowHtml).join(""));
+      mapCityList.querySelectorAll("[data-map-city-id]").forEach(wireMapCityCheckbox);
+
+      if (mapVisibleCount < rows.length) {
+        sentinel.classList.remove("is-loading");
+        sentinel.querySelector(".scroll-status-label").textContent = "";
+      } else {
+        sentinel.outerHTML = endOfListHtml();
+        if (mapScrollObserver) {
+          mapScrollObserver.disconnect();
+          mapScrollObserver = null;
+        }
+      }
+    }, 450);
+  }
+
   function renderCityList() {
     updateMappedStat();
+
+    if (mapScrollObserver) {
+      mapScrollObserver.disconnect();
+      mapScrollObserver = null;
+    }
+    isLoadingMoreMapCities = false;
 
     if (!rightState.supplier) {
       mapCityList.innerHTML = `<div class="empty-state">Select a supplier to continue</div>`;
@@ -816,49 +991,16 @@
     }
 
     const rows = currentMapCandidates();
-    mapCityList.innerHTML = rows.length
-      ? rows
-          .map((r) => {
-            const checked = pendingChecked.has(r.id);
-            const mappedToOtherId = r.systemCityId !== null && r.systemCityId !== pinnedCityId ? r.systemCityId : null;
-            const rowClass = mappedToOtherId !== null ? "merge-list-item mapped-elsewhere" : "merge-list-item";
-            const mappedNote =
-              mappedToOtherId !== null
-                ? `<span class="mapped-elsewhere-note">Mapped: ${getSystemCityLabel(mappedToOtherId)}</span>`
-                : "";
-            // Whether this row is already mapped to *anything* can't be
-            // resolved into "will this be a Remap or does it match the pin"
-            // until a system city is actually pinned — lock the checkbox
-            // rather than let the user create that ambiguous state (see
-            // renderNewSelectionSection()'s matching guard).
-            const locked = pinnedCityId === null && r.systemCityId !== null;
-            return `
-      <label class="${rowClass}">
-        <input type="checkbox" data-map-city-id="${r.id}" ${checked ? "checked" : ""} ${locked ? "disabled" : ""} />
-        <span class="meta">
-          <span>${r.name} <span class="code-badge">${r.countryCode}</span></span>
-          <span class="sub">${getSupplierCountryName(rightState.supplier, r.countryCode)}${r.state ? ` · ${r.state}` : ""}</span>
-          ${mappedNote}
-        </span>
-      </label>`;
-          })
-          .join("")
+    mapVisibleCount = MAP_PAGE_SIZE;
+    const visibleRows = rows.slice(0, mapVisibleCount);
+
+    mapCityList.innerHTML = visibleRows.length
+      ? visibleRows.map(mapCityRowHtml).join("") + (rows.length > visibleRows.length ? scrollStatusHtml("mapCityScrollStatus") : "")
       : `<div class="empty-state">No cities match this filter</div>`;
 
-    // No per-checkbox interruption — checking a city that's already mapped
-    // elsewhere is allowed freely here (this panel works independently of
-    // the left pin, so there may not even be a target to compare against
-    // yet). Any actual re-maps get reviewed together in one batch
-    // confirmation at Save time instead — see saveCityMappingBtn below.
-    mapCityList.querySelectorAll("[data-map-city-id]").forEach((checkbox) => {
-      checkbox.addEventListener("change", () => {
-        const id = checkbox.dataset.mapCityId;
-        if (checkbox.checked) pendingChecked.add(id);
-        else pendingChecked.delete(id);
-        renderSelectedCitiesList();
-        updateSelectionSummary();
-      });
-    });
+    mapCityList.querySelectorAll("[data-map-city-id]").forEach(wireMapCityCheckbox);
+
+    if (visibleRows.length && rows.length > visibleRows.length) observeMapScrollStatus(rows);
   }
 
   // Renders both collapsible sections. "Already Mapped" membership is fixed
@@ -882,17 +1024,24 @@
     renderNewSelectionSection(newSelectionRows);
   }
 
-  function renderAlreadyMappedSection(alreadyMappedRows) {
-    alreadyMappedCount.textContent = alreadyMappedRows.length;
-    alreadyMappedList.innerHTML = alreadyMappedRows.length
-      ? alreadyMappedRows
-          .map((r) => {
-            // Still checked = still mapped (offer Unmap); unchecked here
-            // means the user already queued it for unmap this session
-            // (offer Undo instead) — this is what makes unmapping
-            // reversible without the row ever leaving the list.
-            const queuedForUnmap = !pendingChecked.has(r.id);
-            return `
+  // ---------- Already Mapped section (bounded pages of 50, scroll-loaded) ----------
+  // Same treatment as the main checklist above — its own state/functions,
+  // mirroring mapScrollObserver/loadMoreMapRows exactly — since a supplier
+  // with a lot of cities already mapped to the pinned city can easily
+  // exceed one screen.
+
+  const ALREADY_MAPPED_PAGE_SIZE = 50;
+  let alreadyMappedVisibleCount = ALREADY_MAPPED_PAGE_SIZE;
+  let alreadyMappedScrollObserver = null;
+  let isLoadingMoreAlreadyMapped = false;
+
+  function alreadyMappedRowHtml(r) {
+    // Still checked = still mapped (offer Unmap); unchecked here means the
+    // user already queued it for unmap this session (offer Undo instead) —
+    // this is what makes unmapping reversible without the row ever leaving
+    // the list.
+    const queuedForUnmap = !pendingChecked.has(r.id);
+    return `
       <div class="merge-list-item">
         <span class="meta">
           <span class="merge-list-name" title="${r.name}">${r.name} <span class="code-badge">${r.countryCode}</span></span>
@@ -902,20 +1051,79 @@
           <button class="btn btn-secondary btn-compact" data-toggle-unmap-id="${r.id}">${queuedForUnmap ? "Undo" : "Unmap"}</button>
         </div>
       </div>`;
-          })
-          .join("")
+  }
+
+  function wireAlreadyMappedUnmapButton(btn) {
+    if (btn.dataset.wired) return;
+    btn.dataset.wired = "1";
+    btn.addEventListener("click", () => {
+      const id = btn.dataset.toggleUnmapId;
+      if (pendingChecked.has(id)) pendingChecked.delete(id);
+      else pendingChecked.add(id);
+      renderCityList();
+      renderSelectedCitiesList();
+      updateSelectionSummary();
+    });
+  }
+
+  function observeAlreadyMappedScrollStatus(rows) {
+    const sentinel = document.getElementById("alreadyMappedScrollStatus");
+    if (!sentinel) return;
+    alreadyMappedScrollObserver = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) loadMoreAlreadyMappedRows(sentinel, rows);
+      },
+      { root: alreadyMappedList, rootMargin: "0px 0px 60px 0px", threshold: 0 }
+    );
+    alreadyMappedScrollObserver.observe(sentinel);
+  }
+
+  function loadMoreAlreadyMappedRows(sentinel, rows) {
+    if (isLoadingMoreAlreadyMapped) return;
+    isLoadingMoreAlreadyMapped = true;
+    sentinel.classList.add("is-loading");
+    sentinel.querySelector(".scroll-status-label").textContent = "Loading more cities…";
+    setTimeout(() => {
+      isLoadingMoreAlreadyMapped = false;
+      if (!sentinel.isConnected) return;
+
+      const nextRows = rows.slice(alreadyMappedVisibleCount, alreadyMappedVisibleCount + ALREADY_MAPPED_PAGE_SIZE);
+      alreadyMappedVisibleCount += ALREADY_MAPPED_PAGE_SIZE;
+      sentinel.insertAdjacentHTML("beforebegin", nextRows.map(alreadyMappedRowHtml).join(""));
+      alreadyMappedList.querySelectorAll("[data-toggle-unmap-id]").forEach(wireAlreadyMappedUnmapButton);
+
+      if (alreadyMappedVisibleCount < rows.length) {
+        sentinel.classList.remove("is-loading");
+        sentinel.querySelector(".scroll-status-label").textContent = "";
+      } else {
+        sentinel.outerHTML = endOfListHtml();
+        if (alreadyMappedScrollObserver) {
+          alreadyMappedScrollObserver.disconnect();
+          alreadyMappedScrollObserver = null;
+        }
+      }
+    }, 450);
+  }
+
+  function renderAlreadyMappedSection(alreadyMappedRows) {
+    alreadyMappedCount.textContent = alreadyMappedRows.length;
+
+    if (alreadyMappedScrollObserver) {
+      alreadyMappedScrollObserver.disconnect();
+      alreadyMappedScrollObserver = null;
+    }
+    isLoadingMoreAlreadyMapped = false;
+    alreadyMappedVisibleCount = ALREADY_MAPPED_PAGE_SIZE;
+    const visibleRows = alreadyMappedRows.slice(0, alreadyMappedVisibleCount);
+
+    alreadyMappedList.innerHTML = visibleRows.length
+      ? visibleRows.map(alreadyMappedRowHtml).join("") +
+        (alreadyMappedRows.length > visibleRows.length ? scrollStatusHtml("alreadyMappedScrollStatus") : "")
       : `<div class="empty-state">No existing mappings for this supplier</div>`;
 
-    alreadyMappedList.querySelectorAll("[data-toggle-unmap-id]").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const id = btn.dataset.toggleUnmapId;
-        if (pendingChecked.has(id)) pendingChecked.delete(id);
-        else pendingChecked.add(id);
-        renderCityList();
-        renderSelectedCitiesList();
-        updateSelectionSummary();
-      });
-    });
+    alreadyMappedList.querySelectorAll("[data-toggle-unmap-id]").forEach(wireAlreadyMappedUnmapButton);
+
+    if (visibleRows.length && alreadyMappedRows.length > visibleRows.length) observeAlreadyMappedScrollStatus(alreadyMappedRows);
   }
 
   function renderNewSelectionSection(newSelectionRows) {
@@ -1028,7 +1236,7 @@
     return (
       previewSectionHtml("Previously Saved", keptRows, `<div class="merge-list">${keptRows.map(previewRowHtml).join("")}</div>`) +
       previewSectionHtml("New Map", newMapRows, `<div class="merge-list">${newMapRows.map(previewRowHtml).join("")}</div>`) +
-      previewSectionHtml("Remap", remapRows, renderRemapRows(remapRows, targetLabel)) +
+      previewSectionHtml("Remap", remapRows, `<div class="merge-list">${renderRemapRows(remapRows, targetLabel)}</div>`) +
       previewSectionHtml("Unmap", removedRows, `<div class="merge-list">${removedRows.map(previewRowHtml).join("")}</div>`)
     );
   }

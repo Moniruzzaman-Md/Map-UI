@@ -427,9 +427,28 @@
       // field) or via the separate Map feature (hotel-mapping.html).
       if (record.cityType === "normal") {
         const { direct, mapped } = getNewCityHotelSummary(record.id);
-        const hotelGroupCard = (label, hotels) => `
+        // Street address + resolved city/state/country in one line — the
+        // street address alone (hotel.address) would read as incomplete,
+        // and resolveHotelLocation() (used project-wide for the city/state/
+        // country part) never touches the street address itself.
+        const hotelAddressLine = (h) => {
+          const loc = resolveHotelLocation(h);
+          const countryLabel = getSystemCountryName(loc.country.code) || loc.country.name;
+          return [h.address, loc.city, loc.state, countryLabel].filter(Boolean).join(", ");
+        };
+        // One combined list, no Directly Added / Additionally Mapped split —
+        // a hotel could technically land in both (its own home city already
+        // is this city, but it was also separately checked on the Map
+        // screen), so dedupe by id rather than risk listing it twice.
+        const seenHotelIds = new Set();
+        const hotels = [...direct, ...mapped].filter((h) => {
+          if (seenHotelIds.has(h.id)) return false;
+          seenHotelIds.add(h.id);
+          return true;
+        });
+        summaryList.innerHTML = `
       <div class="history-entry">
-        <div class="history-entry-label">${label}</div>
+        <div class="history-entry-label">Mapped Hotels</div>
         <div class="history-card">
           <table>
             <tbody>
@@ -442,29 +461,71 @@
                     : '<span class="text-not-mapped">Not mapped</span>'
                 }</td>
               </tr>
-              ${
-                hotels.length
-                  ? `
-              <tr>
-                <td class="history-row-label">Hotels</td>
-                <td class="history-row-sep">:</td>
-                <td class="history-row-value">${hotels
-                  .map((h) => `${h.name} — ID: ${getSystemHotelDisplayId(h.id)}`)
-                  .join("<br>")}</td>
-              </tr>`
-                  : ""
-              }
             </tbody>
           </table>
+          ${
+            hotels.length
+              ? `
+          <table class="summary-list-table">
+            <thead>
+              <tr>
+                <th class="summary-list-num">#</th>
+                <th>Hotel</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${hotels
+                .map(
+                  (h, i) => `
+              <tr>
+                <td class="summary-list-num">${i + 1}</td>
+                <td>
+                  <div class="summary-list-name">${h.name}</div>
+                  <div class="summary-list-meta">ID: ${getSystemHotelDisplayId(h.id)} — ${hotelAddressLine(h)}</div>
+                </td>
+              </tr>`
+                )
+                .join("")}
+            </tbody>
+          </table>`
+              : ""
+          }
         </div>
       </div>`;
-        summaryList.innerHTML = hotelGroupCard("Directly Added Hotels", direct) + hotelGroupCard("Additionally Mapped Hotels", mapped);
         openModal(document.getElementById("summaryModal"));
         return;
       }
 
       const rows =
         record.cityType === "merged" ? getCityMappingSummary(record.mergedFrom) : getCityMappingSummary(record.id);
+      // Same numbered-table row shape as .summary-list-table above, reused
+      // here for system-city rows (Merged System Cities) and supplier-city
+      // rows (each supplier's Mapped Cities) — a bold name/label on top, a
+      // muted state/country/ID line underneath, one clearly-bordered row
+      // per entry instead of a single <br>-joined line.
+      const summaryListTableHtml = (columnLabel, items) => `
+      <table class="summary-list-table">
+        <thead>
+          <tr>
+            <th class="summary-list-num">#</th>
+            <th>${columnLabel}</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${items
+            .map(
+              (item, i) => `
+          <tr>
+            <td class="summary-list-num">${i + 1}</td>
+            <td>
+              <div class="summary-list-name">${item.name}</div>
+              <div class="summary-list-meta">${item.meta}</div>
+            </td>
+          </tr>`
+            )
+            .join("")}
+        </tbody>
+      </table>`;
       const mergedCitiesCard =
         record.cityType === "merged"
           ? `
@@ -476,12 +537,22 @@
               <tr>
                 <td class="history-row-label">Cities</td>
                 <td class="history-row-sep">:</td>
-                <td class="history-row-value">${record.mergedFrom
-                  .map((id) => `${getSystemCityLabel(id)} — ID: ${getSystemCityDisplayId(id)}`)
-                  .join("<br>")}</td>
+                <td class="history-row-value"><span class="text-mapped">${record.mergedFrom.length}</span></td>
               </tr>
             </tbody>
           </table>
+          ${summaryListTableHtml(
+            "City",
+            record.mergedFrom
+              .map((id) => SYSTEM_CITIES.find((c) => c.id === id))
+              .filter(Boolean)
+              .map((c) => ({
+                name: c.name,
+                meta: [c.state, getSystemCountryName(c.country.code) || c.country.name, `ID: ${getSystemCityDisplayId(c.id)}`]
+                  .filter(Boolean)
+                  .join(", "),
+              }))
+          )}
         </div>
       </div>`
           : "";
@@ -502,20 +573,19 @@
                     : '<span class="text-not-mapped">Not mapped</span>'
                 }</td>
               </tr>
-              ${
-                r.mapped
-                  ? `
-              <tr>
-                <td class="history-row-label">Mapped Cities</td>
-                <td class="history-row-sep">:</td>
-                <td class="history-row-value">${r.cities
-                  .map((city) => `${city.name}${city.state ? `, ${city.state}` : ""} (${city.countryCode}) — ID: ${city.id}`)
-                  .join("<br>")}</td>
-              </tr>`
-                  : ""
-              }
             </tbody>
           </table>
+          ${
+            r.mapped
+              ? summaryListTableHtml(
+                  "City",
+                  r.cities.map((city) => ({
+                    name: city.name,
+                    meta: [city.state, city.countryCode, `ID: ${city.id}`].filter(Boolean).join(", "),
+                  }))
+                )
+              : ""
+          }
         </div>
       </div>`
         )
