@@ -948,7 +948,7 @@ table.data-table {
    inner .truncatable--* elements), this table's Country Name/System Country
    columns need to reliably fill whatever real space is left after the ID/
    Action columns, at any viewport width — a px guess on the inner element
-   can't track that (see .truncatable--name's own history below). Explicit
+   can't track that (see .truncatable--cell-text's own history below). Explicit
    percentage widths on every <th> (country-supplier.html) plus
    table-layout:fixed make column widths deterministic and responsive
    instead of content-driven, so a percentage on the inner elements now means
@@ -979,6 +979,55 @@ table.data-table {
 #countryTable {
   table-layout: fixed;
   min-width: 800px;
+}
+
+/* Same table-layout:fixed + percentage-<th> + table-level min-width
+   principle again, applied to city-system.html's own 6-column table
+   (ID/Name/State/Country/Status/Action). Action's button count varies by
+   row (c.cityType): 6 for a prepopulated city, 5 for "normal", 4 for
+   "merged" — sized for the worst case, 6 buttons, which needs ~262px
+   (32px/button + gaps + cell padding). 950px (this page's own real
+   available table-wrap width is ~954px, same as country-system.html/
+   country-supplier.html's) keeps that fitting inside Action's 29% share
+   (~275px) without forcing horizontal scroll on an ordinary-width window —
+   a bigger min-width than the real available space would force a
+   scrollbar unconditionally, which is exactly what min-width is supposed
+   to prevent, not cause. */
+#cityTable {
+  table-layout: fixed;
+  min-width: 950px;
+}
+
+/* "Show full values" toggle (matching hotel-system.html's #hotelTable copy)
+   for city-system.html — but this table's default state is table-layout:
+   fixed (unlike hotel-system.html's own table-layout:auto), specifically so
+   columns can't grow/wrap from content. Revealing values fundamentally
+   needs the opposite — columns growing to fit whatever's inside — so
+   .reveal-values also switches this one table back to table-layout:auto
+   for as long as the toggle is on; .table-wrap's own overflow:auto scrolls
+   horizontally if that makes the table wider than its container, same
+   fallback every other wide table in this project already uses. */
+#cityTable.reveal-values {
+  table-layout: auto;
+}
+
+#cityTable.reveal-values .truncatable {
+  mask-image: none !important;
+  -webkit-mask-image: none !important;
+  width: auto !important;
+  max-width: none !important;
+  overflow: visible;
+}
+
+/* .city-name-cell/.system-country-cell (not .truncatable itself) are what
+   actually constrain the Name/Country cells' flex children — relaxing just
+   the .truncatable rule above isn't enough to let these two cells grow in
+   reveal mode, since flex items still shrink to fit a flex container whose
+   own width is unset otherwise. Same reasoning as #hotelTable.reveal-values
+   .supplier-hotel-cell's own copy of this rule. */
+#cityTable.reveal-values .city-name-cell,
+#cityTable.reveal-values .system-country-cell {
+  width: auto !important;
 }
 
 .truncatable {
@@ -1034,18 +1083,19 @@ table.data-table {
   width: 100px;
 }
 
-/* Shared by country-supplier.html's Country Name column and
-   country-system.html's Name column. Unlike every other .truncatable--*
-   column, this one IS a percentage (100%) rather than a literal px — safe
-   here specifically because both tables (#supplierCountryTable,
-   #countryTable) are table-layout:fixed with explicit percentage <th>
-   widths (see those rules), so this column's real width is already
-   deterministic and responsive; 100% just means "fill it," instead of
-   asking auto-layout to size the column from content (which is what forced
-   every fixed-px guess here — 170px, then 300px — to either fade well
-   short of the column's real edge or, unclamped, let one long value grow
-   the whole table). */
-.truncatable--name {
+/* Generic "fill this fixed-layout column" single-line value — shared by
+   country-supplier.html's Country Name column, country-system.html's Name
+   column, and city-system.html's Name/State columns. Unlike every other
+   .truncatable--* column, this one IS a percentage (100%) rather than a
+   literal px — safe here specifically because each of those tables
+   (#supplierCountryTable, #countryTable, #cityTable) is table-layout:fixed
+   with explicit percentage <th> widths (see those rules), so this column's
+   real width is already deterministic and responsive; 100% just means
+   "fill it," instead of asking auto-layout to size the column from content
+   (which is what forced every fixed-px guess here — 170px, then 300px — to
+   either fade well short of the column's real edge or, unclamped, let one
+   long value grow the whole table). */
+.truncatable--cell-text {
   width: 100%;
 }
 
@@ -1087,21 +1137,24 @@ table.data-table {
   width: 100%;
 }
 
-/* Sits beside a preceding code-badge (the system country's code) inside
+/* Sits beside a preceding code-badge (a country's code) inside
    .system-country-cell's flex row, same icon(badge)+flex-text shape as
    .supplier-hotel-text/.location-text below — flex:1 fills whatever's left
-   next to the badge (the column itself is already capped by
-   #supplierCountryTable's table-layout:fixed), min-width:0 is required for
-   a flex item to actually shrink below its content's natural width instead
-   of overflowing the row before overflow:hidden/the fade can kick in. */
+   next to the badge (the column itself is already capped by its table's own
+   table-layout:fixed), min-width:0 is required for a flex item to actually
+   shrink below its content's natural width instead of overflowing the row
+   before overflow:hidden/the fade can kick in. Shared by
+   country-supplier.html's System Country column and city-system.html's
+   Country column. */
 .truncatable--country {
   flex: 1;
   min-width: 0;
 }
 
-/* Icon(badge)+flex-text row for country-supplier.html's System Country
-   column — badge stays its own natural size, .truncatable--country (above)
-   fills the rest and fades at this row's real right edge. */
+/* Icon(badge)+flex-text row shared by country-supplier.html's System
+   Country column and city-system.html's Country column — badge stays its
+   own natural size, .truncatable--country (above) fills the rest and fades
+   at this row's real right edge. */
 .system-country-cell {
   display: flex;
   align-items: center;
@@ -1109,8 +1162,28 @@ table.data-table {
   width: 100%;
 }
 
+/* Flex row for city-system.html's Name column: the fading name
+   (.truncatable--cell-text, given flex:1/min-width:0 in this context, same
+   mechanism as .truncatable--country above) plus its optional trailing
+   city-type pill (.city-type-badge) as a fixed-size sibling — keeps the
+   pill outside the fading box (never itself clipped) and beside the name
+   instead of wrapping onto its own line, since a block-level 100%-width
+   .truncatable--cell-text alone would push it below instead of beside. */
+.city-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+
+.city-name-cell .truncatable--cell-text {
+  flex: 1;
+  min-width: 0;
+}
+
 /* Shared by any .code-badge-wrapped value column in a table-layout:fixed
-   table (country-supplier.html's Country ID, country-system.html's Code):
+   table (country-supplier.html's Country ID, country-system.html's Code,
+   city-system.html's ID):
    stays wrapped in .code-badge's snug pill shape for the overwhelmingly
    common short value (e.g. "AG-US-001", "US") — max-width (not width) only
    kicks in the cap, and therefore the fade, for a rare abnormally long

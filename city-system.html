@@ -178,6 +178,10 @@
               Reset
             </button>
             <a class="btn btn-primary" href="add-city.html" target="_blank" rel="noopener">+ Add City</a>
+            <label class="toggle-row" for="cityRevealValuesToggle" style="margin-bottom:0;">
+              <input type="checkbox" id="cityRevealValuesToggle" />
+              Show full values
+            </label>
           </div>
         </div>
 
@@ -185,12 +189,12 @@
           <table class="data-table" id="cityTable">
             <thead>
               <tr>
-                <th style="width:1%">ID</th>
-                <th style="width:18%">Name</th>
-                <th style="width:12%">State</th>
-                <th style="width:16%">Country</th>
-                <th style="width:12%">Status</th>
-                <th style="width:1%">Action</th>
+                <th style="width:15%">ID</th>
+                <th style="width:13%">Name</th>
+                <th style="width:13%">State</th>
+                <th style="width:20%">Country</th>
+                <th style="width:10%">Status</th>
+                <th style="width:29%">Action</th>
               </tr>
             </thead>
             <tbody>
@@ -283,6 +287,8 @@
   const tbody = document.querySelector("#cityTable tbody");
   const paginationBar = document.getElementById("paginationBar");
   const citySearch = document.getElementById("citySearch");
+  const cityTableEl = document.getElementById("cityTable");
+  const revealValuesToggle = document.getElementById("cityRevealValuesToggle");
 
   let state = { page: 1, pageSize: 10, query: "", country: "", cityState: "", status: "all" };
 
@@ -309,10 +315,20 @@
           .map(
             (c) => `
       <tr data-row-id="${c.id}">
-        <td style="white-space:nowrap"><span class="code-badge">${getSystemCityDisplayId(c.id)}</span></td>
-        <td data-col="name">${c.name}${c.cityType ? ` <span class="pill city-type-badge ${c.cityType === "merged" ? "info" : "neutral"}" aria-label="${c.cityType === "merged" ? "Merged" : "New"}">${c.cityType === "merged" ? "M" : "N"}</span>` : ""}</td>
-        <td>${c.state ? c.state : '<span style="color:var(--text-muted)">—</span>'}</td>
-        <td><span class="code-badge">${c.country.code}</span> ${getSystemCountryName(c.country.code) || c.country.name}</td>
+        <td style="white-space:nowrap"><div class="code-badge truncatable truncatable--badge-value" title="${getSystemCityDisplayId(c.id)}"><span class="truncatable-text">${getSystemCityDisplayId(c.id)}</span></div></td>
+        <td data-col="name">
+          <div class="city-name-cell">
+            <div class="truncatable truncatable--cell-text" title="${c.name}"><span class="truncatable-text">${c.name}</span></div>
+            ${c.cityType ? `<span class="pill city-type-badge ${c.cityType === "merged" ? "info" : "neutral"}" aria-label="${c.cityType === "merged" ? "Merged" : "New"}">${c.cityType === "merged" ? "M" : "N"}</span>` : ""}
+          </div>
+        </td>
+        <td>${c.state ? `<div class="truncatable truncatable--cell-text" title="${c.state}"><span class="truncatable-text">${c.state}</span></div>` : '<span style="color:var(--text-muted)">—</span>'}</td>
+        <td>
+          <div class="system-country-cell">
+            <span class="code-badge">${c.country.code}</span>
+            <span class="truncatable truncatable--country" title="${getSystemCountryName(c.country.code) || c.country.name}"><span class="truncatable-text">${getSystemCountryName(c.country.code) || c.country.name}</span></span>
+          </div>
+        </td>
         <td><span class="pill ${c.active ? "success" : "danger"}">${c.active ? "Active" : "Inactive"}</span></td>
         <td>
           <div class="row-actions">
@@ -369,7 +385,24 @@
         render();
       },
     });
+
+    refreshValueOverflowState();
   }
+
+  // Re-measures every .truncatable cell after each render() — only cells
+  // whose content genuinely doesn't fit their column get .is-overflowing
+  // (and therefore the fade via CSS), same mechanism as
+  // country-system.html's own copy of this function.
+  function refreshValueOverflowState() {
+    document.querySelectorAll("#cityTable .truncatable").forEach((el) => {
+      el.classList.toggle("is-overflowing", el.scrollWidth > el.clientWidth + 1);
+    });
+  }
+
+  revealValuesToggle.addEventListener("change", () => {
+    cityTableEl.classList.toggle("reveal-values", revealValuesToggle.checked);
+    refreshValueOverflowState();
+  });
 
   const runSearch = debounce(() => {
     state.query = citySearch.value;
