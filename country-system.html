@@ -163,8 +163,16 @@
           <div class="toolbar-controls">
             <div class="toolbar-search">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-              <input type="text" id="countrySearch" placeholder="Search by name or code..." />
+              <input type="text" id="countryNameSearch" placeholder="Search by name..." />
             </div>
+            <div class="toolbar-search">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              <input type="text" id="countryCodeSearch" placeholder="Search by code..." />
+            </div>
+            <button class="btn btn-primary" id="countrySearchBtn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#fff" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+              Search
+            </button>
             <button class="btn btn-danger" id="resetCountryFilterBtn">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 109-9 9 9 0 00-7 3.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3 3.5V8h4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
               Reset
@@ -304,15 +312,18 @@
 
   const tbody = document.querySelector("#countryTable tbody");
   const paginationBar = document.getElementById("paginationBar");
-  const searchInput = document.getElementById("countrySearch");
+  const nameSearchInput = document.getElementById("countryNameSearch");
+  const codeSearchInput = document.getElementById("countryCodeSearch");
 
-  let state = { page: 1, pageSize: 10, query: "" };
+  let state = { page: 1, pageSize: 10, nameQuery: "", codeQuery: "" };
 
   function getFiltered() {
-    const q = state.query.trim().toLowerCase();
-    if (!q) return countries;
+    const nameQ = state.nameQuery.trim().toLowerCase();
+    const codeQ = state.codeQuery.trim().toLowerCase();
     return countries.filter(
-      (c) => c.name.toLowerCase().includes(q) || c.code.toLowerCase().includes(q)
+      (c) =>
+        (!nameQ || c.name.toLowerCase().includes(nameQ)) &&
+        (!codeQ || c.code.toLowerCase().includes(codeQ))
     );
   }
 
@@ -366,16 +377,31 @@
     });
   }
 
-  const runSearch = debounce(() => {
-    state.query = searchInput.value;
+  // Typing alone never re-queries the table — only Search (or Enter in
+  // either box) or Reset does, so a half-typed query never flashes a
+  // filtered/empty list.
+  function runSearchNow() {
+    state.nameQuery = nameSearchInput.value;
+    state.codeQuery = codeSearchInput.value;
     state.page = 1;
     render();
-  });
-  searchInput.addEventListener("input", runSearch);
+  }
+
+  function onEnterKey(input, handler) {
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") handler();
+    });
+  }
+
+  document.getElementById("countrySearchBtn").addEventListener("click", runSearchNow);
+  onEnterKey(nameSearchInput, runSearchNow);
+  onEnterKey(codeSearchInput, runSearchNow);
 
   document.getElementById("resetCountryFilterBtn").addEventListener("click", () => {
-    searchInput.value = "";
-    state.query = "";
+    nameSearchInput.value = "";
+    codeSearchInput.value = "";
+    state.nameQuery = "";
+    state.codeQuery = "";
     state.page = 1;
     render();
   });
