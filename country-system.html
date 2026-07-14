@@ -135,15 +135,15 @@
         <ul>
           <li><strong>Code is permanent</strong> — set once when the country is added, never editable, and it's what everything else should key off. Only the name can change.</li>
           <li><strong>Edit</strong> — renaming must never break an existing mapping. Either mappings are keyed by the permanent code, or the rename updates every existing mapping in the same step. Empty names must be rejected with a clear error.</li>
-          <li><strong>Map</strong> — for each supplier, show either the country(ies) already mapped here (with Unmap), or a picker of that supplier's own countries (with Map). In the picker, any option already mapped to a different country must be labeled with its current target (e.g. "Deutschland (DE) — mapped to Austria") so that's visible before it's picked, not just after. Picking an already-mapped-elsewhere option must show old vs. new and require explicit confirmation before applying — never silent. Logged as a <strong>Remap</strong> (see History below), not a plain Map.</li>
+          <li><strong>Map</strong> — for each supplier, show either the country(ies) already mapped here (with Unmap), or a picker of that supplier's own countries (with Map). A supplier country only ever has a name and its own ID — never an ISO/system code, which is purely an internal join key and must never be displayed as if the supplier provided it. In the picker, any option already mapped to a different country must be labeled with its current target (e.g. "Deutschland (AG-DE-021) — mapped to Austria") so that's visible before it's picked, not just after. Picking an already-mapped-elsewhere option must show old vs. new and require explicit confirmation before applying — never silent. Logged as a <strong>Remap</strong> (see History below), not a plain Map.</li>
           <li><strong>History</strong> — every entry has three parts: an <strong>operation name</strong>, a <strong>description</strong> in that operation's fixed pattern, and <strong>who + when</strong>. Logged the instant the change happens (never reconstructed later by comparing snapshots), newest entry first. A mapping change always writes to <strong>two</strong> records — the country's own history AND the affected supplier country's own history — no matter which screen made the change.
             <p>When a description needs to show more than one distinct fact — e.g. who made the change, and separately what it changed from/to — separate the facts with a single pipe character <code>|</code>. The history view splits on <code>|</code> and puts each part on its own line, so a card stays easy to scan instead of one dense run-on sentence. Only insert <code>|</code> between genuinely distinct facts, and never for any other purpose — it's reserved as the line-break marker.</p>
             <p><strong>On the country's own record:</strong></p>
             <ul>
               <li><strong>Edit</strong> — the name was changed. Description: <em>Name: {old name} -&gt; {new name}</em></li>
-              <li><strong>Map</strong> — a supplier's country became linked to this country for the first time (it had no country before). Description: <em>{Supplier} — {supplier's country name} ({code}) — ID: {supplier's country ID}</em></li>
-              <li><strong>Unmap</strong> — a supplier's country that was linked to this country got unlinked entirely, with nothing put in its place. Description: <em>{Supplier} — {supplier's country name} ({code}) — ID: {supplier's country ID}</em></li>
-              <li><strong>Remap</strong> — a supplier's country moved between two countries. Both the country it left and the country it moved to log this as one Remap event, never as Unmap on one and Map on the other — and both log the exact same description, so either country's history is understandable on its own. Description: <em>{Supplier} — {supplier's country name} ({code}) — ID: {supplier's country ID}|{old country} ({code}) -&gt; {new country} ({code})</em> (two lines: who, then what changed)</li>
+              <li><strong>Map</strong> — a supplier's country became linked to this country for the first time (it had no country before). Description: <em>{Supplier} — {supplier's country name} — ID: {supplier's country ID}</em></li>
+              <li><strong>Unmap</strong> — a supplier's country that was linked to this country got unlinked entirely, with nothing put in its place. Description: <em>{Supplier} — {supplier's country name} — ID: {supplier's country ID}</em></li>
+              <li><strong>Remap</strong> — a supplier's country moved between two countries. Both the country it left and the country it moved to log this as one Remap event, never as Unmap on one and Map on the other — and both log the exact same description, so either country's history is understandable on its own. Description: <em>{Supplier} — {supplier's country name} — ID: {supplier's country ID}|{old country} ({code}) -&gt; {new country} ({code})</em> (two lines: who, then what changed)</li>
             </ul>
             <p><strong>On the supplier's own country record</strong> (the matching entry for the same event, from its side — always Map/Remap/Unmap, never Edit/Create, which are reserved for renaming a country, not a mapping change):</p>
             <ul>
@@ -184,9 +184,9 @@
           <table class="data-table" id="countryTable">
             <thead>
               <tr>
-                <th style="width:1%">Code</th>
-                <th>Name</th>
-                <th style="width:1%">Action</th>
+                <th style="width:15%">Code</th>
+                <th style="width:55%">Name</th>
+                <th style="width:30%">Action</th>
               </tr>
             </thead>
             <tbody>
@@ -339,8 +339,8 @@
           .map(
             (c) => `
       <tr data-row-id="${c.id}">
-        <td data-col="code"><span class="code-badge">${c.code}</span></td>
-        <td data-col="name">${c.name}</td>
+        <td data-col="code"><div class="code-badge truncatable truncatable--badge-value" title="${c.code}"><span class="truncatable-text">${c.code}</span></div></td>
+        <td data-col="name"><div class="truncatable truncatable--name" title="${c.name}"><span class="truncatable-text">${c.name}</span></div></td>
         <td>
           <div class="row-actions">
             <button class="action-btn" data-modal-target="#editCountryModal" aria-label="Edit ${c.name}">
@@ -374,6 +374,18 @@
         state.pageSize = pageSize;
         render();
       },
+    });
+
+    refreshValueOverflowState();
+  }
+
+  // Re-measures every .truncatable cell after each render() — only cells
+  // whose content genuinely doesn't fit their column get .is-overflowing
+  // (and therefore the fade via CSS), same mechanism as
+  // country-supplier.html's own copy of this function.
+  function refreshValueOverflowState() {
+    document.querySelectorAll("#countryTable .truncatable").forEach((el) => {
+      el.classList.toggle("is-overflowing", el.scrollWidth > el.clientWidth + 1);
     });
   }
 
@@ -547,7 +559,7 @@
   function applyCountryMapping(supplierKey, row, newSystemCountry) {
     const oldValue = row.systemCountry;
     if (oldValue === newSystemCountry) return;
-    const supplierCountryLabel = `${SUPPLIER_LABELS[supplierKey]} — ${row.name} (${row.code}) — ID: ${row.supplierId}`;
+    const supplierCountryLabel = `${SUPPLIER_LABELS[supplierKey]} — ${row.name} — ID: ${row.supplierId}`;
 
     row.systemCountry = newSystemCountry;
     row.history.push({
@@ -620,7 +632,7 @@
                 (r) => `
           <div class="merge-list-item">
             <span class="meta">
-              <span>${r.name} <span class="code-badge">${r.code}</span></span>
+              <span>${r.name}</span>
               <span class="sub">${r.supplierId}</span>
             </span>
             <button class="btn btn-secondary" data-unmap-country-supplier="${key}" data-unmap-country-id="${r.id}">Unmap</button>
@@ -634,7 +646,7 @@
                 ${rows
                   .map(
                     (r) =>
-                      `<option value="${r.id}">${r.name} (${r.code})${
+                      `<option value="${r.id}">${r.name} (${r.supplierId})${
                         r.systemCountry ? ` — mapped to ${r.systemCountry}` : ""
                       }</option>`
                   )
@@ -684,7 +696,7 @@
           const mappedElsewhere = row.systemCountry;
           showConfirm(
             `
-            <div class="remap-subject"><strong>${row.name}</strong> <span class="code-badge">${row.code}</span> is already mapped. Remap it?</div>
+            <div class="remap-subject"><strong>${row.name}</strong> <span class="code-badge">${row.supplierId}</span> is already mapped. Remap it?</div>
             <div class="remap-compare">
               <div class="remap-box">
                 <div class="remap-box-label">Currently mapped to</div>

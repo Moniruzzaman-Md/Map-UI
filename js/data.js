@@ -56,8 +56,8 @@ SYSTEM_COUNTRIES[0].history.push(
   // seeded "Create" entries below (same users/timestamps), viewed from the
   // system country's side — see SYSTEM_CITIES' matching comment above for
   // why this demo needs both sides pre-seeded rather than created live.
-  { operation: "Map", description: "Agoda — United States (US) — ID: AG-US-001", userName: "Farhan Ahmed", userEmail: "farhan.ahmed@mynztrip.com", timestamp: new Date("2026-06-18T09:12:00") },
-  { operation: "Map", description: "HotelBeds — USA (US) — ID: HB_USA", userName: "Rafiul Karim", userEmail: "rafiul.karim@mynztrip.com", timestamp: new Date("2026-06-25T15:30:00") }
+  { operation: "Map", description: "Agoda — United States — ID: AG-US-001", userName: "Farhan Ahmed", userEmail: "farhan.ahmed@mynztrip.com", timestamp: new Date("2026-06-18T09:12:00") },
+  { operation: "Map", description: "HotelBeds — USA — ID: HB_USA", userName: "Rafiul Karim", userEmail: "rafiul.karim@mynztrip.com", timestamp: new Date("2026-06-25T15:30:00") }
 );
 SYSTEM_COUNTRIES[4].history.push(
   { operation: "Edit", name: "India", description: "Name: Bharat -> India", userName: "Rafiul Karim", userEmail: "rafiul.karim@mynztrip.com", timestamp: new Date("2026-05-30T11:05:00") }
@@ -930,7 +930,7 @@ supplierCities.agoda[9].systemCityId = 1; // final state must match the "Map" en
   SYSTEM_CITIES[1].history.push(
     {
       operation: "Remap",
-      description: `${SUPPLIER_LABELS.agoda} — ${torontoRow.name} (${torontoRow.countryCode}) — ID: ${torontoRow.id}${HISTORY_LINE_BREAK}${laLabel} -> ${torontoLabel}`,
+      description: `${SUPPLIER_LABELS.agoda} — ${torontoRow.name} — ID: ${torontoRow.id}${HISTORY_LINE_BREAK}${laLabel} -> ${torontoLabel}`,
       userName,
       userEmail,
       timestamp,
@@ -938,7 +938,7 @@ supplierCities.agoda[9].systemCityId = 1; // final state must match the "Map" en
     },
     {
       operation: "Map",
-      description: `${SUPPLIER_LABELS.agoda} — ${freshRow.name} (${freshRow.countryCode}) — ID: ${freshRow.id}`,
+      description: `${SUPPLIER_LABELS.agoda} — ${freshRow.name} — ID: ${freshRow.id}`,
       userName,
       userEmail,
       timestamp,
@@ -946,7 +946,7 @@ supplierCities.agoda[9].systemCityId = 1; // final state must match the "Map" en
     },
     {
       operation: "Unmap",
-      description: `${SUPPLIER_LABELS.agoda} — ${removedRow.name} (${removedRow.countryCode}) — ID: ${removedRow.id}`,
+      description: `${SUPPLIER_LABELS.agoda} — ${removedRow.name} — ID: ${removedRow.id}`,
       userName,
       userEmail,
       timestamp,
@@ -955,7 +955,7 @@ supplierCities.agoda[9].systemCityId = 1; // final state must match the "Map" en
   );
   SYSTEM_CITIES[10].history.push({
     operation: "Remap",
-    description: `${SUPPLIER_LABELS.agoda} — ${torontoRow.name} (${torontoRow.countryCode}) — ID: ${torontoRow.id}${HISTORY_LINE_BREAK}${laLabel} -> ${torontoLabel}`,
+    description: `${SUPPLIER_LABELS.agoda} — ${torontoRow.name} — ID: ${torontoRow.id}${HISTORY_LINE_BREAK}${laLabel} -> ${torontoLabel}`,
     userName,
     userEmail,
     timestamp,
@@ -999,7 +999,7 @@ function applyMapping(supplierKey, row, newSystemCityId, groupId) {
   if (oldId === newSystemCityId) return;
   const oldLabel = oldId !== null && oldId !== undefined ? getSystemCityHistoryLabel(oldId) : null;
   const newLabel = newSystemCityId !== null ? getSystemCityHistoryLabel(newSystemCityId) : null;
-  const supplierCityLabel = `${SUPPLIER_LABELS[supplierKey]} — ${row.name} (${row.countryCode}) — ID: ${row.id}`;
+  const supplierCityLabel = `${SUPPLIER_LABELS[supplierKey]} — ${row.name} — ID: ${row.id}`;
   const isRemap = Boolean(oldLabel) && Boolean(newLabel);
   const resolvedGroupId = groupId || generateHistoryGroupId();
   const timestamp = new Date();

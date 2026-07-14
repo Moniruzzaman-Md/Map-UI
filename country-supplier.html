@@ -143,9 +143,9 @@
             </ul>
             <p><strong>On the matching master-list country's own record</strong> (the same event, from its side — always Map/Remap/Unmap, never Edit/Create, which are reserved for renaming a country, not a mapping change):</p>
             <ul>
-              <li><strong>Map</strong> — this supplier's country became linked to it for the first time (it had no country before). Description: <em>{Supplier} — {supplier's country name} ({code}) — ID: {supplier's country ID}</em></li>
-              <li><strong>Unmap</strong> — this supplier's country got unlinked entirely, with nothing put in its place. Description: <em>{Supplier} — {supplier's country name} ({code}) — ID: {supplier's country ID}</em></li>
-              <li><strong>Remap</strong> — this supplier's country moved between two countries. Both the country it left and the country it moved to log this as one Remap event, never as Unmap on one and Map on the other — and both log the exact same description, so either country's history is understandable on its own. Description: <em>{Supplier} — {supplier's country name} ({code}) — ID: {supplier's country ID}|{old country} ({code}) -&gt; {new country} ({code})</em> (two lines: who, then what changed)</li>
+              <li><strong>Map</strong> — this supplier's country became linked to it for the first time (it had no country before). Description: <em>{Supplier} — {supplier's country name} — ID: {supplier's country ID}</em></li>
+              <li><strong>Unmap</strong> — this supplier's country got unlinked entirely, with nothing put in its place. Description: <em>{Supplier} — {supplier's country name} — ID: {supplier's country ID}</em></li>
+              <li><strong>Remap</strong> — this supplier's country moved between two countries. Both the country it left and the country it moved to log this as one Remap event, never as Unmap on one and Map on the other — and both log the exact same description, so either country's history is understandable on its own. Description: <em>{Supplier} — {supplier's country name} — ID: {supplier's country ID}|{old country} ({code}) -&gt; {new country} ({code})</em> (two lines: who, then what changed)</li>
             </ul>
           </li>
           <li><strong>View Cities</strong> — jumps to this supplier's city list, filtered to this country.</li>
@@ -156,20 +156,26 @@
       <section class="content-card">
         <div class="card-toolbar">
           <div class="toolbar-controls">
+            <select class="filter-select" id="supplierFilter">
+              <option value="">Select Supplier</option>
+            </select>
             <div class="toolbar-search">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-              <input type="text" id="countrySearch" placeholder="Search by country name or ID..." disabled />
+              <input type="text" id="supplierCountryNameSearch" placeholder="Search by country name..." disabled />
             </div>
-            <div class="toolbar-filters">
-              <select class="filter-select" id="supplierFilter">
-                <option value="">Select Supplier</option>
-              </select>
-              <select class="filter-select" id="mappedFilter" disabled>
-                <option value="all">All</option>
-                <option value="mapped">Mapped</option>
-                <option value="unmapped">Unmapped</option>
-              </select>
+            <div class="toolbar-search">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              <input type="text" id="supplierCountryIdSearch" placeholder="Search by ID..." disabled />
             </div>
+            <select class="filter-select" id="mappedFilter" disabled>
+              <option value="all">All</option>
+              <option value="mapped">Mapped</option>
+              <option value="unmapped">Unmapped</option>
+            </select>
+            <button class="btn btn-primary" id="supplierCountrySearchBtn" disabled>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#fff" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+              Search
+            </button>
             <button class="btn btn-danger" id="resetSupplierCountryFilterBtn">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 109-9 9 9 0 00-7 3.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3 3.5V8h4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
               Reset
@@ -181,10 +187,10 @@
           <table class="data-table" id="supplierCountryTable">
             <thead>
               <tr>
-                <th style="width:1%">Country ID</th>
-                <th>Country Name</th>
-                <th>System Country</th>
-                <th style="width:1%">Action</th>
+                <th style="width:14%">Country ID</th>
+                <th style="width:38%">Country Name</th>
+                <th style="width:32%">System Country</th>
+                <th style="width:16%">Action</th>
               </tr>
             </thead>
             <tbody>
@@ -294,17 +300,21 @@
       .join("")
   );
   const mappedFilter = document.getElementById("mappedFilter");
-  const countrySearch = document.getElementById("countrySearch");
+  const nameSearchInput = document.getElementById("supplierCountryNameSearch");
+  const idSearchInput = document.getElementById("supplierCountryIdSearch");
+  const searchBtn = document.getElementById("supplierCountrySearchBtn");
 
-  let state = { page: 1, pageSize: 10, supplier: "", mapped: "all", query: "" };
+  let state = { page: 1, pageSize: 10, supplier: "", mapped: "all", nameQuery: "", idQuery: "" };
 
   function getFiltered() {
     if (!state.supplier) return [];
     let rows = supplierCountries[state.supplier] || [];
     if (state.mapped === "mapped") rows = rows.filter((r) => r.systemCountry);
     if (state.mapped === "unmapped") rows = rows.filter((r) => !r.systemCountry);
-    const q = state.query.trim().toLowerCase();
-    if (q) rows = rows.filter((r) => r.name.toLowerCase().includes(q) || r.supplierId.toLowerCase().includes(q));
+    const nameQ = state.nameQuery.trim().toLowerCase();
+    const idQ = state.idQuery.trim().toLowerCase();
+    if (nameQ) rows = rows.filter((r) => r.name.toLowerCase().includes(nameQ));
+    if (idQ) rows = rows.filter((r) => r.supplierId.toLowerCase().includes(idQ));
     return rows;
   }
 
@@ -326,11 +336,16 @@
           .map(
             (r) => `
       <tr>
-        <td style="white-space:nowrap"><span class="code-badge">${r.supplierId}</span></td>
-        <td>${r.name}</td>
+        <td style="white-space:nowrap">
+          <div class="code-badge truncatable truncatable--badge-value" title="${r.supplierId}"><span class="truncatable-text">${r.supplierId}</span></div>
+        </td>
+        <td><div class="truncatable truncatable--name" title="${r.name}"><span class="truncatable-text">${r.name}</span></div></td>
         <td>${
           r.systemCountry
-            ? `<span class="code-badge">${SYSTEM_COUNTRY_CODES[r.systemCountry] || "-"}</span> ${r.systemCountry}`
+            ? `<div class="system-country-cell">
+                 <span class="code-badge">${SYSTEM_COUNTRY_CODES[r.systemCountry] || "-"}</span>
+                 <span class="truncatable truncatable--country" title="${r.systemCountry}"><span class="truncatable-text">${r.systemCountry}</span></span>
+               </div>`
             : '<span class="text-not-mapped">Not mapped</span>'
         }</td>
         <td>
@@ -361,16 +376,32 @@
         render();
       },
     });
+
+    refreshValueOverflowState();
+  }
+
+  // Re-measures every .truncatable cell after each render() — only cells
+  // whose content genuinely doesn't fit their capped width get
+  // .is-overflowing (and therefore the fade via CSS), same mechanism as
+  // hotel-system.html/hotel-supplier.html's own copy of this function.
+  function refreshValueOverflowState() {
+    document.querySelectorAll("#supplierCountryTable .truncatable").forEach((el) => {
+      el.classList.toggle("is-overflowing", el.scrollWidth > el.clientWidth + 1);
+    });
   }
 
   supplierFilter.addEventListener("change", () => {
     state.supplier = supplierFilter.value;
     state.page = 1;
     mappedFilter.disabled = !state.supplier;
-    countrySearch.disabled = !state.supplier;
+    nameSearchInput.disabled = !state.supplier;
+    idSearchInput.disabled = !state.supplier;
+    searchBtn.disabled = !state.supplier;
     if (!state.supplier) {
-      state.query = "";
-      countrySearch.value = "";
+      state.nameQuery = "";
+      state.idQuery = "";
+      nameSearchInput.value = "";
+      idSearchInput.value = "";
       mappedFilter.value = "all";
       state.mapped = "all";
     }
@@ -383,16 +414,39 @@
     render();
   });
 
-  const runSearch = debounce(() => {
-    state.query = countrySearch.value;
+  // Typing alone never re-queries the table — only Search (or Enter in
+  // either box) does, so a half-typed query never flashes a filtered/empty
+  // list.
+  function runSearchNow() {
+    state.nameQuery = nameSearchInput.value;
+    state.idQuery = idSearchInput.value;
     state.page = 1;
     render();
-  });
-  countrySearch.addEventListener("input", runSearch);
+  }
 
+  function onEnterKey(input, handler) {
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") handler();
+    });
+  }
+
+  searchBtn.addEventListener("click", runSearchNow);
+  onEnterKey(nameSearchInput, runSearchNow);
+  onEnterKey(idSearchInput, runSearchNow);
+
+  // Reset only clears the search/mapped filters for the currently selected
+  // supplier — it deliberately leaves the Supplier dropdown alone (unlike
+  // before, when Reset cleared the supplier too), since the supplier is the
+  // one thing you'd otherwise have to re-pick from scratch.
   document.getElementById("resetSupplierCountryFilterBtn").addEventListener("click", () => {
-    supplierFilter.value = "";
-    supplierFilter.dispatchEvent(new Event("change"));
+    nameSearchInput.value = "";
+    idSearchInput.value = "";
+    mappedFilter.value = "all";
+    state.nameQuery = "";
+    state.idQuery = "";
+    state.mapped = "all";
+    state.page = 1;
+    render();
   });
 
   function currentRows() {
@@ -428,7 +482,7 @@
 
   function applySupplierCountryMapping(record, selected) {
     const oldValue = record.systemCountry;
-    const supplierCountryLabel = `${SUPPLIER_LABELS[state.supplier] || state.supplier} — ${record.name} (${record.code}) — ID: ${record.supplierId}`;
+    const supplierCountryLabel = `${SUPPLIER_LABELS[state.supplier] || state.supplier} — ${record.name} — ID: ${record.supplierId}`;
 
     record.systemCountry = selected;
     record.history.push({
@@ -520,7 +574,7 @@
     if (oldValue) {
       showConfirm(
         `
-        <div class="remap-subject"><strong>${record.name}</strong> <span class="code-badge">${record.code}</span> is already mapped. Remap it?</div>
+        <div class="remap-subject"><strong>${record.name}</strong> <span class="code-badge">${record.supplierId}</span> is already mapped. Remap it?</div>
         <div class="remap-compare">
           <div class="remap-box">
             <div class="remap-box-label">Currently mapped to</div>
@@ -563,7 +617,7 @@
 
         const oldCountry = SYSTEM_COUNTRIES.find((c) => c.name === oldValue);
         if (oldCountry) {
-          const supplierCountryLabel = `${SUPPLIER_LABELS[state.supplier] || state.supplier} — ${record.name} (${record.code}) — ID: ${record.supplierId}`;
+          const supplierCountryLabel = `${SUPPLIER_LABELS[state.supplier] || state.supplier} — ${record.name} — ID: ${record.supplierId}`;
           oldCountry.history.push({
             operation: "Unmap",
             description: supplierCountryLabel,

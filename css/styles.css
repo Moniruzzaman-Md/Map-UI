@@ -943,6 +943,44 @@ table.data-table {
   overflow: hidden;
 }
 
+/* Unlike every other table here (which relies on table-layout:auto + a
+   width:1% shrink-to-fit hack on its narrow columns, plus literal-px caps on
+   inner .truncatable--* elements), this table's Country Name/System Country
+   columns need to reliably fill whatever real space is left after the ID/
+   Action columns, at any viewport width — a px guess on the inner element
+   can't track that (see .truncatable--name's own history below). Explicit
+   percentage widths on every <th> (country-supplier.html) plus
+   table-layout:fixed make column widths deterministic and responsive
+   instead of content-driven, so a percentage on the inner elements now means
+   "fill this real column" rather than "let one long value grow it." */
+/* min-width on the <th>s themselves has no effect here — table-layout:fixed
+   sizes columns purely from each <th>'s own `width`, and Chromium/Firefox
+   both ignore a per-cell min-width (or max-width) as a floor once `width`
+   is specified, letting a column shrink arbitrarily thin (verified: a
+   column keeps shrinking past its stated per-th min-width as the browser
+   narrows). A min-width on the *table* itself works instead — it's a
+   normal block-level box, so this simply stops the table shrinking below
+   it — at which point .table-wrap's own overflow:auto (see that rule)
+   takes over with a horizontal scrollbar rather than every column being
+   squeezed to a sliver. 950px keeps the Action column's 3 icon buttons
+   (32px each + gaps, see .action-btn/.row-actions) comfortably on one
+   line at its 16% share, and the Country ID badge legible at its 14%. */
+#supplierCountryTable {
+  table-layout: fixed;
+  min-width: 950px;
+}
+
+/* Same table-layout:fixed + percentage-<th> + table-level min-width
+   principle as #supplierCountryTable above, applied to country-system.html's
+   own Code/Name/Action table (3 columns here, not 4 — no separate ID/System
+   Country split). Action gets a bigger share here (30%, vs.
+   #supplierCountryTable's 16%) since this table's row has 5 icon buttons
+   — Edit/Map/History/Summary/View Cities — instead of 3. */
+#countryTable {
+  table-layout: fixed;
+  min-width: 800px;
+}
+
 .truncatable {
   position: relative;
   overflow: hidden;
@@ -996,8 +1034,19 @@ table.data-table {
   width: 100px;
 }
 
+/* Shared by country-supplier.html's Country Name column and
+   country-system.html's Name column. Unlike every other .truncatable--*
+   column, this one IS a percentage (100%) rather than a literal px — safe
+   here specifically because both tables (#supplierCountryTable,
+   #countryTable) are table-layout:fixed with explicit percentage <th>
+   widths (see those rules), so this column's real width is already
+   deterministic and responsive; 100% just means "fill it," instead of
+   asking auto-layout to size the column from content (which is what forced
+   every fixed-px guess here — 170px, then 300px — to either fade well
+   short of the column's real edge or, unclamped, let one long value grow
+   the whole table). */
 .truncatable--name {
-  width: 170px;
+  width: 100%;
 }
 
 .truncatable--address {
@@ -1038,8 +1087,43 @@ table.data-table {
   width: 100%;
 }
 
+/* Sits beside a preceding code-badge (the system country's code) inside
+   .system-country-cell's flex row, same icon(badge)+flex-text shape as
+   .supplier-hotel-text/.location-text below — flex:1 fills whatever's left
+   next to the badge (the column itself is already capped by
+   #supplierCountryTable's table-layout:fixed), min-width:0 is required for
+   a flex item to actually shrink below its content's natural width instead
+   of overflowing the row before overflow:hidden/the fade can kick in. */
 .truncatable--country {
-  width: 150px;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Icon(badge)+flex-text row for country-supplier.html's System Country
+   column — badge stays its own natural size, .truncatable--country (above)
+   fills the rest and fades at this row's real right edge. */
+.system-country-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+
+/* Shared by any .code-badge-wrapped value column in a table-layout:fixed
+   table (country-supplier.html's Country ID, country-system.html's Code):
+   stays wrapped in .code-badge's snug pill shape for the overwhelmingly
+   common short value (e.g. "AG-US-001", "US") — max-width (not width) only
+   kicks in the cap, and therefore the fade, for a rare abnormally long
+   value (see the stress-test agoda row), instead of forcing every badge to
+   the same wide box. Capped at 100% of the <td> (not a literal px) because
+   these badge columns are only a small percentage share of their table's
+   fixed width — a static px cap can end up wider than that real column on
+   a narrow browser window, letting the badge spill out of its cell and
+   visually overlap the next column, which 100% (always ≤ the real column,
+   at any width) can't do. */
+.truncatable--badge-value {
+  max-width: 100%;
+  display: inline-block;
 }
 
 .truncatable--starrating {
@@ -1582,6 +1666,7 @@ table.data-table {
 .row-actions {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 6px;
 }
 

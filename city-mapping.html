@@ -152,9 +152,9 @@
             </ul>
             <p><strong>On the system city's own record</strong> (one entry per system city actually affected — a Remap logs on both the city it left and the city it moved to, using the exact same description on both sides so either city's history is understandable on its own):</p>
             <ul>
-              <li><strong>Map</strong> — a supplier city became linked to this city for the first time. Description: <em>{Supplier} — {city name} ({country code}) — ID: {supplier city's identifier}</em></li>
-              <li><strong>Remap</strong> — a supplier city already linked elsewhere moved to or from this city. Description: <em>{Supplier} — {city name} ({country code}) — ID: {supplier city's identifier}|{old system city label} -&gt; {new system city label}</em></li>
-              <li><strong>Unmap</strong> — a supplier city linked to this city got unlinked entirely. Description: <em>{Supplier} — {city name} ({country code}) — ID: {supplier city's identifier}</em></li>
+              <li><strong>Map</strong> — a supplier city became linked to this city for the first time. Description: <em>{Supplier} — {city name} — ID: {supplier city's identifier}</em></li>
+              <li><strong>Remap</strong> — a supplier city already linked elsewhere moved to or from this city. Description: <em>{Supplier} — {city name} — ID: {supplier city's identifier}|{old system city label} -&gt; {new system city label}</em></li>
+              <li><strong>Unmap</strong> — a supplier city linked to this city got unlinked entirely. Description: <em>{Supplier} — {city name} — ID: {supplier city's identifier}</em></li>
             </ul>
             <p>When one Save maps, remaps, or unmaps several supplier cities in one action, every resulting entry on a system city's own record from that same Save must share one batch identifier, so its history can display them together as a single grouped event.</p>
           </li>
@@ -555,16 +555,18 @@
   let mappedCitiesScrollObserver = null;
   let isLoadingMoreMappedCities = false;
 
-  // "City address" is state+country (state optional), never the country code
-  // badge already shown next to the name — reuses getSupplierCountryName()
-  // (same helper the bottom checklist uses) rather than a second
-  // country-name lookup.
+  // "City address" is state+country (state optional) — reuses
+  // getSupplierCountryName() (same helper the bottom checklist uses) rather
+  // than a second country-name lookup. No country-code badge next to the
+  // name: row.countryCode is purely an internal join key into
+  // SYSTEM_COUNTRIES, not something the supplier itself provides, and the
+  // real country name is already resolved into the address line below.
   function mappedCityRowHtml(supplierKey, row) {
     const address = [row.state, getSupplierCountryName(supplierKey, row.countryCode)].filter(Boolean).join(", ");
     return `
       <div class="merge-list-item">
         <span class="meta">
-          <span class="merge-list-name" title="${row.name}">${row.name} <span class="code-badge">${row.countryCode}</span></span>
+          <span class="merge-list-name" title="${row.name}">${row.name}</span>
           <span class="sub">${SUPPLIER_LABELS[supplierKey]} · ${address}</span>
         </span>
         <div class="row-actions">
@@ -907,7 +909,7 @@
       <label class="${rowClass}" title="${r.active ? "Active" : "Inactive"}">
         <input type="checkbox" data-map-city-id="${r.id}" ${checked ? "checked" : ""} ${locked ? "disabled" : ""} />
         <span class="meta">
-          <span>${r.name} <span class="code-badge">${r.countryCode}</span></span>
+          <span>${r.name}</span>
           <span class="sub">${getSupplierCountryName(rightState.supplier, r.countryCode)}${r.state ? ` · ${r.state}` : ""}</span>
           ${mappedNote}
         </span>
@@ -1044,7 +1046,7 @@
     return `
       <div class="merge-list-item">
         <span class="meta">
-          <span class="merge-list-name" title="${r.name}">${r.name} <span class="code-badge">${r.countryCode}</span></span>
+          <span class="merge-list-name" title="${r.name}">${r.name}</span>
           <span class="sub">${getSupplierCountryName(rightState.supplier, r.countryCode)}${r.state ? ` · ${r.state}` : ""}</span>
         </span>
         <div class="row-actions">
@@ -1150,7 +1152,7 @@
       <div class="merge-list-item">
         <span class="meta">
           <span class="merge-list-name" title="${r.name}">
-            ${r.name} <span class="code-badge">${r.countryCode}</span>
+            ${r.name}
             <span class="pill ${tagClass} pill-tag">${tag}</span>
           </span>
           <span class="sub">${getSupplierCountryName(rightState.supplier, r.countryCode)}${r.state ? ` · ${r.state}` : ""}</span>
@@ -1193,7 +1195,7 @@
     return `
       <div class="merge-list-item">
         <span class="meta">
-          <span>${r.name} <span class="code-badge">${r.countryCode}</span></span>
+          <span>${r.name}</span>
           <span class="sub">${getSupplierCountryName(rightState.supplier, r.countryCode)}${r.state ? ` · ${r.state}` : ""}</span>
         </span>
       </div>`;
@@ -1206,7 +1208,7 @@
       .map(
         (row) => `
       <div class="remap-batch-item">
-        <div class="remap-subject"><strong>${row.name}</strong> <span class="code-badge">${row.countryCode}</span></div>
+        <div class="remap-subject"><strong>${row.name}</strong> <span class="code-badge">${row.id}</span></div>
         <div class="remap-compare">
           <div class="remap-box">
             <div class="remap-box-label">Currently mapped to</div>
