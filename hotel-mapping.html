@@ -408,8 +408,15 @@
 
     function updateCityFilterOptions() {
       const candidates = candidatesForFilters();
-      const cities = [...new Set(candidates.map((h) => resolveHotelLocation(h).city))].sort();
-      cityFilterSelect.innerHTML = `<option value="">All Cities</option>` + cities.map((c) => `<option value="${c}">${c}</option>`).join("");
+      const stateByCity = new Map();
+      candidates.forEach((h) => {
+        const loc = resolveHotelLocation(h);
+        if (!stateByCity.has(loc.city)) stateByCity.set(loc.city, loc.state);
+      });
+      const cities = [...stateByCity.keys()].sort();
+      cityFilterSelect.innerHTML =
+        `<option value="">All Cities</option>` +
+        cities.map((c) => `<option value="${c}">${stateByCity.get(c) ? `${c} - ${stateByCity.get(c)}` : c}</option>`).join("");
       cityFilterSelect.disabled = !state.country || cities.length === 0;
     }
 

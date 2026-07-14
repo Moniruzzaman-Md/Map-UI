@@ -464,7 +464,7 @@
     }
     pinCity.disabled = candidates.length === 0;
     pinCity.innerHTML = candidates.length
-      ? `<option value="">Select city</option>` + candidates.map((c) => `<option value="${c.id}">${c.name}</option>`).join("")
+      ? `<option value="">Select city</option>` + candidates.map((c) => `<option value="${c.id}">${c.name}${c.state ? ` - ${c.state}` : ""}</option>`).join("")
       : `<option value="">No prepopulated cities here</option>`;
     selectPinnedCity(null);
   }

@@ -128,7 +128,7 @@
           <li><strong>History</strong> — view every mapping made, changed, or removed, by whom and when.</li>
           <li><strong>Active/Inactive toggle</strong> — controls whether this supplier city is available for booking. Changes immediately, no confirmation needed, and is logged to History.</li>
           <li>Type a name and tick <strong>Fuzzy</strong> to match it loosely (forgiving of typos or skipped letters) instead of requiring an exact substring.</li>
-          <li>Nothing you type or pick filters the list right away — click <strong>Search</strong> (or press Enter in a search box) to apply it. Click <strong>Filters</strong> to reveal the rest: ID, Supplier Country/State/City (this city's own location), System Country/State/City (the mapped system city's location, independent of the supplier location filters), Map/Unmap, and Status. While collapsed, anything you've set shows as a removable chip — click a chip's × to clear just that one filter (still without touching the list until you search again). <strong>Reset</strong> clears everything and shows the full list immediately, no Search needed.</li>
+          <li>Nothing you type or pick filters the list right away — click <strong>Search</strong> (or press Enter in a search box) to apply it. Click <strong>Filters</strong> to reveal the rest: ID, Supplier Country/State (this city's own location), System Country/State/City (the mapped system city's location, independent of the supplier location filters), Map/Unmap, and Status. There's no separate Supplier City filter — since every row here already <em>is</em> a city, the Name search above (with Fuzzy) is how you narrow by city name. While collapsed, anything you've set shows as a removable chip — click a chip's × to clear just that one filter (still without touching the list until you search again). <strong>Reset</strong> clears everything and shows the full list immediately, no Search needed.</li>
         </ul>
       </template>
 
@@ -140,7 +140,7 @@
           <li><strong>Hotels</strong> (<code>hotel-system.html?cityId=X</code>, <code>X</code> = the <em>mapped system city's</em> id, not this row's own id) — only rendered when <code>r.systemCityId !== null</code> <strong>and</strong> the resolved system city has no <code>cityType</code> (prepopulated). Excluded for a New-City or merged-city mapping target for the same reason the System City List's own Hotels button excludes them: <code>resolveHotelLocation()</code>-based filtering (which this deep link relies on) only reflects a hotel's own direct <code>systemCityId</code>, never a New City's separate <code>mappedCityIds</code> overlay, and no hotel can ever have a merged city as its direct city at all.</li>
           <li><strong>History</strong> — every entry has an operation name, a description, and who + when, logged the instant the change happens, newest first.</li>
           <li><strong>Active/Inactive toggle</strong> — applies immediately, no confirmation, logged to History as a Status Change.</li>
-          <li><strong>Filters</strong> — nothing in the toolbar re-queries the list on its own; every field only updates the pending state and the live Filters count pill / chip summary (visible once the panel is collapsed). The list itself only re-queries on <strong>Search</strong> (or Enter in the Name/ID search box) or <strong>Reset</strong> — same "wait for Search" convention as the System Hotel List. Two independent cascades live in the panel: <strong>Supplier</strong> Country → State → City (over this row's own <code>countryCode</code>/<code>state</code>/<code>name</code>) and <strong>System</strong> Country → State → City (over the resolved mapped system city's own location) — picking a Supplier location filter never narrows the System location options or vice versa. <strong>Picking a Supplier</strong> (the top-level selector) and <strong>Reset</strong> are the only 2 actions that bypass the wait-for-Search gate and re-render immediately, since the page is non-functional without a supplier and "start over" should show results right away.</li>
+          <li><strong>Filters</strong> — nothing in the toolbar re-queries the list on its own; every field only updates the pending state and the live Filters count pill / chip summary (visible once the panel is collapsed). The list itself only re-queries on <strong>Search</strong> (or Enter in the Name/ID search box) or <strong>Reset</strong> — same "wait for Search" convention as the System Hotel List. Two independent cascades live in the panel: <strong>Supplier</strong> Country → State (over this row's own <code>countryCode</code>/<code>state</code> — no City here, since <code>r.name</code> <em>is</em> the city and is already covered by the Name search box) and <strong>System</strong> Country → State → City (over the resolved mapped system city's own location) — picking a Supplier location filter never narrows the System location options or vice versa. <strong>Picking a Supplier</strong> (the top-level selector) and <strong>Reset</strong> are the only 2 actions that bypass the wait-for-Search gate and re-render immediately, since the page is non-functional without a supplier and "start over" should show results right away.</li>
         </ul>
         <p><strong>Everywhere:</strong> key every relationship by permanent id, never by an editable name, and resolve a mapped system city's country/state live (via its own record) rather than trusting a stale snapshot.</p>
       </template>
@@ -197,12 +197,6 @@
               <label for="supplierStateFilter">Supplier State</label>
               <select class="filter-select" id="supplierStateFilter" disabled>
                 <option value="">All States</option>
-              </select>
-            </div>
-            <div class="filter-field">
-              <label for="supplierCityFilter">Supplier City</label>
-              <select class="filter-select" id="supplierCityFilter" disabled>
-                <option value="">All Cities</option>
               </select>
             </div>
             <div class="filter-field">
@@ -320,7 +314,6 @@
   );
   const countryFilter = document.getElementById("countryFilter");
   const supplierStateFilter = document.getElementById("supplierStateFilter");
-  const supplierCityFilter = document.getElementById("supplierCityFilter");
   const sysCountryFilter = document.getElementById("sysCountryFilter");
   const sysStateFilter = document.getElementById("sysStateFilter");
   const systemCityFilter = document.getElementById("systemCityFilter");
@@ -340,7 +333,6 @@
     idQuery: "",
     supplierCountry: "",
     supplierState: "",
-    supplierCity: "",
     sysCountry: "",
     sysState: "",
     sysCity: "",
@@ -370,9 +362,11 @@
     return row.systemCityId !== null ? SYSTEM_CITIES.find((c) => c.id === row.systemCityId) || null : null;
   }
 
-  // Supplier State/City are a cascading facet over the current supplier's
-  // own rows (Country -> State -> City), same pattern hotel-system.html's
-  // updateCityFilterOptions() uses.
+  // Supplier State is a cascading facet over the current supplier's own
+  // rows (Country -> State), same pattern hotel-system.html's
+  // updateCityFilterOptions() uses. There's no equivalent City filter here —
+  // each row already *is* a city, so the Name search box above (with
+  // Fuzzy) is how you narrow by city name.
   function updateSupplierStateOptions() {
     let rows = currentRows();
     if (state.supplierCountry) rows = rows.filter((r) => r.countryCode === state.supplierCountry);
@@ -384,21 +378,6 @@
       supplierStateFilter.value = current;
     } else {
       state.supplierState = "";
-    }
-  }
-
-  function updateSupplierCityOptions() {
-    let rows = currentRows();
-    if (state.supplierCountry) rows = rows.filter((r) => r.countryCode === state.supplierCountry);
-    if (state.supplierState) rows = rows.filter((r) => r.state === state.supplierState);
-    const names = [...new Set(rows.map((r) => r.name))].sort();
-    const current = state.supplierCity;
-    supplierCityFilter.innerHTML = `<option value="">All Cities</option>` + names.map((n) => `<option value="${n}">${n}</option>`).join("");
-    supplierCityFilter.disabled = names.length === 0;
-    if (names.includes(current)) {
-      supplierCityFilter.value = current;
-    } else {
-      state.supplierCity = "";
     }
   }
 
@@ -452,7 +431,7 @@
     const uniqueCities = [...new Map(cities.map((c) => [c.id, c])).values()].sort((a, b) => a.name.localeCompare(b.name));
     const current = state.sysCity;
     systemCityFilter.innerHTML =
-      `<option value="">All System Cities</option>` + uniqueCities.map((c) => `<option value="${c.id}">${c.name}</option>`).join("");
+      `<option value="">All System Cities</option>` + uniqueCities.map((c) => `<option value="${c.id}">${c.name}${c.state ? ` - ${c.state}` : ""}</option>`).join("");
     if (uniqueCities.some((c) => String(c.id) === current)) {
       systemCityFilter.value = current;
     } else {
@@ -469,7 +448,6 @@
     if (idQ) rows = rows.filter((r) => r.id.toLowerCase().includes(idQ));
     if (state.supplierCountry) rows = rows.filter((r) => r.countryCode === state.supplierCountry);
     if (state.supplierState) rows = rows.filter((r) => r.state === state.supplierState);
-    if (state.supplierCity) rows = rows.filter((r) => r.name === state.supplierCity);
     if (state.sysCountry) rows = rows.filter((r) => { const c = resolveSystemCity(r); return c && (getSystemCountryName(c.country.code) || c.country.name) === state.sysCountry; });
     if (state.sysState) rows = rows.filter((r) => { const c = resolveSystemCity(r); return c && c.state === state.sysState; });
     if (state.sysCity) rows = rows.filter((r) => String(r.systemCityId) === state.sysCity);
@@ -521,13 +499,9 @@
             <button class="action-btn" data-history-btn data-row-id="${r.id}" aria-label="View mapping history for ${r.name}">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 109-9 9 9 0 00-7 3.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3 3.5V8h4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 7.5V12l3.2 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </button>
-            ${
-              systemCity && !systemCity.cityType
-                ? `<a class="action-btn" href="hotel-system.html?cityId=${systemCity.id}" target="_blank" rel="noopener" aria-label="View hotels in ${systemCity.name}">
+            <a class="action-btn" href="hotel-supplier.html?supplier=${state.supplier}&supplierCityId=${encodeURIComponent(r.id)}" target="_blank" rel="noopener" aria-label="View hotels in ${r.name}">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M4 21V10l8-5 8 5v11" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 21v-6h6v6" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 12h.01M15 12h.01M12 8h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-            </a>`
-                : ""
-            }
+            </a>
             ${
               r.systemCityId !== null
                 ? `<button class="action-btn" data-unmap-btn data-row-id="${r.id}" aria-label="Unmap ${r.name}">
@@ -575,7 +549,6 @@
     if (state.idQuery.trim()) entries.push({ key: "idQuery", label: "ID", value: state.idQuery.trim() });
     if (state.supplierCountry) entries.push({ key: "supplierCountry", label: "Supplier Country", value: getSupplierCountryName(state.supplier, state.supplierCountry) });
     if (state.supplierState) entries.push({ key: "supplierState", label: "Supplier State", value: state.supplierState });
-    if (state.supplierCity) entries.push({ key: "supplierCity", label: "Supplier City", value: state.supplierCity });
     if (state.sysCountry) entries.push({ key: "sysCountry", label: "System Country", value: state.sysCountry });
     if (state.sysState) entries.push({ key: "sysState", label: "System State", value: state.sysState });
     if (state.sysCity) entries.push({ key: "sysCity", label: "System City", value: SYSTEM_CITIES.find((c) => String(c.id) === state.sysCity)?.name || state.sysCity });
@@ -610,10 +583,6 @@
     supplierState: () => {
       supplierStateFilter.value = "";
       supplierStateFilter.dispatchEvent(new Event("change"));
-    },
-    supplierCity: () => {
-      supplierCityFilter.value = "";
-      supplierCityFilter.dispatchEvent(new Event("change"));
     },
     sysCountry: () => {
       sysCountryFilter.value = "";
@@ -691,7 +660,6 @@
     citySupplierFiltersToggleBtn.disabled = !state.supplier;
     state.supplierCountry = "";
     state.supplierState = "";
-    state.supplierCity = "";
     state.sysCountry = "";
     state.sysState = "";
     state.sysCity = "";
@@ -704,14 +672,12 @@
           .map((code) => `<option value="${code}">${getSupplierCountryName(state.supplier, code)}</option>`)
           .join("");
       updateSupplierStateOptions();
-      updateSupplierCityOptions();
       updateSysCountryOptions();
       updateSysStateOptions();
       updateSystemCityFilterOptions();
     } else {
       countryFilter.innerHTML = `<option value="">All Countries</option>`;
       supplierStateFilter.innerHTML = `<option value="">All States</option>`;
-      supplierCityFilter.innerHTML = `<option value="">All Cities</option>`;
       sysCountryFilter.innerHTML = `<option value="">All System Countries</option>`;
       sysStateFilter.innerHTML = `<option value="">All System States</option>`;
       systemCityFilter.innerHTML = `<option value="">All System Cities</option>`;
@@ -741,18 +707,11 @@
   countryFilter.addEventListener("change", () => {
     state.supplierCountry = countryFilter.value;
     updateSupplierStateOptions();
-    updateSupplierCityOptions();
     updateFiltersSummary();
   });
 
   supplierStateFilter.addEventListener("change", () => {
     state.supplierState = supplierStateFilter.value;
-    updateSupplierCityOptions();
-    updateFiltersSummary();
-  });
-
-  supplierCityFilter.addEventListener("change", () => {
-    state.supplierCity = supplierCityFilter.value;
     updateFiltersSummary();
   });
 

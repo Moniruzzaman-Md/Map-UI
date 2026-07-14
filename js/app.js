@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initResetDemoData();
   initSearchableSelects();
   initInfoPopups();
+  initCopyButtons();
 });
 
 // ---------- localStorage persistence ----------
@@ -29,8 +30,9 @@ function loadFromStorage(key) {
   try {
     const raw = localStorage.getItem(STORAGE_PREFIX + key);
     if (!raw) return null;
-    // revive timestamp strings back into real Date objects
-    return JSON.parse(raw, (k, value) => (k === "timestamp" ? new Date(value) : value));
+    // revive timestamp/updatedAt strings back into real Date objects
+    // (updatedAt: supplierHotels' own "feed last reported" snapshot field)
+    return JSON.parse(raw, (k, value) => (k === "timestamp" || k === "updatedAt" ? new Date(value) : value));
   } catch (e) {
     console.warn("Could not load from localStorage:", e);
     return null;
@@ -192,6 +194,141 @@ function initInfoPopups() {
     const template = document.querySelector(btn.getAttribute("data-info-target"));
     if (!template) return;
     showInfoPopup(btn.dataset.infoTitle || "", template.innerHTML);
+  });
+}
+
+// Lightweight tooltip-style popover for showing 1-2 field values (with a copy
+// button each) anchored right next to whatever button triggered it — unlike
+// showInfoPopup() (centered, for static per-page explanations), this is for
+// per-row dynamic data, positioned via getBoundingClientRect() the same way
+// enhanceSearchableSelect()'s own dropdown panel positions itself (see
+// position()/open()/close() below, mirroring that function's approach).
+// fields: [{ label, value }, ...].
+function openDetailPopover(triggerEl, fields) {
+  let popover = document.getElementById("detailPopover");
+  if (!popover) {
+    popover = document.createElement("div");
+    popover.id = "detailPopover";
+    popover.className = "detail-popover";
+    document.body.appendChild(popover);
+  }
+
+  // Tear down whatever the previous open call wired up (listeners only) —
+  // this must run before the new "open" class/content are set below, not
+  // after, or it would immediately erase the class this call is about to
+  // add (that was the bug: reopening for a second row silently no-opped).
+  if (popover._detailPopoverClose) popover._detailPopoverClose();
+
+  popover.innerHTML = fields
+    .map(
+      (f) => `
+      <div class="detail-popover-field">
+        <div class="detail-popover-label">${f.label}</div>
+        <div class="detail-popover-value-row">
+          <span class="detail-popover-value">${f.value}</span>
+          <button type="button" class="copy-icon-btn" data-copy-value="${f.value}" aria-label="Copy ${f.label}">
+            <span class="copy-icon-idle">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="9" y="9" width="11" height="11" rx="1.5" stroke="currentColor" stroke-width="1.6"/><path d="M5 15V6a1.5 1.5 0 011.5-1.5H15" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            </span>
+            <span class="copy-icon-done">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+          </button>
+        </div>
+      </div>`
+    )
+    .join("");
+
+  // Positions the popover next to triggerEl, flipping above it when there's
+  // no room below, and aims the CSS caret (--caret-left, .caret-top/-bottom)
+  // at the trigger's own horizontal center — clamped inside the box so it
+  // never points past either rounded corner — so the arrow still lines up
+  // correctly even when the box itself got shifted left to stay on-screen.
+  function position() {
+    const rect = triggerEl.getBoundingClientRect();
+    const triggerCenterX = rect.left + rect.width / 2;
+
+    popover.classList.add("caret-top");
+    popover.classList.remove("caret-bottom");
+    popover.style.top = `${rect.bottom + 10}px`;
+
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const popoverHeight = popover.offsetHeight;
+    if (spaceBelow < popoverHeight + 12 && rect.top > popoverHeight + 12) {
+      popover.style.top = `${rect.top - popoverHeight - 10}px`;
+      popover.classList.remove("caret-top");
+      popover.classList.add("caret-bottom");
+    }
+
+    let left = rect.left;
+    popover.style.left = `${left}px`;
+    const spaceRight = window.innerWidth - rect.left;
+    const popoverWidth = popover.offsetWidth;
+    if (spaceRight < popoverWidth + 8) {
+      left = Math.max(8, rect.right - popoverWidth);
+      popover.style.left = `${left}px`;
+    }
+
+    const caretLeft = Math.min(Math.max(triggerCenterX - left, 16), popoverWidth - 16);
+    popover.style.setProperty("--caret-left", `${caretLeft}px`);
+  }
+
+  popover.classList.add("open");
+  position();
+
+  function close() {
+    popover.classList.remove("open");
+    document.removeEventListener("click", onDocClick, true);
+    document.removeEventListener("keydown", onKeydown);
+    window.removeEventListener("scroll", onScroll, true);
+    window.removeEventListener("resize", close);
+    popover._detailPopoverClose = null;
+  }
+  function onDocClick(e) {
+    if (!popover.contains(e.target) && e.target !== triggerEl && !triggerEl.contains(e.target)) close();
+  }
+  function onKeydown(e) {
+    if (e.key === "Escape") close();
+  }
+  function onScroll(e) {
+    if (!popover.contains(e.target)) close();
+  }
+
+  popover._detailPopoverClose = close;
+
+  document.addEventListener("click", onDocClick, true);
+  document.addEventListener("keydown", onKeydown);
+  window.addEventListener("scroll", onScroll, true);
+  window.addEventListener("resize", close);
+}
+
+// Bare clipboard write, no UI feedback — split out of copyToClipboard() so
+// callers with their own feedback (e.g. flashCopied() below) don't also get
+// the toast stacked on top of it.
+function writeToClipboard(text) {
+  return navigator.clipboard.writeText(text);
+}
+
+function copyToClipboard(text) {
+  writeToClipboard(text).then(() => showToast("Copied to clipboard"));
+}
+
+// Briefly swaps a [data-copy-value] button to its checkmark icon (see the
+// .copy-icon-btn/.copied CSS) instead of relying only on the corner toast —
+// feedback appears right where the user is already looking.
+function flashCopied(btn) {
+  if (btn._copiedTimeout) clearTimeout(btn._copiedTimeout);
+  btn.classList.add("copied");
+  btn._copiedTimeout = setTimeout(() => btn.classList.remove("copied"), 1200);
+}
+
+// Declarative wiring for writeToClipboard(): any button anywhere in the
+// project can trigger it with no page-specific JS via data-copy-value.
+function initCopyButtons() {
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-copy-value]");
+    if (!btn) return;
+    writeToClipboard(btn.dataset.copyValue).then(() => flashCopied(btn));
   });
 }
 

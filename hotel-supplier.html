@@ -119,30 +119,30 @@
       <hr class="page-divider" />
 
       <template id="supplierHotelInfo">
-        <p>Read-only reference list of each supplier's own hotel feed. Pick a <strong>Supplier</strong> first — nothing else on this page works until one is chosen. Two independent ways to reach a system city from here: via <strong>Supplier City</strong> (this supplier's own city list) or via <strong>System Hotel</strong> (matched by Provider ID) — they don't have to agree, since they're resolved completely differently.</p>
+        <p>Each supplier's own hotel feed, side by side with the matching system hotel (if any). Pick a <strong>Supplier</strong> first — nothing else on this page works until one is chosen.</p>
         <ul>
+          <li><strong>Supplier Hotel / Location / GPS / Contact</strong> — exactly what this supplier's feed reports: name, address, city/state/country, coordinates, email, and phone. Click any info icon to see the full values.</li>
+          <li><strong>System Hotel ID / System Hotel / System Location / System GPS / System Star Rating / System Contact / System Status</strong> — the matching entry from the System Hotel List, found automatically by <strong>Provider ID</strong> — not something this supplier reported directly. Shows "Not mapped" when this row has no Provider ID, or one that doesn't match any system hotel yet.</li>
           <li><strong>Provider ID</strong> — the id this supplier's feed reports for the hotel. A blank Provider ID means the feed never sent one for this row.</li>
-          <li><strong>Supplier City</strong> — which of this supplier's own cities (see the Supplier City List) this hotel belongs to, and that city's own mapped system city underneath. Shows "Not linked" when this hotel isn't tied to any of this supplier's own cities, or "Not mapped" underneath a known supplier city that isn't itself mapped to a system city yet.</li>
-          <li><strong>System Hotel</strong> — resolved automatically by matching this row's Provider ID against the System Hotel List's own Provider ID (not a stored link). A row with no Provider ID, or one that doesn't match any System Hotel yet, shows "Not mapped".</li>
           <li><strong>Update Date</strong> — when the supplier last reported this hotel's data.</li>
-          <li>This list can't be edited here — there's no Map, Edit, or History action for it.</li>
+          <li><strong>Edit</strong> — only the city can be changed here, via a Country/State/City picker; everything else is exactly what the feed reported and stays that way.</li>
+          <li><strong>History</strong> — view every city change and status change.</li>
+          <li><strong>Active/Inactive toggle</strong> — controls whether this supplier's version of the hotel is available. Changes immediately, no confirmation needed, and is logged to History.</li>
+          <li><strong>Details</strong> — opens the full raw data this supplier reported for this hotel, as sent — the shape of this varies from one supplier to another.</li>
           <li>Type a name and tick <strong>Fuzzy</strong> to match it loosely (forgiving of typos or skipped letters) instead of requiring an exact substring.</li>
-          <li>Nothing you type or pick filters the list right away — click <strong>Search</strong> (or press Enter in a search box) to apply it. Click <strong>Filters</strong> to reveal the rest: ID, Provider ID, Country/State/City (this row's own raw location fields), Supplier City, System City (independent of Country/State/City), and Status. While collapsed, anything you've set shows as a removable chip — click a chip's × to clear just that one filter. <strong>Reset</strong> clears everything and shows the full list immediately, no Search needed.</li>
+          <li>Nothing you type or pick filters the list right away — click <strong>Search</strong> (or press Enter in a search box) to apply it. Click <strong>Filters</strong> to reveal the rest, split into two sections: <strong>Supplier</strong> (ID, Provider ID, Country/State/City, Hotel Name, Status, Star Rating — all this supplier's own fields) and <strong>System</strong> (Country/State/City, System Hotel ID, Hotel Name — all the matching system hotel's own fields instead). City only opens up once a Country is picked, in either section. While collapsed, anything you've set shows as a removable chip — click a chip's × to clear just that one filter. <strong>Reset</strong> clears everything and shows the full list immediately, no Search needed.</li>
         </ul>
       </template>
 
       <template id="supplierHotelDevNotes">
-        <p>Read-only mirror of each supplier's own hotel feed. Nothing works until a <strong>Supplier</strong> is picked — every row/filter below is scoped to that one supplier's own array. There's no Map/Edit/History here because a real feed is exactly what the supplier last reported — this project doesn't get to change it, only reference it.</p>
+        <p>Each supplier's own hotel feed, joined at render time to its matching system hotel — never stored as a direct link. Nothing works until a <strong>Supplier</strong> is picked — every row/filter/action below is scoped to that one supplier's own array.</p>
         <ul>
           <li><strong>ID</strong> — this supplier's own generated identifier (e.g. <code>AG-HTL-001</code>), permanent.</li>
-          <li><strong>Two independent paths to a system city:</strong>
-            <ul>
-              <li><strong>Supplier Hotel → Supplier City → System City</strong> — <code>row.supplierCityId</code> links to a <code>supplierCities[key]</code> row (<code>resolveSupplierHotelCity()</code>, <code>js/data.js</code>), whose own <code>systemCityId</code> (set via City Mapping) reaches the system city. <code>null</code> when this supplier's own city list has no entry for this hotel's city at all — a real case, not a data gap (e.g. Agoda's own city list has no Chicago entry, so its "Downtown Chicago Inn" can't link to one).</li>
-              <li><strong>Supplier Hotel → System Hotel → System City</strong> — <code>findSystemHotelByProviderId()</code> matches this row's Provider ID against <code>SYSTEM_HOTELS</code>' own Provider ID (not a stored reference), and that system hotel's own <code>systemCityId</code>/<code>resolveHotelLocation()</code> reaches the system city from there.</li>
-            </ul>
-            These two paths are resolved completely independently and are never reconciled against each other — a hotel's Supplier City and its System Hotel's city can legitimately disagree (or one can be known while the other isn't).
-          </li>
-          <li><strong>Filters</strong> — nothing in the toolbar re-queries the list on its own; every field only updates the pending state and the live Filters count pill / chip summary (visible once the panel is collapsed). The list itself only re-queries on <strong>Search</strong> (or Enter in the Name/ID/Provider ID search box), <strong>Reset</strong>, or picking a <strong>Supplier</strong> — the latter two bypass the wait-for-Search gate and re-render immediately, since the page is non-functional without a supplier and "start over" should show results right away. Country/State/City (the hotel's own raw location fields) is one cascade; Supplier City and System City are each flat, independent facets — not a second Country/State/City cascade, since that would just duplicate the existing one over a slightly different field.</li>
+          <li><strong>Finding the matching system hotel</strong> — this row's Provider ID is matched against the System Hotel List's own Provider ID at render time, never a stored reference. A blank Provider ID, or one with no match, means every System-side cell shows "Not mapped" for that row.</li>
+          <li><strong>Edit</strong> — the only editable field is city, via a cascading Country/State/City picker sourced from this supplier's own country and city lists. Every other field belongs to the supplier's feed and can't be changed here.</li>
+          <li><strong>History</strong> — every entry has an operation name, a description, and who + when. Covers city edits and Active/Inactive status changes.</li>
+          <li><strong>Details</strong> — dumps this row's own record as JSON (excluding its history), so its shape can differ supplier to supplier — some carry extra fields the others don't.</li>
+          <li><strong>Filters</strong> — nothing in the toolbar re-queries the list on its own; every field only updates the pending state and the live Filters count pill / chip summary (visible once the panel is collapsed). The list itself only re-queries on <strong>Search</strong> (or Enter in the Name/ID/Provider ID search box), <strong>Reset</strong>, or picking a <strong>Supplier</strong> — the latter two bypass the wait-for-Search gate and re-render immediately, since the page is non-functional without a supplier and "start over" should show results right away. Supplier and System are two fully independent Country/State/City cascades — one over this row's own fields, the other over the matched system hotel's — picking one never narrows the other. City is gated behind Country in both, same as everywhere else in the project.</li>
         </ul>
       </template>
 
@@ -185,6 +185,7 @@
 
           <!-- Collapsed by default. -->
           <div class="filters-panel" id="supplierHotelFiltersPanel" style="display:none;">
+            <div class="filters-section-label">Supplier</div>
             <div class="filter-field">
               <label for="supplierHotelIdSearch">ID</label>
               <div class="toolbar-search">
@@ -218,16 +219,11 @@
               </select>
             </div>
             <div class="filter-field">
-              <label for="supplierCityFilter">Supplier City</label>
-              <select class="filter-select" id="supplierCityFilter">
-                <option value="">All Supplier Cities</option>
-              </select>
-            </div>
-            <div class="filter-field">
-              <label for="sysCityFilter">System City</label>
-              <select class="filter-select" id="sysCityFilter">
-                <option value="">All System Cities</option>
-              </select>
+              <label for="supplierHotelNameFilter">Hotel Name</label>
+              <div class="toolbar-search">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                <input type="text" id="supplierHotelNameFilter" placeholder="Search by hotel name..." />
+              </div>
             </div>
             <div class="filter-field">
               <label for="hotelStatusFilter">Status</label>
@@ -237,6 +233,52 @@
                 <option value="inactive">Inactive</option>
               </select>
             </div>
+            <div class="filter-field">
+              <label for="supplierHotelStarRatingFilter">Star Rating</label>
+              <select class="filter-select" id="supplierHotelStarRatingFilter">
+                <option value="">All Ratings</option>
+                <option value="5">5 ★</option>
+                <option value="4">4 ★</option>
+                <option value="3">3 ★</option>
+                <option value="2">2 ★</option>
+                <option value="1">1 ★</option>
+                <option value="0">0 ★</option>
+              </select>
+            </div>
+
+            <div class="filters-section-label">System</div>
+            <div class="filter-field">
+              <label for="sysCountryFilter">Country</label>
+              <select class="filter-select" id="sysCountryFilter">
+                <option value="">All Countries</option>
+              </select>
+            </div>
+            <div class="filter-field">
+              <label for="sysStateFilter">State</label>
+              <select class="filter-select" id="sysStateFilter" disabled>
+                <option value="">All States</option>
+              </select>
+            </div>
+            <div class="filter-field">
+              <label for="sysCityFilter">City</label>
+              <select class="filter-select" id="sysCityFilter" disabled>
+                <option value="">All Cities</option>
+              </select>
+            </div>
+            <div class="filter-field">
+              <label for="sysHotelIdFilter">System Hotel ID</label>
+              <div class="toolbar-search">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                <input type="text" id="sysHotelIdFilter" placeholder="Search by system hotel ID..." />
+              </div>
+            </div>
+            <div class="filter-field">
+              <label for="sysHotelNameFilter">Hotel Name</label>
+              <div class="toolbar-search">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                <input type="text" id="sysHotelNameFilter" placeholder="Search by system hotel name..." />
+              </div>
+            </div>
           </div>
         </div>
 
@@ -245,25 +287,26 @@
             <thead>
               <tr>
                 <th>ID</th>
-                <th>Name</th>
-                <th>Address</th>
-                <th>City</th>
-                <th>State</th>
-                <th>Country</th>
+                <th>Supplier Hotel</th>
+                <th>Location</th>
+                <th>GPS</th>
                 <th>Star Rating</th>
-                <th>Email</th>
-                <th>Phone Number</th>
-                <th>Provider ID</th>
-                <th>Supplier City</th>
-                <th>System Hotel</th>
+                <th>Contact</th>
                 <th>Status</th>
                 <th>Update Date</th>
+                <th>System Hotel ID</th>
+                <th>System Hotel</th>
+                <th>System Location</th>
+                <th>System GPS</th>
+                <th>System Star Rating</th>
+                <th>System Contact</th>
+                <th>System Status</th>
                 <th>Action</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td colspan="15" class="empty-state">Select a supplier to view its hotel list</td>
+                <td colspan="16" class="empty-state">Select a supplier to view its hotel list</td>
               </tr>
             </tbody>
           </table>
@@ -272,6 +315,84 @@
         <div class="table-footer pagination-bar" id="paginationBar"></div>
       </section>
     </main>
+  </div>
+</div>
+
+<!-- Edit History Modal (card design) -->
+<div class="modal-overlay" id="historyModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Edit History <span id="historyHotelName" style="color:var(--text-muted); font-weight:600;"></span></h3>
+      <button class="modal-close" data-modal-close aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="history-list" id="historyList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Supplier Hotel Details Modal (raw JSON, shape varies per supplier) -->
+<div class="modal-overlay popup-overlay" id="detailsModal">
+  <div class="popup-box popup-box-lg">
+    <div class="modal-header">
+      <h3>Hotel Details <span id="detailsHotelName" style="color:var(--text-muted); font-weight:600;"></span></h3>
+      <button class="modal-close" data-modal-close aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex; justify-content:flex-end; margin-bottom:10px; flex-shrink:0;">
+        <button type="button" class="copy-icon-btn" id="copyDetailsJsonBtn" aria-label="Copy JSON">
+          <span class="copy-icon-idle">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="9" y="9" width="11" height="11" rx="1.5" stroke="currentColor" stroke-width="1.6"/><path d="M5 15V6a1.5 1.5 0 011.5-1.5H15" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          </span>
+          <span class="copy-icon-done">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+        </button>
+      </div>
+      <pre id="detailsJson" style="background:var(--bg-panel); padding:16px; border-radius:var(--radius-sm); font-size:13px; line-height:1.5; overflow:auto; white-space:pre-wrap; word-break:break-word; margin:0; flex:1;"></pre>
+    </div>
+  </div>
+</div>
+
+<!-- Edit City Modal — only the hotel's city (via cascading Country > State >
+     City, sourced from this supplier's own country/city lists) can be
+     changed here; every other field is untouched. -->
+<div class="modal-overlay" id="editCityModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Edit City <span id="editCityHotelName" style="color:var(--text-muted); font-weight:600;"></span></h3>
+      <button class="modal-close" data-modal-close aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label for="editCityCountry">Country</label>
+        <select id="editCityCountry" class="filter-select" style="width:100%; min-width:0;">
+          <option value="">Select country</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="editCityState">State</label>
+        <select id="editCityState" class="filter-select" style="width:100%; min-width:0;" disabled>
+          <option value="">Select country first</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="editCityCity">City</label>
+        <select id="editCityCity" class="filter-select" style="width:100%; min-width:0;" disabled>
+          <option value="">Select country first</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" data-modal-close>Cancel</button>
+      <button class="btn btn-primary" id="editCitySaveBtn">Save</button>
+    </div>
   </div>
 </div>
 
@@ -286,12 +407,24 @@
       .join("")
   );
 
+  // Supplier section — every field here reads the supplier hotel row's own
+  // fields (r.country/r.state/r.city/r.name/r.active/r.starRating).
   const countryFilterSelect = document.getElementById("hotelCountryFilter");
   const stateFilterSelect = document.getElementById("hotelStateFilter");
   const cityFilterSelect = document.getElementById("hotelCityFilter");
-  const supplierCityFilterSelect = document.getElementById("supplierCityFilter");
-  const sysCityFilterSelect = document.getElementById("sysCityFilter");
   const statusFilterSelect = document.getElementById("hotelStatusFilter");
+  const supplierHotelNameFilter = document.getElementById("supplierHotelNameFilter");
+  const supplierHotelStarRatingFilter = document.getElementById("supplierHotelStarRatingFilter");
+
+  // System section — every field here reads the *matched System Hotel*'s own
+  // fields instead (via findSystemHotelByProviderId()/resolveHotelLocation()),
+  // never the supplier row's — see systemLocationFor()/systemHotelFor() below.
+  const sysCountryFilterSelect = document.getElementById("sysCountryFilter");
+  const sysStateFilterSelect = document.getElementById("sysStateFilter");
+  const sysCityFilterSelect = document.getElementById("sysCityFilter");
+  const sysHotelIdFilter = document.getElementById("sysHotelIdFilter");
+  const sysHotelNameFilter = document.getElementById("sysHotelNameFilter");
+
   const hotelSearch = document.getElementById("hotelSearch");
   const supplierHotelFuzzyToggle = document.getElementById("supplierHotelFuzzyToggle");
   const supplierHotelSearchBtn = document.getElementById("supplierHotelSearchBtn");
@@ -312,9 +445,13 @@
     country: "",
     hotelState: "",
     city: "",
-    supplierCity: "",
-    sysCity: "",
     status: "all",
+    starRating: "",
+    sysCountry: "",
+    sysState: "",
+    sysCity: "",
+    sysHotelIdQuery: "",
+    sysHotelNameQuery: "",
   };
 
   function currentRows() {
@@ -334,70 +471,136 @@
 
   function candidatesForFilters() {
     let rows = currentRows();
-    if (state.country) rows = rows.filter((r) => (getSystemCountryName(r.country.code) || r.country.name) === state.country);
+    if (state.country) rows = rows.filter((r) => getSupplierCountryName(state.supplier, r.country.code) === state.country);
     if (state.hotelState) rows = rows.filter((r) => r.state === state.hotelState);
     if (state.city) rows = rows.filter((r) => r.city === state.city);
     return rows;
   }
 
+  // Rebuilding a <select>'s innerHTML resets its own selectedIndex to 0 —
+  // since this function is called from Country/State's own change handlers
+  // (to narrow the *other* fields), it was wiping out the very selection
+  // that just triggered it. Each field restores its state.* value afterward
+  // if that value is still a valid option, else resets state.* to "" (same
+  // "preserve if valid else reset" pattern already used elsewhere in this
+  // file, e.g. the old updateSupplierCityFilterOptions/updateSysCityFilterOptions
+  // and the Edit City modal's own population functions).
   function updateFilterOptions() {
     const rows = currentRows();
-    const countries = [...new Set(rows.map((r) => getSystemCountryName(r.country.code) || r.country.name))].sort();
+    const countries = [...new Set(rows.map((r) => getSupplierCountryName(state.supplier, r.country.code)))].sort();
     countryFilterSelect.innerHTML = `<option value="">All Countries</option>` + countries.map((c) => `<option value="${c}">${c}</option>`).join("");
     countryFilterSelect.disabled = !state.supplier || countries.length === 0;
+    if (countries.includes(state.country)) {
+      countryFilterSelect.value = state.country;
+    } else {
+      state.country = "";
+    }
 
     let stateCandidates = rows;
-    if (state.country) stateCandidates = stateCandidates.filter((r) => (getSystemCountryName(r.country.code) || r.country.name) === state.country);
+    if (state.country) stateCandidates = stateCandidates.filter((r) => getSupplierCountryName(state.supplier, r.country.code) === state.country);
     const states = [...new Set(stateCandidates.map((r) => r.state).filter(Boolean))].sort();
     stateFilterSelect.innerHTML = `<option value="">All States</option>` + states.map((s) => `<option value="${s}">${s}</option>`).join("");
     stateFilterSelect.disabled = !state.supplier || states.length === 0;
-
-    const cityCandidates = candidatesForFilters();
-    const cities = [...new Set(cityCandidates.map((r) => r.city))].sort();
-    cityFilterSelect.innerHTML = `<option value="">All Cities</option>` + cities.map((c) => `<option value="${c}">${c}</option>`).join("");
-    cityFilterSelect.disabled = !state.supplier || cities.length === 0;
-  }
-
-  // Supplier City / System City are a second, independent facet from the
-  // Country/State/City above — over each row's own resolved supplierCityId
-  // (see resolveSupplierHotelCity() in js/data.js), not its raw city/state/
-  // country strings. Deliberately flat (not their own Country/State/City
-  // cascade) rather than duplicating the existing location filters over a
-  // slightly different field.
-  function updateSupplierCityFilterOptions() {
-    const rows = currentRows();
-    const cities = [...new Map(rows.map((r) => [r.supplierCityId, resolveSupplierHotelCity(state.supplier, r)]).filter(([id]) => id !== null)).values()]
-      .filter(Boolean)
-      .sort((a, b) => a.name.localeCompare(b.name));
-    const current = state.supplierCity;
-    supplierCityFilterSelect.innerHTML =
-      `<option value="">All Supplier Cities</option>` + cities.map((c) => `<option value="${c.id}">${c.name}</option>`).join("");
-    if (cities.some((c) => c.id === current)) {
-      supplierCityFilterSelect.value = current;
+    if (states.includes(state.hotelState)) {
+      stateFilterSelect.value = state.hotelState;
     } else {
-      state.supplierCity = "";
+      state.hotelState = "";
+    }
+
+    // City is gated behind Country (loaded country-wise) — picking a
+    // Country is required before City has anything to show, same reasoning
+    // as State being gated above.
+    if (!state.country) {
+      cityFilterSelect.innerHTML = `<option value="">Select country first</option>`;
+      cityFilterSelect.disabled = true;
+      state.city = "";
+    } else {
+      const cityCandidates = candidatesForFilters();
+      const cityStateByName = new Map();
+      cityCandidates.forEach((r) => {
+        if (!cityStateByName.has(r.city)) cityStateByName.set(r.city, r.state);
+      });
+      const cities = [...cityStateByName.keys()].sort();
+      cityFilterSelect.innerHTML =
+        `<option value="">All Cities</option>` +
+        cities.map((c) => `<option value="${c}">${cityStateByName.get(c) ? `${c} - ${cityStateByName.get(c)}` : c}</option>`).join("");
+      cityFilterSelect.disabled = !state.supplier || cities.length === 0;
+      if (cities.includes(state.city)) {
+        cityFilterSelect.value = state.city;
+      } else {
+        state.city = "";
+      }
     }
   }
 
-  function updateSysCityFilterOptions() {
-    const rows = currentRows();
-    const systemCities = [
-      ...new Map(
-        rows
-          .map((r) => resolveSupplierHotelCity(state.supplier, r))
-          .filter((c) => c && c.systemCityId !== null)
-          .map((c) => [c.systemCityId, SYSTEM_CITIES.find((sc) => sc.id === c.systemCityId)])
-      ).values(),
-    ]
-      .filter(Boolean)
-      .sort((a, b) => a.name.localeCompare(b.name));
-    const current = state.sysCity;
-    sysCityFilterSelect.innerHTML =
-      `<option value="">All System Cities</option>` + systemCities.map((c) => `<option value="${c.id}">${c.name}</option>`).join("");
-    if (systemCities.some((c) => String(c.id) === current)) {
-      sysCityFilterSelect.value = current;
+  // The System section mirrors Supplier's Country/State/City cascade shape,
+  // but resolved from the *matched System Hotel* (findSystemHotelByProviderId
+  // + resolveHotelLocation) — a completely different entity from the
+  // supplier row itself. Rows with no matched System Hotel simply have no
+  // system location and are excluded from these option lists (and, once a
+  // system filter is actually applied, from the filtered results too).
+  function systemLocationFor(r) {
+    const matchedHotel = findSystemHotelByProviderId(r.providerId);
+    return matchedHotel ? resolveHotelLocation(matchedHotel) : null;
+  }
+
+  function systemCandidatesForFilters() {
+    let rows = currentRows()
+      .map((r) => ({ r, loc: systemLocationFor(r) }))
+      .filter((x) => x.loc);
+    if (state.sysCountry) rows = rows.filter((x) => (getSystemCountryName(x.loc.country.code) || x.loc.country.name) === state.sysCountry);
+    if (state.sysState) rows = rows.filter((x) => x.loc.state === state.sysState);
+    return rows.map((x) => x.r);
+  }
+
+  // Same "preserve if valid else reset" fix as updateFilterOptions() above,
+  // for the exact same reason (this is called from System Country/State's
+  // own change handlers too).
+  function updateSysFilterOptions() {
+    const rows = currentRows()
+      .map((r) => ({ r, loc: systemLocationFor(r) }))
+      .filter((x) => x.loc);
+    const countries = [...new Set(rows.map((x) => getSystemCountryName(x.loc.country.code) || x.loc.country.name))].sort();
+    sysCountryFilterSelect.innerHTML = `<option value="">All Countries</option>` + countries.map((c) => `<option value="${c}">${c}</option>`).join("");
+    sysCountryFilterSelect.disabled = !state.supplier || countries.length === 0;
+    if (countries.includes(state.sysCountry)) {
+      sysCountryFilterSelect.value = state.sysCountry;
     } else {
+      state.sysCountry = "";
+    }
+
+    let stateCandidates = rows;
+    if (state.sysCountry) stateCandidates = stateCandidates.filter((x) => (getSystemCountryName(x.loc.country.code) || x.loc.country.name) === state.sysCountry);
+    const states = [...new Set(stateCandidates.map((x) => x.loc.state).filter(Boolean))].sort();
+    sysStateFilterSelect.innerHTML = `<option value="">All States</option>` + states.map((s) => `<option value="${s}">${s}</option>`).join("");
+    sysStateFilterSelect.disabled = !state.supplier || states.length === 0;
+    if (states.includes(state.sysState)) {
+      sysStateFilterSelect.value = state.sysState;
+    } else {
+      state.sysState = "";
+    }
+
+    // Same Country-first gating as the Supplier section's City above.
+    if (!state.sysCountry) {
+      sysCityFilterSelect.innerHTML = `<option value="">Select country first</option>`;
+      sysCityFilterSelect.disabled = true;
       state.sysCity = "";
+    } else {
+      const cityCandidates = systemCandidatesForFilters().map((r) => systemLocationFor(r));
+      const cityStateByName = new Map();
+      cityCandidates.forEach((loc) => {
+        if (!cityStateByName.has(loc.city)) cityStateByName.set(loc.city, loc.state);
+      });
+      const cities = [...cityStateByName.keys()].sort();
+      sysCityFilterSelect.innerHTML =
+        `<option value="">All Cities</option>` +
+        cities.map((c) => `<option value="${c}">${cityStateByName.get(c) ? `${c} - ${cityStateByName.get(c)}` : c}</option>`).join("");
+      sysCityFilterSelect.disabled = !state.supplier || cities.length === 0;
+      if (cities.includes(state.sysCity)) {
+        sysCityFilterSelect.value = state.sysCity;
+      } else {
+        state.sysCity = "";
+      }
     }
   }
 
@@ -409,15 +612,27 @@
     if (idQ) rows = rows.filter((r) => r.id.toLowerCase().includes(idQ));
     const providerIdQ = state.providerIdQuery.trim().toLowerCase();
     if (providerIdQ) rows = rows.filter((r) => (r.providerId || "").toLowerCase().includes(providerIdQ));
-    if (state.supplierCity) rows = rows.filter((r) => r.supplierCityId === state.supplierCity);
-    if (state.sysCity) {
-      rows = rows.filter((r) => {
-        const c = resolveSupplierHotelCity(state.supplier, r);
-        return c && String(c.systemCityId) === state.sysCity;
-      });
-    }
     if (state.status === "active") rows = rows.filter((r) => r.active);
     if (state.status === "inactive") rows = rows.filter((r) => !r.active);
+    if (state.starRating) rows = rows.filter((r) => String(r.starRating) === state.starRating);
+
+    if (state.sysCountry) rows = rows.filter((r) => { const loc = systemLocationFor(r); return loc && (getSystemCountryName(loc.country.code) || loc.country.name) === state.sysCountry; });
+    if (state.sysState) rows = rows.filter((r) => { const loc = systemLocationFor(r); return loc && loc.state === state.sysState; });
+    if (state.sysCity) rows = rows.filter((r) => { const loc = systemLocationFor(r); return loc && loc.city === state.sysCity; });
+    const sysHotelIdQ = state.sysHotelIdQuery.trim().toLowerCase();
+    if (sysHotelIdQ) {
+      rows = rows.filter((r) => {
+        const m = findSystemHotelByProviderId(r.providerId);
+        return m && getSystemHotelDisplayId(m.id).toLowerCase().includes(sysHotelIdQ);
+      });
+    }
+    const sysHotelNameQ = state.sysHotelNameQuery.trim().toLowerCase();
+    if (sysHotelNameQ) {
+      rows = rows.filter((r) => {
+        const m = findSystemHotelByProviderId(r.providerId);
+        return m && m.name.toLowerCase().includes(sysHotelNameQ);
+      });
+    }
     return rows;
   }
 
@@ -432,7 +647,7 @@
 
   function render() {
     if (!state.supplier) {
-      tbody.innerHTML = `<tr><td colspan="15" class="empty-state">Select a supplier to view its hotel list</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="16" class="empty-state">Select a supplier to view its hotel list</td></tr>`;
       paginationBar.innerHTML = "";
       updateFiltersSummary();
       return;
@@ -447,55 +662,177 @@
     tbody.innerHTML = pageItems.length
       ? pageItems
           .map((r) => {
-            const countryName = getSystemCountryName(r.country.code) || r.country.name;
-            const countryPlain = `${countryName} (${r.country.code})`;
+            const countryName = getSupplierCountryName(state.supplier, r.country.code);
+            const supplierCountryId = getSupplierCountrySupplierId(state.supplier, r.country.code);
+            const countryPlain = `${countryName} (${supplierCountryId})`;
+            const locationSubtitlePlain = `${r.state ? `${r.state}, ` : ""}${countryPlain}`;
             const matchedHotel = findSystemHotelByProviderId(r.providerId);
-            const systemHotelPlain = matchedHotel ? `${getSystemHotelLabel(matchedHotel.id)} (ID: ${getSystemHotelDisplayId(matchedHotel.id)})` : "";
-            // The "Supplier Hotel -> Supplier City -> System City" chain,
-            // shown in one stacked cell: this row's own resolved supplier
-            // city on top, that supplier city's own mapped system city (or
-            // "Not mapped") underneath — the other, independent path to a
-            // system city besides the Provider-ID-based System Hotel
-            // column. "Not linked" (not "Not mapped") when there's no
-            // supplierCityId at all, since that's a different case: no
-            // known supplier city, vs. a known one that just isn't mapped.
-            const supplierCity = resolveSupplierHotelCity(state.supplier, r);
-            const supplierCitySystemCity = supplierCity && supplierCity.systemCityId !== null ? SYSTEM_CITIES.find((c) => c.id === supplierCity.systemCityId) : null;
-            const supplierCityCell = supplierCity
-              ? `<div style="font-weight:600;">${supplierCity.name}</div>
-                 <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">${supplierCitySystemCity ? getSystemCityLabel(supplierCitySystemCity.id) : "Not mapped"}</div>`
-              : '<span class="text-not-mapped">Not linked</span>';
+            const sysLoc = matchedHotel ? resolveHotelLocation(matchedHotel) : null;
+            const sysCountryName = sysLoc ? getSystemCountryName(sysLoc.country.code) || sysLoc.country.name : null;
             return `
       <tr>
         <td><span class="code-badge">${r.id}</span></td>
-        <td>${truncatableCell(r.name, "name")}</td>
-        <td>${truncatableCell(r.address, "address")}</td>
-        <td>${truncatableCell(r.city, "city")}</td>
-        <td>${truncatableCell(r.state, "state")}</td>
         <td>
-          <div class="truncatable truncatable--country" title="${countryPlain}">
-            <span class="truncatable-text">${countryName} <span class="code-badge">${r.country.code}</span></span>
+          <div class="supplier-hotel-cell">
+            <button type="button" class="info-icon-btn" data-hotel-name="${r.name}" data-hotel-address="${r.address}" aria-label="View full name & address">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 11v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="8" r="1" fill="currentColor"/></svg>
+            </button>
+            <div class="supplier-hotel-text">
+              <div class="truncatable truncatable--supplierhotel" title="${r.name}">
+                <span class="truncatable-text" style="font-weight:600;">${r.name}</span>
+              </div>
+              <div class="truncatable truncatable--supplierhotel" title="${r.address}" style="margin-top:2px;">
+                <span class="truncatable-text" style="font-size:12px; color:var(--text-muted);">${r.address}</span>
+              </div>
+            </div>
           </div>
         </td>
-        <td>${truncatableCell(`${r.starRating} ★`, "starrating")}</td>
-        <td>${truncatableCell(r.email, "email")}</td>
-        <td>${truncatableCell(r.phoneNumber, "phone")}</td>
-        <td>${truncatableCell(r.providerId, "providerid")}</td>
-        <td>${supplierCityCell}</td>
+        <td>
+          <div class="location-cell">
+            <button type="button" class="info-icon-btn" data-location-city="${r.city}" data-location-state="${r.state || "—"}" data-location-country-name="${countryName}" data-location-country-id="${supplierCountryId}" aria-label="View full location details">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 11v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="8" r="1" fill="currentColor"/></svg>
+            </button>
+            <div class="location-text">
+              <div class="truncatable truncatable--location" title="${r.city}">
+                <span class="truncatable-text" style="font-weight:600;">${r.city}</span>
+              </div>
+              <div class="truncatable truncatable--location" title="${locationSubtitlePlain}" style="margin-top:2px;">
+                <span class="truncatable-text" style="font-size:12px; color:var(--text-muted);">${locationSubtitlePlain}</span>
+              </div>
+            </div>
+          </div>
+        </td>
+        <td>
+          <div class="gps-cell">
+            <button type="button" class="info-icon-btn" data-gps-lat="${r.latitude}" data-gps-lng="${r.longitude}" aria-label="View full GPS coordinates">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 11v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="8" r="1" fill="currentColor"/></svg>
+            </button>
+            <div class="gps-text">
+              <div class="truncatable truncatable--gps" title="Lat: ${r.latitude}">
+                <span class="truncatable-text" style="font-size:12px;"><strong>Lat:</strong> ${r.latitude}</span>
+              </div>
+              <div class="truncatable truncatable--gps" title="Long: ${r.longitude}" style="margin-top:2px;">
+                <span class="truncatable-text" style="font-size:12px;"><strong>Long:</strong> ${r.longitude}</span>
+              </div>
+            </div>
+          </div>
+        </td>
+        <td>${truncatableCell("⭐".repeat(r.starRating), "starrating")}</td>
+        <td>
+          <div class="contact-cell">
+            <button type="button" class="info-icon-btn" data-contact-email="${r.email || "—"}" data-contact-phone="${r.phoneNumber || "—"}" aria-label="View full contact details">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 11v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="8" r="1" fill="currentColor"/></svg>
+            </button>
+            <div class="contact-text">
+              <div class="truncatable truncatable--contact" title="${r.email || "—"}">
+                ${r.email ? `<span class="truncatable-text" style="font-weight:600;">${r.email}</span>` : '<span style="color:var(--text-muted)">—</span>'}
+              </div>
+              <div class="truncatable truncatable--contact" title="${r.phoneNumber || "—"}" style="margin-top:2px;">
+                ${r.phoneNumber ? `<span class="truncatable-text" style="font-size:12px; color:var(--text-muted);">${r.phoneNumber}</span>` : '<span style="font-size:12px; color:var(--text-muted);">—</span>'}
+              </div>
+            </div>
+          </div>
+        </td>
+        <td><span class="pill ${r.active ? "success" : "danger"}">${r.active ? "Active" : "Inactive"}</span></td>
+        <td>
+          <div class="truncatable truncatable--updatedate" title="${formatTimestamp(r.updatedAt)}">
+            <span class="truncatable-text" style="font-weight:600;">${formatDateOnly(r.updatedAt)}</span>
+          </div>
+          <div class="truncatable truncatable--updatedate" title="${formatTimestamp(r.updatedAt)}" style="margin-top:2px;">
+            <span class="truncatable-text" style="font-size:12px; color:var(--text-muted);">${formatTimeOnly(r.updatedAt)}</span>
+          </div>
+        </td>
+        <td>${matchedHotel ? `<span class="code-badge">${getSystemHotelDisplayId(matchedHotel.id)}</span>` : '<span class="text-not-mapped">Not mapped</span>'}</td>
         <td>${
           matchedHotel
-            ? `<div class="truncatable truncatable--systemhotel" title="${systemHotelPlain}">
-                 <span class="truncatable-text">${getSystemHotelLabel(matchedHotel.id)} <span class="code-badge">${getSystemHotelDisplayId(matchedHotel.id)}</span></span>
+            ? `<div class="supplier-hotel-cell">
+                 <button type="button" class="info-icon-btn" data-syshotel-name="${matchedHotel.name}" data-syshotel-address="${matchedHotel.address}" aria-label="View full system hotel name & address">
+                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 11v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="8" r="1" fill="currentColor"/></svg>
+                 </button>
+                 <div class="supplier-hotel-text">
+                   <div class="truncatable truncatable--supplierhotel" title="${matchedHotel.name}">
+                     <span class="truncatable-text" style="font-weight:600;">${matchedHotel.name}</span>
+                   </div>
+                   <div class="truncatable truncatable--supplierhotel" title="${matchedHotel.address}" style="margin-top:2px;">
+                     <span class="truncatable-text" style="font-size:12px; color:var(--text-muted);">${matchedHotel.address}</span>
+                   </div>
+                 </div>
                </div>`
             : '<span class="text-not-mapped">Not mapped</span>'
         }</td>
-        <td><span class="pill ${r.active ? "success" : "danger"}">${r.active ? "Active" : "Inactive"}</span></td>
-        <td>${truncatableCell(formatTimestamp(r.updatedAt), "updatedate")}</td>
-        <td></td>
+        <td>${
+          sysLoc
+            ? `<div class="location-cell">
+                 <button type="button" class="info-icon-btn" data-sysloc-city="${sysLoc.city}" data-sysloc-state="${sysLoc.state || "—"}" data-sysloc-country-name="${sysCountryName}" data-sysloc-country-code="${sysLoc.country.code}" aria-label="View full system location details">
+                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 11v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="8" r="1" fill="currentColor"/></svg>
+                 </button>
+                 <div class="location-text">
+                   <div class="truncatable truncatable--location" title="${sysLoc.city}">
+                     <span class="truncatable-text" style="font-weight:600;">${sysLoc.city}</span>
+                   </div>
+                   <div class="truncatable truncatable--location" title="${sysLoc.state ? `${sysLoc.state}, ` : ""}${sysCountryName} (${sysLoc.country.code})" style="margin-top:2px;">
+                     <span class="truncatable-text" style="font-size:12px; color:var(--text-muted);">${sysLoc.state ? `${sysLoc.state}, ` : ""}${sysCountryName} (${sysLoc.country.code})</span>
+                   </div>
+                 </div>
+               </div>`
+            : '<span class="text-not-mapped">Not mapped</span>'
+        }</td>
+        <td>${
+          matchedHotel
+            ? `<div class="gps-cell">
+                 <button type="button" class="info-icon-btn" data-sysgps-lat="${matchedHotel.latitude}" data-sysgps-lng="${matchedHotel.longitude}" aria-label="View full system GPS coordinates">
+                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 11v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="8" r="1" fill="currentColor"/></svg>
+                 </button>
+                 <div class="gps-text">
+                   <div class="truncatable truncatable--gps" title="Lat: ${matchedHotel.latitude}">
+                     <span class="truncatable-text" style="font-size:12px;"><strong>Lat:</strong> ${matchedHotel.latitude}</span>
+                   </div>
+                   <div class="truncatable truncatable--gps" title="Long: ${matchedHotel.longitude}" style="margin-top:2px;">
+                     <span class="truncatable-text" style="font-size:12px;"><strong>Long:</strong> ${matchedHotel.longitude}</span>
+                   </div>
+                 </div>
+               </div>`
+            : '<span class="text-not-mapped">Not mapped</span>'
+        }</td>
+        <td>${matchedHotel ? truncatableCell("⭐".repeat(matchedHotel.starRating), "starrating") : '<span class="text-not-mapped">Not mapped</span>'}</td>
+        <td>${
+          matchedHotel
+            ? `<div class="contact-cell">
+                 <button type="button" class="info-icon-btn" data-syscontact-email="${matchedHotel.email || "—"}" data-syscontact-phone="${matchedHotel.phoneNumber || "—"}" aria-label="View full system contact details">
+                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 11v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="8" r="1" fill="currentColor"/></svg>
+                 </button>
+                 <div class="contact-text">
+                   <div class="truncatable truncatable--contact" title="${matchedHotel.email || "—"}">
+                     ${matchedHotel.email ? `<span class="truncatable-text" style="font-weight:600;">${matchedHotel.email}</span>` : '<span style="color:var(--text-muted)">—</span>'}
+                   </div>
+                   <div class="truncatable truncatable--contact" title="${matchedHotel.phoneNumber || "—"}" style="margin-top:2px;">
+                     ${matchedHotel.phoneNumber ? `<span class="truncatable-text" style="font-size:12px; color:var(--text-muted);">${matchedHotel.phoneNumber}</span>` : '<span style="font-size:12px; color:var(--text-muted);">—</span>'}
+                   </div>
+                 </div>
+               </div>`
+            : '<span class="text-not-mapped">Not mapped</span>'
+        }</td>
+        <td>${matchedHotel ? `<span class="pill ${matchedHotel.active ? "success" : "danger"}">${matchedHotel.active ? "Active" : "Inactive"}</span>` : '<span class="text-not-mapped">Not mapped</span>'}</td>
+        <td>
+          <div class="row-actions">
+            <button class="action-btn" data-edit-city-btn data-row-id="${r.id}" aria-label="Edit city for ${r.name}">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4L16.5 3.5z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+            </button>
+            <button class="action-btn" data-history-btn data-row-id="${r.id}" aria-label="View edit history for ${r.name}">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 109-9 9 9 0 00-7 3.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3 3.5V8h4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 7.5V12l3.2 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <button class="action-btn" data-toggle-active-btn data-row-id="${r.id}" aria-label="${r.active ? "Deactivate" : "Activate"} ${r.name}">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 2v10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M6 5a8 8 0 106.5-1.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            </button>
+            <button class="action-btn" data-details-btn data-row-id="${r.id}" aria-label="View raw details for ${r.name}">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M6 3h9l3 3v15H6z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 10h6M9 13h6M9 16h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            </button>
+          </div>
+        </td>
       </tr>`;
           })
           .join("")
-      : `<tr><td colspan="15" class="empty-state">No hotels match this filter</td></tr>`;
+      : `<tr><td colspan="16" class="empty-state">No hotels match this filter</td></tr>`;
 
     renderPagination(paginationBar, {
       total: filtered.length,
@@ -540,12 +877,13 @@
     if (state.country) entries.push({ key: "country", label: "Country", value: state.country });
     if (state.hotelState) entries.push({ key: "hotelState", label: "State", value: state.hotelState });
     if (state.city) entries.push({ key: "city", label: "City", value: state.city });
-    if (state.supplierCity) {
-      const c = currentRows().map((r) => resolveSupplierHotelCity(state.supplier, r)).find((c) => c && c.id === state.supplierCity);
-      entries.push({ key: "supplierCity", label: "Supplier City", value: c ? c.name : state.supplierCity });
-    }
-    if (state.sysCity) entries.push({ key: "sysCity", label: "System City", value: SYSTEM_CITIES.find((c) => String(c.id) === state.sysCity)?.name || state.sysCity });
     if (state.status !== "all") entries.push({ key: "status", label: "Status", value: state.status === "active" ? "Active" : "Inactive" });
+    if (state.starRating) entries.push({ key: "starRating", label: "Star Rating", value: `${state.starRating} ★` });
+    if (state.sysCountry) entries.push({ key: "sysCountry", label: "System Country", value: state.sysCountry });
+    if (state.sysState) entries.push({ key: "sysState", label: "System State", value: state.sysState });
+    if (state.sysCity) entries.push({ key: "sysCity", label: "System City", value: state.sysCity });
+    if (state.sysHotelIdQuery.trim()) entries.push({ key: "sysHotelIdQuery", label: "System Hotel ID", value: state.sysHotelIdQuery.trim() });
+    if (state.sysHotelNameQuery.trim()) entries.push({ key: "sysHotelNameQuery", label: "System Hotel Name", value: state.sysHotelNameQuery.trim() });
     return entries;
   }
 
@@ -559,6 +897,7 @@
     query: () => {
       state.query = "";
       hotelSearch.value = "";
+      supplierHotelNameFilter.value = "";
       updateFiltersSummary();
     },
     idQuery: () => {
@@ -583,17 +922,35 @@
       cityFilterSelect.value = "";
       cityFilterSelect.dispatchEvent(new Event("change"));
     },
-    supplierCity: () => {
-      supplierCityFilterSelect.value = "";
-      supplierCityFilterSelect.dispatchEvent(new Event("change"));
+    status: () => {
+      statusFilterSelect.value = "all";
+      statusFilterSelect.dispatchEvent(new Event("change"));
+    },
+    starRating: () => {
+      supplierHotelStarRatingFilter.value = "";
+      supplierHotelStarRatingFilter.dispatchEvent(new Event("change"));
+    },
+    sysCountry: () => {
+      sysCountryFilterSelect.value = "";
+      sysCountryFilterSelect.dispatchEvent(new Event("change"));
+    },
+    sysState: () => {
+      sysStateFilterSelect.value = "";
+      sysStateFilterSelect.dispatchEvent(new Event("change"));
     },
     sysCity: () => {
       sysCityFilterSelect.value = "";
       sysCityFilterSelect.dispatchEvent(new Event("change"));
     },
-    status: () => {
-      statusFilterSelect.value = "all";
-      statusFilterSelect.dispatchEvent(new Event("change"));
+    sysHotelIdQuery: () => {
+      state.sysHotelIdQuery = "";
+      sysHotelIdFilter.value = "";
+      updateFiltersSummary();
+    },
+    sysHotelNameQuery: () => {
+      state.sysHotelNameQuery = "";
+      sysHotelNameFilter.value = "";
+      updateFiltersSummary();
     },
   };
 
@@ -648,18 +1005,26 @@
     state.country = "";
     state.hotelState = "";
     state.city = "";
-    state.supplierCity = "";
-    state.sysCity = "";
     state.status = "all";
+    state.starRating = "";
+    state.sysCountry = "";
+    state.sysState = "";
+    state.sysCity = "";
+    state.sysHotelIdQuery = "";
+    state.sysHotelNameQuery = "";
     state.query = "";
     state.fuzzy = false;
     state.idQuery = "";
     state.providerIdQuery = "";
     hotelSearch.value = "";
+    supplierHotelNameFilter.value = "";
     supplierHotelFuzzyToggle.checked = false;
     supplierHotelIdSearch.value = "";
     supplierHotelProviderIdSearch.value = "";
     statusFilterSelect.value = "all";
+    supplierHotelStarRatingFilter.value = "";
+    sysHotelIdFilter.value = "";
+    sysHotelNameFilter.value = "";
     hotelSearch.disabled = !state.supplier;
     supplierHotelFuzzyToggle.disabled = !state.supplier;
     supplierHotelSearchBtn.disabled = !state.supplier;
@@ -667,8 +1032,7 @@
     revealValuesToggle.disabled = !state.supplier;
     if (!state.supplier) setFiltersPanelOpen(false);
     updateFilterOptions();
-    updateSupplierCityFilterOptions();
-    updateSysCityFilterOptions();
+    updateSysFilterOptions();
     render();
   });
 
@@ -712,8 +1076,31 @@
     updateFiltersSummary();
   });
 
-  supplierCityFilterSelect.addEventListener("change", () => {
-    state.supplierCity = supplierCityFilterSelect.value;
+  statusFilterSelect.addEventListener("change", () => {
+    state.status = statusFilterSelect.value;
+    updateFiltersSummary();
+  });
+
+  supplierHotelStarRatingFilter.addEventListener("change", () => {
+    state.starRating = supplierHotelStarRatingFilter.value;
+    updateFiltersSummary();
+  });
+
+  // Country -> State -> City cascade, mirroring the Supplier section's own
+  // (candidatesForFilters()/updateFilterOptions()) but resolved from the
+  // matched System Hotel via systemCandidatesForFilters()/updateSysFilterOptions().
+  sysCountryFilterSelect.addEventListener("change", () => {
+    state.sysCountry = sysCountryFilterSelect.value;
+    state.sysState = "";
+    state.sysCity = "";
+    updateSysFilterOptions();
+    updateFiltersSummary();
+  });
+
+  sysStateFilterSelect.addEventListener("change", () => {
+    state.sysState = sysStateFilterSelect.value;
+    state.sysCity = "";
+    updateSysFilterOptions();
     updateFiltersSummary();
   });
 
@@ -722,13 +1109,29 @@
     updateFiltersSummary();
   });
 
-  statusFilterSelect.addEventListener("change", () => {
-    state.status = statusFilterSelect.value;
+  sysHotelIdFilter.addEventListener("input", () => {
+    state.sysHotelIdQuery = sysHotelIdFilter.value;
     updateFiltersSummary();
   });
 
+  sysHotelNameFilter.addEventListener("input", () => {
+    state.sysHotelNameQuery = sysHotelNameFilter.value;
+    updateFiltersSummary();
+  });
+
+  // Hotel Name is deliberately the same filter (state.query) as the main
+  // toolbar's own search box, just also exposed inside the Supplier section
+  // for visibility — kept in sync both ways rather than being a second,
+  // independent criterion.
   hotelSearch.addEventListener("input", () => {
     state.query = hotelSearch.value;
+    supplierHotelNameFilter.value = hotelSearch.value;
+    updateFiltersSummary();
+  });
+
+  supplierHotelNameFilter.addEventListener("input", () => {
+    state.query = supplierHotelNameFilter.value;
+    hotelSearch.value = supplierHotelNameFilter.value;
     updateFiltersSummary();
   });
 
@@ -763,6 +1166,283 @@
   onEnterKey(hotelSearch, runSearchNow);
   onEnterKey(supplierHotelIdSearch, runSearchNow);
   onEnterKey(supplierHotelProviderIdSearch, runSearchNow);
+
+  let currentDetailsJson = "";
+
+  document.addEventListener("click", (e) => {
+    const hotelBtn = e.target.closest("[data-hotel-name]");
+    if (hotelBtn) {
+      openDetailPopover(hotelBtn, [
+        { label: "Name", value: hotelBtn.dataset.hotelName },
+        { label: "Address", value: hotelBtn.dataset.hotelAddress },
+      ]);
+      return;
+    }
+    const locationBtn = e.target.closest("[data-location-city]");
+    if (locationBtn) {
+      openDetailPopover(locationBtn, [
+        { label: "City", value: locationBtn.dataset.locationCity },
+        { label: "State", value: locationBtn.dataset.locationState },
+        { label: "Country", value: locationBtn.dataset.locationCountryName },
+        { label: "Country ID", value: locationBtn.dataset.locationCountryId },
+      ]);
+      return;
+    }
+    const gpsBtn = e.target.closest("[data-gps-lat]");
+    if (gpsBtn) {
+      openDetailPopover(gpsBtn, [
+        { label: "Latitude", value: gpsBtn.dataset.gpsLat },
+        { label: "Longitude", value: gpsBtn.dataset.gpsLng },
+      ]);
+      return;
+    }
+    const contactBtn = e.target.closest("[data-contact-email]");
+    if (contactBtn) {
+      openDetailPopover(contactBtn, [
+        { label: "Email", value: contactBtn.dataset.contactEmail },
+        { label: "Phone", value: contactBtn.dataset.contactPhone },
+      ]);
+      return;
+    }
+    const sysHotelBtn = e.target.closest("[data-syshotel-name]");
+    if (sysHotelBtn) {
+      openDetailPopover(sysHotelBtn, [
+        { label: "Name", value: sysHotelBtn.dataset.syshotelName },
+        { label: "Address", value: sysHotelBtn.dataset.syshotelAddress },
+      ]);
+      return;
+    }
+    const sysLocBtn = e.target.closest("[data-sysloc-city]");
+    if (sysLocBtn) {
+      openDetailPopover(sysLocBtn, [
+        { label: "City", value: sysLocBtn.dataset.syslocCity },
+        { label: "State", value: sysLocBtn.dataset.syslocState },
+        { label: "Country", value: sysLocBtn.dataset.syslocCountryName },
+        { label: "Country Code", value: sysLocBtn.dataset.syslocCountryCode },
+      ]);
+      return;
+    }
+    const sysGpsBtn = e.target.closest("[data-sysgps-lat]");
+    if (sysGpsBtn) {
+      openDetailPopover(sysGpsBtn, [
+        { label: "Latitude", value: sysGpsBtn.dataset.sysgpsLat },
+        { label: "Longitude", value: sysGpsBtn.dataset.sysgpsLng },
+      ]);
+      return;
+    }
+    const sysContactBtn = e.target.closest("[data-syscontact-email]");
+    if (sysContactBtn) {
+      openDetailPopover(sysContactBtn, [
+        { label: "Email", value: sysContactBtn.dataset.syscontactEmail },
+        { label: "Phone", value: sysContactBtn.dataset.syscontactPhone },
+      ]);
+      return;
+    }
+
+    const historyBtn = e.target.closest("[data-history-btn]");
+    if (historyBtn) {
+      const record = currentRows().find((h) => h.id === historyBtn.dataset.rowId);
+      if (!record) return;
+      document.getElementById("historyHotelName").textContent = `— ${record.name}`;
+      showHistoryList(record.history, "No edit history yet");
+      openModal(document.getElementById("historyModal"));
+      return;
+    }
+
+    const toggleBtn = e.target.closest("[data-toggle-active-btn]");
+    if (toggleBtn) {
+      const record = currentRows().find((h) => h.id === toggleBtn.dataset.rowId);
+      if (!record) return;
+      const wasActive = record.active;
+      record.active = !record.active;
+      record.history.push({
+        operation: "Status Change",
+        status: record.active,
+        description: `Status: ${wasActive ? "Active" : "Inactive"} -> ${record.active ? "Active" : "Inactive"}`,
+        userName: CURRENT_USER.name,
+        userEmail: CURRENT_USER.email,
+        timestamp: new Date(),
+      });
+      saveToStorage("supplierHotels", supplierHotels);
+      render();
+      showToast(`${record.name} marked ${record.active ? "Active" : "Inactive"}`);
+      return;
+    }
+
+    const detailsBtn = e.target.closest("[data-details-btn]");
+    if (detailsBtn) {
+      const record = currentRows().find((h) => h.id === detailsBtn.dataset.rowId);
+      if (!record) return;
+      const { history, ...detailsRecord } = record; // history has its own action, not "details"
+      currentDetailsJson = JSON.stringify(detailsRecord, null, 2);
+      document.getElementById("detailsHotelName").textContent = `— ${record.name}`;
+      document.getElementById("detailsJson").textContent = currentDetailsJson;
+      openModal(document.getElementById("detailsModal"));
+      return;
+    }
+
+    const editCityBtn = e.target.closest("[data-edit-city-btn]");
+    if (editCityBtn) {
+      const record = currentRows().find((h) => h.id === editCityBtn.dataset.rowId);
+      if (record) openEditCityForm(record);
+    }
+  });
+
+  document.getElementById("copyDetailsJsonBtn").addEventListener("click", (e) => {
+    const btn = e.currentTarget;
+    writeToClipboard(currentDetailsJson).then(() => flashCopied(btn));
+  });
+
+  // ---------- Edit City (only the city — everything else on the row is
+  // untouched) ----------
+  const editCityModal = document.getElementById("editCityModal");
+  const editCityHotelName = document.getElementById("editCityHotelName");
+  const editCityCountry = document.getElementById("editCityCountry");
+  const editCityState = document.getElementById("editCityState");
+  const editCityCity = document.getElementById("editCityCity");
+
+  function populateEditCityStates(countryCode, selectedState) {
+    const states = getStatesForCountryCode(countryCode);
+    if (states.length) {
+      editCityState.disabled = false;
+      editCityState.innerHTML = `<option value="">Select state</option>` + states.map((s) => `<option value="${s}">${s}</option>`).join("");
+      if (selectedState) editCityState.value = selectedState;
+    } else {
+      editCityState.disabled = true;
+      editCityState.innerHTML = `<option value="">No state required</option>`;
+    }
+  }
+
+  // City is picked from this supplier's own city list (supplierCities[state.supplier])
+  // — same "country gates the list, state narrows it but never gates" convention
+  // as hotel-system.html's own Add/Edit form uses against SYSTEM_CITIES.
+  function populateEditCityCities(countryCode, stateValue, selectedCityId) {
+    if (!countryCode) {
+      editCityCity.disabled = true;
+      editCityCity.innerHTML = `<option value="">Select country first</option>`;
+      return;
+    }
+    let candidates = (supplierCities[state.supplier] || []).filter((c) => c.countryCode === countryCode);
+    if (stateValue) candidates = candidates.filter((c) => c.state === stateValue);
+    editCityCity.disabled = candidates.length === 0;
+    editCityCity.innerHTML = candidates.length
+      ? `<option value="">Select city</option>` + candidates.map((c) => `<option value="${c.id}">${c.name}${c.state ? ` - ${c.state}` : ""}</option>`).join("")
+      : `<option value="">No eligible cities here</option>`;
+    if (selectedCityId !== null && selectedCityId !== undefined) {
+      editCityCity.value = selectedCityId;
+    }
+  }
+
+  editCityCountry.addEventListener("change", () => {
+    populateEditCityStates(editCityCountry.value, "");
+    populateEditCityCities(editCityCountry.value, "", null);
+  });
+
+  editCityState.addEventListener("change", () => {
+    populateEditCityCities(editCityCountry.value, editCityState.value, null);
+  });
+
+  // "ZZ" (the stress-test country) is deliberately excluded here — see its
+  // own seed comment in js/data.js — so it never shows up as something a
+  // real edit can pick.
+  function openEditCityForm(record) {
+    editCityModal.dataset.activeRow = record.id;
+    editCityHotelName.textContent = `— ${record.name}`;
+
+    editCityCountry.innerHTML =
+      `<option value="">Select country</option>` +
+      (supplierCountries[state.supplier] || [])
+        .filter((c) => c.code !== "ZZ")
+        .map((c) => `<option value="${c.code}">${c.name}</option>`)
+        .join("");
+    editCityCountry.value = record.country.code;
+    populateEditCityStates(record.country.code, record.state);
+    populateEditCityCities(record.country.code, record.state, record.supplierCityId);
+
+    openModal(editCityModal);
+  }
+
+  document.getElementById("editCitySaveBtn").addEventListener("click", () => {
+    const record = currentRows().find((h) => h.id === editCityModal.dataset.activeRow);
+    if (!record) return;
+    const countryCode = editCityCountry.value;
+    if (!countryCode) {
+      showToast("Please select a country", "error");
+      return;
+    }
+    const cityRecord = editCityCity.value ? (supplierCities[state.supplier] || []).find((c) => c.id === editCityCity.value) : null;
+    if (!cityRecord) {
+      showToast("Please select a city", "error");
+      return;
+    }
+    const countryMeta = supplierCountries[state.supplier].find((c) => c.code === countryCode);
+
+    const oldCityLabel = record.city ? `${record.city}${record.state ? `, ${record.state}` : ""}` : "Not set";
+    const newCityLabel = `${cityRecord.name}${cityRecord.state ? `, ${cityRecord.state}` : ""}`;
+
+    record.city = cityRecord.name;
+    record.state = cityRecord.state;
+    record.country = { name: countryMeta.name, code: countryMeta.code };
+    record.supplierCityId = cityRecord.id;
+    record.history.push({
+      operation: "Edit",
+      description: `City: ${oldCityLabel} -> ${newCityLabel}`,
+      userName: CURRENT_USER.name,
+      userEmail: CURRENT_USER.email,
+      timestamp: new Date(),
+    });
+
+    saveToStorage("supplierHotels", supplierHotels);
+    closeModal(editCityModal);
+    render();
+    showToast(`${record.name}'s city updated`);
+  });
+
+  // Pre-select supplier/city when arriving from a deep link, e.g.
+  // hotel-supplier.html?supplier=agoda&supplierCityId=AG-US-001 (used by the
+  // "View Hotels" action on the Supplier City List page) — same pattern
+  // city-supplier.html's own deep-link handling uses.
+  const urlParams = new URLSearchParams(location.search);
+  const linkedSupplier = urlParams.get("supplier");
+  const linkedSupplierCityId = urlParams.get("supplierCityId");
+
+  if (linkedSupplier && supplierFilter.querySelector(`option[value="${linkedSupplier}"]`)) {
+    supplierFilter.value = linkedSupplier;
+    supplierFilter.dispatchEvent(new Event("change"));
+
+    if (linkedSupplierCityId) {
+      const cityRecord = (supplierCities[linkedSupplier] || []).find((c) => c.id === linkedSupplierCityId);
+      if (cityRecord) {
+        const countryName = getSupplierCountryName(linkedSupplier, cityRecord.countryCode);
+
+        // The dropdowns only list values that already have hotel rows for
+        // this supplier, but the deep link can point at a city with none
+        // yet — add the missing option(s) so the filter still narrows to
+        // that exact city instead of silently falling back to "all".
+        if (!countryFilterSelect.querySelector(`option[value="${countryName}"]`)) {
+          countryFilterSelect.insertAdjacentHTML("beforeend", `<option value="${countryName}">${countryName}</option>`);
+        }
+        countryFilterSelect.value = countryName;
+        countryFilterSelect.dispatchEvent(new Event("change"));
+
+        if (cityRecord.state) {
+          if (!stateFilterSelect.querySelector(`option[value="${cityRecord.state}"]`)) {
+            stateFilterSelect.insertAdjacentHTML("beforeend", `<option value="${cityRecord.state}">${cityRecord.state}</option>`);
+          }
+          stateFilterSelect.value = cityRecord.state;
+          stateFilterSelect.dispatchEvent(new Event("change"));
+        }
+
+        if (!cityFilterSelect.querySelector(`option[value="${cityRecord.name}"]`)) {
+          cityFilterSelect.insertAdjacentHTML("beforeend", `<option value="${cityRecord.name}">${cityRecord.name}</option>`);
+        }
+        cityFilterSelect.value = cityRecord.name;
+        cityFilterSelect.dispatchEvent(new Event("change"));
+
+        runSearchNow();
+      }
+    }
+  }
 
   render();
 </script>

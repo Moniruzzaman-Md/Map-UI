@@ -111,6 +111,9 @@
           <button class="info-icon-btn" data-info-target="#hotelListInfo" data-info-title="System Hotel List" aria-label="About this page">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 11v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="8" r="1" fill="currentColor"/></svg>
           </button>
+          <button class="info-icon-btn" data-info-target="#hotelListDevNotes" data-info-title="Developer Notes — System Hotel List" aria-label="Developer notes for this page">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 8l-4 4 4 4M15 8l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
         </div>
       </div>
       <hr class="page-divider" />
@@ -118,9 +121,25 @@
       <template id="hotelListInfo">
         <p>This page manages the <strong>master list of hotels</strong> used across the system.</p>
         <ul>
+          <li><strong>Hotel</strong> — the hotel's name and address. Click the info icon to see both in full.</li>
+          <li><strong>Location</strong> — city, state, and country. Click the info icon for the full breakdown, including the country's code.</li>
+          <li><strong>GPS</strong> — latitude and longitude. Click the info icon to see the exact coordinates.</li>
+          <li><strong>Contact</strong> — email and phone number. Click the info icon to see both in full.</li>
           <li><strong>Edit</strong> — every field is editable except the hotel's <strong>Id</strong> and <strong>Provider Id</strong>, which are fixed once the hotel is created.</li>
           <li><strong>History</strong> — view every change: creation, edits, and status changes.</li>
           <li><strong>Active/Inactive toggle</strong> — controls whether a hotel is available for booking. Changes immediately, no confirmation needed, and is logged to History.</li>
+          <li>Type a name and tick <strong>Fuzzy</strong> to match it loosely (forgiving of typos or skipped letters) instead of requiring an exact substring.</li>
+          <li>Nothing you type or pick filters the list right away — click <strong>Search</strong> (or press Enter in a search box) to apply it. Click <strong>Filters</strong> to reveal the rest: ID, Provider ID, Country/State/City, Star Rating, and Status. City only opens up once a Country is picked. While collapsed, anything you've set shows as a removable chip — click a chip's × to clear just that one filter. <strong>Reset</strong> clears everything and shows the full list immediately, no Search needed.</li>
+        </ul>
+      </template>
+
+      <template id="hotelListDevNotes">
+        <p>The single master hotel list every other hotel-facing page reads from — a supplier's own hotel feed is matched to one of these by Provider ID, never stored as a direct link.</p>
+        <ul>
+          <li><strong>Id</strong> — permanent once assigned, never editable.</li>
+          <li><strong>Location</strong> — resolved live from the hotel's own linked city record rather than a stored snapshot, so a rename to that city or its country is reflected here immediately without re-saving every hotel.</li>
+          <li><strong>City</strong> — picked from the master city list, gated behind Country the same way everywhere else in the project is: State narrows the choices but is never required, City requires a Country first.</li>
+          <li><strong>Filters</strong> — nothing in the toolbar re-queries the list on its own; every field only updates the pending state and the live Filters count pill / chip summary (visible once the panel is collapsed). The list itself only re-queries on <strong>Search</strong> (or Enter in a search box) or <strong>Reset</strong>, which re-renders immediately.</li>
         </ul>
       </template>
 
@@ -223,14 +242,11 @@
             <thead>
               <tr>
                 <th>ID</th>
-                <th>Name</th>
-                <th>Address</th>
-                <th>City</th>
-                <th>State</th>
-                <th>Country</th>
+                <th>Hotel</th>
+                <th>Location</th>
+                <th>GPS</th>
                 <th>Star Rating</th>
-                <th>Email</th>
-                <th>Phone Number</th>
+                <th>Contact</th>
                 <th>Provider ID</th>
                 <th>Status</th>
                 <th>Action</th>
@@ -415,13 +431,28 @@
   // Resolved live via resolveHotelLocation() (js/data.js) rather than the
   // hotel's own stored snapshot, so a rename on city-system.html or
   // country-system.html is reflected here without re-saving every hotel.
+  // City is gated behind Country (loaded country-wise) — picking a Country
+  // is required before City has anything to show, same reasoning as State
+  // being gated on Country already.
   function updateCityFilterOptions() {
-    let candidates = SYSTEM_HOTELS;
-    if (state.country) candidates = candidates.filter((h) => (getSystemCountryName(resolveHotelLocation(h).country.code) || resolveHotelLocation(h).country.name) === state.country);
+    if (!state.country) {
+      cityFilterSelect.innerHTML = `<option value="">Select country first</option>`;
+      cityFilterSelect.disabled = true;
+      state.city = "";
+      return;
+    }
+    let candidates = SYSTEM_HOTELS.filter((h) => (getSystemCountryName(resolveHotelLocation(h).country.code) || resolveHotelLocation(h).country.name) === state.country);
     if (state.hotelState) candidates = candidates.filter((h) => resolveHotelLocation(h).state === state.hotelState);
-    const cities = [...new Set(candidates.map((h) => resolveHotelLocation(h).city))].sort();
+    const cityStateByName = new Map();
+    candidates.forEach((h) => {
+      const loc = resolveHotelLocation(h);
+      if (!cityStateByName.has(loc.city)) cityStateByName.set(loc.city, loc.state);
+    });
+    const cities = [...cityStateByName.keys()].sort();
     const current = state.city;
-    cityFilterSelect.innerHTML = `<option value="">All Cities</option>` + cities.map((c) => `<option value="${c}">${c}</option>`).join("");
+    cityFilterSelect.innerHTML =
+      `<option value="">All Cities</option>` +
+      cities.map((c) => `<option value="${c}">${cityStateByName.get(c) ? `${c} - ${cityStateByName.get(c)}` : c}</option>`).join("");
     cityFilterSelect.disabled = cities.length === 0;
     if (cities.includes(current)) {
       cityFilterSelect.value = current;
@@ -460,22 +491,71 @@
           .map((h) => {
             const loc = resolveHotelLocation(h);
             const countryName = getSystemCountryName(loc.country.code) || loc.country.name;
-            const countryPlain = `${loc.country.code} - ${countryName}`;
+            const locationSubtitlePlain = `${loc.state ? `${loc.state}, ` : ""}${countryName} (${loc.country.code})`;
             return `
       <tr data-row-id="${h.id}">
         <td>${truncatableCell(getSystemHotelDisplayId(h.id), "id")}</td>
-        <td data-col="name">${truncatableCell(h.name, "name")}</td>
-        <td>${truncatableCell(h.address, "address")}</td>
-        <td>${truncatableCell(loc.city, "city")}</td>
-        <td>${truncatableCell(loc.state, "state")}</td>
+        <td data-col="name">
+          <div class="supplier-hotel-cell">
+            <button type="button" class="info-icon-btn" data-hotel-name="${h.name}" data-hotel-address="${h.address}" aria-label="View full name & address">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 11v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="8" r="1" fill="currentColor"/></svg>
+            </button>
+            <div class="supplier-hotel-text">
+              <div class="truncatable truncatable--supplierhotel" title="${h.name}">
+                <span class="truncatable-text" style="font-weight:600;">${h.name}</span>
+              </div>
+              <div class="truncatable truncatable--supplierhotel" title="${h.address}" style="margin-top:2px;">
+                <span class="truncatable-text" style="font-size:12px; color:var(--text-muted);">${h.address}</span>
+              </div>
+            </div>
+          </div>
+        </td>
         <td>
-          <div class="truncatable truncatable--country" title="${countryPlain}">
-            <span class="truncatable-text"><span class="code-badge">${loc.country.code}</span> ${countryName}</span>
+          <div class="location-cell">
+            <button type="button" class="info-icon-btn" data-location-city="${loc.city}" data-location-state="${loc.state || "—"}" data-location-country-name="${countryName}" data-location-country-code="${loc.country.code}" aria-label="View full location details">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 11v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="8" r="1" fill="currentColor"/></svg>
+            </button>
+            <div class="location-text">
+              <div class="truncatable truncatable--location" title="${loc.city}">
+                <span class="truncatable-text" style="font-weight:600;">${loc.city}</span>
+              </div>
+              <div class="truncatable truncatable--location" title="${locationSubtitlePlain}" style="margin-top:2px;">
+                <span class="truncatable-text" style="font-size:12px; color:var(--text-muted);">${locationSubtitlePlain}</span>
+              </div>
+            </div>
+          </div>
+        </td>
+        <td>
+          <div class="gps-cell">
+            <button type="button" class="info-icon-btn" data-gps-lat="${h.latitude}" data-gps-lng="${h.longitude}" aria-label="View full GPS coordinates">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 11v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="8" r="1" fill="currentColor"/></svg>
+            </button>
+            <div class="gps-text">
+              <div class="truncatable truncatable--gps" title="Lat: ${h.latitude}">
+                <span class="truncatable-text" style="font-size:12px;"><strong>Lat:</strong> ${h.latitude}</span>
+              </div>
+              <div class="truncatable truncatable--gps" title="Long: ${h.longitude}" style="margin-top:2px;">
+                <span class="truncatable-text" style="font-size:12px;"><strong>Long:</strong> ${h.longitude}</span>
+              </div>
+            </div>
           </div>
         </td>
         <td>${truncatableCell("⭐".repeat(h.starRating), "starrating")}</td>
-        <td>${truncatableCell(h.email, "email")}</td>
-        <td>${truncatableCell(h.phoneNumber, "phone")}</td>
+        <td>
+          <div class="contact-cell">
+            <button type="button" class="info-icon-btn" data-contact-email="${h.email || "—"}" data-contact-phone="${h.phoneNumber || "—"}" aria-label="View full contact details">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 11v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="8" r="1" fill="currentColor"/></svg>
+            </button>
+            <div class="contact-text">
+              <div class="truncatable truncatable--contact" title="${h.email || "—"}">
+                ${h.email ? `<span class="truncatable-text" style="font-weight:600;">${h.email}</span>` : '<span style="color:var(--text-muted)">—</span>'}
+              </div>
+              <div class="truncatable truncatable--contact" title="${h.phoneNumber || "—"}" style="margin-top:2px;">
+                ${h.phoneNumber ? `<span class="truncatable-text" style="font-size:12px; color:var(--text-muted);">${h.phoneNumber}</span>` : '<span style="font-size:12px; color:var(--text-muted);">—</span>'}
+              </div>
+            </div>
+          </div>
+        </td>
         <td>${truncatableCell(h.providerId, "providerid")}</td>
         <td><span class="pill ${h.active ? "success" : "danger"}">${h.active ? "Active" : "Inactive"}</span></td>
         <td>
@@ -494,7 +574,7 @@
       </tr>`;
           })
           .join("")
-      : `<tr><td colspan="12" class="empty-state">No hotels found</td></tr>`;
+      : `<tr><td colspan="9" class="empty-state">No hotels found</td></tr>`;
 
     renderPagination(paginationBar, {
       total: filtered.length,
@@ -788,6 +868,41 @@
   // ---------- Row actions: Edit / History / Toggle Active ----------
 
   document.addEventListener("click", (e) => {
+    const hotelBtn = e.target.closest("[data-hotel-name]");
+    if (hotelBtn) {
+      openDetailPopover(hotelBtn, [
+        { label: "Name", value: hotelBtn.dataset.hotelName },
+        { label: "Address", value: hotelBtn.dataset.hotelAddress },
+      ]);
+      return;
+    }
+    const locationBtn = e.target.closest("[data-location-city]");
+    if (locationBtn) {
+      openDetailPopover(locationBtn, [
+        { label: "City", value: locationBtn.dataset.locationCity },
+        { label: "State", value: locationBtn.dataset.locationState },
+        { label: "Country", value: locationBtn.dataset.locationCountryName },
+        { label: "Country Code", value: locationBtn.dataset.locationCountryCode },
+      ]);
+      return;
+    }
+    const gpsBtn = e.target.closest("[data-gps-lat]");
+    if (gpsBtn) {
+      openDetailPopover(gpsBtn, [
+        { label: "Latitude", value: gpsBtn.dataset.gpsLat },
+        { label: "Longitude", value: gpsBtn.dataset.gpsLng },
+      ]);
+      return;
+    }
+    const contactBtn = e.target.closest("[data-contact-email]");
+    if (contactBtn) {
+      openDetailPopover(contactBtn, [
+        { label: "Email", value: contactBtn.dataset.contactEmail },
+        { label: "Phone", value: contactBtn.dataset.contactPhone },
+      ]);
+      return;
+    }
+
     const editBtn = e.target.closest("[data-edit-btn]");
     if (editBtn) {
       openHotelForm(SYSTEM_HOTELS.find((h) => String(h.id) === editBtn.dataset.rowId));
@@ -883,7 +998,7 @@
     if (stateValue) candidates = candidates.filter((c) => c.state === stateValue);
     hotelFormCity.disabled = candidates.length === 0;
     hotelFormCity.innerHTML = candidates.length
-      ? `<option value="">Select city</option>` + candidates.map((c) => `<option value="${c.id}">${c.name}</option>`).join("")
+      ? `<option value="">Select city</option>` + candidates.map((c) => `<option value="${c.id}">${c.name}${c.state ? ` - ${c.state}` : ""}</option>`).join("")
       : `<option value="">No eligible cities here</option>`;
     if (selectedCityId !== null && selectedCityId !== undefined) {
       hotelFormCity.value = String(selectedCityId);

@@ -439,6 +439,87 @@ button {
   color: var(--accent-blue);
 }
 
+/* Merged Name+Address cell (hotel-supplier.html's "Supplier Hotel" column):
+   icon at the top-left, name/address stacked to its right. A fixed width
+   here (not just flex:1/min-width:0 on the text column below) is required —
+   table-layout is auto (no explicit width on <td>/table), so without a hard
+   pixel ceiling on the cell itself the column just grows to fit whatever
+   content is inside instead of clipping it, exactly like every other
+   .truncatable--* column relies on its own literal px width, not a
+   percentage, for the same reason. */
+.supplier-hotel-cell {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  width: 240px;
+}
+
+.supplier-hotel-cell .info-icon-btn {
+  margin-top: 1px;
+}
+
+.supplier-hotel-text {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Merged City+State+Country cell ("Location" column) — identical shape to
+   .supplier-hotel-cell above (icon + fixed-width flex row, see that rule's
+   comment for why the width has to live here and not on a percentage-based
+   child). */
+.location-cell {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  width: 220px;
+}
+
+.location-cell .info-icon-btn {
+  margin-top: 1px;
+}
+
+.location-text {
+  flex: 1;
+  min-width: 0;
+}
+
+/* GPS cell (hotel-supplier.html's "GPS" column) — same icon + stacked
+   two-line shape as .location-cell/.supplier-hotel-cell (Lat on top, Long
+   below), just narrower since coordinates are always short. */
+.gps-cell {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  width: 160px;
+}
+
+.gps-cell .info-icon-btn {
+  margin-top: 1px;
+}
+
+.gps-text {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Merged Email+Phone cell (hotel-supplier.html's "Contact" column) — same
+   icon + stacked two-line shape as .location-cell/.supplier-hotel-cell. */
+.contact-cell {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  width: 200px;
+}
+
+.contact-cell .info-icon-btn {
+  margin-top: 1px;
+}
+
+.contact-text {
+  flex: 1;
+  min-width: 0;
+}
+
 .info-popup-body {
   color: var(--text-dark);
   font-size: 14px;
@@ -595,6 +676,15 @@ button {
   background: var(--bg-panel);
 }
 
+.filters-toggle-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.filters-toggle-btn:disabled:hover {
+  background: #fff;
+}
+
 .filters-toggle-btn .chevron {
   transition: transform 0.15s ease;
 }
@@ -709,6 +799,31 @@ button {
 .filter-field .toolbar-search {
   height: 39px;
   box-sizing: border-box;
+}
+
+/* Full-width sub-section heading inside a .filters-panel grid (e.g.
+   hotel-supplier.html's Supplier/System split) — grid-column:1/-1 makes it
+   span every column and force a new row, same trick used elsewhere in this
+   project for a full-width element inside an auto-fill/auto-fit grid. A
+   divider line above every section after the first is what visually
+   separates the groups; the first section has none so it doesn't float a
+   line right under the panel's own top edge. */
+.filters-section-label {
+  grid-column: 1 / -1;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  padding-top: 12px;
+  margin-top: 4px;
+  border-top: 1px solid var(--border-color);
+}
+
+.filters-section-label:first-child {
+  padding-top: 0;
+  margin-top: 0;
+  border-top: none;
 }
 
 .filter-select:focus {
@@ -863,6 +978,20 @@ table.data-table {
   overflow: visible;
 }
 
+/* .supplier-hotel-cell/.location-cell/.gps-cell/.contact-cell (not
+   .truncatable itself) are what actually pin the merged Hotel/Location/GPS/
+   Contact columns to a fixed width (see their own rules above) — relaxing
+   just the .truncatable children above isn't enough to let these columns
+   grow in reveal mode, since they're still boxed in by this fixed-width
+   flex parent. Same reasoning as #supplierHotelTable's own copy of this
+   rule below. */
+#hotelTable.reveal-values .supplier-hotel-cell,
+#hotelTable.reveal-values .location-cell,
+#hotelTable.reveal-values .gps-cell,
+#hotelTable.reveal-values .contact-cell {
+  width: auto !important;
+}
+
 .truncatable--id {
   width: 100px;
 }
@@ -875,12 +1004,38 @@ table.data-table {
   width: 200px;
 }
 
+/* No fixed px width — sits inside .supplier-hotel-cell's flex text column,
+   which is what actually constrains its width (see .supplier-hotel-cell
+   below), rather than a column of its own. */
+.truncatable--supplierhotel {
+  width: 100%;
+}
+
 .truncatable--city {
   width: 100px;
 }
 
 .truncatable--state {
   width: 110px;
+}
+
+/* No fixed px width — sits inside .location-cell's flex text column now
+   that it has its own info icon (same reasoning as .truncatable--supplierhotel
+   above), rather than a column of its own. */
+.truncatable--location {
+  width: 100%;
+}
+
+/* No fixed px width — sits inside .gps-cell's flex row, same reasoning as
+   .truncatable--location/--supplierhotel above. */
+.truncatable--gps {
+  width: 100%;
+}
+
+/* No fixed px width — sits inside .contact-cell's flex text column, same
+   reasoning as .truncatable--location/--supplierhotel above. */
+.truncatable--contact {
+  width: 100%;
 }
 
 .truncatable--country {
@@ -903,10 +1058,6 @@ table.data-table {
   width: 120px;
 }
 
-.truncatable--systemhotel {
-  width: 220px;
-}
-
 .truncatable--updatedate {
   width: 150px;
 }
@@ -922,6 +1073,29 @@ table.data-table {
   -webkit-mask-image: none !important;
   width: auto !important;
   overflow: visible;
+}
+
+/* .supplier-hotel-cell (not .truncatable itself) is what actually pins the
+   merged Name+Address column to a fixed width (see its own rule above) —
+   relaxing just the .truncatable children above isn't enough to let this
+   one column grow in reveal mode, since they're still boxed in by this
+   fixed-width flex parent. */
+#supplierHotelTable.reveal-values .supplier-hotel-cell {
+  width: auto !important;
+}
+
+/* Same reasoning as .supplier-hotel-cell above, now that Location has its
+   own icon + fixed-width flex wrapper too. */
+#supplierHotelTable.reveal-values .location-cell {
+  width: auto !important;
+}
+
+#supplierHotelTable.reveal-values .gps-cell {
+  width: auto !important;
+}
+
+#supplierHotelTable.reveal-values .contact-cell {
+  width: auto !important;
 }
 
 .code-badge {
@@ -1700,6 +1874,160 @@ table.data-table {
 .searchable-select-options {
   overflow-y: auto;
   padding: 4px;
+}
+
+/* Tooltip-style popover for openDetailPopover() — a floating card positioned
+   next to whatever button triggered it (see position() in app.js), not a
+   centered popup-box or sliding drawer. Always in the DOM/display:flex once
+   created; open state is opacity/transform + pointer-events, not
+   display:none, so it can animate in/out (mirrors .modal-overlay's own
+   opacity+visibility transition pattern, just scaled to a much smaller,
+   faster-moving element — see .searchable-select-caret's 0.15s for the same
+   "small UI element" timing precedent). A CSS custom property (--caret-left,
+   set in position()) places the caret triangle under whichever edge of the
+   trigger icon it should point at, even after the popover's own left offset
+   gets clamped to stay on-screen. */
+.detail-popover {
+  position: fixed;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+  padding: 14px 16px;
+  max-width: 340px;
+  max-height: 70vh;
+  overflow-y: auto;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(-4px) scale(0.97);
+  transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s ease;
+}
+
+.detail-popover.caret-bottom {
+  transform: translateY(4px) scale(0.97);
+}
+
+.detail-popover.open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0) scale(1);
+}
+
+/* Caret triangle: two stacked pseudo-elements (a 1px-larger one in the
+   popover's own border color behind, a smaller one in its background color
+   in front) so the popover's 1px border appears to wrap around the caret
+   too, instead of the caret floating borderless off the box's edge. */
+.detail-popover::before,
+.detail-popover::after {
+  content: "";
+  position: absolute;
+  left: var(--caret-left, 20px);
+  width: 0;
+  height: 0;
+  border: 7px solid transparent;
+}
+
+.detail-popover::before {
+  border-width: 8px;
+  margin-left: -1px;
+}
+
+.detail-popover.caret-top::before {
+  top: -16px;
+  border-bottom-color: var(--border-color);
+}
+
+.detail-popover.caret-top::after {
+  top: -14px;
+  border-bottom-color: var(--bg-card);
+}
+
+.detail-popover.caret-bottom::before {
+  bottom: -16px;
+  border-top-color: var(--border-color);
+}
+
+.detail-popover.caret-bottom::after {
+  bottom: -14px;
+  border-top-color: var(--bg-card);
+}
+
+.detail-popover-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.detail-popover-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--text-muted);
+}
+
+.detail-popover-value-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.detail-popover-value {
+  font-size: 14px;
+  color: var(--text-dark);
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  flex: 1;
+  padding-top: 1px;
+}
+
+/* Copy button: reuses .info-icon-btn's existing ghost look (circular,
+   borderless, muted -> accent-blue on hover) instead of the bordered,
+   32px .action-btn meant for table row actions — lighter fits a tooltip
+   better. .copied briefly swaps the visible icon via the two stacked
+   spans in the button's markup (see flashCopied() in app.js). */
+.copy-icon-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: var(--text-muted);
+}
+
+.copy-icon-btn:hover,
+.copy-icon-btn:focus-visible {
+  background: var(--bg-panel);
+  color: var(--accent-blue);
+}
+
+.copy-icon-btn .copy-icon-idle,
+.copy-icon-btn .copy-icon-done {
+  display: flex;
+}
+
+.copy-icon-btn .copy-icon-done {
+  display: none;
+  color: var(--success);
+}
+
+.copy-icon-btn.copied .copy-icon-idle {
+  display: none;
+}
+
+.copy-icon-btn.copied .copy-icon-done {
+  display: flex;
 }
 
 .searchable-select-option {
@@ -2590,7 +2918,8 @@ label.merge-list-item {
    Mapping) share this same tall-box treatment. */
 #mergeCityPreviewModal .popup-box-lg,
 #mappingPreviewModal .popup-box-lg,
-#hotelMappingPreviewModal .popup-box-lg {
+#hotelMappingPreviewModal .popup-box-lg,
+#detailsModal .popup-box-lg {
   height: 85vh;
 }
 
@@ -2599,10 +2928,14 @@ label.merge-list-item {
    only these 3 modals' bodies become flex columns, letting their child
    sections container (#mergePreviewSections / #previewSections) actually
    stretch to fill the taller box above instead of sitting at its own
-   natural (short) content height. */
+   natural (short) content height. Also scopes #detailsModal — its own
+   flex:1 <pre id="detailsJson"> (hotel-supplier.html) needs the same
+   flex-column parent to actually fill the tall box instead of sitting at
+   its own short natural content height. */
 #mergeCityPreviewModal .modal-body,
 #mappingPreviewModal .modal-body,
-#hotelMappingPreviewModal .modal-body {
+#hotelMappingPreviewModal .modal-body,
+#detailsModal .modal-body {
   display: flex;
   flex-direction: column;
 }
