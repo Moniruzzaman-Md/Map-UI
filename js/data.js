@@ -231,16 +231,19 @@ supplierCountries.hotelbeds[0].history.push({
 hydrateObject(supplierCountries, loadFromStorage("supplierCountries"));
 
 // Looks up, for a given system country name, whether/where each supplier maps it.
-// Returns [{ supplierKey, supplierLabel, mapped, countryName, countryId }]
+// A supplier can have more than one of its own country rows mapped to the
+// same system country at once, so each entry carries a `countries` array
+// (filter, not find) rather than a single match — same shape as
+// getCityMappingSummary() below.
+// Returns [{ supplierKey, supplierLabel, mapped, countries: [row, ...] }]
 function getMappingSummary(systemCountryName) {
   return Object.keys(SUPPLIER_LABELS).map((key) => {
-    const match = (supplierCountries[key] || []).find((row) => row.systemCountry === systemCountryName);
+    const countries = (supplierCountries[key] || []).filter((row) => row.systemCountry === systemCountryName);
     return {
       supplierKey: key,
       supplierLabel: SUPPLIER_LABELS[key],
-      mapped: Boolean(match),
-      countryName: match ? match.name : null,
-      countryId: match ? match.supplierId : null,
+      mapped: countries.length > 0,
+      countries,
     };
   });
 }
@@ -1067,10 +1070,10 @@ function applyMapping(supplierKey, row, newSystemCityId, groupId) {
 }
 
 // Cross-supplier mapping summary for a system city — used by city-system.html's
-// Summary action. Unlike country mapping (at most one supplier country maps
-// to a given system country), a system city can have MANY supplier cities
-// mapped to it from the same supplier, so each entry carries a `cities`
-// array rather than a single match like getMappingSummary() does.
+// Summary action. Like country mapping (see getMappingSummary() above), a
+// system city can have MANY supplier cities mapped to it from the same
+// supplier, so each entry carries a `cities` array rather than a single
+// match.
 // `systemCityId` also accepts an array of ids — a merged city has no supplier
 // cities mapped to it directly, so its Summary instead unions the mappings of
 // every system city it was merged from, showing every hotel indirectly linked

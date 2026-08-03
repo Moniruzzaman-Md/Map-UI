@@ -124,7 +124,7 @@
           <li><strong>Code</strong> — the country's unique identifier (e.g. "US"). Set when the country is added and never changes.</li>
           <li><strong>Nationality</strong> — e.g. "American" for United States. Optional — shown as "—" when not set.</li>
           <li><strong>Edit</strong> — rename a country and/or set its Nationality. The code stays the same.</li>
-          <li><strong>Map</strong> — for each supplier, see which of their countries (if any) maps to this system country, with an Unmap option, or pick one to map if none does yet. Reassigning a supplier's country that's already mapped elsewhere asks you to confirm first.</li>
+          <li><strong>Map</strong> — for each supplier, see every one of their countries already mapped here (each with its own Unmap option), plus a picker to map another in if they have one that isn't mapped here yet — more than one of a supplier's own countries can be mapped to this system country at once. Reassigning a supplier's country that's already mapped elsewhere asks you to confirm first.</li>
           <li><strong>History</strong> — every name change, and every supplier country mapped, remapped, or unmapped to this country, with who made the change and when.</li>
           <li><strong>Mapping Summary</strong> — see at a glance which suppliers have this country mapped.</li>
           <li><strong>View Cities</strong> — opens the System City List, filtered to this country.</li>
@@ -137,7 +137,7 @@
           <li><strong>Code is permanent</strong> — set once when the country is added, never editable, and it's what everything else should key off. Only the name and Nationality can change.</li>
           <li><strong>Nationality</strong> — a plain optional text field (e.g. "American"), nullable — no mapping, cascade, or other relationship keys off it, unlike Name. Stored as <code>null</code> (not an empty string) when unset, shown as "—" in the table. Its edit input is deliberately NOT wired via the modal's generic <code>data-fill</code> mechanism (unlike Code/Name) — that mechanism reads the rendered table cell's own text, which shows "—" for null, and would otherwise feed that literal "—" back into the input as if it were a real value. Populated directly from the record instead, so a null nationality opens as a genuinely empty field.</li>
           <li><strong>Edit</strong> — renaming must never break an existing mapping. Either mappings are keyed by the permanent code, or the rename updates every existing mapping in the same step. Empty names must be rejected with a clear error. Name and Nationality are independently checked and independently logged — see History below.</li>
-          <li><strong>Map</strong> — for each supplier, show either the country(ies) already mapped here (with Unmap), or a picker of that supplier's own countries (with Map). A supplier country only ever has a name and its own ID — never an ISO/system code, which is purely an internal join key and must never be displayed as if the supplier provided it. In the picker, any option already mapped to a different country must be labeled with its current target (e.g. "Deutschland (AG-DE-021) — mapped to Austria") so that's visible before it's picked, not just after. Picking an already-mapped-elsewhere option must show old vs. new and require explicit confirmation before applying — never silent. Logged as a <strong>Remap</strong> (see History below), not a plain Map.</li>
+          <li><strong>Map</strong> — for each supplier, show every one of that supplier's own countries already mapped here (each with its own Unmap), and — whenever any of that supplier's other countries isn't mapped here — a picker to map one of those in (with Map); both can appear together, since more than one of a supplier's own countries can be mapped to the same system country at once. A supplier country only ever has a name and its own ID — never an ISO/system code, which is purely an internal join key and must never be displayed as if the supplier provided it. In the picker, any option already mapped to a different country must be labeled with its current target (e.g. "Deutschland (AG-DE-021) — mapped to Austria") so that's visible before it's picked, not just after. Picking an already-mapped-elsewhere option must show old vs. new and require explicit confirmation before applying — never silent. Logged as a <strong>Remap</strong> (see History below), not a plain Map.</li>
           <li><strong>History</strong> — every entry has three parts: an <strong>operation name</strong>, a <strong>description</strong> in that operation's fixed pattern, and <strong>who + when</strong>. Logged the instant the change happens (never reconstructed later by comparing snapshots), newest entry first. A mapping change always writes to <strong>two</strong> records — the country's own history AND the affected supplier country's own history — no matter which screen made the change.
             <p>When a description needs to show more than one distinct fact — e.g. who made the change, and separately what it changed from/to — separate the facts with a single pipe character <code>|</code>. The history view splits on <code>|</code> and puts each part on its own line, so a card stays easy to scan instead of one dense run-on sentence. Only insert <code>|</code> between genuinely distinct facts, and never for any other purpose — it's reserved as the line-break marker.</p>
             <p><strong>On the country's own record:</strong></p>
@@ -266,9 +266,13 @@
   </div>
 </div>
 
-<!-- Map Supplier Countries Modal: per supplier, either the country
-     currently mapped here (with Unmap) or a picker to map one (with Map) —
-     each action commits immediately, no batch Save. -->
+<!-- Map Supplier Countries Modal: per supplier, shows every one of that
+     supplier's own country rows already mapped here (each with its own
+     Unmap) — more than one of a supplier's own rows can be mapped to the
+     same system country at once — plus, whenever that supplier has any
+     other row not already mapped here, a picker to map one in (with Map).
+     Both can render together. Each action commits immediately, no batch
+     Save. -->
 <div class="modal-overlay" id="mapCountriesModal">
   <div class="modal">
     <div class="modal-header">
@@ -525,6 +529,11 @@
     document.getElementById("summaryCountryName").textContent = `— ${record.name}`;
     const summaryList = document.getElementById("summaryList");
     const rows = getMappingSummary(record.name);
+    // Same "Mapped (N)" status row + numbered name/meta list shape as
+    // city-system.html's own Mapping Summary (getCityMappingSummary/
+    // summaryListRowHtml) — minus its scroll-triggered pagination, since a
+    // supplier's own country list here is always small (realistically a
+    // handful of rows at most), so every row just renders directly.
     summaryList.innerHTML = rows
       .map(
         (r) => `
@@ -537,26 +546,41 @@
                 <td class="history-row-label">Status</td>
                 <td class="history-row-sep">:</td>
                 <td class="history-row-value">${
-                  r.mapped ? '<span class="text-mapped">Mapped</span>' : '<span class="text-not-mapped">Not mapped</span>'
+                  r.mapped
+                    ? `<span class="text-mapped">Mapped (${r.countries.length})</span>`
+                    : '<span class="text-not-mapped">Not mapped</span>'
                 }</td>
               </tr>
-              ${
-                r.mapped
-                  ? `
-              <tr>
-                <td class="history-row-label">Supplier Country</td>
-                <td class="history-row-sep">:</td>
-                <td class="history-row-value">${r.countryName}</td>
-              </tr>
-              <tr>
-                <td class="history-row-label">Country ID</td>
-                <td class="history-row-sep">:</td>
-                <td class="history-row-value">${r.countryId}</td>
-              </tr>`
-                  : ""
-              }
             </tbody>
           </table>
+          ${
+            r.mapped
+              ? `<div class="summary-list-scroll">
+              <table class="summary-list-table">
+                <thead>
+                  <tr>
+                    <th class="summary-list-num">#</th>
+                    <th>Supplier Country</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${r.countries
+                    .map(
+                      (c, i) => `
+                  <tr>
+                    <td class="summary-list-num">${i + 1}</td>
+                    <td>
+                      <div class="summary-list-name">${c.name}</div>
+                      <div class="summary-list-meta">ID: ${c.supplierId}</div>
+                    </td>
+                  </tr>`
+                    )
+                    .join("")}
+                </tbody>
+              </table>
+            </div>`
+              : ""
+          }
         </div>
       </div>`
       )
@@ -667,9 +691,17 @@
       .map((key) => {
         const rows = supplierCountries[key] || [];
         const matches = rows.filter((r) => r.systemCountry === mapCountriesActiveRecord.name);
+        // Every other row this supplier could still map here — not already
+        // one of the matches above (whether currently unmapped or mapped to
+        // a different system country). More than one of a supplier's own
+        // rows can be mapped to this system country at once, so the matches
+        // list and this picker are no longer mutually exclusive — both
+        // render together whenever applicable, instead of the picker
+        // disappearing the moment any match exists.
+        const otherRows = rows.filter((r) => !matches.includes(r));
 
-        const sectionHtml = matches.length
-          ? `<div class="merge-list">${matches
+        const matchesHtml = matches.length
+          ? `<div class="merge-list"${otherRows.length ? ' style="margin-bottom:8px;"' : ""}>${matches
               .map(
                 (r) => `
           <div class="merge-list-item">
@@ -681,11 +713,13 @@
           </div>`
               )
               .join("")}</div>`
-          : rows.length
+          : "";
+
+        const pickerHtml = otherRows.length
           ? `<div style="display:flex; gap:8px; align-items:center;">
               <select class="filter-select" data-map-country-select="${key}" style="flex:1; min-width:0;">
                 <option value="">Select ${SUPPLIER_LABELS[key]} country</option>
-                ${rows
+                ${otherRows
                   .map(
                     (r) =>
                       `<option value="${r.id}">${r.name} (${r.supplierId})${
@@ -696,7 +730,9 @@
               </select>
               <button class="btn btn-primary" data-map-country-btn="${key}">Map</button>
             </div>`
-          : `<div class="empty-state">No countries for this supplier</div>`;
+          : "";
+
+        const sectionHtml = matchesHtml || pickerHtml ? `${matchesHtml}${pickerHtml}` : `<div class="empty-state">No countries for this supplier</div>`;
 
         return `
     <div class="form-group">
