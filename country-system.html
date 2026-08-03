@@ -122,7 +122,8 @@
         <p>This page manages the <strong>master list of countries</strong> used everywhere else in the system — supplier country mappings and city records both reference these entries.</p>
         <ul>
           <li><strong>Code</strong> — the country's unique identifier (e.g. "US"). Set when the country is added and never changes.</li>
-          <li><strong>Edit</strong> — rename a country. The code stays the same.</li>
+          <li><strong>Nationality</strong> — e.g. "American" for United States. Optional — shown as "—" when not set.</li>
+          <li><strong>Edit</strong> — rename a country and/or set its Nationality. The code stays the same.</li>
           <li><strong>Map</strong> — for each supplier, see which of their countries (if any) maps to this system country, with an Unmap option, or pick one to map if none does yet. Reassigning a supplier's country that's already mapped elsewhere asks you to confirm first.</li>
           <li><strong>History</strong> — every name change, and every supplier country mapped, remapped, or unmapped to this country, with who made the change and when.</li>
           <li><strong>Mapping Summary</strong> — see at a glance which suppliers have this country mapped.</li>
@@ -133,14 +134,15 @@
       <template id="countryDevNotes">
         <p>This is the master list of countries. Every supplier's own country list maps to one entry here, and city records reference this list too.</p>
         <ul>
-          <li><strong>Code is permanent</strong> — set once when the country is added, never editable, and it's what everything else should key off. Only the name can change.</li>
-          <li><strong>Edit</strong> — renaming must never break an existing mapping. Either mappings are keyed by the permanent code, or the rename updates every existing mapping in the same step. Empty names must be rejected with a clear error.</li>
+          <li><strong>Code is permanent</strong> — set once when the country is added, never editable, and it's what everything else should key off. Only the name and Nationality can change.</li>
+          <li><strong>Nationality</strong> — a plain optional text field (e.g. "American"), nullable — no mapping, cascade, or other relationship keys off it, unlike Name. Stored as <code>null</code> (not an empty string) when unset, shown as "—" in the table. Its edit input is deliberately NOT wired via the modal's generic <code>data-fill</code> mechanism (unlike Code/Name) — that mechanism reads the rendered table cell's own text, which shows "—" for null, and would otherwise feed that literal "—" back into the input as if it were a real value. Populated directly from the record instead, so a null nationality opens as a genuinely empty field.</li>
+          <li><strong>Edit</strong> — renaming must never break an existing mapping. Either mappings are keyed by the permanent code, or the rename updates every existing mapping in the same step. Empty names must be rejected with a clear error. Name and Nationality are independently checked and independently logged — see History below.</li>
           <li><strong>Map</strong> — for each supplier, show either the country(ies) already mapped here (with Unmap), or a picker of that supplier's own countries (with Map). A supplier country only ever has a name and its own ID — never an ISO/system code, which is purely an internal join key and must never be displayed as if the supplier provided it. In the picker, any option already mapped to a different country must be labeled with its current target (e.g. "Deutschland (AG-DE-021) — mapped to Austria") so that's visible before it's picked, not just after. Picking an already-mapped-elsewhere option must show old vs. new and require explicit confirmation before applying — never silent. Logged as a <strong>Remap</strong> (see History below), not a plain Map.</li>
           <li><strong>History</strong> — every entry has three parts: an <strong>operation name</strong>, a <strong>description</strong> in that operation's fixed pattern, and <strong>who + when</strong>. Logged the instant the change happens (never reconstructed later by comparing snapshots), newest entry first. A mapping change always writes to <strong>two</strong> records — the country's own history AND the affected supplier country's own history — no matter which screen made the change.
             <p>When a description needs to show more than one distinct fact — e.g. who made the change, and separately what it changed from/to — separate the facts with a single pipe character <code>|</code>. The history view splits on <code>|</code> and puts each part on its own line, so a card stays easy to scan instead of one dense run-on sentence. Only insert <code>|</code> between genuinely distinct facts, and never for any other purpose — it's reserved as the line-break marker.</p>
             <p><strong>On the country's own record:</strong></p>
             <ul>
-              <li><strong>Edit</strong> — the name was changed. Description: <em>Name: {old name} -&gt; {new name}</em></li>
+              <li><strong>Edit</strong> — the name and/or Nationality changed. Description is just whichever of these actually changed, each its own line via the <code>|</code> convention above when both did in the same save: <em>Name: {old name} -&gt; {new name}</em> and/or <em>Nationality: {old nationality or "—"} -&gt; {new nationality or "—"}</em></li>
               <li><strong>Map</strong> — a supplier's country became linked to this country for the first time (it had no country before). Description: <em>{Supplier} — {supplier's country name} — ID: {supplier's country ID}</em></li>
               <li><strong>Unmap</strong> — a supplier's country that was linked to this country got unlinked entirely, with nothing put in its place. Description: <em>{Supplier} — {supplier's country name} — ID: {supplier's country ID}</em></li>
               <li><strong>Remap</strong> — a supplier's country moved between two countries. Both the country it left and the country it moved to log this as one Remap event, never as Unmap on one and Map on the other — and both log the exact same description, so either country's history is understandable on its own. Description: <em>{Supplier} — {supplier's country name} — ID: {supplier's country ID}|{old country} ({code}) -&gt; {new country} ({code})</em> (two lines: who, then what changed)</li>
@@ -184,9 +186,10 @@
           <table class="data-table" id="countryTable">
             <thead>
               <tr>
-                <th style="width:15%">Code</th>
-                <th style="width:55%">Name</th>
-                <th style="width:30%">Action</th>
+                <th style="width:12%">Code</th>
+                <th style="width:36%">Name</th>
+                <th style="width:24%">Nationality</th>
+                <th style="width:28%">Action</th>
               </tr>
             </thead>
             <tbody>
@@ -219,6 +222,11 @@
       <div class="form-group">
         <label for="countryName">Country Name</label>
         <input type="text" id="countryName" data-fill="name" />
+      </div>
+      <div class="form-group">
+        <label for="countryNationality">Nationality</label>
+        <input type="text" id="countryNationality" placeholder="e.g. American" />
+        <p class="hint">Optional — leave blank if not set.</p>
       </div>
     </div>
     <div class="modal-footer">
@@ -341,6 +349,11 @@
       <tr data-row-id="${c.id}">
         <td data-col="code"><div class="code-badge truncatable truncatable--badge-value" title="${c.code}"><span class="truncatable-text">${c.code}</span></div></td>
         <td data-col="name"><div class="truncatable truncatable--cell-text" title="${c.name}"><span class="truncatable-text">${c.name}</span></div></td>
+        <td data-col="nationality">${
+          c.nationality
+            ? `<div class="truncatable truncatable--cell-text" title="${c.nationality}"><span class="truncatable-text">${c.nationality}</span></div>`
+            : '<span style="color:var(--text-muted)">—</span>'
+        }</td>
         <td>
           <div class="row-actions">
             <button class="action-btn" data-modal-target="#editCountryModal" aria-label="Edit ${c.name}">
@@ -363,7 +376,7 @@
       </tr>`
           )
           .join("")
-      : `<tr><td colspan="3" style="text-align:center; color:var(--text-muted); padding:28px;">No countries found</td></tr>`;
+      : `<tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:28px;">No countries found</td></tr>`;
 
     renderPagination(paginationBar, {
       total: filtered.length,
@@ -420,41 +433,70 @@
 
   render();
 
+  // Nationality is deliberately NOT wired via data-fill like Code/Name above
+  // — the generic mechanism reads the rendered table cell's own text, which
+  // shows "—" for a null nationality, and that literal "—" would otherwise
+  // get typed straight into the input as if it were a real value. Populate
+  // it here instead, directly from the record, so a null nationality opens
+  // as a genuinely empty (not "—"-filled) field.
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest('[data-modal-target="#editCountryModal"]');
+    if (!btn) return;
+    const row = btn.closest("tr");
+    const record = countries.find((c) => String(c.id) === String(row?.dataset.rowId));
+    document.getElementById("countryNationality").value = record?.nationality || "";
+  });
+
   document.getElementById("saveCountryBtn").addEventListener("click", () => {
     const modal = document.getElementById("editCountryModal");
     const rowId = modal.dataset.activeRow;
     const newName = document.getElementById("countryName").value.trim();
+    const newNationality = document.getElementById("countryNationality").value.trim() || null;
     if (!newName) {
       showToast("Country name is required", "error");
       return;
     }
     if (rowId === "") return;
     const record = countries.find((c) => String(c.id) === String(rowId));
-    if (record && record.name !== newName) {
-      const oldName = record.name;
-      record.name = newName;
-      record.history.push({
-        operation: "Edit",
-        name: newName,
-        description: `Name: ${oldName} -> ${newName}`,
-        userName: CURRENT_USER.name,
-        userEmail: CURRENT_USER.email,
-        timestamp: new Date(),
-      });
+    if (record) {
+      // Name and Nationality are 2 separately-checked, separately-logged
+      // facts — HISTORY_LINE_BREAK (js/app.js) puts each on its own line in
+      // the resulting Edit entry when both change in the same save, rather
+      // than cramming them into one dense sentence.
+      const changeParts = [];
+      if (record.name !== newName) {
+        const oldName = record.name;
+        changeParts.push(`Name: ${oldName} -> ${newName}`);
+        record.name = newName;
 
-      // Supplier country mappings reference a system country by its NAME
-      // (supplierCountries[key][*].systemCountry — see country-supplier.html),
-      // not a stable id/code, so a rename here would otherwise silently
-      // orphan every existing mapping (its pre-fill wouldn't match any
-      // <option>, its table cell would keep showing the old name, and an
-      // accidental re-save could even unmap it). Cascade the rename into
-      // every supplier's rows so the mapping stays intact.
-      Object.keys(supplierCountries).forEach((key) => {
-        supplierCountries[key].forEach((row) => {
-          if (row.systemCountry === oldName) row.systemCountry = newName;
+        // Supplier country mappings reference a system country by its NAME
+        // (supplierCountries[key][*].systemCountry — see country-supplier.html),
+        // not a stable id/code, so a rename here would otherwise silently
+        // orphan every existing mapping (its pre-fill wouldn't match any
+        // <option>, its table cell would keep showing the old name, and an
+        // accidental re-save could even unmap it). Cascade the rename into
+        // every supplier's rows so the mapping stays intact.
+        Object.keys(supplierCountries).forEach((key) => {
+          supplierCountries[key].forEach((row) => {
+            if (row.systemCountry === oldName) row.systemCountry = newName;
+          });
         });
-      });
-      saveToStorage("supplierCountries", supplierCountries);
+        saveToStorage("supplierCountries", supplierCountries);
+      }
+      if ((record.nationality || null) !== newNationality) {
+        changeParts.push(`Nationality: ${record.nationality || "—"} -> ${newNationality || "—"}`);
+        record.nationality = newNationality;
+      }
+      if (changeParts.length) {
+        record.history.push({
+          operation: "Edit",
+          name: record.name,
+          description: changeParts.join(HISTORY_LINE_BREAK),
+          userName: CURRENT_USER.name,
+          userEmail: CURRENT_USER.email,
+          timestamp: new Date(),
+        });
+      }
     }
     saveToStorage("SYSTEM_COUNTRIES", SYSTEM_COUNTRIES);
     render();

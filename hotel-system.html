@@ -486,6 +486,14 @@
       return `<div class="truncatable truncatable--${modifier}" title="${value}"><span class="truncatable-text">${value}</span></div>`;
     }
 
+    // Same .code-badge treatment already used for the ID/code column on
+    // country-system.html, country-supplier.html, and city-system.html —
+    // kept as its own helper (not a truncatableCell variant) since it adds
+    // the .code-badge/.truncatable--badge-value classes on top.
+    function idBadgeCell(value) {
+      return `<div class="code-badge truncatable truncatable--id truncatable--badge-value" title="${value}"><span class="truncatable-text">${value}</span></div>`;
+    }
+
     tbody.innerHTML = pageItems.length
       ? pageItems
           .map((h) => {
@@ -494,7 +502,7 @@
             const locationSubtitlePlain = `${loc.state ? `${loc.state}, ` : ""}${countryName} (${loc.country.code})`;
             return `
       <tr data-row-id="${h.id}">
-        <td>${truncatableCell(getSystemHotelDisplayId(h.id), "id")}</td>
+        <td>${idBadgeCell(getSystemHotelDisplayId(h.id))}</td>
         <td data-col="name">
           <div class="supplier-hotel-cell">
             <button type="button" class="info-icon-btn" data-hotel-name="${h.name}" data-hotel-address="${h.address}" aria-label="View full name & address">

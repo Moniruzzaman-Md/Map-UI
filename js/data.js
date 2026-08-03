@@ -4,43 +4,45 @@
 // source so the two pages never drift out of sync (e.g. for the System
 // page's cross-supplier mapping Summary).
 
+// nationality is optional (null allowed) — Singapore, Qatar, and Nepal are
+// left unset below on purpose, as demo cases for the null state.
 const SYSTEM_COUNTRIES = [
-  { name: "United States", code: "US" },
-  { name: "United Kingdom", code: "GB" },
-  { name: "Canada", code: "CA" },
-  { name: "Australia", code: "AU" },
-  { name: "India", code: "IN" },
-  { name: "Germany", code: "DE" },
-  { name: "France", code: "FR" },
-  { name: "Japan", code: "JP" },
-  { name: "China", code: "CN" },
-  { name: "Brazil", code: "BR" },
-  { name: "United Arab Emirates", code: "AE" },
-  { name: "Singapore", code: "SG" },
-  { name: "Italy", code: "IT" },
-  { name: "Spain", code: "ES" },
-  { name: "Netherlands", code: "NL" },
-  { name: "Switzerland", code: "CH" },
-  { name: "Sweden", code: "SE" },
-  { name: "Norway", code: "NO" },
-  { name: "Thailand", code: "TH" },
-  { name: "Malaysia", code: "MY" },
-  { name: "Indonesia", code: "ID" },
-  { name: "New Zealand", code: "NZ" },
-  { name: "South Korea", code: "KR" },
-  { name: "South Africa", code: "ZA" },
-  { name: "Mexico", code: "MX" },
-  { name: "Turkey", code: "TR" },
-  { name: "Qatar", code: "QA" },
-  { name: "Saudi Arabia", code: "SA" },
-  { name: "Egypt", code: "EG" },
-  { name: "Portugal", code: "PT" },
-  { name: "Ireland", code: "IE" },
-  { name: "Greece", code: "GR" },
-  { name: "Vietnam", code: "VN" },
-  { name: "Philippines", code: "PH" },
-  { name: "Sri Lanka", code: "LK" },
-  { name: "Nepal", code: "NP" },
+  { name: "United States", code: "US", nationality: "American" },
+  { name: "United Kingdom", code: "GB", nationality: "British" },
+  { name: "Canada", code: "CA", nationality: "Canadian" },
+  { name: "Australia", code: "AU", nationality: "Australian" },
+  { name: "India", code: "IN", nationality: "Indian" },
+  { name: "Germany", code: "DE", nationality: "German" },
+  { name: "France", code: "FR", nationality: "French" },
+  { name: "Japan", code: "JP", nationality: "Japanese" },
+  { name: "China", code: "CN", nationality: "Chinese" },
+  { name: "Brazil", code: "BR", nationality: "Brazilian" },
+  { name: "United Arab Emirates", code: "AE", nationality: "Emirati" },
+  { name: "Singapore", code: "SG", nationality: null },
+  { name: "Italy", code: "IT", nationality: "Italian" },
+  { name: "Spain", code: "ES", nationality: "Spanish" },
+  { name: "Netherlands", code: "NL", nationality: "Dutch" },
+  { name: "Switzerland", code: "CH", nationality: "Swiss" },
+  { name: "Sweden", code: "SE", nationality: "Swedish" },
+  { name: "Norway", code: "NO", nationality: "Norwegian" },
+  { name: "Thailand", code: "TH", nationality: "Thai" },
+  { name: "Malaysia", code: "MY", nationality: "Malaysian" },
+  { name: "Indonesia", code: "ID", nationality: "Indonesian" },
+  { name: "New Zealand", code: "NZ", nationality: "New Zealander" },
+  { name: "South Korea", code: "KR", nationality: "South Korean" },
+  { name: "South Africa", code: "ZA", nationality: "South African" },
+  { name: "Mexico", code: "MX", nationality: "Mexican" },
+  { name: "Turkey", code: "TR", nationality: "Turkish" },
+  { name: "Qatar", code: "QA", nationality: null },
+  { name: "Saudi Arabia", code: "SA", nationality: "Saudi" },
+  { name: "Egypt", code: "EG", nationality: "Egyptian" },
+  { name: "Portugal", code: "PT", nationality: "Portuguese" },
+  { name: "Ireland", code: "IE", nationality: "Irish" },
+  { name: "Greece", code: "GR", nationality: "Greek" },
+  { name: "Vietnam", code: "VN", nationality: "Vietnamese" },
+  { name: "Philippines", code: "PH", nationality: "Filipino" },
+  { name: "Sri Lanka", code: "LK", nationality: "Sri Lankan" },
+  { name: "Nepal", code: "NP", nationality: null },
 ];
 
 SYSTEM_COUNTRIES.forEach((c, i) => {
@@ -185,6 +187,18 @@ function getSupplierCountryName(supplierKey, code) {
 function getSupplierCountrySupplierId(supplierKey, code) {
   const row = (supplierCountries[supplierKey] || []).find((c) => c.code === code);
   return row ? row.supplierId : code;
+}
+
+// Looks up whether/how a specific supplier maps a given system country name
+// to one of its own country rows — e.g.
+// findSupplierCountryBySystemCountry("agoda", "United States") -> the
+// AG-US-001 row. Returns null if that supplier has no country row whose
+// systemCountry equals the given name (covers both "supplier doesn't operate
+// there" and "operates there but it's explicitly unmapped", e.g. Agoda's
+// Bharat/IN row).
+function findSupplierCountryBySystemCountry(supplierKey, systemCountryName) {
+  if (!systemCountryName) return null;
+  return (supplierCountries[supplierKey] || []).find((c) => c.systemCountry === systemCountryName) || null;
 }
 
 // stable per-supplier row ids + history log

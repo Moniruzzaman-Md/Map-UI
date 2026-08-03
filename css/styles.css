@@ -972,10 +972,9 @@ table.data-table {
 
 /* Same table-layout:fixed + percentage-<th> + table-level min-width
    principle as #supplierCountryTable above, applied to country-system.html's
-   own Code/Name/Action table (3 columns here, not 4 — no separate ID/System
-   Country split). Action gets a bigger share here (30%, vs.
-   #supplierCountryTable's 16%) since this table's row has 5 icon buttons
-   — Edit/Map/History/Summary/View Cities — instead of 3. */
+   own Code/Name/Nationality/Action table. Action gets a bigger share here
+   (28%, vs. #supplierCountryTable's 16%) since this table's row has 5 icon
+   buttons — Edit/Map/History/Summary/View Cities — instead of 3. */
 #countryTable {
   table-layout: fixed;
   min-width: 800px;
@@ -3071,10 +3070,16 @@ label.merge-list-item {
    as a fallback — a real height (not just a min-height floor) so each is
    consistently tall — close to .popup-box's own max-height:90vh ceiling —
    instead of shrink-wrapping to whatever its buckets' content happens to
-   need. All 3 save-preview popups in this project (add-city.html's Merge
-   Cities, city-mapping.html's Save Mapping, hotel-mapping.html's Save
-   Mapping) share this same tall-box treatment. */
+   need. All 4 save-preview popups in this project (add-city.html's Merge
+   Cities System City AND Supplier City saves, city-mapping.html's Save
+   Mapping, hotel-mapping.html's Save Mapping) share this same tall-box
+   treatment — as does add-city.html's own #confirmModal, which borrows the
+   same wide/tall bucket layout for its mode-switch discard warning (see its
+   own HTML comment for why that's still never mistakable for a Save
+   preview). */
 #mergeCityPreviewModal .popup-box-lg,
+#supplierMapPreviewModal .popup-box-lg,
+#confirmModal .popup-box-lg,
 #mappingPreviewModal .popup-box-lg,
 #hotelMappingPreviewModal .popup-box-lg,
 #detailsModal .popup-box-lg {
@@ -3089,11 +3094,21 @@ label.merge-list-item {
    natural (short) content height. Also scopes #detailsModal — its own
    flex:1 <pre id="detailsJson"> (hotel-supplier.html) needs the same
    flex-column parent to actually fill the tall box instead of sitting at
-   its own short natural content height. */
+   its own short natural content height. add-city.html's own #confirmModal
+   gets the same treatment via its own more specific rule right below —
+   scoped through .popup-box-lg specifically so other pages' plain
+   #confirmModal (never carries .popup-box-lg) is unaffected even though
+   the id is reused page-to-page. */
 #mergeCityPreviewModal .modal-body,
+#supplierMapPreviewModal .modal-body,
 #mappingPreviewModal .modal-body,
 #hotelMappingPreviewModal .modal-body,
 #detailsModal .modal-body {
+  display: flex;
+  flex-direction: column;
+}
+
+#confirmModal .popup-box-lg .modal-body {
   display: flex;
   flex-direction: column;
 }
@@ -3125,6 +3140,26 @@ label.merge-list-item {
   gap: 18px;
 }
 
+/* add-city.html's own #confirmModal (mode-switch discard warning): same
+   shape as #mergePreviewSections above — a full-width warning banner on
+   top, the To Map/To Unmap (or To Add/To Remove) buckets stretching to
+   fill the rest of the tall box below it. Scoped through .popup-box-lg,
+   same reasoning as #confirmModal .popup-box-lg .modal-body above — other
+   pages' plain #confirmMessage (never inside a .popup-box-lg) is
+   unaffected despite the id being reused page-to-page. */
+#confirmModal .popup-box-lg #confirmMessage {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  gap: 18px;
+}
+
+#confirmModal .popup-box-lg #confirmMessage > .preview-status-banner {
+  flex: none;
+  margin-bottom: 0;
+}
+
 /* Cancels the generic .preview-section{flex:1} (below) for the top-level
    Status Change section specifically — a direct child of
    #mergePreviewSections, not one of the 3 side-by-side buckets — so it
@@ -3153,6 +3188,39 @@ label.merge-list-item {
 }
 
 #previewSections .empty-state {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 120px;
+}
+
+/* add-city.html's Supplier City save preview: same flat 3-sibling-bucket
+   shape as #previewSections above (no extra top-level Status Change row
+   like #mergePreviewSections' System City save has), so it gets the exact
+   same side-by-side treatment directly rather than needing its own
+   .preview-buckets-row wrapper. */
+#supplierMapPreviewSections {
+  display: flex;
+  align-items: stretch;
+  flex: 1;
+  min-height: 0;
+  gap: 20px;
+}
+
+#supplierMapPreviewSections > .preview-section {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+#supplierMapPreviewSections .merge-list {
+  flex: 1;
+  min-height: 120px;
+  max-height: none;
+}
+
+#supplierMapPreviewSections .empty-state {
   flex: 1;
   display: flex;
   align-items: center;
@@ -3373,6 +3441,61 @@ label.merge-list-item {
   justify-content: space-between;
   align-items: center;
   gap: 12px;
+}
+
+/* add-city.html's merge summary card only — unlike other pinned-city-card
+   usages, kept as compact as possible: name/meta stacked in one column, the
+   two mapping-count pills stacked in another, Active/Inactive shown as a
+   colored left edge (same green/red bar as the merge candidate rows
+   further down this page) instead of a third pill, and the Supplier City /
+   System City mode toggle stacked vertically on the card's own right edge. */
+#mergeSummaryCard {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 14px;
+  margin-bottom: 3px;
+  padding: 6px 14px;
+}
+
+#mergeSummaryCard.merge-summary-card--active {
+  border-left: 3px solid var(--success);
+}
+
+#mergeSummaryCard.merge-summary-card--inactive {
+  border-left: 3px solid var(--accent-red);
+}
+
+#mergeSummaryCard .merge-summary-info {
+  min-width: 0;
+}
+
+#mergeSummaryCard .pinned-city-name,
+#mergeSummaryCard .pinned-city-meta {
+  margin-top: 0;
+  white-space: nowrap;
+}
+
+#mergeSummaryCard .merge-summary-counts {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  white-space: nowrap;
+}
+
+#mergeSummaryCard .row-actions {
+  flex-shrink: 0;
+}
+
+#mergeSummaryCard .merge-mode-toggle {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+#mergeSummaryCard .merge-mode-toggle .btn {
+  padding: 5px 12px;
+  font-size: 12px;
+  white-space: nowrap;
 }
 
 /* Checkbox + label toggle row, e.g. "Show only unmapped" filters on the
