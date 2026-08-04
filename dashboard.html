@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dashboard – Hotel Map | mynztrip.com</title>
+<link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- Top bar -->
+  <header class="topbar">
+    <div class="topbar-brand">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2L2 8l10 4 10-4-10-6z" fill="#fff"/>
+        <path d="M2 16l10 4 10-4M2 12l10 4 10-4" stroke="#fff" stroke-width="1.6" fill="none"/>
+      </svg>
+      mynztrip.com
+    </div>
+
+    <button class="icon-btn" aria-label="Menu">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+
+    <button class="icon-btn accent-red" aria-label="Messages">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" stroke="#fff" stroke-width="1.8" fill="none"/></svg>
+    </button>
+
+    <div class="topbar-search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <input type="text" placeholder="Booking ID, PNR, Ticket No..." />
+      <button type="button">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#fff" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+        Search
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+
+    <div class="topbar-right">
+      <button class="icon-btn" aria-label="Notifications">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9z" stroke="#fff" stroke-width="1.8" fill="none"/><path d="M13.7 21a2 2 0 01-3.4 0" stroke="#fff" stroke-width="1.8"/></svg>
+      </button>
+      <svg class="avatar" width="38" height="38" viewBox="0 0 38 38" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="19" cy="19" r="19" fill="#c7cbe8"/>
+        <circle cx="19" cy="15" r="6" fill="#7c82b0"/>
+        <path d="M6 34c1.5-7 8-10 13-10s11.5 3 13 10" fill="#7c82b0"/>
+      </svg>
+    </div>
+  </header>
+
+  <div class="app-body">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <a class="nav-item active" href="dashboard.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        Dashboard
+      </a>
+
+      <!-- Hotel Map (mother menu for this project's pages) -->
+      <nav class="nav-group open">
+        <button class="nav-item">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 4L4 6v14l5-2 6 2 5-2V4l-5 2-6-2z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 4v14M15 6v14" stroke="currentColor" stroke-width="1.6"/></svg>
+          Hotel Map
+          <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="submenu">
+          <div class="submenu-group">
+            <button class="submenu-item submenu-toggle">
+              Country
+              <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="submenu-nested">
+              <a class="submenu-item nested" href="country-system.html">System</a>
+              <a class="submenu-item nested" href="country-supplier.html">Supplier</a>
+            </div>
+          </div>
+          <div class="submenu-group">
+            <button class="submenu-item submenu-toggle">
+              City
+              <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="submenu-nested">
+              <a class="submenu-item nested" href="city-system.html">System</a>
+              <a class="submenu-item nested" href="city-supplier.html">Supplier</a>
+            </div>
+          </div>
+          <a class="submenu-item" href="city-mapping.html">City Mapping</a>
+          <div class="submenu-group">
+            <button class="submenu-item submenu-toggle">
+              Hotel
+              <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="submenu-nested">
+              <a class="submenu-item nested" href="hotel-system.html">System</a>
+              <a class="submenu-item nested" href="hotel-supplier.html">Supplier</a>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="reset-demo-btn" id="resetDemoDataBtn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 109-9 9 9 0 00-7 3.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3 3.5V8h4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Reset Demo Data
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main-content" id="dashboardMain">
+      <div class="page-header">
+        <div class="page-title-row">
+          <h1 class="page-title">Dashboard</h1>
+          <button class="info-icon-btn" data-info-target="#dashboardInfo" data-info-title="Dashboard" aria-label="About this page">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 11v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="8" r="1" fill="currentColor"/></svg>
+          </button>
+          <button class="info-icon-btn" data-info-target="#dashboardDevNotes" data-info-title="Developer Notes — Dashboard" aria-label="Developer notes for this page">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 8l-4 4 4 4M15 8l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      </div>
+      <hr class="page-divider" />
+
+      <template id="dashboardInfo">
+        <p>This is a snapshot of the whole system, split into two halves: what exists in the system itself, and how well each supplier's own data lines up with it. Every count and label doubles as a shortcut straight into the screen behind it — there's no separate links section to hunt through.</p>
+        <ul>
+          <li><strong>System</strong> — total counts for Countries, Cities, and Hotels, plus how many of those cities were added or merged by hand rather than belonging to the original list, and how many countries have a Nationality set. These aren't mapped to anything themselves — they're what suppliers map into. Click a tile's title to open that list; Cities also has a direct link to add a new one.</li>
+          <li><strong>Hotel Star Ratings</strong> — how the system's hotels break down across the 1–5 star scale, plus SC (no formal star rating).</li>
+          <li><strong>Supplier</strong> — one card per supplier, with an overall mapped percentage next to its name, and a line each for Country/City/Hotel showing how many of their own records are linked to a system record versus their total count. Click Country/City/Hotel — or its View link — to open that supplier's list already scoped to this supplier; City's View link instead opens the City Mapping screen for this supplier. Browse suppliers a page at a time if there are more than fit at once.</li>
+          <li><strong>Needs Attention</strong> — a quick highlight of the lowest mapping coverage across every supplier and entity, and which suppliers have the most inactive hotels, each with a link straight to that supplier's list.</li>
+        </ul>
+      </template>
+
+      <template id="dashboardDevNotes">
+        <p>Every number on this screen is computed fresh on page load, directly from the live in-memory data — nothing here is cached or precomputed, so it always reflects whatever is currently in storage. Navigation is attached directly to the stat it belongs to instead of living in a separate links block.</p>
+        <ul>
+          <li><strong>System tiles</strong> — plain lengths of the system Country/City/Hotel lists. <strong>Custom Cities</strong> counts every system city carrying a city-type marker (added via New City or created by a merge, as opposed to the original prepopulated list), split into how many of each kind. <strong>Nationality Set</strong> counts system countries whose Nationality field is non-null. Each tile's title links to that entity's System list; the Cities tile additionally links to Add City.</li>
+          <li><strong>Hotel Star Ratings</strong> — every system hotel's `starRating` field, bucketed 5 down to 1 plus a 0 bucket labeled <strong>SC</strong> (a real classification for hotels with no formal star rating, e.g. serviced apartments — not "unrated data"), shown as a percentage of the total. Buckets with zero hotels still render, so the full scale's shape is visible. This is a plain magnitude distribution, not a coverage metric, so every bar shares one flat color instead of the tier scale used elsewhere on this page.</li>
+          <li><strong>Supplier cards</strong> — one per supplier, with an overall percentage (mapped records summed across all three types, divided by their combined total) shown next to the name, colored by the same three-tier scale as the bars below it. Three lines follow: <strong>Country</strong> (mapped when a system country is assigned), <strong>City</strong> (mapped when a system city is assigned), <strong>Hotel</strong> (mapped when its provider identifier resolves to a real system hotel — hotels have no separate stored link, so this is a derived match, never a manually set one). Every label link carries this supplier along as a `?supplier=` deep link so the destination screen opens with that supplier already selected, not an empty "pick a supplier" state. Every line also has a View link using the same deep link: Country's and Hotel's point at the same Supplier List their label already does (Country's because that's genuinely where its Map action lives; Hotel's because there is no separate mapping screen to send it to instead — a supplier hotel's "mapped" status is a derived Provider ID match, never a manually set one). City's View link differs from its label, going to the City Mapping screen's own Map-Supplier-Cities panel instead of the Supplier City List. The card list is paginated independently of every other list on this page.</li>
+          <li><strong>Needs Attention</strong> — two independently computed, capped-at-3 highlight lists, not a general alert system. <strong>Lowest Mapping Coverage</strong> flattens all 12 supplier×entity combinations already computed for the Supplier cards above, sorts by percentage ascending, and shows the worst 3 — so which items appear changes automatically as coverage changes, never a fixed list of names. <strong>Inactive Hotels</strong> counts each supplier's own inactive hotel rows (the only entity with real active/inactive variance in this data — system records and other supplier entities are effectively always active in the seed data), shows suppliers with at least one inactive hotel, worst count first, capped at 3. Both link to that supplier's own list, deep-linked the same way as the Supplier cards.</li>
+        </ul>
+      </template>
+
+      <div class="dashboard-layout">
+        <section class="dashboard-section">
+          <h2 class="dashboard-section-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="14" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="14" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/></svg>
+            System
+          </h2>
+          <div class="stat-tile-row">
+            <div class="stat-tile">
+              <div class="stat-tile-icon stat-tile-icon--blue">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.7 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.7-3.8-9s1.3-6.4 3.8-9z" stroke="currentColor" stroke-width="1.6"/></svg>
+              </div>
+              <div class="stat-tile-content">
+                <a class="stat-tile-label" href="country-system.html">System Countries</a>
+                <span class="stat-tile-value" id="statSystemCountries">--</span>
+                <span class="stat-tile-sub" id="statSupplierCountries"></span>
+              </div>
+            </div>
+            <div class="stat-tile">
+              <div class="stat-tile-icon stat-tile-icon--cyan">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 21V8l6-4 6 4v13" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M16 21v-9l4 2v7" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 11h1M8 14h1M8 17h1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+              </div>
+              <div class="stat-tile-content">
+                <a class="stat-tile-label" href="city-system.html">System Cities</a>
+                <span class="stat-tile-value" id="statSystemCities">--</span>
+                <span class="stat-tile-sub" id="statSupplierCities"></span>
+                <a class="stat-tile-action" href="add-city.html">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                  Add City
+                </a>
+              </div>
+            </div>
+            <div class="stat-tile">
+              <div class="stat-tile-icon stat-tile-icon--navy">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M9 17l-4.5 2V7L9 5m0 12l6 2m-6-2V5m6 14l4.5-2V5L15 7m0 12V7m0 0L9 5" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+              </div>
+              <div class="stat-tile-content">
+                <a class="stat-tile-label" href="hotel-system.html">System Hotels</a>
+                <span class="stat-tile-value" id="statSystemHotels">--</span>
+                <span class="stat-tile-sub" id="statSupplierHotels"></span>
+              </div>
+            </div>
+            <div class="stat-tile">
+              <div class="stat-tile-icon stat-tile-icon--cyan">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 3l1.8 4.8L19 9l-4.8 1.8L12 16l-1.8-5.2L5 9l5.2-1.2L12 3z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M18 15l.9 2.1L21 18l-2.1.9L18 21l-.9-2.1L15 18l2.1-.9L18 15z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+              </div>
+              <div class="stat-tile-content">
+                <a class="stat-tile-label" href="city-system.html?customOnly=1">Custom Cities</a>
+                <span class="stat-tile-value" id="statCustomCities">--</span>
+                <span class="stat-tile-sub" id="statCustomCitiesBreakdown"></span>
+              </div>
+            </div>
+            <div class="stat-tile">
+              <div class="stat-tile-icon stat-tile-icon--blue">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.6"/><circle cx="9" cy="12" r="2.2" stroke="currentColor" stroke-width="1.4"/><path d="M14 10h4M14 14h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+              </div>
+              <div class="stat-tile-content">
+                <a class="stat-tile-label" href="country-system.html">Nationality Set</a>
+                <span class="stat-tile-value" id="statNationalitySet">--</span>
+                <span class="stat-tile-sub" id="statNationalitySub"></span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="content-card star-rating-card">
+          <div class="card-toolbar">
+            <h2>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="vertical-align:-3px; margin-right:6px;"><path d="M12 3l2.5 5.5L21 9.5l-4.7 4.3L17.5 21 12 17.5 6.5 21l1.2-7.2L3 9.5l6.5-1z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+              Hotel Star Ratings
+            </h2>
+          </div>
+          <div class="star-rating-list" id="starRatingList"></div>
+        </section>
+
+        <section class="content-card supplier-section">
+          <div class="card-toolbar">
+            <h2>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="vertical-align:-3px; margin-right:6px;"><path d="M3 12a9 9 0 1018 0 9 9 0 00-18 0z" stroke="currentColor" stroke-width="1.6"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.7 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.7-3.8-9s1.3-6.4 3.8-9z" stroke="currentColor" stroke-width="1.6"/></svg>
+              Supplier
+            </h2>
+          </div>
+          <div class="supplier-summary-list" id="supplierSummaryList"></div>
+          <div class="table-footer pagination-bar" id="supplierPaginationBar"></div>
+        </section>
+
+        <section class="content-card attention-card">
+          <div class="card-toolbar">
+            <h2>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="vertical-align:-3px; margin-right:6px;"><path d="M12 9v4M12 17h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M10.3 4.6L2.9 17.5a1.8 1.8 0 001.6 2.7h15a1.8 1.8 0 001.6-2.7L13.7 4.6a1.8 1.8 0 00-3.4 0z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+              Needs Attention
+            </h2>
+          </div>
+          <div class="attention-list" id="attentionList"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+<script src="js/data.js"></script>
+<script>
+  document.getElementById("statSystemCountries").textContent = SYSTEM_COUNTRIES.length;
+  document.getElementById("statSupplierCountries").textContent =
+    `${Object.values(supplierCountries).flat().length} supplier rows across ${Object.keys(SUPPLIER_LABELS).length} suppliers`;
+
+  document.getElementById("statSystemCities").textContent = SYSTEM_CITIES.length;
+  document.getElementById("statSupplierCities").textContent =
+    `${Object.values(supplierCities).flat().length} supplier rows across ${Object.keys(SUPPLIER_LABELS).length} suppliers`;
+
+  document.getElementById("statSystemHotels").textContent = SYSTEM_HOTELS.length;
+  document.getElementById("statSupplierHotels").textContent =
+    `${Object.values(supplierHotels).flat().length} supplier rows across ${Object.keys(SUPPLIER_LABELS).length} suppliers`;
+
+  const customCities = SYSTEM_CITIES.filter((c) => c.cityType);
+  const customCityCounts = {
+    normal: customCities.filter((c) => c.cityType === "normal").length,
+    merged: customCities.filter((c) => c.cityType === "merged").length,
+  };
+  document.getElementById("statCustomCities").textContent = customCities.length;
+  document.getElementById("statCustomCitiesBreakdown").textContent =
+    `${customCityCounts.normal} new · ${customCityCounts.merged} merged`;
+
+  const countriesWithNationality = SYSTEM_COUNTRIES.filter((c) => c.nationality).length;
+  document.getElementById("statNationalitySet").textContent = `${countriesWithNationality}/${SYSTEM_COUNTRIES.length}`;
+  document.getElementById("statNationalitySub").textContent = SYSTEM_COUNTRIES.length
+    ? `${Math.round((countriesWithNationality / SYSTEM_COUNTRIES.length) * 100)}% of countries have one set`
+    : "";
+
+  function coverageTierClass(pct) {
+    if (pct >= 80) return "tier-good";
+    if (pct >= 50) return "tier-warn";
+    return "tier-low";
+  }
+
+  function meterRowHtml(label, mapped, total, href, viewHref) {
+    const pct = total ? Math.round((mapped / total) * 100) : 0;
+    const tier = coverageTierClass(pct);
+    return `
+      <div class="coverage-meter-row">
+        <a class="coverage-meter-label" href="${href}">${label}</a>
+        <span class="coverage-meter-track ${tier}">
+          <span class="coverage-meter-fill ${tier}" style="width:${pct}%"></span>
+        </span>
+        <span class="coverage-meter-value">${mapped} / ${total} <span class="coverage-meter-pct">(${pct}%)</span></span>
+        <span class="coverage-meter-action">${viewHref ? `<a href="${viewHref}">View →</a>` : ""}</span>
+      </div>`;
+  }
+
+  // -- Hotel Star Ratings: a plain magnitude distribution, not a coverage
+  // metric, so bars share one flat color rather than the tier scale above
+  // (there's no "good/bad" star rating). All buckets are shown even if a
+  // rating has zero hotels, so the shape of the full scale is visible.
+  // Rating 0 is a real category, not "unrated" — hotels with no formal star
+  // rating (e.g. serviced apartments) are classed "SC", listed after 1 Star
+  // rather than as a highest-to-lowest numeric bucket.
+  const starRatingCounts = [5, 4, 3, 2, 1, 0].map((stars) => ({
+    stars,
+    label: stars === 0 ? "SC" : `${stars} Star`,
+    count: SYSTEM_HOTELS.filter((h) => h.starRating === stars).length,
+  }));
+  document.getElementById("starRatingList").innerHTML = starRatingCounts
+    .map(({ label, count }) => {
+      const pct = SYSTEM_HOTELS.length ? Math.round((count / SYSTEM_HOTELS.length) * 100) : 0;
+      return `
+        <div class="star-rating-row">
+          <span class="star-rating-label">${label}</span>
+          <span class="star-rating-track">
+            <span class="star-rating-fill" style="width:${pct}%"></span>
+          </span>
+          <span class="star-rating-value">${count} hotels (${pct}%)</span>
+        </div>`;
+    })
+    .join("");
+
+  // -- Supplier mapping-summary cards (System/Country/City/Hotel counts +
+  // mapping counts per supplier), paginated independently of every other
+  // list on this page via a small local pager (reuses getPageList() from
+  // js/app.js for page-number generation, but skips the rows-per-page
+  // dropdown renderPagination() bundles in — a handful of supplier cards
+  // doesn't need a variable page size the way a data table does).
+  // Fixed hue order for the supplier avatar badges — pulled from the app's
+  // existing non-status brand colors (never the success/warning/red trio,
+  // which the meter bars below already use for coverage severity; reusing
+  // them here would make a red avatar look like a coverage warning).
+  const SUPPLIER_AVATAR_CLASSES = ["avatar-blue", "avatar-cyan", "avatar-navylight", "avatar-navy"];
+
+  function computeSupplierSummary(key, index) {
+    const countryRows = supplierCountries[key] || [];
+    const cityRows = supplierCities[key] || [];
+    const hotelRows = supplierHotels[key] || [];
+    const country = { total: countryRows.length, mapped: countryRows.filter((r) => r.systemCountry != null).length };
+    const city = { total: cityRows.length, mapped: cityRows.filter((r) => r.systemCityId != null).length };
+    const hotel = {
+      total: hotelRows.length,
+      mapped: hotelRows.filter((r) => Boolean(findSystemHotelByProviderId(r.providerId))).length,
+    };
+    const totalAll = country.total + city.total + hotel.total;
+    const mappedAll = country.mapped + city.mapped + hotel.mapped;
+    return {
+      key,
+      label: SUPPLIER_LABELS[key],
+      avatarClass: SUPPLIER_AVATAR_CLASSES[index % SUPPLIER_AVATAR_CLASSES.length],
+      overallPct: totalAll ? Math.round((mappedAll / totalAll) * 100) : 0,
+      country,
+      city,
+      hotel,
+    };
+  }
+
+  const supplierSummaries = Object.keys(SUPPLIER_LABELS).map(computeSupplierSummary);
+
+  // Every one of these destination pages (country-supplier.html,
+  // city-supplier.html, hotel-supplier.html, city-mapping.html) already
+  // supports a `?supplier=<key>` deep link that pre-selects that supplier
+  // in its own Supplier dropdown — reused here so a card's links land
+  // already scoped to that supplier instead of an empty "pick a supplier"
+  // state. Country and Hotel's View link is the same destination as their
+  // label (the Supplier list itself, since that's genuinely where Country's
+  // Map action lives, and Hotel has no separate action to send it to
+  // instead — its "mapped" status is a derived Provider ID match, not
+  // something manually set). City's View link differs from its label,
+  // going to the City Mapping screen instead of the Supplier City List.
+  function supplierCardHtml(s) {
+    const overallTier = coverageTierClass(s.overallPct);
+    return `
+      <div class="supplier-summary-card">
+        <div class="supplier-summary-header">
+          <span class="supplier-summary-avatar ${s.avatarClass}">${s.label.charAt(0)}</span>
+          <span class="supplier-summary-name">${s.label}</span>
+          <span class="pill ${overallTier === "tier-good" ? "success" : overallTier === "tier-warn" ? "warning" : "danger"} supplier-summary-overall">${s.overallPct}% mapped</span>
+        </div>
+        <div class="supplier-summary-metrics">
+          ${meterRowHtml("Country", s.country.mapped, s.country.total, `country-supplier.html?supplier=${s.key}`, `country-supplier.html?supplier=${s.key}`)}
+          ${meterRowHtml("City", s.city.mapped, s.city.total, `city-supplier.html?supplier=${s.key}`, `city-mapping.html?supplier=${s.key}`)}
+          ${meterRowHtml("Hotel", s.hotel.mapped, s.hotel.total, `hotel-supplier.html?supplier=${s.key}`, `hotel-supplier.html?supplier=${s.key}`)}
+        </div>
+      </div>`;
+  }
+
+  function renderCardPagination(container, { total, page, pageSize, onChange }) {
+    const totalPages = Math.max(1, Math.ceil(total / pageSize));
+    const start = total === 0 ? 0 : (page - 1) * pageSize + 1;
+    const end = Math.min(page * pageSize, total);
+    const pages = getPageList(page, totalPages);
+    container.innerHTML = `
+      <div class="pagination-info">Showing <strong>${start}</strong> - <strong>${end}</strong> of <strong>${total}</strong> suppliers</div>
+      <div class="pagination-controls">
+        <button class="page-btn nav" data-page="${page - 1}" ${page === 1 ? "disabled" : ""}>&laquo; Previous</button>
+        ${pages
+          .map((p) =>
+            p === "..."
+              ? `<span class="page-ellipsis">&hellip;</span>`
+              : `<button class="page-btn ${p === page ? "active" : ""}" data-page="${p}">${p}</button>`
+          )
+          .join("")}
+        <button class="page-btn nav" data-page="${page + 1}" ${page === totalPages ? "disabled" : ""}>Next &raquo;</button>
+      </div>`;
+    container.querySelectorAll(".page-btn[data-page]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        if (btn.disabled) return;
+        onChange({ page: parseInt(btn.dataset.page, 10) });
+      });
+    });
+  }
+
+  const supplierPageState = { page: 1, pageSize: 2 };
+
+  function renderSupplierPage() {
+    const total = supplierSummaries.length;
+    const totalPages = Math.max(1, Math.ceil(total / supplierPageState.pageSize));
+    supplierPageState.page = Math.min(Math.max(1, supplierPageState.page), totalPages);
+    const start = (supplierPageState.page - 1) * supplierPageState.pageSize;
+    const pageItems = supplierSummaries.slice(start, start + supplierPageState.pageSize);
+
+    document.getElementById("supplierSummaryList").innerHTML = pageItems.map(supplierCardHtml).join("");
+    renderCardPagination(document.getElementById("supplierPaginationBar"), {
+      total,
+      page: supplierPageState.page,
+      pageSize: supplierPageState.pageSize,
+      onChange: ({ page }) => {
+        supplierPageState.page = page;
+        renderSupplierPage();
+      },
+    });
+  }
+
+  renderSupplierPage();
+
+  // -- Needs Attention: two curated highlight lists computed from data
+  // already gathered above, not a general-purpose alert system — capped at
+  // 3 rows each so this stays a quick scan, not another full table.
+  function attentionItemHtml(tier, boldText, restText, pillText, href) {
+    return `
+      <div class="attention-item">
+        <svg class="attention-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 9v4M12 17h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M10.3 4.6L2.9 17.5a1.8 1.8 0 001.6 2.7h15a1.8 1.8 0 001.6-2.7L13.7 4.6a1.8 1.8 0 00-3.4 0z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        <div class="attention-body">
+          <span class="attention-text"><strong>${boldText}</strong> ${restText}</span>
+          <span class="pill ${tier === "tier-good" ? "success" : tier === "tier-warn" ? "warning" : "danger"} attention-pill">${pillText}</span>
+        </div>
+        <a class="attention-link" href="${href}">View →</a>
+      </div>`;
+  }
+
+  // Lowest mapping coverage: flatten every supplier x entity combo already
+  // computed in supplierSummaries into one list, worst percentage first.
+  const coverageCombos = supplierSummaries.flatMap((s) => [
+    { supplierLabel: s.label, entityLabel: "Country", ...s.country, href: `country-supplier.html?supplier=${s.key}` },
+    { supplierLabel: s.label, entityLabel: "City", ...s.city, href: `city-supplier.html?supplier=${s.key}` },
+    { supplierLabel: s.label, entityLabel: "Hotel", ...s.hotel, href: `hotel-supplier.html?supplier=${s.key}` },
+  ]);
+  coverageCombos.forEach((c) => (c.pct = c.total ? Math.round((c.mapped / c.total) * 100) : 0));
+  coverageCombos.sort((a, b) => a.pct - b.pct);
+  const lowestCoverageHtml = coverageCombos
+    .slice(0, 3)
+    .map((c) =>
+      attentionItemHtml(
+        coverageTierClass(c.pct),
+        c.supplierLabel,
+        `— ${c.entityLabel} mapping is the lowest in the system`,
+        `${c.pct}% mapped`,
+        c.href
+      )
+    )
+    .join("");
+
+  // Inactive hotels per supplier — the only entity with real active/inactive
+  // variance in this data (system records and other supplier entities are
+  // effectively always active), worst count first.
+  const inactiveHotelCounts = Object.keys(SUPPLIER_LABELS)
+    .map((key) => {
+      const rows = supplierHotels[key] || [];
+      const inactive = rows.filter((h) => !h.active).length;
+      return {
+        label: SUPPLIER_LABELS[key],
+        inactive,
+        total: rows.length,
+        pct: rows.length ? Math.round((inactive / rows.length) * 100) : 0,
+        href: `hotel-supplier.html?supplier=${key}`,
+      };
+    })
+    .filter((s) => s.inactive > 0)
+    .sort((a, b) => b.inactive - a.inactive);
+  const inactiveHotelsHtml = inactiveHotelCounts
+    .slice(0, 3)
+    .map((s) =>
+      attentionItemHtml(
+        s.pct >= 15 ? "tier-low" : "tier-warn",
+        s.label,
+        `has ${s.inactive} inactive hotel${s.inactive === 1 ? "" : "s"}`,
+        `${s.pct}% inactive`,
+        s.href
+      )
+    )
+    .join("");
+
+  document.getElementById("attentionList").innerHTML = `
+    <p class="attention-group-title">Lowest Mapping Coverage</p>
+    ${lowestCoverageHtml || '<p class="attention-empty">Nothing stands out — coverage looks even across suppliers.</p>'}
+    <p class="attention-group-title">Inactive Hotels</p>
+    ${inactiveHotelsHtml || '<p class="attention-empty">No inactive hotels found.</p>'}
+  `;
+</script>
+</body>
+</html>

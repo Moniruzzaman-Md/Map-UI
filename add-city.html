@@ -53,6 +53,11 @@
 
     <!-- Sidebar -->
     <aside class="sidebar">
+      <a class="nav-item" href="dashboard.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        Dashboard
+      </a>
+
       <!-- Hotel Map (mother menu for this project's pages) -->
       <nav class="nav-group open">
         <button class="nav-item active">
@@ -378,7 +383,7 @@
               <div class="mapping-bottom-col">
                 <!-- System City mode -->
                 <div class="form-group mapping-list-group" id="mergeSystemListGroup" style="display:none;">
-                  <label>Cities in This Merge</label>
+                  <label>System Cities in This Merge</label>
                   <div class="merge-list">
                     <details class="mapping-collapsible-inline" open>
                       <summary class="mapping-collapsible-header mapping-collapsible-header--warning">
@@ -399,7 +404,7 @@
 
                 <!-- Supplier City mode -->
                 <div class="form-group mapping-list-group" id="mergeSupplierListGroup">
-                  <label>Supplier Cities Mapped to This Merge</label>
+                  <label>Supplier Cities in This Merge</label>
                   <div class="merge-list">
                     <details class="mapping-collapsible-inline" open>
                       <summary class="mapping-collapsible-header mapping-collapsible-header--warning">
@@ -425,7 +430,7 @@
                 <div class="form-group mapping-list-group" id="mergeSystemPickerGroup" style="display:none;">
                   <div class="mapping-search-actions-row" style="margin-bottom:6px;">
                     <div style="display:flex; align-items:center; gap:10px;">
-                      <label style="margin-bottom:0;">Candidate Cities</label>
+                      <label style="margin-bottom:0;">Candidate System Cities</label>
                       <span class="hint" id="mergeCandidateStat" style="margin-top:0;">Select a country first</span>
                     </div>
                     <span class="mapping-save-summary" id="mergeSelectionSummary">No pending changes</span>
@@ -448,7 +453,7 @@
                 <div class="form-group mapping-list-group" id="mergeSupplierPickerGroup">
                   <div class="mapping-search-actions-row" style="margin-bottom:6px;">
                     <div style="display:flex; align-items:center; gap:10px;">
-                      <label style="margin-bottom:0;">Supplier Cities</label>
+                      <label style="margin-bottom:0;">Candidate Supplier Cities</label>
                       <span class="hint" id="mergeSupplierMappedStat" style="margin-top:0;">Mapped: 0/0</span>
                     </div>
                     <span class="mapping-save-summary" id="mergeSupplierSelectionSummary">No pending changes</span>
@@ -1969,6 +1974,8 @@
       systemPickerGroup.style.display = isSupplierMode ? "none" : "";
       modeSupplierBtn.className = `btn ${isSupplierMode ? "btn-primary" : "btn-secondary"}`;
       modeSystemBtn.className = `btn ${isSupplierMode ? "btn-secondary" : "btn-primary"}`;
+      memberCountEl.className = `pill ${isSupplierMode ? "neutral" : "info"}`;
+      mappedSupplierCountEl.className = `pill ${isSupplierMode ? "info" : "neutral"}`;
     }
 
     // Generic confirm dialog (mirrors #confirmModal on city-mapping.html /

@@ -53,6 +53,11 @@
 
     <!-- Sidebar -->
     <aside class="sidebar">
+      <a class="nav-item" href="dashboard.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        Dashboard
+      </a>
+
       <!-- Hotel Map (mother menu for this project's pages) -->
       <nav class="nav-group open">
         <button class="nav-item active">
@@ -652,6 +657,15 @@
     closeModal(document.getElementById("confirmModal"));
     if (action) action();
   });
+
+  // Pre-select the supplier filter when arriving from a deep link, e.g.
+  // country-supplier.html?supplier=agoda (used by the Dashboard's Supplier
+  // cards). The option values are the SUPPLIER_LABELS keys directly.
+  const linkedSupplierKey = new URLSearchParams(location.search).get("supplier");
+  if (linkedSupplierKey && supplierFilter.querySelector(`option[value="${linkedSupplierKey}"]`)) {
+    supplierFilter.value = linkedSupplierKey;
+    supplierFilter.dispatchEvent(new Event("change"));
+  }
 
   render();
 </script>
