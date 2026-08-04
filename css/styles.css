@@ -1989,15 +1989,11 @@ table.data-table {
 }
 
 .stat-tile {
-  position: relative;
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
   padding: 18px 20px;
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
   transition: box-shadow 0.15s ease, transform 0.15s ease;
 }
 
@@ -2006,14 +2002,25 @@ table.data-table {
   transform: translateY(-2px);
 }
 
+.stat-tile-value-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .stat-tile-icon {
   flex-shrink: 0;
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.stat-tile-icon svg {
+  width: 17px;
+  height: 17px;
 }
 
 .stat-tile-icon--blue {
@@ -2036,6 +2043,13 @@ table.data-table {
   flex-direction: column;
   gap: 4px;
   min-width: 0;
+}
+
+.stat-tile-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
 }
 
 .stat-tile-label {
@@ -2064,21 +2078,29 @@ a.stat-tile-label:hover {
   color: var(--text-muted);
 }
 
+.stat-tile-sub strong {
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
 .stat-tile-action {
-  position: absolute;
-  top: 16px;
-  right: 18px;
+  flex-shrink: 0;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-size: 12px;
+  gap: 3px;
+  padding: 3px 8px 3px 6px;
+  border-radius: var(--radius-pill);
+  background: rgba(43, 62, 209, 0.1);
+  font-size: 11px;
   font-weight: 700;
   color: var(--accent-blue);
   text-decoration: none;
+  white-space: nowrap;
 }
 
 .stat-tile-action:hover {
-  text-decoration: underline;
+  background: var(--accent-blue);
+  color: #fff;
 }
 
 .supplier-section,
