@@ -1376,6 +1376,75 @@ table.data-table {
   padding: 0 14px;
 }
 
+/* Dashboard supplier-card pagination only (see js in dashboard.html) — lets
+   the Next button be nudged out from under the cursor via transform without
+   shifting the layout of the buttons around it. */
+.page-btn.dodge-btn {
+  position: relative;
+  z-index: 3;
+  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.2s, box-shadow 0.2s;
+}
+
+/* Heat tiers on the button itself — how hotly it's been chased recently.
+   Color/shadow only, never `transform`, since that property is already
+   owned by the dodge positioning above and the two would fight for control
+   if both tried to animate it. */
+.page-btn.dodge-btn.heat-annoyed {
+  border-color: #f3722c;
+}
+.page-btn.dodge-btn.heat-angry {
+  border-color: #f94144;
+  box-shadow: 0 0 0 2px rgba(249, 65, 68, 0.15);
+}
+.page-btn.dodge-btn.heat-saint {
+  border-color: #f9c74f;
+  box-shadow: 0 0 0 2px rgba(249, 199, 79, 0.2);
+}
+
+/* Taunt bubble anchored above the runaway Next button — a child of the
+   button itself, so it automatically travels with it via normal DOM
+   nesting whenever the button's own transform repositions it. */
+.dodge-taunt {
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  margin-bottom: 6px;
+  transform: translate(-50%, 4px);
+  background: var(--text-dark);
+  color: #fff;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  z-index: 5;
+}
+.dodge-taunt.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* Confetti burst for catching the runaway button mid-chase. Appended to
+   <body> (not the button) so .content-card's overflow:hidden can't clip it. */
+.dodge-confetti {
+  position: fixed;
+  width: 6px;
+  height: 6px;
+  border-radius: 1px;
+  pointer-events: none;
+  z-index: 9999;
+  animation: dodge-confetti-fly 0.65s ease-out forwards;
+}
+@keyframes dodge-confetti-fly {
+  to {
+    transform: translate(var(--dx), var(--dy)) rotate(200deg);
+    opacity: 0;
+  }
+}
+
 .page-btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;

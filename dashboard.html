@@ -424,6 +424,258 @@
       </div>`;
   }
 
+  // Makes the supplier pagination's Next button dodge the cursor as it
+  // approaches, instead of just sitting there waiting to be clicked. Scoped
+  // entirely to #supplierPaginationBar — the shared renderPagination() in
+  // js/app.js (used by every other list page) is untouched, so this is a
+  // dashboard-only quirk. Purely a transform on the button itself, so the
+  // click handler and keyboard/Tab access still work normally; it only
+  // makes landing a mouse click on it hard, not impossible.
+  //
+  // Personality: it dodges the instant the cursor gets close — no slow
+  // buildup — plus a taunt bubble each time. A 0-100 "heat" value tracks how
+  // hotly it's been pursued recently (rises per dodge, decays over time) to
+  // drive the border-color escalation, the catch reward, and the 30s
+  // decision below; it never gates the dodge itself. Left alone, heat decays
+  // back to 0 and it eases home on its own (no fixed idle cutoff). It always
+  // stays fully on screen (clamped to the viewport intersected with
+  // .content-card's own box — the card has overflow:hidden, so that's the
+  // real clipping boundary, not the much larger .dashboard-layout scroll
+  // area). 30s after the page loads, dodging retires for good — if it's
+  // still actively being chased right at that moment it "becomes a saint"
+  // (a one-off toast, eases home) instead of just quietly stopping. Catching
+  // it mid-chase (clicking while heat > 0) triggers a small confetti reward;
+  // normal clicks on an already-calm button do nothing extra.
+  function initRunawayNextButton(container) {
+    if (container._runawayInit) return;
+    container._runawayInit = true;
+    if (window.matchMedia("(pointer: coarse)").matches) return; // leave touch devices alone
+
+    const DODGE_RADIUS = 70; // px from cursor to button center that triggers an instant dodge
+    const HEAT_PER_DODGE = 30; // heat gained each time it flees
+    const HEAT_DECAY_PER_TICK = 2;
+    const DECAY_TICK_MS = 150;
+    const MIN_DODGE_INTERVAL_MS = 160; // floor between jumps — keeps it snappy, not jittery
+    const SHOW_DURATION_MS = 30000; // dodging is retired for good after this long
+    const EDGE_MARGIN = 12; // px kept clear of the visible area's edge
+    const HEAT_CLASSES = ["heat-annoyed", "heat-angry", "heat-saint"];
+    const TAUNTS = ["Nope!", "Too slow!", "Nice try!", "Catch me if you can!", "Missed me!"];
+    const scrollParent = container.closest(".dashboard-layout"); // scrolls -> can go stale, see below
+    const clipParent = container.closest(".content-card"); // overflow:hidden -> the real visual boundary
+
+    // curLeft/curTop are OUR OWN authoritative target position, not read
+    // back from getBoundingClientRect() mid-chase — the button's CSS
+    // transition means the rendered box only catches up to a new transform
+    // over ~150ms, so re-measuring it between fast mousemove events would
+    // read a stale, still-animating position. naturalLeft/Top (the
+    // untransformed position) are captured once per fresh element, at a
+    // moment transform is guaranteed empty, so that read is exact.
+    const state = {
+      btn: null,
+      tauntEl: null,
+      tauntTimer: null,
+      naturalLeft: 0,
+      naturalTop: 0,
+      width: 0,
+      height: 0,
+      curLeft: 0,
+      curTop: 0,
+    };
+    let showActive = true;
+    let heat = 0;
+    let isSaint = false;
+    let lastDodgeAt = 0;
+    let tauntIndex = 0;
+
+    function goHome() {
+      if (!state.btn) return;
+      state.curLeft = state.naturalLeft;
+      state.curTop = state.naturalTop;
+      state.btn.style.transform = "";
+    }
+
+    function heatTier(h) {
+      if (h < 40) return null; // no extra styling — plain button
+      if (h < 75) return "heat-annoyed";
+      return "heat-angry";
+    }
+
+    function updateHeat() {
+      if (!state.btn) return;
+      const cls = isSaint ? "heat-saint" : heatTier(heat);
+      state.btn.classList.remove(...HEAT_CLASSES);
+      if (cls) state.btn.classList.add(cls);
+    }
+
+    function showTaunt() {
+      if (!state.tauntEl) return;
+      state.tauntEl.textContent = TAUNTS[tauntIndex++ % TAUNTS.length];
+      state.tauntEl.classList.add("show");
+      clearTimeout(state.tauntTimer);
+      state.tauntTimer = setTimeout(() => state.tauntEl?.classList.remove("show"), 1100);
+    }
+
+    const CONFETTI_COLORS = ["#f94144", "#f3722c", "#f9c74f", "#90be6d", "#577590", "#43aa8b"];
+    function spawnConfetti(anchorEl) {
+      const rect = anchorEl.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      for (let i = 0; i < 14; i++) {
+        const piece = document.createElement("span");
+        piece.className = "dodge-confetti";
+        piece.style.left = `${cx}px`;
+        piece.style.top = `${cy}px`;
+        piece.style.background = CONFETTI_COLORS[i % CONFETTI_COLORS.length];
+        const angle = (Math.PI * 2 * i) / 14 + Math.random() * 0.4;
+        const dist = 40 + Math.random() * 40;
+        piece.style.setProperty("--dx", `${Math.cos(angle) * dist}px`);
+        piece.style.setProperty("--dy", `${Math.sin(angle) * dist}px`);
+        // appended to <body>, not the button, so .content-card's
+        // overflow:hidden can't clip the burst.
+        document.body.appendChild(piece);
+        setTimeout(() => piece.remove(), 700);
+      }
+    }
+
+    function celebrateCatch() {
+      spawnConfetti(state.btn);
+      showToast("Caught! Achievement unlocked: Mouse Whisperer.", "success");
+    }
+
+    function becomeSaint() {
+      isSaint = true;
+      heat = 0;
+      goHome();
+      updateHeat();
+      showToast("Blessed are those who never give up.", "success");
+    }
+
+    const decayTimer = setInterval(() => {
+      if (!showActive || heat <= 0) return;
+      heat = Math.max(0, heat - HEAT_DECAY_PER_TICK);
+      updateHeat();
+      if (heat === 0 && state.btn && (state.curLeft !== state.naturalLeft || state.curTop !== state.naturalTop)) {
+        goHome();
+      }
+    }, DECAY_TICK_MS);
+
+    setTimeout(() => {
+      showActive = false;
+      clearInterval(decayTimer);
+      // Still actively being chased right at the 30s mark -> comedic
+      // reward ending instead of just quietly stopping.
+      if (heat > 0) {
+        becomeSaint();
+      } else {
+        goHome();
+      }
+    }, SHOW_DURATION_MS);
+
+    // If the layout scrolls mid-chase, naturalLeft/Top (captured once,
+    // viewport-relative) go stale — not just the visual position but the
+    // cached numbers themselves, which would silently throw off every
+    // distance/clamp calculation afterward. Snap home, cool down, and drop
+    // the cached element reference so the next mousemove re-measures
+    // everything fresh, exactly like a brand-new element would (the taunt
+    // bubble DOM node is reused, not recreated — see below).
+    scrollParent?.addEventListener("scroll", () => {
+      goHome();
+      heat = 0;
+      updateHeat();
+      state.btn = null;
+    });
+
+    container.addEventListener("mousemove", (e) => {
+      if (!showActive) return;
+
+      const btn = Array.from(container.querySelectorAll(".page-btn.nav")).find(
+        (b) => b.textContent.includes("Next") && !b.disabled
+      );
+      if (!btn) return;
+
+      if (btn !== state.btn) {
+        // Fresh render (page changed) or a cache-clear from a scroll — new
+        // chase either way. transform is guaranteed empty here, so this
+        // rect read is exact.
+        btn.classList.add("dodge-btn");
+        btn.style.transform = "";
+        const rect = btn.getBoundingClientRect();
+        state.btn = btn;
+        state.naturalLeft = rect.left;
+        state.naturalTop = rect.top;
+        state.width = rect.width;
+        state.height = rect.height;
+        state.curLeft = rect.left;
+        state.curTop = rect.top;
+        heat = 0;
+
+        // Taunt bubble is a child of the button itself, so it automatically
+        // travels with it via normal DOM nesting whenever the button's own
+        // transform moves it — no separate positioning needed. Re-use it if
+        // this is the same physical element (a scroll-triggered cache-clear,
+        // not a real re-render) rather than inserting a duplicate.
+        let taunt = btn.querySelector(".dodge-taunt");
+        if (!taunt) {
+          taunt = document.createElement("span");
+          taunt.className = "dodge-taunt";
+          btn.appendChild(taunt);
+          // Catch reward: only wire this once per real DOM element.
+          btn.addEventListener("click", () => {
+            if (heat > 0) celebrateCatch();
+          });
+        }
+        state.tauntEl = taunt;
+
+        updateHeat();
+      }
+
+      if (isSaint) return; // permanently calm from here on
+
+      const cx = state.curLeft + state.width / 2;
+      const cy = state.curTop + state.height / 2;
+      const dx = cx - e.clientX;
+      const dy = cy - e.clientY;
+      const dist = Math.hypot(dx, dy);
+      // Dodges the instant the cursor gets close — no slow buildup — just a
+      // short cooldown so it doesn't jitter on every single pixel of motion.
+      if (dist > DODGE_RADIUS || Date.now() - lastDodgeAt < MIN_DODGE_INTERVAL_MS) return;
+
+      lastDodgeAt = Date.now();
+      heat = Math.min(100, heat + HEAT_PER_DODGE);
+      updateHeat();
+      showTaunt();
+
+      const angle = Math.atan2(dy, dx) + (Math.random() - 0.5) * 0.6;
+      const jump = 70 + Math.random() * 40;
+      let newLeft = state.curLeft + Math.cos(angle) * jump;
+      let newTop = state.curTop + Math.sin(angle) * jump;
+
+      // Clamp to stay fully visible: inside the browser viewport, inside the
+      // card's own box (clipParent has overflow:hidden — moving past its
+      // edge gets clipped even while still "on screen"), AND inside whatever
+      // part of the card is currently scrolled into view (the card can be
+      // taller than the scroll container's own visible window, so being
+      // within the card alone isn't enough — the card's top/bottom can
+      // themselves be scrolled off-screen). Both rects are already
+      // viewport-relative, so intersecting them is automatically scroll-correct.
+      const cardRect = clipParent?.getBoundingClientRect();
+      const scrollRect = scrollParent?.getBoundingClientRect();
+      const boundsLeft = Math.max(cardRect?.left ?? -Infinity, scrollRect?.left ?? -Infinity);
+      const boundsRight = Math.min(cardRect?.right ?? Infinity, scrollRect?.right ?? Infinity);
+      const boundsTop = Math.max(cardRect?.top ?? -Infinity, scrollRect?.top ?? -Infinity);
+      const boundsBottom = Math.min(cardRect?.bottom ?? Infinity, scrollRect?.bottom ?? Infinity);
+
+      const minLeft = Math.max(EDGE_MARGIN, boundsLeft + EDGE_MARGIN);
+      const maxLeft = Math.min(window.innerWidth - state.width - EDGE_MARGIN, boundsRight - state.width - EDGE_MARGIN);
+      const minTop = Math.max(EDGE_MARGIN, boundsTop + EDGE_MARGIN);
+      const maxTop = Math.min(window.innerHeight - state.height - EDGE_MARGIN, boundsBottom - state.height - EDGE_MARGIN);
+
+      state.curLeft = Math.max(minLeft, Math.min(maxLeft, newLeft));
+      state.curTop = Math.max(minTop, Math.min(maxTop, newTop));
+      btn.style.transform = `translate(${state.curLeft - state.naturalLeft}px, ${state.curTop - state.naturalTop}px)`;
+    });
+  }
+
   function renderCardPagination(container, { total, page, pageSize, onChange }) {
     const totalPages = Math.max(1, Math.ceil(total / pageSize));
     const start = total === 0 ? 0 : (page - 1) * pageSize + 1;
@@ -448,6 +700,7 @@
         onChange({ page: parseInt(btn.dataset.page, 10) });
       });
     });
+    initRunawayNextButton(container);
   }
 
   const supplierPageState = { page: 1, pageSize: 2 };
