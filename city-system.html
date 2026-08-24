@@ -160,7 +160,7 @@
               <li><strong>Numbered pages, not scroll-to-load</strong> — each table carries <code>renderPagination()</code>'s standard footer, the same one every list page in this project uses: Showing x-y of n, page buttons, and a Rows selector. The mapping screens' scroll-triggered loading is deliberately <em>not</em> used here — those are working surfaces where a row is picked out of a stream, this is a table being read, and a reader who wants row 200 should be able to ask for it rather than scroll to it. The footer is <strong>pinned to the bottom edge of the popup</strong>, a sibling of the scrolling body rather than a trailing element inside it — exactly the relationship <code>.content-card</code> gives its own footer on every list page, so the controls stay put instead of drifting up under a short list or scrolling away under a long one. It goes blank while a tab loads (page numbers under a spinner would describe a list that isn't on screen) and hides entirely on a tab with no rows, so its border can't float under an empty state. Changing tab resets to page 1 (a page number means nothing once the rows underneath it are a different list) while the chosen Rows value carries over, since that is a preference about how the reader wants to read. Note <code>renderPagination()</code> hardcodes an id on its Rows select, so the copy rendered inside this popup is re-keyed after render — two elements sharing an id would point this popup's label at the select on the page behind it.</li>
               <li><strong>Status is a colored left edge, not a column</strong> — a green or red bar on the row's left edge, the same signal the mapping screens' candidate rows carry, taken out of the first cell's own padding so nothing shifts between an active and an inactive row. A Status column of identical pills is a column of chrome in a table where every other column actually differs row to row. Cells are middle-aligned, so a two-line cell (a supplier's country name over its own identifier) sits level with the single-line cells beside it.</li>
               <li><strong>One scrolling surface</strong> — the <strong>popup body</strong> is the only thing that scrolls; the table inside it is full height. A list with its own scrolling box means two scrollbars competing for the same gesture, and a short list leaves dead space under it while the box keeps its height. Every open starts at the top, however far the last city's list had been scrolled.</li>
-              <li><strong>Loading, and stale responses</strong> — every list must render a <strong>loading state</strong> before its rows, not appear instantly: each one stands for a query, and a list that materialises with no perceptible fetch teaches an expectation a real backend will break. A stale response must never overwrite a newer one — clicking through tabs faster than the fetch resolves has to land the tab clicked last.</li>
+              <li><strong>Loading, and stale responses</strong> — every list must render a <strong>loading state</strong> before its rows, not appear instantly: each one stands for a query, and a list that materialises with no perceptible fetch teaches an expectation a real backend will break. That state is <strong>the table that is coming</strong> — the real header with this tab's own columns, and rows of shimmering bars where the values will be — not a spinner beside the word "Loading". The columns are known before the lookup runs, so it costs nothing extra, and the placeholder and the result occupy the same shape, which is what stops the panel jumping when the rows land. The shimmer is decoration: the block carries <code>aria-busy</code> for the announcement, and the animation stops entirely under <em>prefers-reduced-motion</em>. A stale response must never overwrite a newer one — clicking through tabs faster than the fetch resolves has to land the tab clicked last.</li>
             </ul>
           </li>
           <li><strong>Active/Inactive toggle</strong> — applies immediately, no confirmation, logged to History as a Status Change.</li>
@@ -766,17 +766,48 @@
   }
 
   // Every list in this popup is a query in a real deployment — a city's
-  // hotels, or one supplier's cities mapped to it — so each one renders a
-  // spinner first rather than appearing instantly. The mock holds all of it
-  // in memory, so without a deliberate pause the loading state would flash
+  // hotels, or one supplier's cities mapped to it — so each one shows a
+  // loading state first rather than appearing instantly. The mock holds all
+  // of it in memory, so without a deliberate pause that state would flash
   // for less than a frame and the screen would teach the wrong expectation.
   // Same reasoning (and same ~450ms) as the mapping pages' scroll loader.
   const SUMMARY_LOAD_MS = 450;
+  const SUMMARY_SKELETON_ROWS = 6;
   let summaryLoadToken = 0;
 
-  function withSummaryLoading(host, renderRows) {
+  // The placeholder is the table that is coming, not a spinner beside the
+  // word "Loading": the real header with the tab's own columns, and rows of
+  // shimmering bars where the values will be. It costs nothing extra — the
+  // columns are already known before the lookup runs — and it means the
+  // panel doesn't jump from a 60px strip to a full table when the rows
+  // land, which is what made the old state feel cheap in a popup this size.
+  // Cell widths are varied per column and row so it reads as text of
+  // different lengths rather than a barcode.
+  function summarySkeletonHtml(columns) {
+    const rows = Array.from({ length: SUMMARY_SKELETON_ROWS }, (_, r) => {
+      const cells = columns
+        .map((_label, c) => `<td><span class="summary-skeleton-bar" style="width:${45 + ((r * 7 + c * 23) % 45)}%"></span></td>`)
+        .join("");
+      return `<tr><td class="summary-list-num"><span class="summary-skeleton-bar"></span></td>${cells}</tr>`;
+    }).join("");
+
+    return `
+      <div class="table-wrap summary-skeleton" aria-busy="true" aria-label="Loading">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th class="summary-list-num">#</th>
+              ${columns.map((label) => `<th>${label}</th>`).join("")}
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`;
+  }
+
+  function withSummaryLoading(host, columns, renderRows) {
     if (!host) return;
-    host.innerHTML = `<div class="summary-loading"><span class="scroll-status-spinner"></span><span>Loading…</span></div>`;
+    host.innerHTML = summarySkeletonHtml(columns);
     // Token guard: clicking through tabs faster than the delay must land
     // the newest request's rows, never an earlier one arriving late.
     const token = ++summaryLoadToken;
@@ -880,20 +911,16 @@
     // The tab's own lookup, run now rather than on open: one supplier, or
     // the hotels. Whether it comes back empty is only knowable by asking.
     const rows = isHotels ? cityHotels(summaryCityId) : supplierCitiesForCity(tabKey, summaryCityId);
+    const columns = isHotels ? SUMMARY_HOTEL_COLUMNS : SUMMARY_CITY_COLUMNS;
 
-    withSummaryLoading(summaryPanelBody, () => {
+    withSummaryLoading(summaryPanelBody, columns, () => {
       if (!rows.length) {
         summaryPanelBody.innerHTML = isHotels
           ? `<div class="empty-state">No hotels are mapped to this city</div>`
           : `<div class="empty-state">No ${supplierLabel} cities mapped to this city</div>`;
         return;
       }
-      renderSummaryTable(
-        summaryPanelBody,
-        rows,
-        isHotels ? SUMMARY_HOTEL_COLUMNS : SUMMARY_CITY_COLUMNS,
-        isHotels ? summaryHotelRowHtml : summaryCityRowHtml(tabKey)
-      );
+      renderSummaryTable(summaryPanelBody, rows, columns, isHotels ? summaryHotelRowHtml : summaryCityRowHtml(tabKey));
     });
   }
 
