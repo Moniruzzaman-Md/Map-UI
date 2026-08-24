@@ -134,6 +134,7 @@
       <template id="countryListInfo">
         <p>This page manages the <strong>master list of countries</strong> used everywhere else in the system — supplier country mappings and city records both reference these entries.</p>
         <ul>
+          <li><strong>#</strong> — the row's position in the whole result, not just the page on screen, so row 11 is still 11 on page 2. It renumbers when a search changes what the list holds.</li>
           <li><strong>Code</strong> — the country's unique identifier (e.g. "US"). Set when the country is added and never changes.</li>
           <li><strong>Nationality</strong> — e.g. "American" for United States. Optional — shown as "—" when not set.</li>
           <li><strong>Edit</strong> — rename a country and/or set its Nationality. The code stays the same.</li>
@@ -199,8 +200,9 @@
           <table class="data-table" id="countryTable">
             <thead>
               <tr>
+                <th class="table-num">#</th>
                 <th style="width:12%">Code</th>
-                <th style="width:36%">Name</th>
+                <th style="width:34%">Name</th>
                 <th style="width:24%">Nationality</th>
                 <th style="width:28%">Action</th>
               </tr>
@@ -362,8 +364,9 @@
     tbody.innerHTML = pageItems.length
       ? pageItems
           .map(
-            (c) => `
+            (c, i) => `
       <tr data-row-id="${c.id}">
+        <td class="table-num">${startIdx + i + 1}</td>
         <td data-col="code"><div class="code-badge truncatable truncatable--badge-value" title="${c.code}"><span class="truncatable-text">${c.code}</span></div></td>
         <td data-col="name"><div class="truncatable truncatable--cell-text" title="${c.name}"><span class="truncatable-text">${c.name}</span></div></td>
         <td data-col="nationality">${
@@ -393,7 +396,7 @@
       </tr>`
           )
           .join("")
-      : `<tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:28px;">No countries found</td></tr>`;
+      : `<tr><td colspan="5" class="empty-state">No countries found</td></tr>`;
 
     renderPagination(paginationBar, {
       total: filtered.length,
@@ -573,7 +576,7 @@
               <table class="summary-list-table">
                 <thead>
                   <tr>
-                    <th class="summary-list-num">#</th>
+                    <th class="table-num">#</th>
                     <th>Supplier Country</th>
                   </tr>
                 </thead>
@@ -582,7 +585,7 @@
                     .map(
                       (c, i) => `
                   <tr>
-                    <td class="summary-list-num">${i + 1}</td>
+                    <td class="table-num">${i + 1}</td>
                     <td>
                       <div class="summary-list-name">${c.name}</div>
                       <div class="summary-list-meta">ID: ${c.supplierId}</div>

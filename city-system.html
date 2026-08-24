@@ -697,7 +697,7 @@
         <table class="data-table">
           <thead>
             <tr>
-              <th class="summary-list-num">#</th>
+              <th class="table-num">#</th>
               ${columns.map((label) => `<th>${label}</th>`).join("")}
             </tr>
           </thead>
@@ -746,7 +746,7 @@
     const countryLabel = getSystemCountryName(loc.country.code) || loc.country.name;
     return `
       <tr class="${summaryRowClass(hotel.active)}">
-        <td class="summary-list-num">${i + 1}</td>
+        <td class="table-num">${i + 1}</td>
         <td><div class="summary-list-name">${hotel.name}</div></td>
         <td style="white-space:nowrap"><span class="code-badge">${getSystemHotelDisplayId(hotel.id)}</span></td>
         <td>${[hotel.address, loc.city, loc.state, countryLabel].filter(Boolean).join(", ")}</td>
@@ -762,7 +762,7 @@
   function summaryCityRowHtml(supplierKey) {
     return (city, i) => `
       <tr class="${summaryRowClass(city.active)}">
-        <td class="summary-list-num">${i + 1}</td>
+        <td class="table-num">${i + 1}</td>
         <td><div class="summary-list-name">${city.name}</div></td>
         <td>${city.state || '<span style="color:var(--text-muted)">—</span>'}</td>
         <td>
@@ -796,7 +796,7 @@
       const cells = columns
         .map((_label, c) => `<td><span class="summary-skeleton-bar" style="width:${45 + ((r * 7 + c * 23) % 45)}%"></span></td>`)
         .join("");
-      return `<tr><td class="summary-list-num"><span class="summary-skeleton-bar"></span></td>${cells}</tr>`;
+      return `<tr><td class="table-num"><span class="summary-skeleton-bar"></span></td>${cells}</tr>`;
     }).join("");
 
     return `
@@ -804,7 +804,7 @@
         <table class="data-table">
           <thead>
             <tr>
-              <th class="summary-list-num">#</th>
+              <th class="table-num">#</th>
               ${columns.map((label) => `<th>${label}</th>`).join("")}
             </tr>
           </thead>

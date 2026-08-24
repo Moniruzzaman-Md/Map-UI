@@ -611,8 +611,15 @@ button {
   flex-wrap: wrap;
 }
 
+/* The project's dropdown. Height is pinned here rather than left to the
+   padding: 9px top and bottom around a "normal" 14px line box comes out at
+   39px, one taller than the 38px text inputs sitting beside it, and every
+   place that noticed was fixing it again in its own scoped rule. Pinning
+   it once means a dropdown is 38px wherever it appears — toolbar, filter
+   panel, drawer form or mapping header. */
 .filter-select {
-  padding: 9px 14px;
+  height: var(--control-height);
+  padding: 0 14px;
   border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
   font-size: 14px;
@@ -1701,7 +1708,11 @@ table.data-table {
   box-shadow: inset 3px 0 0 var(--accent-red);
 }
 
-.summary-list-num {
+/* Serial-number column ("#"), shared by every table that carries one — the
+   list pages' .data-table and the Summary popup's. It numbers rows by
+   their position in the whole result, not within the page, so row 11 on
+   page 2 reads 11. */
+.table-num {
   width: 24px;
   /* Three-digit row numbers are normal once a list pages past 99 — without
      this they wrap inside the 24px column instead of widening it. */
@@ -1886,6 +1897,22 @@ table.data-table {
   border-top: 1px solid var(--border-color);
   background: var(--bg-panel);
   flex-shrink: 0;
+}
+
+/* Buttons inside a drawer or popup take the same tokens as the ones in a
+   card toolbar. They were shrink-wrapping their labels — a Cancel/Save
+   pair rendered 80px beside 125px, and every one of them stood 39px tall
+   against the project's 38 — which is exactly the raggedness the fixed
+   widths exist to prevent. min-width rather than width: a label longer
+   than the token grows past it instead of clipping, which is the "fixed
+   whenever possible" escape hatch, and the common pairs (Cancel/Close/
+   Continue/Map/Unmap) all land on the same 120. Row-action icon buttons
+   are .action-btn, not .btn, so they keep their own compact size. */
+.modal .btn,
+.popup-box .btn {
+  min-width: var(--btn-width);
+  height: var(--control-height);
+  justify-content: center;
 }
 
 .btn {
@@ -2480,9 +2507,15 @@ a.coverage-meter-label:hover {
 
 /* ---------- Searchable select (every dropdown in the project) ---------- */
 
+/* inline-flex, not inline-block: an inline-block wrapper leaves a line-box
+   descender gap under its trigger, so every dropdown measured 39px tall
+   against the 38px its own trigger was set to — one pixel taller than the
+   text inputs beside it in the same form. It still shrink-wraps to its
+   content the way inline-block did, so nothing that relies on that
+   (see the width-stretching rules elsewhere) changes. */
 .searchable-select {
   position: relative;
-  display: inline-block;
+  display: inline-flex;
   vertical-align: middle;
 }
 
@@ -3383,7 +3416,7 @@ label.merge-list-item {
 }
 
 /* The row-number column is a short stub, not a line of "text". */
-.summary-skeleton .summary-list-num .summary-skeleton-bar {
+.summary-skeleton .table-num .summary-skeleton-bar {
   width: 14px;
 }
 
