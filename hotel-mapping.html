@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Hotel Mapping to New City – Hotel Map | mynztrip.com</title>
+<title>Hotel Mapping – Hotel Map | mynztrip.com</title>
 <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
@@ -112,11 +112,11 @@
     <main class="main-content" id="hotelMappingMain">
       <div class="page-header">
         <div class="page-title-row">
-          <h1 class="page-title">Hotel Mapping to New City</h1>
-          <button class="info-icon-btn" data-info-target="#hotelMappingInfo" data-info-title="Hotel Mapping to New City" aria-label="About this page">
+          <h1 class="page-title">Hotel Mapping</h1>
+          <button class="info-icon-btn" data-info-target="#hotelMappingInfo" data-info-title="Hotel Mapping" aria-label="About this page">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 11v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="8" r="1" fill="currentColor"/></svg>
           </button>
-          <button class="info-icon-btn" data-info-target="#hotelMappingDevNotes" data-info-title="Developer Notes — Hotel Mapping to New City" aria-label="Developer notes for this page">
+          <button class="info-icon-btn" data-info-target="#hotelMappingDevNotes" data-info-title="Developer Notes — Hotel Mapping" aria-label="Developer notes for this page">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 8l-4 4 4 4M15 8l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
         </div>
@@ -124,7 +124,7 @@
       <hr class="page-divider" />
 
       <template id="hotelMappingInfo">
-        <p>Maps <strong>system hotels</strong> to a New City. Unlike every other mapping in this project, a hotel can be mapped to more than one city — there's no "remap" here, just check to map and uncheck to unmap.</p>
+        <p>Maps <strong>system hotels</strong> to a system city. Unlike every other mapping in this project, a hotel can be mapped to more than one city — there's no "remap" here, just check to map and uncheck to unmap.</p>
         <ul>
           <li>Filter by Country/State/City to narrow down the hotel list — these filter the hotel's own location, not the pinned city. The hotel checklist stays empty until a <strong>Country</strong> is chosen (State and City are optional, further narrowing filters) — the full hotel list can run into the millions, so nothing loads with no filter at all.</li>
           <li>The checklist loads 50 hotels at a time — scroll to the bottom of the list to automatically load more of the current filter/search results. Each row's left edge is green for an Active hotel, red for Inactive.</li>
@@ -132,12 +132,12 @@
           <li>On the left, <strong>Already Mapped</strong> lists hotels currently mapped to this city — its <strong>Unmap</strong> button queues a removal without the row disappearing, so you can change your mind (the button becomes <strong>Undo</strong>) right up until Save. It has its own search box (also affected by Fuzzy search) and loads 50 at a time the same way the main checklist does, since a city with a lot of hotels can easily exceed one screen. <strong>New Selection</strong> lists your fresh picks from the checklist on the right.</li>
           <li><strong>Show only unmapped</strong> hides hotels already mapped to this city, so you can see what's still available.</li>
           <li><strong>Save Mapping</strong> always opens a preview first — Previously Saved, New Map, and Unmap — before applying anything, and logs a Map/Unmap entry on both the hotel's and this city's History.</li>
-          <li>Tick <strong>"Full Screen"</strong> (top-right) to hide the page title too, giving the hotel checklist the entire screen.</li>
+          <li><strong>"Full Screen"</strong> (top-right) hides the page title, collapses the sidebar and puts the browser into full screen, the same as pressing F11. The sidebar returns to whatever state it was in when full screen ends. Press it again, or press Esc or F11, to leave full screen.</li>
         </ul>
       </template>
 
       <template id="hotelMappingDevNotes">
-        <p>This screen links system hotels to a New City. A New City has no supplier-city mapping of its own — hotels are attached to it directly instead, and unlike every other mapping in this project, one hotel can be linked to several different cities at once, so there is no "remap" concept here, only additive map/unmap.</p>
+        <p>This screen links system hotels to a system city — any system city, since city types were retired and none of them is a special case. Unlike every other mapping in this project, one hotel can be linked to several different cities at once, so there is no "remap" concept here, only additive map/unmap.</p>
         <ul>
           <li><strong>Loading the list</strong> — the hotel checklist must require at least a Country selection before it queries or renders anything; a real hotel table can run into the millions, so nothing should ever be scanned with zero filters applied. State and City are optional narrowing filters on top of Country, never a requirement of their own.</li>
           <li><strong>Keeping a large result set from hanging the screen</strong> — even after a Country is picked, a big market can still match thousands of hotels, and rendering all of them at once is what actually freezes the page, not the filtering itself. The list loads and displays results in bounded pages of 50 at a time, never the whole matching set in one go. Reaching the bottom of the currently-loaded rows must trigger loading the next page automatically, with a brief loading indicator while it fetches — the newly loaded rows must be appended below the existing ones without disturbing the checklist's current scroll position or re-rendering rows already on screen, since jumping the scroll position or reshuffling existing rows could shift a checkbox out from under someone who's about to click it. Once every matching hotel has been loaded, the bottom of the list must show a clear "end of list" state and stop trying to load further. Picking anything already checked on an earlier page stays checked as later pages load in. Both the Country/State/City filters and the name search apply to the full matching set before that page split happens, so a search finds a match anywhere in the result set, not just among rows already loaded — and starts back at the first page, same as picking a new filter does.</li>
@@ -163,7 +163,7 @@
       </template>
 
       <div class="mapping-nav-fabs">
-        <button type="button" class="mapping-nav-fab mapping-chrome-toggle" id="hotelMappingChromeToggleBtn" aria-label="Hide page title for full-height checklist">
+        <button type="button" class="mapping-nav-fab mapping-chrome-toggle" id="hotelMappingChromeToggleBtn" aria-label="Full screen: hide page title and fill the display">
           <svg class="icon-expand" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           <svg class="icon-collapse" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           <span>Full Screen</span>
@@ -304,7 +304,7 @@
 <script>
   const params = new URLSearchParams(window.location.search);
   const pinnedCityId = Number(params.get("cityId"));
-  const pinnedCity = SYSTEM_CITIES.find((c) => c.id === pinnedCityId && c.cityType === "normal");
+  const pinnedCity = SYSTEM_CITIES.find((c) => c.id === pinnedCityId);
 
   const countryFilterSelect = document.getElementById("hotelMapCountryFilter");
   const stateFilterSelect = document.getElementById("hotelMapStateFilter");
@@ -322,28 +322,26 @@
   const selectionSummary = document.getElementById("hotelMapSelectionSummary");
 
   // "Full Screen" toggle — hides the title/divider so the checklist can
-  // claim that space too. Scoped to #hotelMappingMain (this page's own
-  // <main> id) so it can't leak into any other page. Same mechanism as
-  // city-mapping.html's own toggle, but simpler: this page has one panel
-  // already sized by plain flex:1, so there's no section height to
-  // recompute after the title disappears.
+  // claim that space, and puts the browser into real fullscreen at the same
+  // time (see initFullScreenToggle() in js/app.js). Scoped to
+  // #hotelMappingMain (this page's own <main> id) so it can't leak into any
+  // other page. Same call as city-mapping.html's own toggle, minus the
+  // onChange: this page has one panel already sized by plain flex:1, so
+  // there's no section height to recompute after the title disappears.
   const hotelMappingMain = document.getElementById("hotelMappingMain");
   const hotelMappingChromeToggleBtn = document.getElementById("hotelMappingChromeToggleBtn");
-  hotelMappingChromeToggleBtn.addEventListener("click", () => {
-    const hidden = !hotelMappingMain.classList.contains("chrome-hidden");
-    hotelMappingMain.classList.toggle("chrome-hidden", hidden);
-    hotelMappingChromeToggleBtn.classList.toggle("active", hidden);
-    hotelMappingChromeToggleBtn.querySelector("span").textContent = hidden ? "Exit Full Screen" : "Full Screen";
-    hotelMappingChromeToggleBtn.setAttribute("aria-label", hidden ? "Show page title" : "Hide page title for full-height checklist");
+  initFullScreenToggle(hotelMappingMain, hotelMappingChromeToggleBtn, {
+    ariaOn: "Exit full screen and show page title",
+    ariaOff: "Full screen: hide page title and fill the display",
   });
 
   if (!pinnedCity) {
-    // A live-created New City only exists in localStorage — some browsers
-    // (Firefox) partition that per file:// document, so a fresh New City's
-    // Map link can silently fail to resolve when the project is opened as
-    // local files instead of served over http. Doesn't affect a real
-    // deployment (one shared http origin) or the pre-seeded demo cities.
-    document.getElementById("hotelMappingBody").innerHTML = `<div class="empty-state">No New City found for this link. If you just created this city, make sure you're testing over http:// (not file://) or using Chrome/Edge — Firefox partitions local-file storage per page, so a brand-new city's data may not carry over yet. Otherwise, go back to the System City List and use a New City's Map button.</div>`;
+    // A live-created city only exists in localStorage — some browsers
+    // (Firefox) partition that per file:// document, so a freshly added
+    // city's Map link can silently fail to resolve when the project is
+    // opened as local files instead of served over http. Doesn't affect a
+    // real deployment (one shared http origin) or the pre-seeded cities.
+    document.getElementById("hotelMappingBody").innerHTML = `<div class="empty-state">No system city found for this link. If you just created this city, make sure you're testing over http:// (not file://) or using Chrome/Edge — Firefox partitions local-file storage per page, so a brand-new city's data may not carry over yet. Otherwise, go back to the System City List and use a city's Map button.</div>`;
   } else {
     document.getElementById("pinnedCityName").textContent = pinnedCity.name;
     document.getElementById("pinnedCityMeta").textContent = [pinnedCity.state, getSystemCountryName(pinnedCity.country.code) || pinnedCity.country.name]

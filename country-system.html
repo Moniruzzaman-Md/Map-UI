@@ -534,11 +534,12 @@
     document.getElementById("summaryCountryName").textContent = `— ${record.name}`;
     const summaryList = document.getElementById("summaryList");
     const rows = getMappingSummary(record.name);
-    // Same "Mapped (N)" status row + numbered name/meta list shape as
-    // city-system.html's own Mapping Summary (getCityMappingSummary/
-    // summaryListRowHtml) — minus its scroll-triggered pagination, since a
-    // supplier's own country list here is always small (realistically a
-    // handful of rows at most), so every row just renders directly.
+    // "Mapped (N)" status row + a numbered name/meta list. This one stays
+    // cross-supplier (getMappingSummary reads every supplier at once) where
+    // city-system.html's Summary deliberately does not: a supplier's own
+    // country list is always small — realistically a handful of rows — so
+    // every row renders directly, with no pagination and no per-supplier
+    // lookup to fan out.
     summaryList.innerHTML = rows
       .map(
         (r) => `
@@ -618,7 +619,7 @@
   // same changelog convention as the existing per-row Map Country modal on
   // country-supplier.html — then re-renders so that supplier's section
   // switches live between "mapped, offer Unmap" and "picker, offer Map".
-  // Logs from BOTH sides, same reasoning as applyMapping() for cities in
+  // Logs from BOTH sides, same reasoning as applyCityMap() for cities in
   // js/data.js: the supplier country has one evolving value (systemCountry),
   // logged as Map (first time set), Remap (changed to a different country),
   // or Unmap (cleared) — never Edit/Create, which are reserved for entity

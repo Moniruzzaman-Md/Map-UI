@@ -170,6 +170,72 @@ const supplierCountries = {
   ],
 };
 
+// ---------- Bulk demo suppliers ----------
+// 50 extra suppliers on top of the 4 hand-authored ones, so the screens that
+// list every supplier are exercised at a realistic deployment's scale rather
+// than at four. Names are a fixed 10x5 word-pair grid (deterministic, no
+// randomness, so ids and order are identical on every load) and the keys are
+// the slugged names. Each gets 2-3 countries and a slice of the shared bulk
+// city-name pool further down; nothing here is mapped to a system city, and
+// none of them get supplier hotels at all (every consumer already reads
+// supplierHotels[key] || []) — 310 hotels x 50 suppliers would multiply the
+// demo's data volume for no extra coverage, since these exist to test
+// breadth (how many suppliers), not depth (how much data per supplier).
+const BULK_SUPPLIER_PREFIXES = [
+  "Skyline",
+  "Blue Orbit",
+  "Nomad",
+  "Vertex",
+  "Harborline",
+  "Solstice",
+  "Lantern",
+  "Cobalt",
+  "Meridian",
+  "Zephyr",
+];
+const BULK_SUPPLIER_SUFFIXES = ["Travel", "Stays", "Holidays", "Rooms", "Getaways"];
+
+const BULK_SUPPLIER_COUNTRY_POOL = [
+  { name: "United States", code: "US" },
+  { name: "United Kingdom", code: "GB" },
+  { name: "Canada", code: "CA" },
+  { name: "France", code: "FR" },
+  { name: "Germany", code: "DE" },
+  { name: "Italy", code: "IT" },
+  { name: "Spain", code: "ES" },
+  { name: "Japan", code: "JP" },
+  { name: "Singapore", code: "SG" },
+  { name: "Australia", code: "AU" },
+];
+
+const BULK_SUPPLIER_KEYS = [];
+
+BULK_SUPPLIER_PREFIXES.forEach((prefix, p) => {
+  BULK_SUPPLIER_SUFFIXES.forEach((suffix, s) => {
+    const index = p * BULK_SUPPLIER_SUFFIXES.length + s;
+    const label = `${prefix} ${suffix}`;
+    const key = label.toLowerCase().replace(/[^a-z0-9]/g, "");
+    BULK_SUPPLIER_KEYS.push(key);
+    SUPPLIER_LABELS[key] = label;
+
+    // 2-3 countries each, walked round-robin through the pool so different
+    // suppliers cover different countries instead of all starting at the US.
+    const countryCount = 2 + (index % 2);
+    supplierCountries[key] = Array.from({ length: countryCount }, (_, i) => {
+      const meta = BULK_SUPPLIER_COUNTRY_POOL[(index + i) % BULK_SUPPLIER_COUNTRY_POOL.length];
+      return {
+        name: meta.name,
+        code: meta.code,
+        supplierId: `${key.slice(0, 3).toUpperCase()}-${meta.code}-${String(index + 1).padStart(3, "0")}`,
+        // Only the first country is mapped to its system counterpart, so
+        // these suppliers show a partly-mapped state rather than a
+        // uniformly empty or uniformly complete one.
+        systemCountry: i === 0 ? meta.name : null,
+      };
+    });
+  });
+});
+
 // Looks up how a specific supplier names a country (by real-world ISO code),
 // e.g. getSupplierCountryName("hotelbeds", "US") -> "USA". Keeps the city
 // list's country display in sync with that supplier's own country list
@@ -233,8 +299,7 @@ hydrateObject(supplierCountries, loadFromStorage("supplierCountries"));
 // Looks up, for a given system country name, whether/where each supplier maps it.
 // A supplier can have more than one of its own country rows mapped to the
 // same system country at once, so each entry carries a `countries` array
-// (filter, not find) rather than a single match — same shape as
-// getCityMappingSummary() below.
+// (filter, not find) rather than a single match.
 // Returns [{ supplierKey, supplierLabel, mapped, countries: [row, ...] }]
 function getMappingSummary(systemCountryName) {
   return Object.keys(SUPPLIER_LABELS).map((key) => {
@@ -383,15 +448,15 @@ SYSTEM_CITIES[0].history.push({
   timestamp: new Date("2026-06-21T11:05:00"),
 });
 
-// Demo "New City" and "Merged City" examples, pre-seeded here rather than
-// requiring the Add City feature to be used live — a live-created city only
-// exists in localStorage, and some browsers (Firefox) partition that per
-// file:// document, so a deep link that depends on it (e.g. New City's Map
-// button -> hotel-mapping.html?cityId=X) silently can't find it when the
-// project is opened as local files instead of served over http. These two
-// examples live directly in this seed data instead, exactly like every
+// Demo city added via Add City, pre-seeded here rather than requiring the
+// Add City feature to be used live — a live-created city only exists in
+// localStorage, and some browsers (Firefox) partition that per file://
+// document, so a deep link that depends on it silently can't find it when
+// the project is opened as local files instead of served over http. This
+// example lives directly in this seed data instead, exactly like every
 // prepopulated city above, so the Map/Summary features are demoable with
-// zero setup regardless of how the project is opened.
+// zero setup regardless of how the project is opened. It carries no special
+// status of any kind — an added city is an ordinary system city.
 const DEMO_NEW_CITY_ID = SYSTEM_CITIES.length;
 SYSTEM_CITIES.push({
   id: DEMO_NEW_CITY_ID,
@@ -409,52 +474,23 @@ SYSTEM_CITIES.push({
       timestamp: new Date("2026-06-22T14:00:00"),
     },
   ],
-  cityType: "normal",
 });
 
-const DEMO_MERGED_CITY_ID = SYSTEM_CITIES.length;
-SYSTEM_CITIES.push({
-  id: DEMO_MERGED_CITY_ID,
-  name: "Liberty Metro",
-  state: null,
-  country: { name: "United States", code: "US" },
-  active: true,
-  history: [
-    {
-      operation: "Create",
-      name: "Liberty Metro",
-      description: `Name: Liberty Metro, Country: United States (US), Merged from: ${SYSTEM_CITIES[0].name} (ID: ${getSystemCityDisplayId(0)}), ${SYSTEM_CITIES[1].name} (ID: ${getSystemCityDisplayId(1)})`,
-      userName: "Rafiul Karim",
-      userEmail: "rafiul.karim@mynztrip.com",
-      timestamp: new Date("2026-06-23T09:30:00"),
-    },
-  ],
-  cityType: "merged",
-  mergedFrom: [0, 1],
-});
-
-// Matching component-side entries for the Liberty Metro demo above — same
-// user/timestamp as its own Create entry, so New York's and Los Angeles's
-// own History views show they were folded into it (see the dual-side
-// Merged/Unmerged convention in city-system.html's saveMergeCityBtn/
-// saveEditMergeBtn handlers).
-SYSTEM_CITIES[0].history.push({
-  operation: "Merged",
-  description: `Merged into: Liberty Metro (ID: ${getSystemCityDisplayId(DEMO_MERGED_CITY_ID)})`,
-  userName: "Rafiul Karim",
-  userEmail: "rafiul.karim@mynztrip.com",
-  timestamp: new Date("2026-06-23T09:30:00"),
-});
-SYSTEM_CITIES[1].history.push({
-  operation: "Merged",
-  description: `Merged into: Liberty Metro (ID: ${getSystemCityDisplayId(DEMO_MERGED_CITY_ID)})`,
-  userName: "Rafiul Karim",
-  userEmail: "rafiul.karim@mynztrip.com",
-  timestamp: new Date("2026-06-23T09:30:00"),
-});
-
-// restore any edits/new/merged cities saved from a previous session
+// restore any edits/added cities saved from a previous session
 hydrateArray(SYSTEM_CITIES, loadFromStorage("SYSTEM_CITIES"));
+
+// Every system city is now equal — there is no New City / Merged City status
+// any more (a city's type never decides what can be mapped to it, and a
+// system city can never be mapped to another system city at all). A save
+// written by an older build of the app still carries the retired cityType/
+// mergedFrom fields, so strip them immediately after hydrating — before any
+// other section of this file reads a city — rather than depending on the
+// user clearing localStorage by hand. A city that used to be "merged" simply
+// becomes an ordinary city, keeping its own name/state/country/history.
+SYSTEM_CITIES.forEach((c) => {
+  delete c.cityType;
+  delete c.mergedFrom;
+});
 
 // ---------- System Hotel ----------
 // Plain literal fields (name/address/lat/long/starRating/city/state/country),
@@ -579,9 +615,9 @@ function getSystemHotelDisplayId(id) {
   return String(50000000000 + id);
 }
 
-// Demo hotel directly added under the seeded New City above (Crestwood Bay)
-// — gives New City's Summary a real "Directly Added Hotels" example with
-// zero setup, same reasoning as the New City/Merged City seeding above.
+// Demo hotel directly added under the seeded added city above (Crestwood
+// Bay) — gives that city's Summary a real "Directly Added Hotels" example
+// with zero setup, same reasoning as the city seeding above.
 const DEMO_NEW_CITY_HOTEL_ID = SYSTEM_HOTELS.length;
 SYSTEM_HOTELS.push({
   id: DEMO_NEW_CITY_HOTEL_ID,
@@ -621,7 +657,7 @@ SYSTEM_HOTELS.push({
 // existed, DEMO_NEW_CITY_ID may not resolve to anything at all until Reset
 // Demo Data (same caveat as rule 40) — skip quietly instead of crashing the
 // whole page on an undefined `.history`.
-const demoNewCityForHotelDemo = SYSTEM_CITIES.find((c) => c.id === DEMO_NEW_CITY_ID && c.cityType === "normal");
+const demoNewCityForHotelDemo = SYSTEM_CITIES.find((c) => c.id === DEMO_NEW_CITY_ID);
 const demoMappedHotel = SYSTEM_HOTELS.find((h) => h.id === 1);
 if (demoNewCityForHotelDemo && demoMappedHotel) {
   demoMappedHotel.mappedCityIds = [DEMO_NEW_CITY_ID];
@@ -641,13 +677,67 @@ if (demoNewCityForHotelDemo && demoMappedHotel) {
   });
 }
 
+// Bulk secondary hotel-city mappings, so the demo shows both relation types
+// instead of a wall of Primary. A hotel's own city is always its primary;
+// every *additional* city it is mapped to is a secondary one. This maps a
+// scattered share of the hotels into one other city in the same country, so
+// a city's Summary shows a mix of its own hotels (Primary) and hotels
+// visiting from elsewhere (Secondary) — without touching any hotel's own
+// city, and therefore without changing the location it resolves to anywhere
+// else in the app.
+// Deterministic (every third hotel, a neighbouring city in the same
+// country) rather than Math.random: the demo has to look the same on every
+// reload, or a screenshot stops being reproducible and two people comparing
+// notes see different data.
+// No history entries: the bulk seed invents hotels and mappings without
+// writing an audit trail for them — only the hand-authored demos above log
+// one — and inventing a hundred entries under a made-up author's name would
+// be worse than having none.
+{
+  const citiesByCountry = {};
+  SYSTEM_CITIES.forEach((city) => {
+    const code = city.country.code;
+    if (!citiesByCountry[code]) citiesByCountry[code] = [];
+    citiesByCountry[code].push(city);
+  });
+
+  // Counts only the hotels actually considered, so the target index below
+  // advances by one each time. Deriving it from the hotel's own index
+  // instead advanced in steps of two, which — against a country list of
+  // even length — could only ever land on half the cities, leaving the
+  // other half with nothing but Primary rows however many hotels were
+  // mapped.
+  let pick = 0;
+
+  SYSTEM_HOTELS.forEach((hotel, i) => {
+    if (i % 2 !== 0) return;
+    pick++;
+    // Leave the hand-authored demo mapping (The Beverly Hilton -> Crestwood
+    // Bay) exactly as it is — it's referenced by name in the dev notes.
+    if (hotel.mappedCityIds.length) return;
+
+    const siblings = citiesByCountry[hotel.country.code] || [];
+    if (siblings.length < 2) return;
+
+    // Spread across the whole country rather than stepping forward from the
+    // hotel's own city: that variant only ever mapped hotels onto their
+    // later neighbours, so the cities at the front of each country's list —
+    // New York, Chicago, Toronto, the ones a demo actually opens first —
+    // never received one and showed nothing but Primary.
+    const target = siblings[(pick * 7 + 3) % siblings.length];
+    if (!target || target.id === hotel.systemCityId) return;
+
+    hotel.mappedCityIds = [target.id];
+  });
+}
+
 hydrateArray(SYSTEM_HOTELS, loadFromStorage("SYSTEM_HOTELS"));
 
 // hydrateArray fully replaces SYSTEM_HOTELS with whatever's in localStorage,
 // which wipes out systemCityId for any hotel saved before the Add/Edit form
 // switched City from free text to a SYSTEM_CITIES picker (or before
 // systemCityId was hardcoded into the seed literals above) — self-heal it
-// the same way the cityType correction above does, instead of relying on
+// the same way the retired-field strip above does, instead of relying on
 // the user clearing localStorage by hand. This is a last-resort fallback
 // for genuinely legacy saved data only: the seed hotels above already carry
 // a hardcoded systemCityId (not name-matched, precisely to avoid this same
@@ -656,7 +746,7 @@ hydrateArray(SYSTEM_HOTELS, loadFromStorage("SYSTEM_HOTELS"));
 // too, so this loop is a no-op for all of them.
 SYSTEM_HOTELS.forEach((h) => {
   if (h.systemCityId !== undefined && h.systemCityId !== null) return;
-  const match = SYSTEM_CITIES.find((c) => !c.cityType && c.name === h.city && c.country.code === h.country.code);
+  const match = SYSTEM_CITIES.find((c) => c.name === h.city && c.country.code === h.country.code);
   h.systemCityId = match ? match.id : null;
 });
 
@@ -709,15 +799,6 @@ function findSystemHotelByProviderId(providerId) {
   if (!providerId) return null;
   return SYSTEM_HOTELS.find((h) => h.providerId === providerId) || null;
 }
-
-// The seed cities (first SEED_CITY_COUNT, in their fixed definition order —
-// nothing ever removes or reorders them) must never carry a cityType, even
-// if a stale save from an older build of the app persisted one. This makes
-// "which cities were actually created via Add City" self-correcting on every
-// load instead of depending on the user clearing localStorage by hand.
-SYSTEM_CITIES.slice(0, SEED_CITY_COUNT).forEach((c) => {
-  delete c.cityType;
-});
 
 // Full disambiguating label for a system city, e.g. "New York, New York, United States"
 // or "London, United Kingdom" when there's no state.
@@ -819,6 +900,28 @@ generateBulkCityNames(200, true).forEach((name, i) => {
   });
 });
 
+// Cities for the 50 bulk suppliers declared near SUPPLIER_LABELS above.
+// Each takes its own window of one shared name pool (offset by supplier
+// index) so no two of them look like copies of each other, spread across
+// that supplier's own countries. Unmapped, same reasoning as the bulk Agoda
+// rows above — these exist for volume, not to demonstrate mapping.
+const BULK_SUPPLIER_CITY_POOL = generateBulkCityNames(400);
+
+BULK_SUPPLIER_KEYS.forEach((key, index) => {
+  const countries = supplierCountries[key];
+  const cityCount = 6 + (index % 9);
+  const offset = (index * 13) % (BULK_SUPPLIER_CITY_POOL.length - cityCount);
+  supplierCities[key] = BULK_SUPPLIER_CITY_POOL.slice(offset, offset + cityCount).map((name, i) => {
+    const country = countries[i % countries.length];
+    return {
+      name,
+      state: country.code === "US" ? STATES_BY_COUNTRY_CODE.US[i % STATES_BY_COUNTRY_CODE.US.length] : null,
+      countryCode: country.code,
+      systemCityId: null,
+    };
+  });
+});
+
 // TBO's ids look like lowercase 3-letter city/airport codes (e.g. real-world
 // "dac"/"kul" style) rather than a sequential number — matches real codes
 // where one exists, falls back to the city name's own first 3 letters for
@@ -901,34 +1004,27 @@ supplierCities.agoda[8].history.push({
 
 // Illustrative example of a grouped batch, pre-seeded so it's demoable
 // without performing a live action: city-mapping.html's Save is always
-// scoped to one supplier at a time, but within that one supplier it can
-// map/remap/unmap several of that supplier's own cities against the same
-// pinned system city in a single click — Los Angeles's own history should
-// show all 3 as one grouped card (see renderHistoryList() in
-// js/app.js), not three disconnected entries. Story: Agoda's "Toronto" row
-// had been mis-mapped to Los Angeles by mistake and got corrected over to
-// the real Toronto system city in the same sitting a newly-found Agoda
-// city was mapped in and a duplicate/test entry was removed.
+// scoped to one supplier at a time, but within that one supplier it can map
+// and unmap several of that supplier's own cities against the same pinned
+// system city in a single click — Los Angeles's own history should show all
+// 3 as one grouped card (see renderHistoryList() in js/app.js), not three
+// disconnected entries. Story: two Agoda cities were mapped into Los
+// Angeles in one sitting and a duplicate/test entry was removed from it.
+// Deliberately no Remap anywhere: with set-valued mappings a supplier city
+// is never moved off one system city by being added to another.
 supplierCities.agoda[9].systemCityId = 1; // final state must match the "Map" entry below
+supplierCities.agoda[2].systemCityId = 10; // mapped to Toronto, not to LA
 {
   const laLabel = getSystemCityHistoryLabel(1);
-  const torontoLabel = getSystemCityHistoryLabel(10);
   const groupId = "grp-demo-la-cleanup";
   const timestamp = new Date("2026-06-27T16:00:00");
   const userName = "Farhan Ahmed";
   const userEmail = "farhan.ahmed@mynztrip.com";
 
-  const torontoRow = supplierCities.agoda[2]; // was mapped to LA, corrected to the real Toronto
+  const secondRow = supplierCities.agoda[2]; // also mapped to LA in the same batch
   const freshRow = supplierCities.agoda[9]; // freshly mapped to LA in the same batch
   const removedRow = supplierCities.agoda[10]; // unmapped from LA in the same batch
 
-  torontoRow.history.push({
-    operation: "Remap",
-    description: `${laLabel} -> ${torontoLabel}`,
-    userName,
-    userEmail,
-    timestamp,
-  });
   freshRow.history.push({
     operation: "Map",
     description: laLabel,
@@ -945,14 +1041,6 @@ supplierCities.agoda[9].systemCityId = 1; // final state must match the "Map" en
   });
 
   SYSTEM_CITIES[1].history.push(
-    {
-      operation: "Remap",
-      description: `${SUPPLIER_LABELS.agoda} — ${torontoRow.name} — ID: ${torontoRow.id}${HISTORY_LINE_BREAK}${laLabel} -> ${torontoLabel}`,
-      userName,
-      userEmail,
-      timestamp,
-      groupId,
-    },
     {
       operation: "Map",
       description: `${SUPPLIER_LABELS.agoda} — ${freshRow.name} — ID: ${freshRow.id}`,
@@ -971,8 +1059,8 @@ supplierCities.agoda[9].systemCityId = 1; // final state must match the "Map" en
     }
   );
   SYSTEM_CITIES[10].history.push({
-    operation: "Remap",
-    description: `${SUPPLIER_LABELS.agoda} — ${torontoRow.name} — ID: ${torontoRow.id}${HISTORY_LINE_BREAK}${laLabel} -> ${torontoLabel}`,
+    operation: "Map",
+    description: `${SUPPLIER_LABELS.agoda} — ${secondRow.name} — ID: ${secondRow.id}`,
     userName,
     userEmail,
     timestamp,
@@ -982,6 +1070,23 @@ supplierCities.agoda[9].systemCityId = 1; // final state must match the "Map" en
 
 // restore any mappings saved from a previous session
 hydrateObject(supplierCities, loadFromStorage("supplierCities"));
+
+// ---------- Many-to-many normalisation ----------
+// A supplier city is mapped to a SET of system cities, not one: the same
+// supplier city can legitimately belong to several system cities, and
+// whether it counts as "mapped" is only ever a question about one specific
+// system city. The seed literals above (and any save written by an older
+// build) still use the single-valued `systemCityId`, so both are converted
+// here, after hydration, before anything reads a row — one place, rather
+// than every reader having to cope with both shapes.
+Object.keys(supplierCities).forEach((key) => {
+  supplierCities[key].forEach((row) => {
+    if (!Array.isArray(row.systemCityIds)) {
+      row.systemCityIds = row.systemCityId === null || row.systemCityId === undefined ? [] : [row.systemCityId];
+    }
+    delete row.systemCityId;
+  });
+});
 
 // Ties together every history entry created by one user action (e.g. every
 // row touched by a single city-mapping.html Save click) so the frontend can
@@ -995,100 +1100,79 @@ function generateHistoryGroupId() {
 }
 
 // Shared by every page that maps/unmaps a supplier city to a system city
-// (city-mapping.html, city-supplier.html) — assigns (or clears) the
-// mapping and logs it from BOTH sides. The supplier city has one evolving
-// value (its systemCityId), so it gets a Map (first time) / Remap (changed
-// to a different city) / Unmap (cleared) changelog entry — never Edit/Create,
-// which are reserved for entity-property changes, not mapping actions (same
-// vocabulary as applyCountryMapping's country-mapping equivalent). A system
-// city instead has a *set* of supplier cities mapped to it, so each affected
-// system city gets its own additive/removal log line — but a remap (city A
-// -> city B) is one event touching two records, not two independent actions,
-// so BOTH A and B log it as Remap too, not Unmap/Map. `groupId` is optional —
-// callers that apply several rows in one batch (city-mapping.html's Save,
-// always scoped to one supplier at a time) generate one shared id and pass
-// it into every call so the affected system city's history can show them as
-// one grouped event instead of several disconnected entries; a caller that
-// only ever changes one row at a time (every other call site) can omit it
-// and this function makes its own.
-function applyMapping(supplierKey, row, newSystemCityId, groupId) {
-  const oldId = row.systemCityId;
-  if (oldId === newSystemCityId) return;
-  const oldLabel = oldId !== null && oldId !== undefined ? getSystemCityHistoryLabel(oldId) : null;
-  const newLabel = newSystemCityId !== null ? getSystemCityHistoryLabel(newSystemCityId) : null;
+// (city-mapping.html, city-supplier.html). Adds or removes ONE link between
+// this supplier city and ONE system city, and logs it from both sides.
+//
+// There is deliberately no Remap: with a set-valued mapping, "already mapped
+// somewhere else" is not a conflict to resolve, so every change is either a
+// Map or an Unmap, and each one concerns exactly one system city. Mapping a
+// supplier city to a second system city leaves the first mapping alone —
+// nothing is ever silently taken away from another city. Edit/Create stay
+// reserved for entity-property changes, never mapping actions (same
+// vocabulary as applyCountryMapping's country equivalent).
+//
+// `groupId` is optional — callers that apply several rows in one batch
+// (city-mapping.html's Save, always scoped to one supplier at a time)
+// generate one shared id and pass it into every call so the affected system
+// city's history can show them as one grouped event; a caller that only ever
+// changes one row at a time can omit it and this function makes its own.
+function applyCityMap(supplierKey, row, systemCityId, mapped, groupId) {
+  if (systemCityId === null || systemCityId === undefined) return;
+  if (!Array.isArray(row.systemCityIds)) row.systemCityIds = [];
+
+  const wasMapped = row.systemCityIds.includes(systemCityId);
+  if (wasMapped === mapped) return;
+
+  const cityLabel = getSystemCityHistoryLabel(systemCityId);
   const supplierCityLabel = `${SUPPLIER_LABELS[supplierKey]} — ${row.name} — ID: ${row.id}`;
-  const isRemap = Boolean(oldLabel) && Boolean(newLabel);
   const resolvedGroupId = groupId || generateHistoryGroupId();
   const timestamp = new Date();
-  // On a genuine remap, both affected system cities' own history must say
-  // exactly where the supplier city moved from and to, including each
-  // city's own ID (same ID-suffixed getSystemCityHistoryLabel used for
-  // oldLabel/newLabel above) — same "old -> new" convention as country
-  // mapping. HISTORY_LINE_BREAK (js/app.js) puts this on its own line
-  // instead of cramming the "who" and the "old -> new" (now with two IDs)
-  // into one dense sentence.
-  const remapSuffix = isRemap ? `${HISTORY_LINE_BREAK}${getSystemCityHistoryLabel(oldId)} -> ${getSystemCityHistoryLabel(newSystemCityId)}` : "";
 
-  row.systemCityId = newSystemCityId;
+  row.systemCityIds = mapped
+    ? [...row.systemCityIds, systemCityId]
+    : row.systemCityIds.filter((id) => id !== systemCityId);
+
+  // Both sides describe the *other* record, so either history reads on its
+  // own. Neither carries an "old -> new" suffix any more: there is no
+  // previous value to contrast with when a link is simply added or removed.
   row.history.push({
-    operation: !oldLabel ? "Map" : newLabel ? "Remap" : "Unmap",
-    description: newLabel ? (oldLabel ? `${oldLabel} -> ${newLabel}` : `${newLabel}`) : `${oldLabel} -> Not mapped`,
+    operation: mapped ? "Map" : "Unmap",
+    description: mapped ? cityLabel : `${cityLabel} -> Not mapped`,
     userName: CURRENT_USER.name,
     userEmail: CURRENT_USER.email,
     timestamp,
   });
 
-  if (oldId !== null && oldId !== undefined) {
-    const oldCity = SYSTEM_CITIES.find((c) => c.id === oldId);
-    if (oldCity) {
-      oldCity.history.push({
-        operation: isRemap ? "Remap" : "Unmap",
-        description: `${supplierCityLabel}${remapSuffix}`,
-        userName: CURRENT_USER.name,
-        userEmail: CURRENT_USER.email,
-        timestamp,
-        groupId: resolvedGroupId,
-      });
-    }
-  }
-  if (newSystemCityId !== null) {
-    const newCity = SYSTEM_CITIES.find((c) => c.id === newSystemCityId);
-    if (newCity) {
-      newCity.history.push({
-        operation: isRemap ? "Remap" : "Map",
-        description: `${supplierCityLabel}${remapSuffix}`,
-        userName: CURRENT_USER.name,
-        userEmail: CURRENT_USER.email,
-        timestamp,
-        groupId: resolvedGroupId,
-      });
-    }
+  const city = SYSTEM_CITIES.find((c) => c.id === systemCityId);
+  if (city) {
+    city.history.push({
+      operation: mapped ? "Map" : "Unmap",
+      description: supplierCityLabel,
+      userName: CURRENT_USER.name,
+      userEmail: CURRENT_USER.email,
+      timestamp,
+      groupId: resolvedGroupId,
+    });
   }
 
   saveToStorage("supplierCities", supplierCities);
   saveToStorage("SYSTEM_CITIES", SYSTEM_CITIES);
 }
 
-// Cross-supplier mapping summary for a system city — used by city-system.html's
-// Summary action. Like country mapping (see getMappingSummary() above), a
-// system city can have MANY supplier cities mapped to it from the same
-// supplier, so each entry carries a `cities` array rather than a single
-// match.
-// `systemCityId` also accepts an array of ids — a merged city has no supplier
-// cities mapped to it directly, so its Summary instead unions the mappings of
-// every system city it was merged from, showing every hotel indirectly linked
-// to it through any of those component cities.
-function getCityMappingSummary(systemCityId) {
-  const ids = Array.isArray(systemCityId) ? systemCityId : [systemCityId];
-  return Object.keys(SUPPLIER_LABELS).map((key) => {
-    const cities = (supplierCities[key] || []).filter((row) => ids.includes(row.systemCityId));
-    return {
-      supplierKey: key,
-      supplierLabel: SUPPLIER_LABELS[key],
-      mapped: cities.length > 0,
-      cities,
-    };
-  });
+// One supplier's own cities mapped to a system city — the lookup behind
+// city-system.html's Summary popup, and deliberately scoped to a SINGLE
+// supplier. Suppliers are independent sources with independent storage:
+// there is no cross-supplier query to be had, so anything that wants
+// "every supplier's rows for this city" has to ask each supplier in turn
+// and should be designed knowing that. The cross-supplier version this
+// replaced was used to label a tab per supplier with its own count, which
+// meant paying that fan-out on every open just to draw the tabs.
+// Unlike country mapping (getMappingSummary() above, still cross-supplier
+// because a country summary is a handful of rows either way), a system
+// city can have MANY of the same supplier's cities mapped to it, so this
+// returns an array.
+function supplierCitiesForCity(supplierKey, systemCityId) {
+  return (supplierCities[supplierKey] || []).filter((row) => (row.systemCityIds || []).includes(systemCityId));
 }
 
 // ---------- Supplier Hotel ----------
@@ -1234,7 +1318,7 @@ function pickBulkHotelCity(key, seed) {
   const namedCities = cities.length > 20 ? cities.slice(0, 9) : cities;
   const pool = cities.length > 20 && hashSeed(seed, 3) % 3 !== 0 ? namedCities : cities;
   const city = pool[hashSeed(seed, 4) % pool.length];
-  const systemCity = city.systemCityId !== null ? SYSTEM_CITIES.find((c) => c.id === city.systemCityId) : null;
+  const systemCity = (city.systemCityIds && city.systemCityIds.length) ? SYSTEM_CITIES.find((c) => c.id === city.systemCityIds[0]) : null;
   return {
     supplierCityId: city.id,
     name: city.name,
@@ -1427,62 +1511,14 @@ function applyHotelCityMap(hotel, city, mapped, groupId) {
   saveToStorage("SYSTEM_CITIES", SYSTEM_CITIES);
 }
 
-// Hotel-based Summary for a New City: hotels attached directly (via Add
+// Hotel-based Summary for a system city: hotels attached directly (via Add
 // Hotel's own city field) vs hotels attached through the Map feature above.
 // Kept as two separate lists (rather than merged/deduped) since they're
 // added through two different actions and a city-system.html Summary
 // reader should be able to tell which is which.
-function getNewCityHotelSummary(cityId) {
+function getCityHotelSummary(cityId) {
   return {
     direct: SYSTEM_HOTELS.filter((h) => h.systemCityId === cityId),
     mapped: SYSTEM_HOTELS.filter((h) => (h.mappedCityIds || []).includes(cityId)),
   };
-}
-
-// ---------- City Merge (System) ----------
-
-// Shared by add-city.html's Merge Cities section for both creating a merged
-// city and editing an existing one's composition — mirrors applyHotelCityMap's
-// exact shape (entity, entity, boolean, groupId) even though this relationship
-// is composition membership, not a hotel/city map. `included`: true = being
-// added to mergedCity.mergedFrom (Merged), false = being removed
-// (Unmerged) — never Map/Unmap, a merge isn't a mapping relationship.
-// `groupId` is optional; a caller touching several component cities in one
-// save (the Merge Cities section's Save, always scoped to one merged city) passes
-// one shared id so the merged city's own history renders the whole batch —
-// including a co-occurring name/state rename pushed under the same id — as
-// one grouped card. Never stamped on componentCity's own entry: a single
-// component city only ever gets one entry per batch, nothing to group there
-// (same rule as applyHotelCityMap's hotel side).
-function applyCityMerge(mergedCity, componentCity, included, groupId) {
-  mergedCity.mergedFrom = mergedCity.mergedFrom || [];
-  const alreadyIncluded = mergedCity.mergedFrom.includes(componentCity.id);
-  if (included === alreadyIncluded) return;
-
-  const mergedCityLabel = getSystemCityHistoryLabel(mergedCity.id);
-  const componentLabel = getSystemCityHistoryLabel(componentCity.id);
-  const resolvedGroupId = groupId || generateHistoryGroupId();
-  const timestamp = new Date();
-
-  mergedCity.mergedFrom = included
-    ? [...mergedCity.mergedFrom, componentCity.id]
-    : mergedCity.mergedFrom.filter((id) => id !== componentCity.id);
-
-  componentCity.history.push({
-    operation: included ? "Merged" : "Unmerged",
-    description: included ? `Merged into: ${mergedCityLabel}` : `Removed from merged city: ${mergedCityLabel}`,
-    userName: CURRENT_USER.name,
-    userEmail: CURRENT_USER.email,
-    timestamp,
-  });
-  mergedCity.history.push({
-    operation: included ? "Merged" : "Unmerged",
-    description: componentLabel,
-    userName: CURRENT_USER.name,
-    userEmail: CURRENT_USER.email,
-    timestamp,
-    groupId: resolvedGroupId,
-  });
-
-  saveToStorage("SYSTEM_CITIES", SYSTEM_CITIES);
 }

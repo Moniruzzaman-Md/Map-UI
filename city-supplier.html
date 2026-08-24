@@ -124,25 +124,24 @@
       <hr class="page-divider" />
 
       <template id="supplierCityInfo">
-        <p>This page maps each <strong>supplier's own city list</strong> to the system's master city list, so bookings from different suppliers can be matched to the same city record. Pick a <strong>Supplier</strong> first — nothing else on this page works until one is chosen.</p>
+        <p>This page maps each <strong>supplier's own city list</strong> to the system's master city list, so bookings from different suppliers can be matched to the same city record. A supplier city can be mapped to <strong>several system cities at once</strong>, and the System City column lists every one of them. Pick a <strong>Supplier</strong> first — nothing else on this page works until one is chosen.</p>
         <ul>
           <li><strong>ID</strong> — this supplier's own identifier for the city, not editable.</li>
-          <li><strong>Map</strong> — go to City Mapping with this supplier city already pre-selected on the right, ready to pin a system city and save.</li>
-          <li><strong>Unmap</strong> — appears once a city is mapped; opens a confirmation before clearing the mapping.</li>
-          <li><strong>Hotels</strong> — jump to the System Hotel List filtered (and searched) to the mapped system city, showing every hotel directly assigned to it. Only appears once mapped, and only when the mapped system city is a prepopulated one — same restriction as the System City List's own Hotels button, and for the same reason: a New City's real hotels are linked through the separate Map/hotel-mapping.html overlay, and a merged city can never be a hotel's direct city at all, so neither would show anything meaningful here.</li>
+          <li><strong>Map</strong> — go to City Mapping with this supplier city already pre-selected, ready to pin a system city and save. Unmapping happens there too, against the city pinned at the time: a supplier city can be mapped to several system cities, so removing a mapping means naming which one.</li>
+          <li><strong>Hotels</strong> — jump to this supplier's own Hotel List filtered to this supplier city, showing every hotel it carries.</li>
           <li><strong>History</strong> — view every mapping made, changed, or removed, by whom and when.</li>
           <li><strong>Active/Inactive toggle</strong> — controls whether this supplier city is available for booking. Changes immediately, no confirmation needed, and is logged to History.</li>
           <li>Type a name and tick <strong>Fuzzy</strong> to match it loosely (forgiving of typos or skipped letters) instead of requiring an exact substring.</li>
-          <li>Nothing you type or pick filters the list right away — click <strong>Search</strong> (or press Enter in a search box) to apply it. Click <strong>Filters</strong> to reveal the rest: ID, Supplier Country/State (this city's own location), System Country/State/City (the mapped system city's location, independent of the supplier location filters), Map/Unmap, and Status. There's no separate Supplier City filter — since every row here already <em>is</em> a city, the Name search above (with Fuzzy) is how you narrow by city name. While collapsed, anything you've set shows as a removable chip — click a chip's × to clear just that one filter (still without touching the list until you search again). <strong>Reset</strong> clears everything and shows the full list immediately, no Search needed.</li>
+          <li>Nothing you type or pick filters the list right away — click <strong>Search</strong> (or press Enter in a search box) to apply it. Click <strong>Filters</strong> to reveal the rest: ID, Supplier Country/State (this city's own location), System Country/State/City (matches if <em>any</em> of the row's mapped system cities matches, independent of the supplier location filters), Map/Unmap, and Status. There's no separate Supplier City filter — since every row here already <em>is</em> a city, the Name search above (with Fuzzy) is how you narrow by city name. While collapsed, anything you've set shows as a removable chip — click a chip's × to clear just that one filter (still without touching the list until you search again). <strong>Reset</strong> clears everything and shows the full list immediately, no Search needed.</li>
         </ul>
       </template>
 
       <template id="supplierCityDevNotes">
-        <p>This maps each supplier's own city list to the system's master city list. A supplier city maps to at most one system city at a time; a system city can have many supplier cities mapped to it. Nothing on this page works until a <strong>Supplier</strong> is picked — every row/filter/action below is scoped to that one supplier's own array.</p>
+        <p>This maps each supplier's own city list to the system's master city list. The relationship is <strong>many-to-many</strong>: a supplier city can be mapped to several system cities at once, and a system city can have many supplier cities mapped to it. Nothing on this page works until a <strong>Supplier</strong> is picked — every row/filter/action below is scoped to that one supplier's own array.</p>
         <ul>
           <li><strong>ID</strong> — this supplier's own generated identifier (e.g. <code>AG-US-001</code>), permanent, never editable. Not the same value as that country's own id in the Supplier Country List, even though the two can look similar by coincidence of format.</li>
-          <li><strong>Map / Unmap</strong> — Map deep-links to City Mapping with this supplier city pre-selected on the right; Unmap opens a confirmation first. Both log to <strong>two</strong> history records in the same action — this supplier city's own, and the affected system city's own.</li>
-          <li><strong>Hotels</strong> (<code>hotel-system.html?cityId=X</code>, <code>X</code> = the <em>mapped system city's</em> id, not this row's own id) — only rendered when <code>r.systemCityId !== null</code> <strong>and</strong> the resolved system city has no <code>cityType</code> (prepopulated). Excluded for a New-City or merged-city mapping target for the same reason the System City List's own Hotels button excludes them: <code>resolveHotelLocation()</code>-based filtering (which this deep link relies on) only reflects a hotel's own direct <code>systemCityId</code>, never a New City's separate <code>mappedCityIds</code> overlay, and no hotel can ever have a merged city as its direct city at all.</li>
+          <li><strong>Map</strong> — deep-links to City Mapping with this supplier city pre-selected. There is deliberately <strong>no row-level Unmap here</strong>: a row can hold several mappings, so "unmap" is meaningless without naming which system city it targets — that belongs on the mapping screen, against the pinned city. Every map/unmap logs to <strong>two</strong> records in the same action: this supplier city's own history and that one system city's own.</li>
+          <li><strong>Hotels</strong> (<code>hotel-supplier.html?supplier=X&amp;supplierCityId=Y</code>) — deep-links to this supplier's own Hotel List scoped to this row's own city, so it works whether or not the row is mapped to anything.</li>
           <li><strong>History</strong> — every entry has an operation name, a description, and who + when, logged the instant the change happens, newest first.</li>
           <li><strong>Active/Inactive toggle</strong> — applies immediately, no confirmation, logged to History as a Status Change.</li>
           <li><strong>Filters</strong> — nothing in the toolbar re-queries the list on its own; every field only updates the pending state and the live Filters count pill / chip summary (visible once the panel is collapsed). The list itself only re-queries on <strong>Search</strong> (or Enter in the Name/ID search box) or <strong>Reset</strong> — same "wait for Search" convention as the System Hotel List. Two independent cascades live in the panel: <strong>Supplier</strong> Country → State (over this row's own <code>countryCode</code>/<code>state</code> — no City here, since <code>r.name</code> <em>is</em> the city and is already covered by the Name search box) and <strong>System</strong> Country → State → City (over the resolved mapped system city's own location) — picking a Supplier location filter never narrows the System location options or vice versa. <strong>Picking a Supplier</strong> (the top-level selector) and <strong>Reset</strong> are the only 2 actions that bypass the wait-for-Search gate and re-render immediately, since the page is non-functional without a supplier and "start over" should show results right away.</li>
@@ -360,11 +359,12 @@
     return i === query.length;
   }
 
-  // Resolves a supplier city row's mapped system city record, or null if
-  // unmapped — the single source every System Country/State/City filter
-  // (and the System City column itself) reads from.
-  function resolveSystemCity(row) {
-    return row.systemCityId !== null ? SYSTEM_CITIES.find((c) => c.id === row.systemCityId) || null : null;
+  // Every system city a supplier city row is mapped to — an array, since a
+  // supplier city can belong to several system cities at once. The single
+  // source every System Country/State/City filter (and the System City
+  // column itself) reads from; an unmapped row gives an empty array.
+  function resolveSystemCities(row) {
+    return (row.systemCityIds || []).map((id) => SYSTEM_CITIES.find((c) => c.id === id)).filter(Boolean);
   }
 
   // Supplier State is a cascading facet over the current supplier's own
@@ -397,7 +397,7 @@
     const countryNames = [
       ...new Set(
         rows
-          .map(resolveSystemCity)
+          .flatMap(resolveSystemCities)
           .filter(Boolean)
           .map((c) => getSystemCountryName(c.country.code) || c.country.name)
       ),
@@ -412,7 +412,7 @@
   }
 
   function updateSysStateOptions() {
-    let cities = currentRows().map(resolveSystemCity).filter(Boolean);
+    let cities = currentRows().flatMap(resolveSystemCities);
     if (state.sysCountry) cities = cities.filter((c) => (getSystemCountryName(c.country.code) || c.country.name) === state.sysCountry);
     const states = [...new Set(cities.map((c) => c.state).filter(Boolean))].sort();
     const current = state.sysState;
@@ -430,7 +430,7 @@
   // Country/State — those are the other, independent facet) — never the
   // full master city list.
   function updateSystemCityFilterOptions() {
-    let cities = currentRows().map(resolveSystemCity).filter(Boolean);
+    let cities = currentRows().flatMap(resolveSystemCities);
     if (state.sysCountry) cities = cities.filter((c) => (getSystemCountryName(c.country.code) || c.country.name) === state.sysCountry);
     if (state.sysState) cities = cities.filter((c) => c.state === state.sysState);
     const uniqueCities = [...new Map(cities.map((c) => [c.id, c])).values()].sort((a, b) => a.name.localeCompare(b.name));
@@ -453,11 +453,11 @@
     if (idQ) rows = rows.filter((r) => r.id.toLowerCase().includes(idQ));
     if (state.supplierCountry) rows = rows.filter((r) => r.countryCode === state.supplierCountry);
     if (state.supplierState) rows = rows.filter((r) => r.state === state.supplierState);
-    if (state.sysCountry) rows = rows.filter((r) => { const c = resolveSystemCity(r); return c && (getSystemCountryName(c.country.code) || c.country.name) === state.sysCountry; });
-    if (state.sysState) rows = rows.filter((r) => { const c = resolveSystemCity(r); return c && c.state === state.sysState; });
-    if (state.sysCity) rows = rows.filter((r) => String(r.systemCityId) === state.sysCity);
-    if (state.mapped === "mapped") rows = rows.filter((r) => r.systemCityId !== null);
-    if (state.mapped === "unmapped") rows = rows.filter((r) => r.systemCityId === null);
+    if (state.sysCountry) rows = rows.filter((r) => resolveSystemCities(r).some((c) => (getSystemCountryName(c.country.code) || c.country.name) === state.sysCountry));
+    if (state.sysState) rows = rows.filter((r) => resolveSystemCities(r).some((c) => c.state === state.sysState));
+    if (state.sysCity) rows = rows.filter((r) => (r.systemCityIds || []).some((id) => String(id) === state.sysCity));
+    if (state.mapped === "mapped") rows = rows.filter((r) => (r.systemCityIds || []).length > 0);
+    if (state.mapped === "unmapped") rows = rows.filter((r) => !(r.systemCityIds || []).length);
     if (state.status === "active") rows = rows.filter((r) => r.active);
     if (state.status === "inactive") rows = rows.filter((r) => !r.active);
     return rows;
@@ -480,10 +480,16 @@
     tbody.innerHTML = pageItems.length
       ? pageItems
           .map((r) => {
-            const systemCity = r.systemCityId !== null ? SYSTEM_CITIES.find((c) => c.id === r.systemCityId) : null;
-            const systemCityCell = systemCity
-              ? `<div style="font-weight:600;">${systemCity.name}</div>
-                 <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">${getSystemCityLabel(systemCity.id)}</div>`
+            // Every system city this row is mapped to, not just one — a
+            // supplier city can belong to several at once.
+            const systemCities = resolveSystemCities(r);
+            const systemCityCell = systemCities.length
+              ? systemCities
+                  .map(
+                    (c) => `<div style="font-weight:600;">${c.name}</div>
+                 <div style="font-size:12px; color:var(--text-muted); margin-top:2px; margin-bottom:6px;">${getSystemCityLabel(c.id)}</div>`
+                  )
+                  .join("")
               : '<span class="text-not-mapped">Not mapped</span>';
             return `
       <tr>
@@ -507,13 +513,6 @@
             <a class="action-btn" href="hotel-supplier.html?supplier=${state.supplier}&supplierCityId=${encodeURIComponent(r.id)}" target="_blank" rel="noopener" aria-label="View hotels in ${r.name}">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M4 21V10l8-5 8 5v11" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 21v-6h6v6" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 12h.01M15 12h.01M12 8h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
             </a>
-            ${
-              r.systemCityId !== null
-                ? `<button class="action-btn" data-unmap-btn data-row-id="${r.id}" aria-label="Unmap ${r.name}">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-            </button>`
-                : ""
-            }
             <button class="action-btn" data-toggle-active-btn data-row-id="${r.id}" aria-label="${r.active ? "Deactivate" : "Activate"} ${r.name}">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 2v10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M6 5a8 8 0 106.5-1.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
             </button>
@@ -809,20 +808,10 @@
       return;
     }
 
-    const unmapBtn = e.target.closest("[data-unmap-btn]");
-    if (unmapBtn) {
-      const record = currentRows().find((r) => String(r.id) === unmapBtn.dataset.rowId);
-      if (!record) return;
-      showConfirm(
-        `<p style="margin:0;">Unmap <strong>${record.name}</strong> from <strong>${getSystemCityLabel(record.systemCityId)}</strong>?</p>`,
-        () => {
-          applyMapping(state.supplier, record, null);
-          showToast(`${record.name} unmapped`);
-          render();
-        }
-      );
-      return;
-    }
+    // No row-level Unmap any more: a supplier city can be mapped to several
+    // system cities, so "unmap" is meaningless without naming which one.
+    // Unmapping happens on the mapping screen, against the city pinned
+    // there — the Map action above deep-links straight to it.
 
     const toggleBtn = e.target.closest("[data-toggle-active-btn]");
     if (toggleBtn) {

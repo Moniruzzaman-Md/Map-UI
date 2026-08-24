@@ -127,32 +127,42 @@
         <p>This page manages the <strong>master list of cities</strong> used across the system.</p>
         <ul>
           <li><strong>ID</strong> — a unique, system-generated identifier. Not editable.</li>
-          <li><strong>New City</strong> — add a single new city under a country.</li>
-          <li><strong>Merge Cities</strong> — combine two or more existing cities into one entry, on the same Add City page as New City (its own section, below). Only cities from the original master list can be merged; cities you've already created or merged can't be merged again.</li>
-          <li><strong>Edit</strong> — rename a city. For a merged city, Edit instead opens the Add City page's Merge Cities section to adjust which cities make it up — dropping it below 2 cities makes it Inactive automatically rather than deleting it.</li>
-          <li><strong>Map</strong> — jump to City Mapping with this city already pinned, to map supplier cities to it. Only available for prepopulated cities — cities created via New City or Merge Cities can't be mapped.</li>
-          <li><strong>Hotels</strong> — jump to the System Hotel List with Country/State/City already filtered (and searched) to this city, showing every hotel directly assigned to it. Only available for prepopulated cities — cities created via New City or Merge Cities aren't a hotel's own direct city (New City hotels are linked via Map on Hotel Mapping instead, and a merged city can never be a hotel's direct city at all), so there's nothing meaningful for this button to filter to for either.</li>
-          <li><strong>History</strong> — view every change: creation, renames, status changes, and merge composition changes, plus supplier cities mapped or unmapped to this city.</li>
-          <li><strong>Summary</strong> — see, per supplier, which of their cities are mapped to this one. For a merged city, this instead shows every supplier city mapped to any of the system cities it was merged from, plus the list of cities it was merged out of. For a city added via New City, this instead shows every hotel mapped to it. Any list here that runs long loads 50 rows at a time — scroll to the bottom of that list to automatically load more.</li>
+          <li><strong>+ Add City</strong> — opens a drawer to add a single city under a country. Country is required. State is required for US and Canada, and unavailable for the rest. The name is required. On save the newly added city and its country are set on the filter.</li>
+          <li><strong>Edit</strong> — reopen the same drawer to change a city's details. The country cannot be changed. For a city added here, the state can be changed; for a city from the original master list, it cannot.</li>
+          <li>Nothing you type or pick filters the list right away — click <strong>Search</strong> (or press Enter in the search box) to apply it. Click <strong>Filters</strong> to reveal Country, State, Status and Custom cities only; State opens up once a Country is picked. While collapsed, anything you've set shows as a removable chip — click a chip's × to clear just that one filter. <strong>Reset</strong> clears everything and shows the full list immediately, no Search needed.</li>
+          <li><strong>Custom cities only</strong> — tick to show just the cities added through Add City. Untick to show every city. It combines with the other filters and the search.</li>
+          <li><strong>Map</strong> — jump to City Mapping with this city already pinned, to map supplier cities to it. Available for every city.</li>
+          <li><strong>Hotels</strong> — jump to the System Hotel List with Country/State/City already filtered (and searched) to this city, showing every hotel assigned to it.</li>
+          <li><strong>History</strong> — view every change: creation, renames, state changes, status changes, plus supplier cities and hotels mapped or unmapped to this city.</li>
+          <li><strong>Summary</strong> — a quick review of what is mapped to this city, in one wide popup. A single row of tabs runs across the top: <strong>Hotels</strong> first, then a <strong>tab per supplier</strong>. Hotels stays in place; the supplier tabs scroll sideways after it, between the arrows at either end of that group, when there are more than fit — or type in <strong>Find supplier</strong> at the end of the row to narrow them to matching names. Nothing is selected when the popup opens: pick Hotels or the supplier you want and its list is fetched then. Each table is paged the same way as the lists elsewhere in the system — <strong>Previous/Next</strong> and <strong>Rows</strong> below it. A green or red bar down a row's left edge is that hotel's or supplier city's Active/Inactive status. On the Hotels tab, <strong>Relation Type</strong> says whether this city is that hotel's <strong>Primary</strong> city or a <strong>Secondary</strong> one — a hotel belongs to several cities but only one of them is its primary, so the same hotel reads Primary here and Secondary in the summary of another city it is mapped to.</li>
           <li><strong>Active/Inactive toggle</strong> — controls whether a city is available for booking.</li>
         </ul>
       </template>
 
       <template id="cityListDevNotes">
-        <p>This is the master list of system cities. Every city here is one of 3 types, which changes what its <strong>Edit</strong>, <strong>Map</strong>, <strong>Hotels</strong>, and <strong>Summary</strong> actions do: a <strong>prepopulated</strong> city (no <code>cityType</code>, from the original seed data), a <strong>New City</strong> (<code>cityType: "normal"</code>, added via Add City), or a <strong>Merged city</strong> (<code>cityType: "merged"</code>, also from Add City).</p>
+        <p>This is the master list of system cities. Every record here is the same kind of thing — there is no <code>cityType</code>, no New/Merged/Custom status, and therefore no per-type branching in any action. A city added via Add City behaves exactly like one that shipped in the seed data everywhere it matters — same actions, same mapping rules (a system city is never mapped to another system city) — with a single deliberate exception: its State stays editable, see Add / Edit below.</p>
         <ul>
           <li><strong>ID</strong> — permanent, system-generated, never editable.</li>
-          <li><strong>Edit</strong> — prepopulated and New City rename in place here. A merged city instead deep-links to Add City's Merge Cities section (<code>add-city.html?cityId=X</code>) to adjust its composition — dropping it below 2 member cities must set it Inactive automatically rather than deleting the record.</li>
-          <li><strong>Map</strong> (<code>city-mapping.html?cityId=X</code>) — prepopulated cities only. Cities created or merged via Add City must be excluded, since supplier-city mapping only makes sense against the original master-list geography.</li>
-          <li><strong>Hotels</strong> (<code>hotel-system.html?cityId=X</code>) — prepopulated cities only. Deep-links to the System Hotel List with Country/State/City pre-filled from this city and the search already run (collapsing that page's own Filters panel, same as if the user had set those 3 filters and pressed Search themselves). Excluded for New City and Merged: a hotel's own direct city (<code>systemCityId</code>) can be a New City but is never a merged city, and a New City's real hotel relationship is mostly via the separate Map overlay (<code>mappedCityIds</code>, set from hotel-mapping.html) rather than this direct-city filter, so this button would show an incomplete or always-empty result for either.</li>
-          <li><strong>History</strong> — every entry has an <strong>operation name</strong>, a <strong>description</strong>, and <strong>who + when</strong>, logged the instant the change happens, newest first: <strong>Create</strong> (initial fields), <strong>Edit</strong> (a rename), <strong>Status Change</strong> (Active/Inactive, including the automatic deactivation when a merge drops below 2 members), and merge composition changes (members added/removed on a merged city). A supplier city mapped or unmapped to this city from City Mapping also logs here, on this city's own record, in the same action as the supplier city's own history entry.</li>
-          <li><strong>Summary</strong> — 3 different views depending on city type, all read from live data, never a stored snapshot:
+          <li><strong>Add / Edit</strong> — one drawer (<code>#cityFormModal</code>) serves both, same dual-mode <code>openCityForm(record)</code> pattern as <code>hotel-system.html</code>'s <code>openHotelForm()</code>: pass a record to edit, pass nothing to add. Country/State are live cascading selects while adding; the ID row is hidden entirely in add mode. <strong>State is required</strong> whenever the chosen country is one the system holds states for, and is unavailable for every other country — a city's state is part of the record, not a narrowing filter, so this is the one State control in the project that is mandatory rather than optional. The same check runs on save while editing, so a state that can be edited can never be cleared back to none. While editing, Country is always disabled — a city's country is permanent once the record exists — but <strong>State stays editable for a city that was added through this drawer</strong>, since that state was chosen from this drawer's own State select when the record was created. A seeded city's State is disabled. This is read off the record's history (<code>wasAddedInApp()</code> — an added city always carries a <code>Create</code> entry, nothing else writes one) rather than a stored flag, so it doesn't reintroduce a stored city status and it covers cities added before the rule existed. A state change is logged into the same single <code>Edit</code> history entry as a name change made in the same save. There is no separate Add City page — <code>?add=1</code> opens the drawer on load, which is what the Dashboard's own Add shortcut links to. After an add, the list's search is set to the new city's name <em>and</em> the Country filter to that city's country, so the created row is actually visible rather than buried on the last page behind whatever filters were active — name plus country is also what a real backend query needs to narrow on, where a bare name search would scan every country. State is rebuilt for the new country but left on All, and Status is reset to All.</li>
+          <li><strong>Filters</strong> — nothing in the toolbar re-queries the list on its own; every field only updates the pending state, the live Filters count pill, and the chip summary shown while the panel is collapsed. The list re-queries on <strong>Search</strong>, on Enter in the search box, or on <strong>Reset</strong> — Reset bypasses the wait-for-Search gate, since "start over" showing the previous filter's results would be a lie. Clearing a chip is a pending change like any other. Country/State is the usual cascade: State is gated behind Country and is rebuilt the moment Country changes, because it's a dependent control rather than a result.</li>
+          <li><strong>Custom cities only</strong> — a single on/off narrowing to the cities added through the Add City drawer; there is deliberately no "original only" counterpart, since unticking already answers that. It must use the exact same <code>wasAddedInApp()</code> history derivation the Edit drawer's State rule uses, never a second definition of "custom" — one derivation means the filter and the editability rule can never disagree about a given city. This is a filter over an <em>observable fact about a record's history</em>, not the return of the deleted city-status system: nothing is stored on the city, nothing branches on it beyond these two places, and the list rows carry no custom/original badge. <code>?customOnly=1</code> lands with it already ticked. Reset, and the post-add filter clearing, both untick it — the row an add just created must never be filtered out of view by a filter the user didn't set for that purpose.</li>
+          <li><strong>Map</strong> (<code>city-mapping.html?cityId=X</code>) — every city is a valid mapping target.</li>
+          <li><strong>Hotels</strong> (<code>hotel-system.html?cityId=X</code>) — deep-links to the System Hotel List with Country/State/City pre-filled from this city and the search already run (collapsing that page's own Filters panel, same as if the user had set those 3 filters and pressed Search themselves).</li>
+          <li><strong>History</strong> — every entry has an <strong>operation name</strong>, a <strong>description</strong>, and <strong>who + when</strong>, logged the instant the change happens, newest first: <strong>Create</strong> (initial fields), <strong>Edit</strong> (a rename), <strong>Status Change</strong> (Active/Inactive). A supplier city or hotel mapped or unmapped to this city also logs here, on this city's own record, in the same action as that entity's own history entry.</li>
+          <li><strong>Summary</strong> — a read-only review of everything mapped to this city, read from live data every time it opens, never from a stored snapshot. It is a <strong>wide centred popup</strong> (<code>.popup-box-lg</code>, the size the save previews use), not this project's usual right drawer: it carries a tab per supplier plus a paginated table, and a ~360px drawer could only ever show a sliver of that. It stays a popup rather than a page of its own — this is a glance at one row, not a place to work. Nothing in it writes; mapping and unmapping belong on the mapping screen, against a pinned city.
             <ul>
-              <li><strong>Prepopulated</strong> — one card per supplier, each showing whether any of that supplier's cities are mapped to this one, and if so, a table of them.</li>
-              <li><strong>Merged</strong> — the same per-supplier view as prepopulated, but aggregated across every one of its <code>mergedFrom</code> member cities, plus its own card listing those member cities.</li>
-              <li><strong>New City</strong> — one table of every hotel attached to it: directly (the hotel's own <code>systemCityId</code>) or via Map on hotel-mapping.html (<code>mappedCityIds</code>), deduped by hotel id so a hotel that's somehow both never appears twice.</li>
+              <li><strong>One tab row over one panel</strong> — hotels and every supplier are the same question asked of different sources, so they are tabs, not stacked sections: only one list is ever on screen, and the popup never grows taller than the list it is showing. <strong>Hotels is pinned outside the scrolling strip</strong>, with a divider after it — it is not one of the suppliers, and it must stay reachable however far the strip is scrolled. <strong>Find supplier</strong> is pinned at the other end for the same reason. Only the middle scrolls. The row sits <strong>flush under the popup header</strong> — the body's usual top padding is dropped here, since it would only put an empty band above the tabs — and is sticky, so the tabs stay put while a long table scrolls under them.</li>
+              <li><strong>Opening this popup must cost nothing.</strong> No tab carries a count, nothing is selected, and no source is read until the user picks a tab — the first lookup happens on that click, against that one source. This is the rule the rest of the popup's design follows from, and it is a consequence of how the data actually sits: <strong>suppliers are independent sources with independent storage</strong>, and the supplier list itself comes from configuration the app already holds, not from a query. So "which suppliers have rows for this city" is not one question, it is one question per supplier — 54 lookups today and more with every supplier onboarded, paid on every open, purely to decide which tabs look worth clicking. A count is worth its query when it changes what the user does next; here the user arrives already knowing whether they want the hotels or a named supplier, so it changes nothing. The earlier version labelled every tab with its own count, greyed out the empty ones and auto-opened the first supplier that had rows — all three are gone with the counts that fed them.</li>
+              <li><strong>Hotels</strong> — every hotel attached to this city, whether via the hotel's own city field or the Map overlay, <strong>deduped by hotel id</strong>: a hotel can legitimately satisfy both (its home city already is this city and it was also separately mapped), and it must never be listed twice. Fetched when its tab is opened, like every other tab — a busy city can carry thousands of hotels, so nothing about them is read while the popup is merely open.</li>
+              <li><strong>Relation Type</strong> — a hotel belongs to several cities and exactly one of them is its <strong>primary</strong>, so each row says whether <em>this</em> city is that hotel's Primary or a Secondary one. The value describes <strong>the pair, not the hotel</strong>: the same hotel is Primary in one city's summary and Secondary in every other city it is mapped to, which is why the column exists only in this per-city view and only on the Hotels tab — supplier cities are a flat set with no primary among them. Read today from which field holds the city (the hotel's own <code>systemCityId</code> is primary, an entry in its mapped cities is secondary); when that pair becomes a join row carrying its own flag, only the read changes and the column stays as it is. A hotel that somehow satisfies both — its own city also listed among its mapped ones, which is redundant data — is listed once, as Primary: that is the stronger of the two claims.</li>
+              <li><strong>Supplier tabs</strong> — one per supplier, drawn from the supplier list itself and therefore built once rather than per city. Nothing distinguishes them until one is opened; whether a supplier has anything for this city is only knowable by asking it, so an empty answer arrives as an empty state in the panel, after a load, exactly like a non-empty one. The strip must survive a realistic supplier count: fixed-width tabs on one scrolling line, never wrapping — wrapping puts dozens of tabs on six rows and pushes the list itself off-screen, and makes the strip's height jump as it filters. It uses the <strong>same strip as the City Mapping screen</strong> — a scroll arrow at each end of the supplier group, appearing only once the tabs actually overflow, with the scrollbar itself hidden. The filter must never hide the tab currently being shown, must still report "no match" when the query matches nothing, and must survive a tab selection — which is why selecting a tab toggles classes rather than rebuilding the strip. It also never touches the pinned Hotels tab. The filter box is cleared on every open, so a query left over from the last city can't silently hide suppliers in this one.</li>
+              <li><strong>Ordinary project tables</strong> — the lists render as <code>.data-table</code>, the same table every list page uses, with one addition: a leading <strong>#</strong> column, since a row's position in the list is part of what this popup is being read for. Its sticky header stops <em>below</em> the sticky tab row rather than sliding under it — the row publishes its measured height for the header to offset against, because that height depends on which of the tabs and the search box is taller. <code>.table-wrap</code> drops its own scrolling here: a nested scroller would both break the one-scrolling-surface rule and stop the header sticking at all, since a <code>&lt;thead&gt;</code> sticks to its own scrollport.</li>
+              <li><strong>Numbered pages, not scroll-to-load</strong> — each table carries <code>renderPagination()</code>'s standard footer, the same one every list page in this project uses: Showing x-y of n, page buttons, and a Rows selector. The mapping screens' scroll-triggered loading is deliberately <em>not</em> used here — those are working surfaces where a row is picked out of a stream, this is a table being read, and a reader who wants row 200 should be able to ask for it rather than scroll to it. The footer is <strong>pinned to the bottom edge of the popup</strong>, a sibling of the scrolling body rather than a trailing element inside it — exactly the relationship <code>.content-card</code> gives its own footer on every list page, so the controls stay put instead of drifting up under a short list or scrolling away under a long one. It goes blank while a tab loads (page numbers under a spinner would describe a list that isn't on screen) and hides entirely on a tab with no rows, so its border can't float under an empty state. Changing tab resets to page 1 (a page number means nothing once the rows underneath it are a different list) while the chosen Rows value carries over, since that is a preference about how the reader wants to read. Note <code>renderPagination()</code> hardcodes an id on its Rows select, so the copy rendered inside this popup is re-keyed after render — two elements sharing an id would point this popup's label at the select on the page behind it.</li>
+              <li><strong>Status is a colored left edge, not a column</strong> — a green or red bar on the row's left edge, the same signal the mapping screens' candidate rows carry, taken out of the first cell's own padding so nothing shifts between an active and an inactive row. A Status column of identical pills is a column of chrome in a table where every other column actually differs row to row. Cells are middle-aligned, so a two-line cell (a supplier's country name over its own identifier) sits level with the single-line cells beside it.</li>
+              <li><strong>One scrolling surface</strong> — the <strong>popup body</strong> is the only thing that scrolls; the table inside it is full height. A list with its own scrolling box means two scrollbars competing for the same gesture, and a short list leaves dead space under it while the box keeps its height. Every open starts at the top, however far the last city's list had been scrolled.</li>
+              <li><strong>Loading, and stale responses</strong> — every list must render a <strong>loading state</strong> before its rows, not appear instantly: each one stands for a query, and a list that materialises with no perceptible fetch teaches an expectation a real backend will break. A stale response must never overwrite a newer one — clicking through tabs faster than the fetch resolves has to land the tab clicked last.</li>
             </ul>
-            Every list in this modal (Mapped Hotels, each supplier's Mapped Cities, Merged System Cities' member list) loads in bounded pages of 50, scroll-triggered off that list's own box — same convention as hotel-mapping.html's/city-mapping.html's checklists: a spinner while the next page loads, appended below the existing rows without resetting that list's scroll position, and a clear "end of list" state once nothing remains. Applied uniformly to all 3 lists even though only Mapped Hotels and per-supplier Mapped Cities realistically grow large in practice — the merged-members list stays small today, but pagination isn't skipped there just because of that.</li>
+          </li>
           <li><strong>Active/Inactive toggle</strong> — applies immediately, no confirmation, logged to History as a Status Change.</li>
         </ul>
         <p><strong>Everywhere:</strong> key every relationship by permanent id, never by an editable name, and resolve a city's country/state live (via its country code) rather than trusting a name snapshot that might be stale after a rename elsewhere.</p>
@@ -165,32 +175,71 @@
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
               <input type="text" id="citySearch" placeholder="Search by city name..." />
             </div>
-            <div class="toolbar-filters">
+            <!-- Filters sits directly after the field it extends: the search
+                 box and this panel are the same act (narrowing the list),
+                 while Search/Reset act on whatever they add up to. -->
+            <button type="button" class="filters-toggle-btn" id="cityFiltersToggleBtn" aria-expanded="false" aria-controls="cityFiltersPanel">
+              Filters
+              <span class="pill info" id="cityActiveFilterCount" style="display:none;">0</span>
+              <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <button class="btn btn-primary" id="citySearchBtn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#fff" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+              Search
+            </button>
+            <button class="btn btn-danger" id="resetCityFilterBtn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 109-9 9 9 0 00-7 3.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3 3.5V8h4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Reset
+            </button>
+            <label class="toggle-row" for="cityRevealValuesToggle" style="margin-bottom:0;">
+              <input type="checkbox" id="cityRevealValuesToggle" />
+              Show full values
+            </label>
+            <!-- Pushed to the far right: adding a city isn't part of the
+                 find-something-in-the-list group to its left. -->
+            <button class="btn btn-primary toolbar-push-right" id="addCityBtn">+ Add City</button>
+          </div>
+
+          <!-- Shown only while the panel below is collapsed and at least one of
+               its filters is active, so a collapsed filter set isn't silently
+               invisible — see updateFiltersSummary(). Same pattern as
+               hotel-system.html / hotel-supplier.html. -->
+          <div class="filters-summary" id="cityFiltersSummary" style="display:none;"></div>
+
+          <!-- Collapsed by default: the Country/State/Status selects and the
+               custom-cities toggle, moved out of the always-visible row. -->
+          <div class="filters-panel" id="cityFiltersPanel" style="display:none;">
+            <div class="filter-field">
+              <label for="cityCountryFilter">Country</label>
               <select class="filter-select" id="cityCountryFilter">
                 <option value="">All Countries</option>
               </select>
+            </div>
+            <div class="filter-field">
+              <label for="cityStateFilter">State</label>
               <select class="filter-select" id="cityStateFilter" disabled>
                 <option value="">Select State</option>
               </select>
+            </div>
+            <div class="filter-field">
+              <label for="cityStatusFilter">Status</label>
               <select class="filter-select" id="cityStatusFilter">
                 <option value="all">All Status</option>
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
               </select>
-              <label class="toggle-row" for="cityCustomOnlyToggle" style="margin-bottom:0;">
-                <input type="checkbox" id="cityCustomOnlyToggle" />
-                Custom Only
+            </div>
+            <!-- "Custom" means added through this page's Add City drawer, as
+                 opposed to shipping in the original master list. Read off the
+                 record's own history, not a stored city type. A checkbox
+                 rather than a dropdown: it's one on/off narrowing, and there
+                 is deliberately no "original only" counterpart. -->
+            <div class="filter-field filter-field--toggle">
+              <label class="toggle-row" for="cityCustomFilter" style="margin-bottom:0;">
+                <input type="checkbox" id="cityCustomFilter" />
+                Custom cities only
               </label>
             </div>
-            <button class="btn btn-danger" id="resetCityFilterBtn">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 109-9 9 9 0 00-7 3.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3 3.5V8h4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              Reset
-            </button>
-            <a class="btn btn-primary" href="add-city.html" target="_blank" rel="noopener">+ Add City</a>
-            <label class="toggle-row" for="cityRevealValuesToggle" style="margin-bottom:0;">
-              <input type="checkbox" id="cityRevealValuesToggle" />
-              Show full values
-            </label>
           </div>
         </div>
 
@@ -218,36 +267,46 @@
   </div>
 </div>
 
-<!-- Edit City Modal -->
-<div class="modal-overlay" id="editCityModal">
+<!-- Add / Edit City drawer — one modal serving both, same dual-mode pattern
+     as hotel-system.html's #hotelFormModal. Add mode: ID row hidden,
+     Country/State live selects (State cascades off Country and stays
+     disabled for countries that have none). Edit mode: ID shown, Country
+     always disabled — a city's country is permanent — and State editable
+     only for a city that was added through this drawer, so a just-added
+     city's state can still be corrected while a seeded city's stays put. -->
+<div class="modal-overlay" id="cityFormModal">
   <div class="modal">
     <div class="modal-header">
-      <h3>Edit City</h3>
+      <h3 id="cityFormTitle">Add City</h3>
       <button class="modal-close" data-modal-close aria-label="Close">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       </button>
     </div>
     <div class="modal-body">
-      <div class="form-group">
-        <label for="editCityId">ID</label>
-        <input type="text" id="editCityId" disabled />
+      <div class="form-group" id="cityFormIdGroup">
+        <label for="cityFormId">ID</label>
+        <input type="text" id="cityFormId" disabled />
       </div>
       <div class="form-group">
-        <label for="editCityCountry">Country</label>
-        <input type="text" id="editCityCountry" disabled />
+        <label for="cityFormCountry">Country</label>
+        <select id="cityFormCountry" class="filter-select" style="width:100%; min-width:0;">
+          <option value="">Select country</option>
+        </select>
       </div>
       <div class="form-group">
-        <label for="editCityState">State</label>
-        <input type="text" id="editCityState" disabled />
+        <label for="cityFormState">State</label>
+        <select id="cityFormState" class="filter-select" style="width:100%; min-width:0;" disabled>
+          <option value="">Select country first</option>
+        </select>
       </div>
       <div class="form-group">
-        <label for="editCityName">City Name</label>
-        <input type="text" id="editCityName" />
+        <label for="cityFormName">City Name</label>
+        <input type="text" id="cityFormName" placeholder="e.g. Boston" />
       </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" data-modal-close>Cancel</button>
-      <button class="btn btn-primary" id="saveCityBtn">Save Changes</button>
+      <button class="btn btn-primary" id="saveCityBtn">Save City</button>
     </div>
   </div>
 </div>
@@ -267,9 +326,12 @@
   </div>
 </div>
 
-<!-- Mapping Summary Modal (card design, one card per supplier) -->
-<div class="modal-overlay" id="summaryModal">
-  <div class="modal">
+<!-- Mapping Summary — a wide centred popup, not the project's usual right
+     drawer: it carries a full supplier tab strip and two paginated tables,
+     which a ~360px drawer could only show a sliver of at a time. Same
+     .popup-box-lg the save previews use, for the same reason. -->
+<div class="modal-overlay popup-overlay" id="summaryModal">
+  <div class="popup-box popup-box-lg">
     <div class="modal-header">
       <h3>Mapping Summary <span id="summaryCityName" style="color:var(--text-muted); font-weight:600;"></span></h3>
       <button class="modal-close" data-modal-close aria-label="Close">
@@ -277,8 +339,41 @@
       </button>
     </div>
     <div class="modal-body">
-      <div class="history-list" id="summaryList"></div>
+
+      <!-- One tab row for the whole summary: Hotels is pinned at the left
+           and never scrolls away, the supplier tabs scroll sideways after
+           it between the same arrows city-mapping.html's strip uses, and
+           Find supplier is pinned at the right end. Only the suppliers
+           scroll — the things that must always be reachable are the ones
+           the row keeps in place. The row sits flush under the popup header
+           and sticks there, so the tabs stay put while a long table scrolls
+           under them. -->
+      <div class="summary-tabs-bar">
+        <button type="button" class="supplier-tab summary-hotels-tab" role="tab" aria-selected="false" data-summary-tab="hotels">
+          <span class="supplier-tab-label">Hotels</span>
+        </button>
+        <button type="button" class="supplier-tabs-arrow" id="summaryTabsPrev" aria-label="Scroll suppliers left" hidden>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="supplier-tabs" id="summarySupplierTabs" role="tablist" aria-label="Supplier"></div>
+        <button type="button" class="supplier-tabs-arrow" id="summaryTabsNext" aria-label="Scroll suppliers right" hidden>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="toolbar-search summary-supplier-search">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <input type="text" id="summaryTabsSearch" placeholder="Find supplier..." />
+        </div>
+      </div>
+      <div class="supplier-tabs-empty" id="summarySupplierEmpty" hidden>No supplier matches that name</div>
+
+      <div id="summaryPanelBody"></div>
     </div>
+
+    <!-- Outside .modal-body on purpose: the footer belongs to the popup,
+         not to the list inside it, so it stays pinned to the bottom edge
+         while the table scrolls — the same relationship .content-card gives
+         its own table footer on every list page. -->
+    <div class="table-footer pagination-bar" id="summaryPaginationBar"></div>
   </div>
 </div>
 
@@ -293,6 +388,7 @@
 
   const stateFilterSelect = document.getElementById("cityStateFilter");
   const statusFilterSelect = document.getElementById("cityStatusFilter");
+  const customFilterToggle = document.getElementById("cityCustomFilter");
   const tbody = document.querySelector("#cityTable tbody");
   const paginationBar = document.getElementById("paginationBar");
   const citySearch = document.getElementById("citySearch");
@@ -309,7 +405,10 @@
     if (state.cityState) rows = rows.filter((c) => c.state === state.cityState);
     if (state.status === "active") rows = rows.filter((c) => c.active);
     if (state.status === "inactive") rows = rows.filter((c) => !c.active);
-    if (state.customOnly) rows = rows.filter((c) => c.cityType);
+    // Custom = added here via Add City. Same wasAddedInApp() derivation the
+    // Edit drawer uses for its State field, so the two can never disagree
+    // about which cities count as custom.
+    if (state.customOnly) rows = rows.filter((c) => wasAddedInApp(c));
     return rows;
   }
 
@@ -329,7 +428,6 @@
         <td data-col="name">
           <div class="city-name-cell">
             <div class="truncatable truncatable--cell-text" title="${c.name}"><span class="truncatable-text">${c.name}</span></div>
-            ${c.cityType ? `<span class="pill city-type-badge ${c.cityType === "merged" ? "info" : "neutral"}" aria-label="${c.cityType === "merged" ? "Merged" : "New"}">${c.cityType === "merged" ? "M" : "N"}</span>` : ""}
           </div>
         </td>
         <td>${c.state ? `<div class="truncatable truncatable--cell-text" title="${c.state}"><span class="truncatable-text">${c.state}</span></div>` : '<span style="color:var(--text-muted)">—</span>'}</td>
@@ -342,33 +440,15 @@
         <td><span class="pill ${c.active ? "success" : "danger"}">${c.active ? "Active" : "Inactive"}</span></td>
         <td>
           <div class="row-actions">
-            ${
-              c.cityType === "merged"
-                ? `<a class="action-btn" href="add-city.html?cityId=${c.id}" target="_blank" rel="noopener" aria-label="Edit merged city ${c.name}">
+            <button class="action-btn" data-edit-btn data-row-id="${c.id}" aria-label="Edit ${c.name}">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4L16.5 3.5z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
-            </a>`
-                : `<button class="action-btn" data-edit-btn data-row-id="${c.id}" aria-label="Edit ${c.name}">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4L16.5 3.5z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
-            </button>`
-            }
-            ${
-              c.cityType === "merged"
-                ? ""
-                : c.cityType === "normal"
-                ? `<a class="action-btn" href="hotel-mapping.html?cityId=${c.id}" target="_blank" rel="noopener" aria-label="Map hotels to ${c.name}">
+            </button>
+            <a class="action-btn" href="city-mapping.html?cityId=${c.id}" target="_blank" rel="noopener" aria-label="Map supplier cities to ${c.name}">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M9 17l-4.5 2V7L9 5m0 12l6 2m-6-2V5m6 14l4.5-2V5L15 7m0 12V7m0 0L9 5" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
-            </a>`
-                : `<a class="action-btn" href="city-mapping.html?cityId=${c.id}" target="_blank" rel="noopener" aria-label="Map supplier cities to ${c.name}">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M9 17l-4.5 2V7L9 5m0 12l6 2m-6-2V5m6 14l4.5-2V5L15 7m0 12V7m0 0L9 5" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
-            </a>`
-            }
-            ${
-              c.cityType
-                ? ""
-                : `<a class="action-btn" href="hotel-system.html?cityId=${c.id}" target="_blank" rel="noopener" aria-label="View hotels in ${c.name}">
+            </a>
+            <a class="action-btn" href="hotel-system.html?cityId=${c.id}" target="_blank" rel="noopener" aria-label="View hotels in ${c.name}">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M4 21V10l8-5 8 5v11" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 21v-6h6v6" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 12h.01M15 12h.01M12 8h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-            </a>`
-            }
+            </a>
             <button class="action-btn" data-history-btn data-row-id="${c.id}" aria-label="View edit history for ${c.name}">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 109-9 9 9 0 00-7 3.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3 3.5V8h4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 7.5V12l3.2 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </button>
@@ -397,6 +477,9 @@
     });
 
     refreshValueOverflowState();
+    // Keeps the count pill and chips honest after any bulk state change
+    // (Search, Reset, the post-add filter set), not just after a field edit.
+    updateFiltersSummary();
   }
 
   // Re-measures every .truncatable cell after each render() — only cells
@@ -414,21 +497,30 @@
     refreshValueOverflowState();
   });
 
-  const runSearch = debounce(() => {
+  // ---------- Filters: pending until Search ----------
+  // Same model as hotel-system.html / hotel-supplier.html: every field below
+  // only updates `state` plus the Filters count pill and the collapsed
+  // summary chips. The table itself re-queries on Search, Enter in the
+  // search box, or Reset — never on a keystroke or a dropdown change — so a
+  // multi-field filter set is applied in one go instead of the list
+  // reshuffling under the user between picks.
+
+  citySearch.addEventListener("input", () => {
     state.query = citySearch.value;
-    state.page = 1;
-    render();
+    updateFiltersSummary();
   });
-  citySearch.addEventListener("input", runSearch);
 
   countryFilterSelect.addEventListener("change", () => {
     state.country = countryFilterSelect.value;
-    state.page = 1;
     state.cityState = "";
 
     const countryMeta = SYSTEM_COUNTRIES.find((c) => c.name === state.country);
     const states = countryMeta ? getStatesForCountryCode(countryMeta.code) : [];
 
+    // The State select is rebuilt immediately even though nothing re-queries
+    // yet — it's a dependent control, not a result: leaving stale options
+    // from the previous country would let the user pick a state that country
+    // doesn't have.
     if (states.length) {
       stateFilterSelect.disabled = false;
       stateFilterSelect.innerHTML =
@@ -437,157 +529,493 @@
       stateFilterSelect.disabled = true;
       stateFilterSelect.innerHTML = `<option value="">Select State</option>`;
     }
-    render();
+    updateFiltersSummary();
   });
 
   stateFilterSelect.addEventListener("change", () => {
     state.cityState = stateFilterSelect.value;
-    state.page = 1;
-    render();
+    updateFiltersSummary();
   });
 
   statusFilterSelect.addEventListener("change", () => {
     state.status = statusFilterSelect.value;
-    state.page = 1;
-    render();
+    updateFiltersSummary();
   });
 
-  const customOnlyToggle = document.getElementById("cityCustomOnlyToggle");
-  customOnlyToggle.addEventListener("change", () => {
-    state.customOnly = customOnlyToggle.checked;
-    state.page = 1;
-    render();
+  customFilterToggle.addEventListener("change", () => {
+    state.customOnly = customFilterToggle.checked;
+    updateFiltersSummary();
   });
 
+  const cityFiltersToggleBtn = document.getElementById("cityFiltersToggleBtn");
+  const cityFiltersPanel = document.getElementById("cityFiltersPanel");
+  const cityFiltersSummary = document.getElementById("cityFiltersSummary");
+  const cityActiveFilterCount = document.getElementById("cityActiveFilterCount");
+
+  // Human-readable label + value for every pending filter, keyed the same
+  // way getFiltered() reads them — drives both the count pill and the chips.
+  function activeFilterEntries() {
+    const entries = [];
+    if (state.query.trim()) entries.push({ key: "query", label: "Name", value: state.query.trim() });
+    if (state.country) entries.push({ key: "country", label: "Country", value: state.country });
+    if (state.cityState) entries.push({ key: "cityState", label: "State", value: state.cityState });
+    if (state.status !== "all") entries.push({ key: "status", label: "Status", value: state.status === "active" ? "Active" : "Inactive" });
+    if (state.customOnly) entries.push({ key: "customOnly", label: "Custom cities only", value: "Yes" });
+    return entries;
+  }
+
+  // Clearing a chip only updates the pending state, like every other change
+  // here — the table still waits for Search. Select-backed filters reuse
+  // their own change handler by dispatching a real "change" rather than
+  // duplicating the cascade logic.
+  const FILTER_CLEARERS = {
+    query: () => {
+      state.query = "";
+      citySearch.value = "";
+      updateFiltersSummary();
+    },
+    country: () => {
+      countryFilterSelect.value = "";
+      countryFilterSelect.dispatchEvent(new Event("change"));
+    },
+    cityState: () => {
+      stateFilterSelect.value = "";
+      stateFilterSelect.dispatchEvent(new Event("change"));
+    },
+    status: () => {
+      statusFilterSelect.value = "all";
+      statusFilterSelect.dispatchEvent(new Event("change"));
+    },
+    customOnly: () => {
+      customFilterToggle.checked = false;
+      customFilterToggle.dispatchEvent(new Event("change"));
+    },
+  };
+
+  cityFiltersSummary.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-clear-filter]");
+    if (btn) FILTER_CLEARERS[btn.dataset.clearFilter]?.();
+  });
+
+  function updateFiltersSummary() {
+    const entries = activeFilterEntries();
+
+    cityActiveFilterCount.textContent = String(entries.length);
+    cityActiveFilterCount.style.display = entries.length ? "" : "none";
+
+    const isOpen = cityFiltersPanel.style.display !== "none";
+    if (isOpen || !entries.length) {
+      cityFiltersSummary.style.display = "none";
+      cityFiltersSummary.innerHTML = "";
+    } else {
+      cityFiltersSummary.style.display = "";
+      cityFiltersSummary.innerHTML = entries
+        .map(
+          (e) =>
+            `<span class="filter-chip">${e.label}: ${e.value}<button type="button" data-clear-filter="${e.key}" aria-label="Clear ${e.label} filter">×</button></span>`
+        )
+        .join("");
+    }
+  }
+
+  function setFiltersPanelOpen(open) {
+    cityFiltersPanel.style.display = open ? "grid" : "none";
+    cityFiltersToggleBtn.classList.toggle("open", open);
+    cityFiltersToggleBtn.setAttribute("aria-expanded", String(open));
+    updateFiltersSummary();
+  }
+
+  cityFiltersToggleBtn.addEventListener("click", () => {
+    setFiltersPanelOpen(cityFiltersPanel.style.display === "none");
+  });
+
+  function runSearchNow() {
+    state.page = 1;
+    setFiltersPanelOpen(false);
+    render();
+  }
+
+  document.getElementById("citySearchBtn").addEventListener("click", runSearchNow);
+  citySearch.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") runSearchNow();
+  });
+
+  // Reset is the one control that re-queries without waiting for Search —
+  // "start over" showing the previous filter's results would be a lie.
   document.getElementById("resetCityFilterBtn").addEventListener("click", () => {
     citySearch.value = "";
     countryFilterSelect.value = "";
     stateFilterSelect.disabled = true;
     stateFilterSelect.innerHTML = `<option value="">Select State</option>`;
     statusFilterSelect.value = "all";
-    customOnlyToggle.checked = false;
+    customFilterToggle.checked = false;
     state = { ...state, page: 1, query: "", country: "", cityState: "", status: "all", customOnly: false };
     render();
   });
 
-  // ---------- Summary modal: paginated tables (Mapped Hotels, Merged
-  // System Cities, each supplier's Mapped Cities) ----------
+  // ---------- Mapping Summary popup ----------
+  // A wide centred popup rather than the usual drawer: it holds a tab strip
+  // over every supplier plus two paginated tables, and the two of them
+  // never fitted the ~360px drawer this replaced. Everything in it is read
+  // from live data on open — nothing is stored, and nothing here writes.
 
-  const SUMMARY_PAGE_SIZE = 50;
+  // Numbered pages with the project's own footer bar (renderPagination in
+  // js/app.js), same as every list page here — not the scroll-to-load-more
+  // convention the mapping screens' checklists use. Those are working
+  // surfaces where a row is picked out of a stream; this is a table being
+  // read, and the page/rows-per-page controls are what the rest of the
+  // project reads tables with.
+  const SUMMARY_PAGE_SIZE = 10;
 
-  // <tr>-based sentinel/end-caption (see .summary-list-scroll-status in
-  // css/styles.css) — these lists are <tr>s inside a <table><tbody>, not
-  // flat <div> rows inside a .merge-list like the mapping pages' own
-  // pagination, so the trailing row has to be a real <tr> for
-  // insertAdjacentHTML("beforebegin", …) to insert new rows at the right
-  // level.
-  function summaryScrollStatusRowHtml(id) {
-    return `<tr class="summary-list-scroll-status" id="${id}"><td colspan="2"><span class="scroll-status-spinner"></span><span class="scroll-status-label"></span></td></tr>`;
-  }
+  // Which page of the current tab's table is showing. Reset whenever the
+  // tab or the city changes — a page number means nothing once the rows
+  // underneath it are a different list.
+  let summaryTableState = { page: 1, pageSize: SUMMARY_PAGE_SIZE };
 
-  function summaryEndOfListRowHtml() {
-    return `<tr class="summary-list-scroll-status summary-list-scroll-status--end"><td colspan="2">You've reached the end of the list</td></tr>`;
-  }
+  // Renders one page of `rows` plus the footer bar into `host`. Called
+  // again by the footer's own handlers, so the table and its controls stay
+  // in step without the caller having to re-render anything.
+  function renderSummaryTable(host, rows, columns, rowHtml) {
+    const totalPages = Math.max(1, Math.ceil(rows.length / summaryTableState.pageSize));
+    summaryTableState.page = Math.min(summaryTableState.page, totalPages);
+    const startIdx = (summaryTableState.page - 1) * summaryTableState.pageSize;
+    const pageRows = rows.slice(startIdx, startIdx + summaryTableState.pageSize);
 
-  // Shell only — an empty <tbody> inside a bounded, independently-
-  // scrollable box (.summary-list-scroll, the IntersectionObserver root
-  // renderPaginatedSummaryTable() below uses). Rows are populated
-  // afterward via renderPaginatedSummaryTable(), once this shell actually
-  // exists in the DOM (summaryList.innerHTML as a whole is assigned in one
-  // shot, so nothing here can render synchronously before that happens).
-  function summaryListTableShellHtml(scrollRootId, tbodyId, columnLabel) {
-    return `
-      <div class="summary-list-scroll" id="${scrollRootId}">
-        <table class="summary-list-table">
+    // The project's own .data-table, same as every list page — the popup's
+    // tables are read the same way, so they look the same way. The only
+    // addition is the leading "#" column.
+    host.innerHTML = `
+      <div class="table-wrap">
+        <table class="data-table">
           <thead>
             <tr>
               <th class="summary-list-num">#</th>
-              <th>${columnLabel}</th>
+              ${columns.map((label) => `<th>${label}</th>`).join("")}
             </tr>
           </thead>
-          <tbody id="${tbodyId}"></tbody>
+          <tbody>${pageRows.map((item, i) => rowHtml(item, startIdx + i)).join("")}</tbody>
         </table>
       </div>`;
+
+    const bar = document.getElementById("summaryPaginationBar");
+    renderPagination(bar, {
+      total: rows.length,
+      page: summaryTableState.page,
+      pageSize: summaryTableState.pageSize,
+      onChange: ({ page, pageSize }) => {
+        summaryTableState = { page, pageSize };
+        renderSummaryTable(host, rows, columns, rowHtml);
+      },
+    });
+
+    // renderPagination() hardcodes id="pageSizeSelect", and this page
+    // already has one in its own footer — two elements sharing an id means
+    // the popup's "Rows" label would focus the select behind the modal.
+    // Re-key this copy instead of forking the shared helper.
+    const pageSizeSelect = bar.querySelector(".page-size-select");
+    pageSizeSelect.id = "summaryPageSizeSelect";
+    bar.querySelector('label[for="pageSizeSelect"]').setAttribute("for", "summaryPageSizeSelect");
   }
 
-  // Shared row shape for every summary list on this page (Mapped Hotels,
-  // Merged System Cities, each supplier's Mapped Cities) — a bold
-  // name/label on top, a muted meta line underneath, one bordered row per
-  // entry (same look .summary-list-table has always had).
-  function summaryListRowHtml(item, i) {
+  // Active/Inactive as a colored left edge on the row rather than a Status
+  // column — same green/red bar the mapping screens' candidate rows use,
+  // and it buys back a whole column of width for the values that actually
+  // differ from row to row.
+  function summaryRowClass(active) {
+    return active ? "summary-list-row--active" : "summary-list-row--inactive";
+  }
+
+  const SUMMARY_HOTEL_COLUMNS = ["Hotel", "ID", "Address", "Relation Type"];
+
+  // `entry` is { hotel, primary } — the relation belongs to the pair, not to
+  // the hotel, so the same hotel reads Primary in its own city's summary and
+  // Secondary in every other city it is mapped to.
+  function summaryHotelRowHtml({ hotel, primary }, i) {
+    // Street address plus the resolved city/state/country: the street
+    // address alone (hotel.address) reads as incomplete, and
+    // resolveHotelLocation() never touches the street address itself.
+    const loc = resolveHotelLocation(hotel);
+    const countryLabel = getSystemCountryName(loc.country.code) || loc.country.name;
     return `
-      <tr>
+      <tr class="${summaryRowClass(hotel.active)}">
         <td class="summary-list-num">${i + 1}</td>
-        <td>
-          <div class="summary-list-name">${item.name}</div>
-          <div class="summary-list-meta">${item.meta}</div>
-        </td>
+        <td><div class="summary-list-name">${hotel.name}</div></td>
+        <td style="white-space:nowrap"><span class="code-badge">${getSystemHotelDisplayId(hotel.id)}</span></td>
+        <td>${[hotel.address, loc.city, loc.state, countryLabel].filter(Boolean).join(", ")}</td>
+        <td><span class="pill ${primary ? "info" : "neutral"}">${primary ? "Primary" : "Secondary"}</span></td>
       </tr>`;
   }
 
-  // Renders `rows` into the <tbody> at `tbodyId` (already an empty shell
-  // inside a .summary-list-scroll wrapper with id `scrollRootId`) as
-  // bounded pages of 50, scroll-triggered off that wrapper — same
-  // bounded-pages/spinner/end-caption convention already used on
-  // hotel-mapping.html/city-mapping.html/add-city.html, but simplified
-  // since every summary list here is read-only (no checkbox/selection
-  // state to carry across pages, so each call is fully self-contained —
-  // unlike those pages, nothing here needs to survive a re-render).
-  function renderPaginatedSummaryTable(scrollRootId, tbodyId, rows, rowHtml) {
-    const scrollRoot = document.getElementById(scrollRootId);
-    const tbody = document.getElementById(tbodyId);
-    if (!scrollRoot || !tbody) return;
+  const SUMMARY_CITY_COLUMNS = ["City", "State", "Country", "Supplier City ID"];
 
-    let visibleCount = SUMMARY_PAGE_SIZE;
-    let observer = null;
-    let isLoading = false;
-    const sentinelId = `${tbodyId}-scroll-status`;
+  // Bound to a supplier key so the Country cell can show that supplier's own
+  // name for the country (and its own identifier for it) rather than the
+  // system's — those are the values that identify it in the supplier's feed.
+  function summaryCityRowHtml(supplierKey) {
+    return (city, i) => `
+      <tr class="${summaryRowClass(city.active)}">
+        <td class="summary-list-num">${i + 1}</td>
+        <td><div class="summary-list-name">${city.name}</div></td>
+        <td>${city.state || '<span style="color:var(--text-muted)">—</span>'}</td>
+        <td>
+          <div>${getSupplierCountryName(supplierKey, city.countryCode)}</div>
+          <div class="summary-list-meta">${getSupplierCountrySupplierId(supplierKey, city.countryCode)}</div>
+        </td>
+        <td style="white-space:nowrap"><span class="code-badge">${city.id}</span></td>
+      </tr>`;
+  }
 
-    function loadMore(sentinel) {
-      if (isLoading) return;
-      isLoading = true;
-      sentinel.classList.add("is-loading");
-      sentinel.querySelector(".scroll-status-label").textContent = "Loading more…";
-      setTimeout(() => {
-        isLoading = false;
-        if (!sentinel.isConnected) return;
+  // Every list in this popup is a query in a real deployment — a city's
+  // hotels, or one supplier's cities mapped to it — so each one renders a
+  // spinner first rather than appearing instantly. The mock holds all of it
+  // in memory, so without a deliberate pause the loading state would flash
+  // for less than a frame and the screen would teach the wrong expectation.
+  // Same reasoning (and same ~450ms) as the mapping pages' scroll loader.
+  const SUMMARY_LOAD_MS = 450;
+  let summaryLoadToken = 0;
 
-        const startIdx = visibleCount;
-        const nextRows = rows.slice(startIdx, startIdx + SUMMARY_PAGE_SIZE);
-        visibleCount += SUMMARY_PAGE_SIZE;
-        sentinel.insertAdjacentHTML("beforebegin", nextRows.map((item, i) => rowHtml(item, startIdx + i)).join(""));
+  function withSummaryLoading(host, renderRows) {
+    if (!host) return;
+    host.innerHTML = `<div class="summary-loading"><span class="scroll-status-spinner"></span><span>Loading…</span></div>`;
+    // Token guard: clicking through tabs faster than the delay must land
+    // the newest request's rows, never an earlier one arriving late.
+    const token = ++summaryLoadToken;
+    setTimeout(() => {
+      if (token !== summaryLoadToken || !host.isConnected) return;
+      renderRows();
+    }, SUMMARY_LOAD_MS);
+  }
 
-        if (visibleCount < rows.length) {
-          sentinel.classList.remove("is-loading");
-          sentinel.querySelector(".scroll-status-label").textContent = "";
-        } else {
-          sentinel.outerHTML = summaryEndOfListRowHtml();
-          if (observer) {
-            observer.disconnect();
-            observer = null;
-          }
-        }
-      }, 450);
-    }
+  // ---------- Mapped Hotels ----------
 
-    function observeSentinel() {
-      const sentinel = document.getElementById(sentinelId);
-      if (!sentinel) return;
-      observer = new IntersectionObserver(
-        (entries) => {
-          if (entries[0].isIntersecting) loadMore(sentinel);
-        },
-        { root: scrollRoot, rootMargin: "0px 0px 60px 0px", threshold: 0 }
+  // One combined list, no Directly Added / Additionally Mapped split — a
+  // hotel could technically land in both (its own home city already is this
+  // city, but it was also separately mapped), so dedupe by id rather than
+  // risk listing it twice.
+  // Each hotel is returned with the relation it has to THIS city, since
+  // that is what the list is being read for: primary if this is the
+  // hotel's own city, secondary if it was attached on top of one. The two
+  // sets are walked direct-first so a hotel that somehow appears in both
+  // (redundant data — its own city is also listed among its mapped ones)
+  // is kept once, as primary: that's the stronger claim of the two.
+  function cityHotels(cityId) {
+    const { direct, mapped } = getCityHotelSummary(cityId);
+    const seen = new Set();
+    return [
+      ...direct.map((hotel) => ({ hotel, primary: true })),
+      ...mapped.map((hotel) => ({ hotel, primary: false })),
+    ].filter(({ hotel }) => {
+      if (seen.has(hotel.id)) return false;
+      seen.add(hotel.id);
+      return true;
+    });
+  }
+
+  // ---------- The tab row ----------
+  // Hotels and every supplier are tabs in one row over one panel: they are
+  // the same question ("what is mapped to this city") asked of different
+  // sources, so stacking them as separate sections made the popup taller
+  // than it needed to be and pushed the suppliers below the fold. Hotels is
+  // pinned outside the scrolling strip — it is not one of the suppliers,
+  // and it must stay reachable however far the strip is scrolled.
+
+  const summaryHotelsTab = document.querySelector('[data-summary-tab="hotels"]');
+  const summarySupplierTabs = document.getElementById("summarySupplierTabs");
+  const summaryPanelBody = document.getElementById("summaryPanelBody");
+  const summaryPaginationBar = document.getElementById("summaryPaginationBar");
+  const summarySupplierEmpty = document.getElementById("summarySupplierEmpty");
+  const summaryTabsSearch = document.getElementById("summaryTabsSearch");
+  const summaryTabsPrev = document.getElementById("summaryTabsPrev");
+  const summaryTabsNext = document.getElementById("summaryTabsNext");
+
+  // Which city's Summary is open. Nothing else is held: the strip is the
+  // supplier list itself, which the app already knows, and a tab's rows are
+  // fetched when that tab is opened.
+  let summaryCityId = null;
+
+  // The strip is built once, from the supplier list — not from anything
+  // read per city. Every supplier here is an independent source with its
+  // own storage, so "which of them has rows for this city" cannot be
+  // answered without asking each one in turn; the strip therefore carries
+  // no counts and marks nothing as empty, and each tab is a question the
+  // user asks rather than one answered up front. See the dev notes.
+  summarySupplierTabs.innerHTML = Object.keys(SUPPLIER_LABELS)
+    .map(
+      (key) =>
+        `<button type="button" class="supplier-tab" role="tab" aria-selected="false" data-summary-supplier="${key}" title="${SUPPLIER_LABELS[key]}"><span class="supplier-tab-label">${SUPPLIER_LABELS[key]}</span></button>`
+    )
+    .join("");
+
+  // `tabKey` is "hotels" or a supplier key — one panel serves both, so
+  // switching between a city's hotels and one of its suppliers is the same
+  // gesture and only ever leaves one list on screen.
+  function showSummaryTab(tabKey) {
+    const isHotels = tabKey === "hotels";
+    const supplierLabel = isHotels ? null : SUPPLIER_LABELS[tabKey];
+    if (!isHotels && !supplierLabel) return;
+
+    summaryHotelsTab.classList.toggle("active", isHotels);
+    summaryHotelsTab.setAttribute("aria-selected", String(isHotels));
+    summarySupplierTabs.querySelectorAll(".supplier-tab").forEach((tab) => {
+      const active = tab.dataset.summarySupplier === tabKey;
+      tab.classList.toggle("active", active);
+      tab.setAttribute("aria-selected", String(active));
+      // Selecting a supplier scrolled out of view has to bring its tab back
+      // into view, or the strip would show nothing selected.
+      if (active) tab.scrollIntoView({ block: "nearest", inline: "nearest" });
+    });
+    // The active tab is never filtered out, so re-running the filter after a
+    // selection is what un-hides it if the current query doesn't match it.
+    applySummaryTabFilter();
+
+    // Back to page 1: a page number carried over from the previous tab
+    // would point into a list that no longer exists.
+    summaryTableState = { page: 1, pageSize: summaryTableState.pageSize };
+
+    // The footer belongs to the table being loaded, so it goes blank until
+    // that table is on screen — leaving the previous tab's page numbers
+    // under a spinner would be describing a list that isn't there.
+    summaryPaginationBar.innerHTML = "";
+
+    // The tab's own lookup, run now rather than on open: one supplier, or
+    // the hotels. Whether it comes back empty is only knowable by asking.
+    const rows = isHotels ? cityHotels(summaryCityId) : supplierCitiesForCity(tabKey, summaryCityId);
+
+    withSummaryLoading(summaryPanelBody, () => {
+      if (!rows.length) {
+        summaryPanelBody.innerHTML = isHotels
+          ? `<div class="empty-state">No hotels are mapped to this city</div>`
+          : `<div class="empty-state">No ${supplierLabel} cities mapped to this city</div>`;
+        return;
+      }
+      renderSummaryTable(
+        summaryPanelBody,
+        rows,
+        isHotels ? SUMMARY_HOTEL_COLUMNS : SUMMARY_CITY_COLUMNS,
+        isHotels ? summaryHotelRowHtml : summaryCityRowHtml(tabKey)
       );
-      observer.observe(sentinel);
-    }
+    });
+  }
 
-    const visibleRows = rows.slice(0, visibleCount);
-    tbody.innerHTML =
-      visibleRows.map((item, i) => rowHtml(item, i)).join("") +
-      (rows.length > visibleRows.length ? summaryScrollStatusRowHtml(sentinelId) : "");
+  document.querySelector("#summaryModal .summary-tabs-bar").addEventListener("click", (e) => {
+    const tab = e.target.closest("[data-summary-tab], [data-summary-supplier]");
+    if (!tab || tab.classList.contains("active")) return;
+    showSummaryTab(tab.dataset.summaryTab || tab.dataset.summarySupplier);
+  });
 
-    if (visibleRows.length && rows.length > visibleRows.length) observeSentinel();
+  // Narrows the tabs by name, never hides the supplier currently being
+  // shown, and still says "no match" when the query genuinely matches
+  // nothing — same behaviour as city-mapping.html's own strip.
+  function applySummaryTabFilter() {
+    const query = summaryTabsSearch.value.trim().toLowerCase();
+    let matches = 0;
+    summarySupplierTabs.querySelectorAll(".supplier-tab").forEach((tab) => {
+      const match = !query || tab.textContent.toLowerCase().includes(query);
+      if (match) matches++;
+      tab.hidden = !match && !tab.classList.contains("active");
+    });
+    summarySupplierEmpty.hidden = matches > 0;
+    syncSummaryTabsOverflow();
+  }
+
+  // The arrows only earn their space once the tabs actually overflow, which
+  // depends on how many suppliers exist and how wide the popup is — so it's
+  // measured, not assumed, and re-measured on scroll, on resize and on
+  // every open.
+  function syncSummaryTabsOverflow() {
+    const overflowing = summarySupplierTabs.scrollWidth > summarySupplierTabs.clientWidth + 1;
+    summaryTabsPrev.hidden = !overflowing;
+    summaryTabsNext.hidden = !overflowing;
+    if (!overflowing) return;
+
+    // Whether an arrow still has somewhere to go is decided by where the
+    // first/last tab actually sits, not by scrollLeft vs
+    // scrollWidth - clientWidth: on a fractional device pixel ratio (a
+    // browser at 125% zoom, say) that arithmetic never reaches its own
+    // maximum, leaving the Next arrow enabled at the end of the strip.
+    const visibleTabs = [...summarySupplierTabs.querySelectorAll(".supplier-tab")].filter((tab) => !tab.hidden);
+    const stripBox = summarySupplierTabs.getBoundingClientRect();
+    const firstBox = visibleTabs[0] && visibleTabs[0].getBoundingClientRect();
+    const lastBox = visibleTabs[visibleTabs.length - 1] && visibleTabs[visibleTabs.length - 1].getBoundingClientRect();
+    summaryTabsPrev.disabled = !firstBox || firstBox.left >= stripBox.left - 2;
+    summaryTabsNext.disabled = !lastBox || lastBox.right <= stripBox.right + 2;
+  }
+
+  // Scrolls by most of a "page" rather than a fixed tab count, so the jump
+  // matches what's actually visible at this width.
+  function scrollSummaryTabs(direction) {
+    summarySupplierTabs.scrollBy({ left: direction * Math.max(summarySupplierTabs.clientWidth - 80, 120), behavior: "smooth" });
+  }
+
+  // The table's own sticky <thead> has to stop below the sticky tab row
+  // rather than under it, so the row's real height is published as a custom
+  // property for the CSS to offset against. Measured, not hardcoded — the
+  // row is as tall as whichever of the tabs and the search box is taller.
+  function syncSummaryTabsHeight() {
+    const bar = document.querySelector("#summaryModal .summary-tabs-bar");
+    const body = document.querySelector("#summaryModal .modal-body");
+    if (bar && body) body.style.setProperty("--summary-tabs-h", `${Math.round(bar.getBoundingClientRect().height)}px`);
+  }
+
+  summaryTabsPrev.addEventListener("click", () => scrollSummaryTabs(-1));
+  summaryTabsNext.addEventListener("click", () => scrollSummaryTabs(1));
+  summarySupplierTabs.addEventListener("scroll", syncSummaryTabsOverflow);
+  window.addEventListener(
+    "resize",
+    debounce(() => {
+      syncSummaryTabsOverflow();
+      syncSummaryTabsHeight();
+    }, 150)
+  );
+
+  summaryTabsSearch.addEventListener("input", () => {
+    summarySupplierTabs.scrollLeft = 0;
+    applySummaryTabFilter();
+  });
+
+  // ---------- Opening it ----------
+
+  function openSummary(record) {
+    // Any in-flight list belongs to the city last opened — invalidate it, or
+    // its rows would land in this city's panel.
+    summaryLoadToken++;
+    summaryCityId = record.id;
+
+    document.getElementById("summaryCityName").textContent = `— ${record.name} (ID: ${getSystemCityDisplayId(record.id)})`;
+    // A fresh search each time: a filter left over from the last city would
+    // silently hide suppliers in this one.
+    summaryTabsSearch.value = "";
+
+    // Nothing is selected on open and nothing is read from the data: no
+    // tab carries a count, so opening this popup asks the sources nothing
+    // at all. The first lookup happens when the user picks the tab they
+    // came here for — which they already know, since they arrived with a
+    // supplier (or the hotels) in mind. Same "no tab selected until you
+    // pick one" model as city-mapping.html's own strip.
+    summaryHotelsTab.classList.remove("active");
+    summaryHotelsTab.setAttribute("aria-selected", "false");
+    summarySupplierTabs.querySelectorAll(".supplier-tab").forEach((tab) => {
+      tab.classList.remove("active");
+      tab.setAttribute("aria-selected", "false");
+      tab.hidden = false;
+    });
+    summarySupplierTabs.scrollLeft = 0;
+    summarySupplierEmpty.hidden = true;
+    summaryPaginationBar.innerHTML = "";
+    summaryPanelBody.innerHTML = `<div class="empty-state">Select Hotels or a supplier above to see what is mapped to this city</div>`;
+
+    openModal(document.getElementById("summaryModal"));
+    // Each open starts at the top of the panel, however far the previous
+    // city's list had been scrolled.
+    document.querySelector("#summaryModal .modal-body").scrollTop = 0;
+    // Re-measured once the popup is actually laid out at its own width —
+    // measuring the strip while the box is still collapsed would decide
+    // "no overflow" for a width it never had, and the tab row would report
+    // a height the sticky table header can't offset against.
+    requestAnimationFrame(() => {
+      syncSummaryTabsOverflow();
+      syncSummaryTabsHeight();
+    });
   }
 
   document.addEventListener("click", (e) => {
@@ -595,14 +1023,7 @@
     if (editBtn) {
       const record = SYSTEM_CITIES.find((c) => String(c.id) === editBtn.dataset.rowId);
       if (!record) return;
-
-      document.getElementById("editCityId").value = getSystemCityDisplayId(record.id);
-      document.getElementById("editCityCountry").value = `${getSystemCountryName(record.country.code) || record.country.name} (${record.country.code})`;
-      document.getElementById("editCityState").value = record.state || "—";
-      document.getElementById("editCityName").value = record.name;
-      const modal = document.getElementById("editCityModal");
-      modal.dataset.activeRow = record.id;
-      openModal(modal);
+      openCityForm(record);
       return;
     }
 
@@ -620,144 +1041,7 @@
     if (summaryBtn) {
       const record = SYSTEM_CITIES.find((c) => String(c.id) === summaryBtn.dataset.rowId);
       if (!record) return;
-
-      document.getElementById("summaryCityName").textContent = `— ${record.name} (ID: ${getSystemCityDisplayId(record.id)})`;
-      const summaryList = document.getElementById("summaryList");
-
-      // A New City has no supplier-city mapping — its Summary instead shows
-      // the hotels attached to it, either directly (Add Hotel's own city
-      // field) or via the separate Map feature (hotel-mapping.html).
-      if (record.cityType === "normal") {
-        const { direct, mapped } = getNewCityHotelSummary(record.id);
-        // Street address + resolved city/state/country in one line — the
-        // street address alone (hotel.address) would read as incomplete,
-        // and resolveHotelLocation() (used project-wide for the city/state/
-        // country part) never touches the street address itself.
-        const hotelAddressLine = (h) => {
-          const loc = resolveHotelLocation(h);
-          const countryLabel = getSystemCountryName(loc.country.code) || loc.country.name;
-          return [h.address, loc.city, loc.state, countryLabel].filter(Boolean).join(", ");
-        };
-        // One combined list, no Directly Added / Additionally Mapped split —
-        // a hotel could technically land in both (its own home city already
-        // is this city, but it was also separately checked on the Map
-        // screen), so dedupe by id rather than risk listing it twice.
-        const seenHotelIds = new Set();
-        const hotels = [...direct, ...mapped].filter((h) => {
-          if (seenHotelIds.has(h.id)) return false;
-          seenHotelIds.add(h.id);
-          return true;
-        });
-        summaryList.innerHTML = `
-      <div class="history-entry">
-        <div class="history-entry-label">Mapped Hotels</div>
-        <div class="history-card">
-          <table>
-            <tbody>
-              <tr>
-                <td class="history-row-label">Status</td>
-                <td class="history-row-sep">:</td>
-                <td class="history-row-value">${
-                  hotels.length
-                    ? `<span class="text-mapped">Mapped (${hotels.length})</span>`
-                    : '<span class="text-not-mapped">Not mapped</span>'
-                }</td>
-              </tr>
-            </tbody>
-          </table>
-          ${hotels.length ? summaryListTableShellHtml("summaryHotelsScroll", "summaryHotelsBody", "Hotel") : ""}
-        </div>
-      </div>`;
-        if (hotels.length) {
-          renderPaginatedSummaryTable(
-            "summaryHotelsScroll",
-            "summaryHotelsBody",
-            hotels.map((h) => ({ name: h.name, meta: `ID: ${getSystemHotelDisplayId(h.id)} — ${hotelAddressLine(h)}` })),
-            summaryListRowHtml
-          );
-        }
-        openModal(document.getElementById("summaryModal"));
-        return;
-      }
-
-      const rows =
-        record.cityType === "merged" ? getCityMappingSummary(record.mergedFrom) : getCityMappingSummary(record.id);
-
-      const mergedCitiesCard =
-        record.cityType === "merged"
-          ? `
-      <div class="history-entry">
-        <div class="history-entry-label">Merged System Cities</div>
-        <div class="history-card">
-          <table>
-            <tbody>
-              <tr>
-                <td class="history-row-label">Cities</td>
-                <td class="history-row-sep">:</td>
-                <td class="history-row-value"><span class="text-mapped">${record.mergedFrom.length}</span></td>
-              </tr>
-            </tbody>
-          </table>
-          ${summaryListTableShellHtml("summaryMergedCitiesScroll", "summaryMergedCitiesBody", "City")}
-        </div>
-      </div>`
-          : "";
-      summaryList.innerHTML =
-        mergedCitiesCard +
-        rows
-          .map(
-            (r) => `
-      <div class="history-entry">
-        <div class="history-entry-label">${r.supplierLabel}</div>
-        <div class="history-card">
-          <table>
-            <tbody>
-              <tr>
-                <td class="history-row-label">Status</td>
-                <td class="history-row-sep">:</td>
-                <td class="history-row-value">${
-                  r.mapped
-                    ? `<span class="text-mapped">Mapped (${r.cities.length})</span>`
-                    : '<span class="text-not-mapped">Not mapped</span>'
-                }</td>
-              </tr>
-            </tbody>
-          </table>
-          ${r.mapped ? summaryListTableShellHtml(`summaryCitiesScroll-${r.supplierKey}`, `summaryCitiesBody-${r.supplierKey}`, "City") : ""}
-        </div>
-      </div>`
-          )
-          .join("");
-
-      // Hydrate every shell now that it actually exists in the DOM — the
-      // merged-from cities list (merged only) and one call per supplier
-      // that has anything mapped.
-      if (record.cityType === "merged") {
-        const mergedCityItems = record.mergedFrom
-          .map((id) => SYSTEM_CITIES.find((c) => c.id === id))
-          .filter(Boolean)
-          .map((c) => ({
-            name: c.name,
-            meta: [c.state, getSystemCountryName(c.country.code) || c.country.name, `ID: ${getSystemCityDisplayId(c.id)}`]
-              .filter(Boolean)
-              .join(", "),
-          }));
-        renderPaginatedSummaryTable("summaryMergedCitiesScroll", "summaryMergedCitiesBody", mergedCityItems, summaryListRowHtml);
-      }
-      rows.forEach((r) => {
-        if (!r.mapped) return;
-        renderPaginatedSummaryTable(
-          `summaryCitiesScroll-${r.supplierKey}`,
-          `summaryCitiesBody-${r.supplierKey}`,
-          r.cities.map((city) => ({
-            name: city.name,
-            meta: [city.state, city.countryCode, `ID: ${city.id}`].filter(Boolean).join(", "),
-          })),
-          summaryListRowHtml
-        );
-      });
-
-      openModal(document.getElementById("summaryModal"));
+      openSummary(record);
       return;
     }
 
@@ -781,32 +1065,204 @@
     }
   });
 
-  document.getElementById("saveCityBtn").addEventListener("click", () => {
-    const modal = document.getElementById("editCityModal");
-    const rowId = modal.dataset.activeRow;
-    const newName = document.getElementById("editCityName").value.trim();
-    if (!newName) {
+  // ---------- Add / Edit City drawer ----------
+  // One drawer serves both, same dual-mode pattern as hotel-system.html's
+  // openHotelForm(): pass a record to edit it, pass nothing to add. A city's
+  // country is permanent once created, so Country is a live select in add
+  // mode and disabled in edit mode. State follows the same rule with one
+  // exception — see wasAddedInApp() below.
+
+  const cityFormModal = document.getElementById("cityFormModal");
+  const cityFormTitle = document.getElementById("cityFormTitle");
+  const cityFormIdGroup = document.getElementById("cityFormIdGroup");
+  const cityFormId = document.getElementById("cityFormId");
+  const cityFormCountry = document.getElementById("cityFormCountry");
+  const cityFormState = document.getElementById("cityFormState");
+  const cityFormName = document.getElementById("cityFormName");
+  const saveCityBtn = document.getElementById("saveCityBtn");
+
+  cityFormCountry.insertAdjacentHTML(
+    "beforeend",
+    SYSTEM_COUNTRIES.map((c) => `<option value="${c.name}">${c.name} (${c.code})</option>`).join("")
+  );
+
+  // Same cascade the other forms in this project use — State only becomes
+  // selectable for countries that actually have states, and is never
+  // required.
+  function populateCityFormStates(countryName, selectedState) {
+    const meta = SYSTEM_COUNTRIES.find((c) => c.name === countryName);
+    const states = meta ? getStatesForCountryCode(meta.code) : [];
+    if (states.length) {
+      cityFormState.disabled = false;
+      cityFormState.innerHTML =
+        `<option value="">Select state</option>` + states.map((s) => `<option value="${s}">${s}</option>`).join("");
+      if (selectedState) cityFormState.value = selectedState;
+    } else {
+      cityFormState.disabled = true;
+      cityFormState.innerHTML = `<option value="">${meta ? "No state required" : "Select country first"}</option>`;
+    }
+  }
+
+  cityFormCountry.addEventListener("change", () => populateCityFormStates(cityFormCountry.value));
+
+  // Was this city created through the Add City drawer, rather than shipped in
+  // the seed data? Read off the history instead of a stored flag: a city
+  // created here always logs a Create entry as its first history row, and
+  // nothing else ever writes one. That keeps this from becoming a new stored
+  // city status (the New/Merged/Custom system was deliberately removed) and
+  // means cities added before this rule existed are covered too, since their
+  // Create entry is already sitting in their saved history.
+  function wasAddedInApp(record) {
+    return Boolean(record) && record.history.some((h) => h.operation === "Create");
+  }
+
+  function openCityForm(record) {
+    const isEdit = Boolean(record);
+    cityFormTitle.textContent = isEdit ? "Edit City" : "Add City";
+    saveCityBtn.textContent = isEdit ? "Save Changes" : "Save City";
+    cityFormModal.dataset.activeRow = isEdit ? record.id : "";
+    cityFormIdGroup.style.display = isEdit ? "" : "none";
+
+    if (isEdit) {
+      cityFormId.value = getSystemCityDisplayId(record.id);
+      cityFormCountry.value = getSystemCountryName(record.country.code) || record.country.name;
+      populateCityFormStates(cityFormCountry.value, record.state);
+      // A city can legitimately have no state even in a country that has
+      // them — keep the select showing nothing selected rather than
+      // silently falling back to the first state in the list.
+      if (!record.state) cityFormState.value = "";
+      cityFormName.value = record.name;
+    } else {
+      cityFormCountry.value = "";
+      populateCityFormStates("");
+      cityFormName.value = "";
+    }
+    // Country is only ever editable while adding, so the country a city was
+    // filed under can't drift. State stays editable for a city added through
+    // this drawer — its state was picked from this same State select when the
+    // record was created, so a wrong pick stays correctable — but is locked
+    // for a seeded city. Either way populateCityFormStates() has the final
+    // say when the country has no states at all.
+    cityFormCountry.disabled = isEdit;
+    cityFormState.disabled = (isEdit && !wasAddedInApp(record)) || cityFormState.disabled;
+
+    openModal(cityFormModal);
+    cityFormName.focus();
+  }
+
+  document.getElementById("addCityBtn").addEventListener("click", () => openCityForm());
+
+  saveCityBtn.addEventListener("click", () => {
+    const rowId = cityFormModal.dataset.activeRow;
+    const isEdit = rowId !== "";
+    const name = cityFormName.value.trim();
+
+    if (!isEdit && !cityFormCountry.value) {
+      showToast("Please select a country", "error");
+      return;
+    }
+    // A city's state is part of the record, not a narrowing filter, so unlike
+    // every other State control in this project it is required — but only for
+    // a country the system actually holds states for (US/CA today). For any
+    // other country the select is disabled and there is nothing to require.
+    // Checked on edit too, so an editable state can't be cleared back to none.
+    if (!cityFormState.disabled && !cityFormState.value) {
+      showToast("Please select a state", "error");
+      return;
+    }
+    if (!name) {
       showToast("City name is required", "error");
       return;
     }
-    if (rowId === "") return;
-    const record = SYSTEM_CITIES.find((c) => String(c.id) === String(rowId));
-    if (record && record.name !== newName) {
-      const oldName = record.name;
-      record.name = newName;
-      record.history.push({
-        operation: "Edit",
-        name: newName,
-        description: `Name: ${oldName} -> ${newName}`,
-        userName: CURRENT_USER.name,
-        userEmail: CURRENT_USER.email,
-        timestamp: new Date(),
-      });
+
+    if (isEdit) {
+      const record = SYSTEM_CITIES.find((c) => String(c.id) === String(rowId));
+      if (record) {
+        // Collect every actual change first so one save writes one history
+        // entry, however many fields moved — matching how a single Edit row
+        // has always represented a single trip through this drawer.
+        const changes = [];
+        if (record.name !== name) {
+          changes.push(`Name: ${record.name} -> ${name}`);
+          record.name = name;
+        }
+        if (wasAddedInApp(record) && !cityFormState.disabled) {
+          const newState = cityFormState.value || null;
+          if ((record.state || null) !== newState) {
+            changes.push(`State: ${record.state || "None"} -> ${newState || "None"}`);
+            record.state = newState;
+          }
+        }
+        if (changes.length) {
+          record.history.push({
+            operation: "Edit",
+            name: record.name,
+            description: changes.join(", "),
+            userName: CURRENT_USER.name,
+            userEmail: CURRENT_USER.email,
+            timestamp: new Date(),
+          });
+        }
+      }
+      saveToStorage("SYSTEM_CITIES", SYSTEM_CITIES);
+      render();
+      cityFormModal.classList.remove("open");
+      showToast("City updated successfully");
+      return;
     }
+
+    const meta = SYSTEM_COUNTRIES.find((c) => c.name === cityFormCountry.value);
+    const stateValue = cityFormState.disabled ? null : cityFormState.value || null;
+    const newId = SYSTEM_CITIES.length;
+    SYSTEM_CITIES.push({
+      id: newId,
+      name,
+      state: stateValue,
+      country: { name: meta.name, code: meta.code },
+      active: true,
+      history: [
+        {
+          operation: "Create",
+          name,
+          description: [`Name: ${name}`, stateValue ? `State: ${stateValue}` : null, `Country: ${meta.name} (${meta.code})`]
+            .filter(Boolean)
+            .join(", "),
+          userName: CURRENT_USER.name,
+          userEmail: CURRENT_USER.email,
+          timestamp: new Date(),
+        },
+      ],
+    });
     saveToStorage("SYSTEM_CITIES", SYSTEM_CITIES);
+    cityFormModal.classList.remove("open");
+
+    // Surface what was just created instead of dropping the user back on
+    // whatever page of the list they were on — a new city always lands at
+    // the end of the list, so without this it'd be invisible behind the
+    // current filters. The Country filter is set alongside the name search:
+    // against a real backend those two together are what narrows the query,
+    // where a bare name search would have to scan every country. State is
+    // rebuilt for that country but left on All, and Status is cleared, so
+    // the row is shown because it matches and not by coincidence.
+    citySearch.value = name;
+    countryFilterSelect.value = meta.name;
+    const newCityStates = getStatesForCountryCode(meta.code);
+    if (newCityStates.length) {
+      stateFilterSelect.disabled = false;
+      stateFilterSelect.innerHTML =
+        `<option value="">All States</option>` + newCityStates.map((s) => `<option value="${s}">${s}</option>`).join("");
+    } else {
+      stateFilterSelect.disabled = true;
+      stateFilterSelect.innerHTML = `<option value="">Select State</option>`;
+    }
+    statusFilterSelect.value = "all";
+    // Cleared rather than switched to "Custom Only": the point is to show
+    // the row that was just created, and leaving "Original Only" set would
+    // hide the very city this is trying to surface.
+    customFilterToggle.checked = false;
+    state = { ...state, page: 1, query: name, country: meta.name, cityState: "", status: "all", customOnly: false };
     render();
-    modal.classList.remove("open");
-    showToast("City updated successfully");
+    showToast("City added successfully");
   });
 
   // Pre-select country filter when arriving from a deep link, e.g.
@@ -823,14 +1279,20 @@
     countryFilterSelect.dispatchEvent(new Event("change"));
   }
 
-  // Pre-check "Custom Only" when arriving from a deep link, e.g.
-  // city-system.html?customOnly=1 (used by the Dashboard's Custom Cities tile).
+  // city-system.html?customOnly=1 lands with the list already narrowed to
+  // cities added through Add City — for linking straight to "what have we
+  // added ourselves" from anywhere else in the app.
   if (urlParams.get("customOnly") === "1") {
-    customOnlyToggle.checked = true;
-    state.customOnly = true;
+    customFilterToggle.checked = true;
+    customFilterToggle.dispatchEvent(new Event("change"));
   }
 
   render();
+
+  // city-system.html?add=1 opens the Add City drawer straight away — used by
+  // the Dashboard's "Add" shortcut on its System Cities tile, now that there
+  // is no separate Add City page to link to.
+  if (urlParams.get("add") === "1") openCityForm();
 </script>
 </body>
 </html>

@@ -101,22 +101,40 @@ function initSidebarAccordion() {
 // until explicitly re-expanded.
 const SIDEBAR_COLLAPSED_KEY = STORAGE_PREFIX + "sidebarCollapsed";
 
+// Held from init because the menu button's own aria-label is what changes
+// when the sidebar toggles ("Menu" -> "Show menu"/"Hide menu"), so it can't
+// be re-found by that selector afterwards.
+let sidebarMenuBtn = null;
+
+function isSidebarCollapsed() {
+  const appBody = document.querySelector(".app-body");
+  return Boolean(appBody && appBody.classList.contains("sidebar-collapsed"));
+}
+
+// Collapses/expands without touching the saved preference — callers that
+// represent a real user choice persist it themselves. Full screen uses this
+// to borrow the sidebar's space temporarily and hand it back on exit.
+function applySidebarCollapsed(collapsed) {
+  const appBody = document.querySelector(".app-body");
+  if (!appBody) return;
+  appBody.classList.toggle("sidebar-collapsed", collapsed);
+  if (sidebarMenuBtn) {
+    sidebarMenuBtn.setAttribute("aria-expanded", String(!collapsed));
+    sidebarMenuBtn.setAttribute("aria-label", collapsed ? "Show menu" : "Hide menu");
+  }
+}
+
 function initSidebarCollapse() {
   const appBody = document.querySelector(".app-body");
   const menuBtn = document.querySelector('.topbar .icon-btn[aria-label="Menu"]');
   if (!appBody || !menuBtn) return;
+  sidebarMenuBtn = menuBtn;
 
-  function applyCollapsed(collapsed) {
-    appBody.classList.toggle("sidebar-collapsed", collapsed);
-    menuBtn.setAttribute("aria-expanded", String(!collapsed));
-    menuBtn.setAttribute("aria-label", collapsed ? "Show menu" : "Hide menu");
-  }
-
-  applyCollapsed(localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "1");
+  applySidebarCollapsed(localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "1");
 
   menuBtn.addEventListener("click", () => {
-    const collapsed = !appBody.classList.contains("sidebar-collapsed");
-    applyCollapsed(collapsed);
+    const collapsed = !isSidebarCollapsed();
+    applySidebarCollapsed(collapsed);
     try {
       localStorage.setItem(SIDEBAR_COLLAPSED_KEY, collapsed ? "1" : "0");
     } catch (e) {
@@ -474,15 +492,95 @@ function debounce(fn, delay = 350) {
   };
 }
 
+// ---------- "Full Screen" toggle (mapping screens) ----------
+// Three things at once, deliberately: it hides the page title/divider inside
+// the app (the original behaviour), collapses the sidebar, and puts the
+// browser itself into real fullscreen, the same state F11 gives — so the
+// mapping checklists get the whole display instead of just the space the
+// page header was using.
+//
+// The two can fall out of sync — the browser's own exits (Esc, F11, the
+// window losing fullscreen) don't route through this button — so the
+// fullscreenchange event mirrors the browser's state back onto the toggle
+// instead of the button tracking its own separate idea of "on". Native
+// fullscreen can also be refused outright (an iframe without the
+// allowfullscreen permission, a browser policy, a rejected promise); when
+// that happens the in-app half still applies, which is exactly what this
+// button did before.
+function isNativeFullScreen() {
+  return Boolean(document.fullscreenElement || document.webkitFullscreenElement);
+}
+
+function requestNativeFullScreen() {
+  const el = document.documentElement;
+  const request = el.requestFullscreen || el.webkitRequestFullscreen;
+  if (!request) return Promise.resolve();
+  // Older WebKit returns undefined rather than a promise.
+  return Promise.resolve(request.call(el)).catch(() => {});
+}
+
+function exitNativeFullScreen() {
+  if (!isNativeFullScreen()) return Promise.resolve();
+  const exit = document.exitFullscreen || document.webkitExitFullscreen;
+  if (!exit) return Promise.resolve();
+  return Promise.resolve(exit.call(document)).catch(() => {});
+}
+
+// mainEl  — the page's own <main>, which carries .chrome-hidden (scoped per
+//           page so one mapping screen's toggle can't affect another's).
+// btnEl   — the floating toggle button; its <span> is the label.
+// options — labelOn/labelOff, ariaOn/ariaOff, and onChange(isOn), called
+//           after every state change including browser-driven ones, for
+//           pages that need to recompute layout afterwards.
+function initFullScreenToggle(mainEl, btnEl, options = {}) {
+  const {
+    labelOn = "Exit Full Screen",
+    labelOff = "Full Screen",
+    ariaOn = "Exit full screen",
+    ariaOff = "Enter full screen",
+    onChange,
+  } = options;
+
+  // What the sidebar looked like before full screen borrowed its space, so
+  // exiting restores the user's own choice instead of always expanding it.
+  // Captured on the off -> on transition only: applyState is also called by
+  // fullscreenchange, which can fire with the state already on.
+  let sidebarWasCollapsed = false;
+
+  function applyState(on) {
+    const wasOn = mainEl.classList.contains("chrome-hidden");
+    if (on && !wasOn) sidebarWasCollapsed = isSidebarCollapsed();
+
+    mainEl.classList.toggle("chrome-hidden", on);
+    btnEl.classList.toggle("active", on);
+    btnEl.querySelector("span").textContent = on ? labelOn : labelOff;
+    btnEl.setAttribute("aria-label", on ? ariaOn : ariaOff);
+
+    // Collapsed for the duration only — the stored sidebar preference is
+    // deliberately not written, so this never changes what other pages open
+    // with.
+    applySidebarCollapsed(on ? true : sidebarWasCollapsed);
+
+    if (onChange) onChange(on);
+  }
+
+  btnEl.addEventListener("click", () => {
+    const turningOn = !mainEl.classList.contains("chrome-hidden");
+    applyState(turningOn);
+    if (turningOn) requestNativeFullScreen();
+    else exitNativeFullScreen();
+  });
+
+  // Esc / F11 / anything else that drops the browser out of fullscreen also
+  // drops the page out of its full-screen layout, so the two never disagree.
+  document.addEventListener("fullscreenchange", () => applyState(isNativeFullScreen()));
+  document.addEventListener("webkitfullscreenchange", () => applyState(isNativeFullScreen()));
+}
+
 // Shared identity + formatting for history entries across all pages.
 const CURRENT_USER = { name: "Admin User", email: "admin@mynztrip.com" };
 
-// "Merged"/"Unmerged" are for a city's own merge-composition membership
-// changing (added to / removed from a merged city's mergedFrom list) — kept
-// distinct from Map/Remap/Unmap since a merge isn't a mapping relationship,
-// just this city's own property. Same green/red as the analogous
-// addition/removal pair Map/Unmap already use.
-const OPERATION_PILL_CLASS = { Create: "success", Edit: "info", "Status Change": "neutral", Map: "success", Remap: "info", Unmap: "danger", Merged: "success", Unmerged: "danger" };
+const OPERATION_PILL_CLASS = { Create: "success", Edit: "info", "Status Change": "neutral", Map: "success", Remap: "info", Unmap: "danger" };
 
 // The one reserved marker for "start a new line here" inside a history
 // description string — used when one description needs to show more than
