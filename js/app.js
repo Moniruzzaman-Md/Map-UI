@@ -77,22 +77,16 @@ function initSidebarAccordion() {
       group.classList.toggle("open", !isOpen);
     });
   });
-
-  // nested sub-group inside a submenu, e.g. Hotel Map > Country > System/Supplier
-  document.querySelectorAll(".submenu-group").forEach((group) => {
-    const trigger = group.querySelector(":scope > .submenu-toggle");
-    if (!trigger) return;
-    trigger.addEventListener("click", () => {
-      group.classList.toggle("open");
-    });
-  });
+  // The menu is two levels — a parent and its pages — so this is the only
+  // accordion there is. The nested Country/City/Hotel sub-groups that used
+  // to sit in between (and the .submenu-toggle handler that opened them)
+  // are gone.
 }
 
-// Collapses the sidebar entirely (not to an icon-only rail — only the
-// top-level "Hotel Map" nav item has its own icon, every nested City/
-// Country/Hotel group and its System/Supplier/City Mapping links are plain
-// text, so a narrow rail would have nothing meaningful to show for most of
-// the menu). Toggled from the topbar's hamburger "Menu" button, which
+// Collapses the sidebar entirely rather than to an icon-only rail. Every
+// item does now carry an icon, so a rail is no longer impossible — but the
+// six list pages would show the same list glyph six times over, which
+// identifies nothing. Toggled from the topbar's hamburger "Menu" button, which
 // otherwise has no behavior wired to it. This is a multi-page app (every
 // nav click is a real page load, not client-side routing), so the choice
 // is persisted in localStorage — same mynztrip:-prefixed convention

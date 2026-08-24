@@ -58,7 +58,11 @@
         Dashboard
       </a>
 
-      <!-- Hotel Map (mother menu for this project's pages) -->
+      <!-- Hotel Map (mother menu for this project's pages). Two levels
+           only: this parent and its pages. The Country/City/Hotel
+           accordions that used to sit between them are gone — they made
+           every page three clicks deep and hid the one thing the menu is
+           for, which is seeing which lists exist. -->
       <nav class="nav-group open">
         <button class="nav-item active">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 4L4 6v14l5-2 6 2 5-2V4l-5 2-6-2z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 4v14M15 6v14" stroke="currentColor" stroke-width="1.6"/></svg>
@@ -66,37 +70,41 @@
           <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
         <div class="submenu">
-          <div class="submenu-group">
-            <button class="submenu-item submenu-toggle">
-              Country
-              <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </button>
-            <div class="submenu-nested">
-              <a class="submenu-item nested" href="country-system.html">System</a>
-              <a class="submenu-item nested" href="country-supplier.html">Supplier</a>
-            </div>
-          </div>
-          <div class="submenu-group open">
-            <button class="submenu-item submenu-toggle">
-              City
-              <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </button>
-            <div class="submenu-nested">
-              <a class="submenu-item nested active" href="city-system.html">System</a>
-              <a class="submenu-item nested" href="city-supplier.html">Supplier</a>
-            </div>
-          </div>
-          <a class="submenu-item" href="city-mapping.html">City Mapping</a>
-          <div class="submenu-group">
-            <button class="submenu-item submenu-toggle">
-              Hotel
-              <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </button>
-            <div class="submenu-nested">
-              <a class="submenu-item nested" href="hotel-system.html">System</a>
-              <a class="submenu-item nested" href="hotel-supplier.html">Supplier</a>
-            </div>
-          </div>
+          <a class="submenu-item" href="country-system.html">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M7 9h10M7 13h10M7 17h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            System Country List
+          </a>
+          <a class="submenu-item" href="country-supplier.html">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M7 9h10M7 13h10M7 17h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            Supplier Country List
+          </a>
+          <a class="submenu-item active" href="city-system.html">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M7 9h10M7 13h10M7 17h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            System City List
+          </a>
+          <a class="submenu-item" href="city-supplier.html">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M7 9h10M7 13h10M7 17h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            Supplier City List
+          </a>
+          <!-- The two mapping screens carry the Map icon used for every
+               mapping action in this project, not the list icon: they are
+               where relationships are made, not another list to read. -->
+          <a class="submenu-item" href="city-mapping.html">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 17l-4.5 2V7L9 5m0 12l6 2m-6-2V5m6 14l4.5-2V5L15 7m0 12V7m0 0L9 5" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+            City Mapping
+          </a>
+          <a class="submenu-item" href="hotel-system.html">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M7 9h10M7 13h10M7 17h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            System Hotel List
+          </a>
+          <a class="submenu-item" href="hotel-supplier.html">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M7 9h10M7 13h10M7 17h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            Supplier Hotel List
+          </a>
+          <a class="submenu-item" href="hotel-mapping.html">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 17l-4.5 2V7L9 5m0 12l6 2m-6-2V5m6 14l4.5-2V5L15 7m0 12V7m0 0L9 5" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+            Hotel Mapping
+          </a>
         </div>
       </nav>
 

@@ -267,11 +267,28 @@ button {
   display: none;
 }
 
+/* One level of pages under the parent — no third level. The icon sits
+   indented from the parent's own, and the label lines up past it, so the
+   hierarchy reads from the indent rather than from nesting. The 3px left
+   border is transparent until active, so nothing shifts when it lights. */
 .submenu-item {
-  padding: 11px 22px 11px 56px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 22px 11px 37px;
   font-size: 14px;
   color: rgba(255, 255, 255, 0.75);
   border-left: 3px solid transparent;
+}
+
+.submenu-item svg {
+  flex-shrink: 0;
+  opacity: 0.75;
+}
+
+.submenu-item.active svg,
+.submenu-item:hover svg {
+  opacity: 1;
 }
 
 .submenu-item:hover {
@@ -284,44 +301,6 @@ button {
   font-weight: 600;
   background: rgba(255, 255, 255, 0.1);
   border-left-color: var(--accent-red);
-}
-
-/* Nested sub-group inside a submenu, e.g. Hotel Map > Country > System/Supplier */
-
-.submenu-toggle {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  background: none;
-  border: none;
-  cursor: pointer;
-  text-align: left;
-}
-
-.submenu-toggle .chevron {
-  margin-left: auto;
-  width: 12px;
-  height: 12px;
-  transition: transform 0.15s ease;
-}
-
-.submenu-group.open > .submenu-toggle .chevron {
-  transform: rotate(180deg);
-}
-
-.submenu-nested {
-  display: flex;
-  flex-direction: column;
-  background: rgba(0, 0, 0, 0.12);
-}
-
-.submenu-group:not(.open) .submenu-nested {
-  display: none;
-}
-
-.submenu-item.nested {
-  padding-left: 72px;
-  font-size: 13.5px;
 }
 
 .sidebar-footer {
