@@ -135,6 +135,7 @@
         <p>This page manages the <strong>master list of countries</strong> used everywhere else in the system — supplier country mappings and city records both reference these entries.</p>
         <ul>
           <li><strong>#</strong> — the row's position in the whole result, not just the page on screen, so row 11 is still 11 on page 2. It renumbers when a search changes what the list holds.</li>
+          <li>The list is fetched, so it shows placeholder rows for a moment whenever it is queried — opening the page, <strong>Search</strong>, <strong>Reset</strong>, and changing page or rows per page. Saving an edit updates the row in place without re-fetching.</li>
           <li><strong>Code</strong> — the country's unique identifier (e.g. "US"). Set when the country is added and never changes.</li>
           <li><strong>Nationality</strong> — e.g. "American" for United States. Optional — shown as "—" when not set.</li>
           <li><strong>Edit</strong> — rename a country and/or set its Nationality. The code stays the same.</li>
@@ -149,6 +150,8 @@
         <p>This is the master list of countries. Every supplier's own country list maps to one entry here, and city records reference this list too.</p>
         <ul>
           <li><strong>Code is permanent</strong> — set once when the country is added, never editable, and it's what everything else should key off. Only the name and Nationality can change.</li>
+          <li><strong>#</strong> — the row's position in the whole result set, not within the page, so row 11 reads 11 on page 2. It is a position, not an identity: the Code is what identifies a country and what everything else keys off, and the number changes the moment a search narrows the list.</li>
+          <li><strong>The list is a query, and looks like one.</strong> Fetching it shows the skeleton — the header stays put and the body fills with placeholder rows (shared <code>withTableLoading()</code>/<code>skeletonRowsHtml()</code>, see js/app.js). Only the body is replaced: the header's columns never change, so redrawing them would make the one part of the table that is genuinely ready flicker. The pagination footer is emptied for the same reason — page numbers describing rows that aren't on screen are a lie — and returns with the rows. This runs on <strong>the first load, Search, Reset and any page or rows-per-page change</strong>, each of which is a real query in a deployed system. It deliberately does <em>not</em> run after saving an edit: that row is already on screen and only its own values changed, so replacing the whole table with placeholders would be describing a fetch nobody asked for.</li>
           <li><strong>Nationality</strong> — a plain optional text field (e.g. "American"), nullable — no mapping, cascade, or other relationship keys off it, unlike Name. Stored as <code>null</code> (not an empty string) when unset, shown as "—" in the table. Its edit input is deliberately NOT wired via the modal's generic <code>data-fill</code> mechanism (unlike Code/Name) — that mechanism reads the rendered table cell's own text, which shows "—" for null, and would otherwise feed that literal "—" back into the input as if it were a real value. Populated directly from the record instead, so a null nationality opens as a genuinely empty field.</li>
           <li><strong>Edit</strong> — renaming must never break an existing mapping. Either mappings are keyed by the permanent code, or the rename updates every existing mapping in the same step. Empty names must be rejected with a clear error. Name and Nationality are independently checked and independently logged — see History below.</li>
           <li><strong>Map</strong> — for each supplier, show every one of that supplier's own countries already mapped here (each with its own Unmap), and — whenever any of that supplier's other countries isn't mapped here — a picker to map one of those in (with Map); both can appear together, since more than one of a supplier's own countries can be mapped to the same system country at once. A supplier country only ever has a name and its own ID — never an ISO/system code, which is purely an internal join key and must never be displayed as if the supplier provided it. In the picker, any option already mapped to a different country must be labeled with its current target (e.g. "Deutschland (AG-DE-021) — mapped to Austria") so that's visible before it's picked, not just after. Picking an already-mapped-elsewhere option must show old vs. new and require explicit confirmation before applying — never silent. Logged as a <strong>Remap</strong> (see History below), not a plain Map.</li>
@@ -338,6 +341,7 @@
   const countries = SYSTEM_COUNTRIES;
 
   const tbody = document.querySelector("#countryTable tbody");
+  const tableWrap = document.querySelector("#countryTable").closest(".table-wrap");
   const paginationBar = document.getElementById("paginationBar");
   const nameSearchInput = document.getElementById("countryNameSearch");
   const codeSearchInput = document.getElementById("countryCodeSearch");
@@ -354,7 +358,28 @@
     );
   }
 
+  // Every trip through the list is a query in a real deployment — the first
+  // load, a Search, a Reset, a page or page-size change — so each one shows
+  // the skeleton first (see withTableLoading in js/app.js). Saving an edit
+  // deliberately does NOT: the row is already on screen and only its own
+  // values changed, so replacing the whole table with placeholders would be
+  // describing a fetch the user didn't ask for.
+  //
+  // Only the body is skeletoned. The header is already on screen and its
+  // columns never change, so redrawing it would make the one part of the
+  // table that is genuinely ready flicker.
+  const COUNTRY_COLUMN_COUNT = document.querySelectorAll("#countryTable thead th").length;
+
   function render() {
+    tableWrap.classList.add("skeleton");
+    paginationBar.innerHTML = "";
+    withTableLoading(tbody, skeletonRowsHtml(COUNTRY_COLUMN_COUNT), () => {
+      tableWrap.classList.remove("skeleton");
+      renderRows();
+    });
+  }
+
+  function renderRows() {
     const filtered = getFiltered();
     const totalPages = Math.max(1, Math.ceil(filtered.length / state.pageSize));
     state.page = Math.min(state.page, totalPages);
@@ -519,7 +544,7 @@
       }
     }
     saveToStorage("SYSTEM_COUNTRIES", SYSTEM_COUNTRIES);
-    render();
+    renderRows();
     modal.classList.remove("open");
     showToast("Country updated successfully");
   });

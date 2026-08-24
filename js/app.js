@@ -399,6 +399,62 @@ function showToast(message, type = "success") {
   toast._timer = setTimeout(() => toast.classList.remove("show"), 3200);
 }
 
+// ---------- Skeleton loading state (shared by every list in the project) ----------
+// A list that waits on a query shows the table that is coming, not a
+// spinner: the columns are known before the query runs, so drawing them
+// costs nothing, and the placeholder occupies the same shape as the result
+// — nothing moves when the rows land.
+//
+// Every list here is served from memory, so without a deliberate pause the
+// loading state would flash for less than a frame and the screen would
+// teach an expectation a real backend breaks. Same ~450ms the mapping
+// pages' scroll loader uses.
+const TABLE_LOAD_MS = 450;
+const SKELETON_ROWS = 6;
+
+let tableLoadSeq = 0;
+
+// `<tr>`s of shimmering bars for a table `columnCount` wide. Bar widths
+// vary with the row and column so the block reads as text of different
+// lengths rather than a barcode; a cell carrying .table-num renders a short
+// stub instead (see the CSS). Callers own the surrounding <table>, since
+// some have a header already on screen and some are drawing a whole table.
+function skeletonRowsHtml(columnCount, rowCount = SKELETON_ROWS, numColumn = true) {
+  return Array.from({ length: rowCount }, (_, r) =>
+    `<tr>${Array.from({ length: columnCount }, (_, c) => {
+      const isNum = numColumn && c === 0;
+      const width = isNum ? "" : ` style="width:${45 + ((r * 7 + c * 23) % 45)}%"`;
+      return `<td${isNum ? ' class="table-num"' : ""}><span class="skeleton-bar"${width}></span></td>`;
+    }).join("")}</tr>`
+  ).join("");
+}
+
+// Runs `render` after the simulated query delay, showing `skeletonHtml` in
+// `host` meanwhile. The token is recorded on the host itself, so a second
+// load of the same list supersedes the first while two different lists
+// loading at once never cancel each other.
+function withTableLoading(host, skeletonHtml, render) {
+  if (!host) return;
+  host.innerHTML = skeletonHtml;
+  host.setAttribute("aria-busy", "true");
+  const token = String(++tableLoadSeq);
+  host.dataset.loadToken = token;
+  setTimeout(() => {
+    if (host.dataset.loadToken !== token || !host.isConnected) return;
+    host.removeAttribute("aria-busy");
+    render();
+  }, TABLE_LOAD_MS);
+}
+
+// Invalidates whatever `host` is waiting on — for the cases that answer
+// without a query at all (an empty result already known, or a list being
+// torn down), where a pending render must not land afterwards.
+function cancelTableLoading(host) {
+  if (!host) return;
+  host.dataset.loadToken = String(++tableLoadSeq);
+  host.removeAttribute("aria-busy");
+}
+
 // Reusable pagination renderer for all list pages.
 // container: element to render controls into
 // opts: { total, page, pageSize, onChange({page, pageSize}) }

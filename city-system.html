@@ -775,32 +775,14 @@
 
   // Every list in this popup is a query in a real deployment — a city's
   // hotels, or one supplier's cities mapped to it — so each one shows a
-  // loading state first rather than appearing instantly. The mock holds all
-  // of it in memory, so without a deliberate pause that state would flash
-  // for less than a frame and the screen would teach the wrong expectation.
-  // Same reasoning (and same ~450ms) as the mapping pages' scroll loader.
-  const SUMMARY_LOAD_MS = 450;
-  const SUMMARY_SKELETON_ROWS = 6;
-  let summaryLoadToken = 0;
-
-  // The placeholder is the table that is coming, not a spinner beside the
-  // word "Loading": the real header with the tab's own columns, and rows of
-  // shimmering bars where the values will be. It costs nothing extra — the
-  // columns are already known before the lookup runs — and it means the
-  // panel doesn't jump from a 60px strip to a full table when the rows
-  // land, which is what made the old state feel cheap in a popup this size.
-  // Cell widths are varied per column and row so it reads as text of
-  // different lengths rather than a barcode.
-  function summarySkeletonHtml(columns) {
-    const rows = Array.from({ length: SUMMARY_SKELETON_ROWS }, (_, r) => {
-      const cells = columns
-        .map((_label, c) => `<td><span class="summary-skeleton-bar" style="width:${45 + ((r * 7 + c * 23) % 45)}%"></span></td>`)
-        .join("");
-      return `<tr><td class="table-num"><span class="summary-skeleton-bar"></span></td>${cells}</tr>`;
-    }).join("");
-
-    return `
-      <div class="table-wrap summary-skeleton" aria-busy="true" aria-label="Loading">
+  // loading state first rather than appearing instantly. The skeleton
+  // itself, the delay and the stale-response guard are shared with every
+  // other list in the project (withTableLoading/skeletonRowsHtml in
+  // js/app.js); what's local here is the header, since each tab's table has
+  // its own columns and this panel is empty until one is picked.
+  function withSummaryLoading(host, columns, renderRows) {
+    const skeleton = `
+      <div class="table-wrap skeleton" aria-label="Loading">
         <table class="data-table">
           <thead>
             <tr>
@@ -808,21 +790,10 @@
               ${columns.map((label) => `<th>${label}</th>`).join("")}
             </tr>
           </thead>
-          <tbody>${rows}</tbody>
+          <tbody>${skeletonRowsHtml(columns.length + 1)}</tbody>
         </table>
       </div>`;
-  }
-
-  function withSummaryLoading(host, columns, renderRows) {
-    if (!host) return;
-    host.innerHTML = summarySkeletonHtml(columns);
-    // Token guard: clicking through tabs faster than the delay must land
-    // the newest request's rows, never an earlier one arriving late.
-    const token = ++summaryLoadToken;
-    setTimeout(() => {
-      if (token !== summaryLoadToken || !host.isConnected) return;
-      renderRows();
-    }, SUMMARY_LOAD_MS);
+    withTableLoading(host, skeleton, renderRows);
   }
 
   // ---------- Mapped Hotels ----------
@@ -1013,7 +984,7 @@
   function openSummary(record) {
     // Any in-flight list belongs to the city last opened — invalidate it, or
     // its rows would land in this city's panel.
-    summaryLoadToken++;
+    cancelTableLoading(summaryPanelBody);
     summaryCityId = record.id;
 
     document.getElementById("summaryCityName").textContent = `— ${record.name} (ID: ${getSystemCityDisplayId(record.id)})`;

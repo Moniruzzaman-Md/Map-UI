@@ -3395,42 +3395,39 @@ label.merge-list-item {
   margin-bottom: 16px;
 }
 
-/* Placeholder shown while a Summary list is "fetching" — one row, same
-   spinner the scroll-loaders use, so a deferred list reads as loading
-   rather than as an empty result. */
-/* ---------- Mapping Summary popup (city-system.html) ---------- */
-
-/* Loading state for the popup's lists: the table that is coming, with
-   shimmering bars where the values will be, rather than a spinner beside
-   the word "Loading". The header is real (its columns are known before the
-   lookup runs), so nothing moves when the rows arrive — the placeholder and
-   the result occupy the same shape. */
-.summary-skeleton .summary-skeleton-bar {
+/* ---------- Skeleton loading state (shared) ----------
+   Every list in this project that waits on a query shows the table that is
+   coming — shimmering bars where the values will be — rather than a spinner
+   beside the word "Loading". The columns are always known before the query
+   runs, so drawing them costs nothing, and the placeholder then occupies
+   the same shape as the result: nothing moves when the rows land. Built by
+   skeletonRowsHtml()/withTableLoading() in js/app.js. */
+.skeleton .skeleton-bar {
   display: block;
   width: 60%;
   height: 11px;
   border-radius: var(--radius-pill);
   background: linear-gradient(90deg, var(--bg-panel) 25%, #e9ebf5 40%, var(--bg-panel) 60%);
   background-size: 300% 100%;
-  animation: summary-skeleton-shimmer 1.3s ease-in-out infinite;
+  animation: skeleton-shimmer 1.3s ease-in-out infinite;
 }
 
 /* The row-number column is a short stub, not a line of "text". */
-.summary-skeleton .table-num .summary-skeleton-bar {
+.skeleton .table-num .skeleton-bar {
   width: 14px;
 }
 
 /* Rows fade toward the bottom of the block, so the placeholder reads as a
    list continuing past the edge rather than one that is exactly six long. */
-.summary-skeleton tbody tr:nth-child(n + 4) {
+.skeleton tbody tr:nth-child(n + 4) {
   opacity: 0.55;
 }
 
-.summary-skeleton tbody tr:nth-child(n + 6) {
+.skeleton tbody tr:nth-child(n + 6) {
   opacity: 0.3;
 }
 
-@keyframes summary-skeleton-shimmer {
+@keyframes skeleton-shimmer {
   from {
     background-position: 150% 0;
   }
@@ -3442,10 +3439,12 @@ label.merge-list-item {
 /* A shimmer is decoration, not information — the aria-busy on the block is
    what actually announces the wait, so it can stop moving entirely. */
 @media (prefers-reduced-motion: reduce) {
-  .summary-skeleton .summary-skeleton-bar {
+  .skeleton .skeleton-bar {
     animation: none;
   }
 }
+
+/* ---------- Mapping Summary popup (city-system.html) ---------- */
 
 /* The summary's one tab row: a pinned Hotels tab, the supplier tabs
    scrolling after it, and Find supplier pinned at the far end. Only the
