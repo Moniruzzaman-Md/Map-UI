@@ -273,7 +273,6 @@
                              element so the heading keeps reading as a heading
                              when no country is picked yet. -->
                         <span class="mapping-scope-country is-empty" id="hotelScopeCountry">— pick a System Country first</span>
-                        <span class="mapping-scope-summary" id="hotelScopeSummary"></span>
                       </p>
                       <!-- One control for both pickers, not one each: they
                            share the grid's first row, so a picker collapsed
@@ -285,6 +284,10 @@
                         <span id="pickerCollapseLabel">Hide fields</span>
                         <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                       </button>
+                      <!-- Below the heading and the button rather than
+                           inside the heading, so its rule spans the whole
+                           half instead of stopping short at the button. -->
+                      <span class="mapping-scope-summary" id="hotelScopeSummary"></span>
                     </div>
                     <div class="mapping-scope-fields">
                       <div class="form-group">
@@ -526,20 +529,25 @@
   const pinScopeSummary = document.getElementById("pinScopeSummary");
   const hotelScopeSummary = document.getElementById("hotelScopeSummary");
 
+  // Each hidden control reads back as "what it is: what it holds" — a bare
+  // list of values ("Illinois, Chicago") leaves the reader matching values
+  // to fields they can no longer see.
+  function scopePart(key, value) {
+    const safe = String(value).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    return `<span class="scope-key">${key}:</span> ${safe}`;
+  }
+
   function updateScopeSummaries() {
-    pinScopeSummary.textContent = pinnedCityLabel() || "no city pinned";
+    pinScopeSummary.innerHTML = scopePart("City", pinnedCityLabel() || "none pinned");
     // Every control in this picker collapses away, so anything actually
     // narrowing the list has to show up here — a filter working from out of
-    // sight is worse than no filter. Only what is set is listed: spelling
-    // out the defaults would push the parts that matter off the end of a
-    // line that truncates.
-    const parts = [];
-    if (stateFilterSelect.value) parts.push(stateFilterSelect.value);
-    if (cityFilterSelect.value) parts.push(cityFilterSelect.value);
-    if (unmappedOnlyToggle.checked) parts.push("Unmapped only");
-    if (fuzzyToggle.checked) parts.push("Fuzzy");
-    if (searchInput.value.trim()) parts.push(`"${searchInput.value.trim()}"`);
-    hotelScopeSummary.textContent = parts.length ? parts.join(", ") : "all states and cities";
+    // sight is worse than no filter. State and City always show, since
+    // "All" is as much an answer as a value; the rest only when set.
+    const parts = [scopePart("State", stateFilterSelect.value || "All"), scopePart("City", cityFilterSelect.value || "All")];
+    if (searchInput.value.trim()) parts.push(scopePart("Search", `"${searchInput.value.trim()}"`));
+    if (unmappedOnlyToggle.checked) parts.push(scopePart("Unmapped", "On"));
+    if (fuzzyToggle.checked) parts.push(scopePart("Fuzzy", "On"));
+    hotelScopeSummary.innerHTML = parts.join(" · ");
   }
 
   pickerCollapseToggle.addEventListener("click", () => {

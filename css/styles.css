@@ -3340,24 +3340,38 @@ label.merge-list-item {
 /* Its own line under the heading rather than trailing it: beside the
    heading it had only the leftover width and lost the end of itself to an
    ellipsis, and the end is where the search query and the toggles land. */
+/* Wraps onto as many lines as it needs — every value here stands for a
+   control that is currently hidden, so an ellipsis would drop exactly the
+   part the reader cannot otherwise check. Its own band under the heading,
+   a size down and behind a rule, so the two lines never read as one run of
+   text: the heading names the picker, this reports its state. */
 .mapping-split.pickers-collapsed .mapping-scope-summary {
   display: block;
   flex: 1 1 100%;
   min-width: 0;
-  margin-top: 2px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-color);
+  white-space: normal;
+  font-size: 12px;
   font-weight: 500;
-  color: var(--text-muted);
+  line-height: 1.5;
+  color: var(--text-dark);
 }
 
-/* The heading keeps its own line and the button stays on it: the row does
-   not wrap, the heading claims the width, and only the summary inside it
-   breaks to a second line. */
+/* "What this is" against "what it holds": the field's name is the quieter
+   half, so the values are what the eye lands on. */
+.scope-key {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+/* Heading and button share the first line; the summary's 100% basis always
+   puts it on the next one. */
 .mapping-split.pickers-collapsed .mapping-scope-titlerow {
-  flex-wrap: nowrap;
-  align-items: flex-start;
+  flex-wrap: wrap;
+  align-items: center;
+  row-gap: 0;
 }
 
 .mapping-split.pickers-collapsed .mapping-scope-title {
@@ -3397,13 +3411,13 @@ label.merge-list-item {
 }
 
 /* A cell in the picker's field grid, beside the search the second one
-   governs. Stacked and bottom-aligned so the pair sits against the control
-   row rather than the label row above it. */
+   governs. The pair sits on one line, bottom-aligned so it lands against
+   the control row rather than the label row above it. */
 .mapping-scope-toggles {
   display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  gap: 8px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 8px 16px;
   margin-bottom: 0;
   min-width: 0;
 }
