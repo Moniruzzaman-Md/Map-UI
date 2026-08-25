@@ -363,7 +363,15 @@
         <button type="button" class="supplier-tabs-arrow" id="summaryTabsPrev" aria-label="Scroll suppliers left" hidden>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
-        <div class="supplier-tabs" id="summarySupplierTabs" role="tablist" aria-label="Supplier"></div>
+        <div class="supplier-tabs" id="summarySupplierTabs" role="tablist" aria-label="Supplier">
+          <!-- "No supplier matches that name" belongs on the strip's own
+               line, not under it: when the filter matches nothing, this line
+               is what the strip has to show, and a message below an empty
+               strip leaves a blank row standing where the answer should be.
+               It is a static child here, which is why the tab render below
+               uses insertAdjacentHTML rather than innerHTML. -->
+          <div class="supplier-tabs-empty" id="summarySupplierEmpty" hidden>No supplier matches that name</div>
+        </div>
         <button type="button" class="supplier-tabs-arrow" id="summaryTabsNext" aria-label="Scroll suppliers right" hidden>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
@@ -372,8 +380,6 @@
           <input type="text" id="summaryTabsSearch" placeholder="Find supplier..." />
         </div>
       </div>
-      <div class="supplier-tabs-empty" id="summarySupplierEmpty" hidden>No supplier matches that name</div>
-
       <div id="summaryPanelBody"></div>
     </div>
 
@@ -849,12 +855,18 @@
   // answered without asking each one in turn; the strip therefore carries
   // no counts and marks nothing as empty, and each tab is a question the
   // user asks rather than one answered up front. See the dev notes.
-  summarySupplierTabs.innerHTML = Object.keys(SUPPLIER_LABELS)
-    .map(
-      (key) =>
-        `<button type="button" class="supplier-tab" role="tab" aria-selected="false" data-summary-supplier="${key}" title="${SUPPLIER_LABELS[key]}"><span class="supplier-tab-label">${SUPPLIER_LABELS[key]}</span></button>`
-    )
-    .join("");
+  // Inserted before the strip's static "no match" line rather than over it
+  // — that line lives inside the strip so it can take the tabs' own place
+  // when the filter empties them.
+  summarySupplierTabs.insertAdjacentHTML(
+    "afterbegin",
+    Object.keys(SUPPLIER_LABELS)
+      .map(
+        (key) =>
+          `<button type="button" class="supplier-tab" role="tab" aria-selected="false" data-summary-supplier="${key}" title="${SUPPLIER_LABELS[key]}"><span class="supplier-tab-label">${SUPPLIER_LABELS[key]}</span></button>`
+      )
+      .join("")
+  );
 
   // `tabKey` is "hotels" or a supplier key — one panel serves both, so
   // switching between a city's hotels and one of its suppliers is the same

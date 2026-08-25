@@ -3167,10 +3167,11 @@ label.merge-list-item {
   width: 152px;
 }
 
-/* Two buttons on this page, so its cluster runs across rather than down:
+/* Two buttons on these pages, so the cluster runs across rather than down:
    stacked, the second button would hang into the panel below and sit on top
    of the picker's own toggles. Side by side, the whole cluster stays in the
    band between the topbar and the panel. */
+#cityMappingMain .mapping-nav-fabs,
 #hotelMappingMain .mapping-nav-fabs {
   flex-direction: row;
   align-items: center;
@@ -3446,14 +3447,20 @@ label.merge-list-item {
 }
 
 /* Same role, city-mapping.html's "Map Supplier Cities" panel — its Already
-   Mapped list is now scroll-paginated too (see renderAlreadyMappedSection/
+   Mapped list is scroll-paginated too (see renderAlreadyMappedSection/
    observeAlreadyMappedScrollStatus), so it needs the same bounded,
    independently-scrollable box to serve as the IntersectionObserver root;
-   New Selection matched to the same height for visual balance (plain
-   scroll, not paginated, same reasoning as #hotelNewSelectionList above). */
+   New Selection matched to it (plain scroll, not paginated).
+
+   `flex: 1` rather than the fixed 260px this used to carry: these two are
+   an accordion now (see the name="" on the <details> in city-mapping.html),
+   so exactly one is ever open, and a fixed height left it scrolling its own
+   rows with dead space underneath while the closed section's header was the
+   only other thing in the column. */
 #alreadyMappedList,
 #newSelectionList {
-  max-height: 260px;
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
 }
 
@@ -3832,8 +3839,6 @@ label.merge-list-item {
   align-self: center;
 }
 
-/* Only rendered when a supplier filter matches nothing; sits just under the
-   strip's border, which no longer has a margin of its own to sit inside. */
 /* The same strip inside the Save preview: no arrows or filter box there
    (a session spans a handful of suppliers, not fifty), so it just scrolls
    if it ever needs to, and gets the margin the panel version doesn't. */
@@ -3970,10 +3975,21 @@ label.merge-list-item {
   align-self: center;
 }
 
+/* Sits inside the scrolling strip, on the line the tabs would occupy, so a
+   filter that matches nothing answers in place instead of leaving an empty
+   strip with a message stranded under it. Padded to the tabs' own vertical
+   rhythm so the bar keeps its height either way, and :not([hidden]) rather
+   than a bare display, so the attribute still hides it. */
+.supplier-tabs-empty:not([hidden]) {
+  display: flex;
+  align-items: center;
+}
+
 .supplier-tabs-empty {
+  padding: 10px 12px;
   font-size: 13px;
   color: var(--text-muted);
-  margin: 10px 0 0;
+  white-space: nowrap;
 }
 
 .supplier-tab:hover {
@@ -4238,16 +4254,15 @@ label.merge-list-item {
   font-size: 12px;
 }
 
-/* Splits the search box and the Save button onto one row, search half-width
-   and left, Save right — replaces the old arrangement (full-width search box
-   on its own row, Save Mapping full-width below both columns). Only 2
-   children, so space-between alone pushes them to opposite ends;
-   .mapping-search-half caps the search box's own width so it doesn't just
-   grow to fill the leftover space. */
+/* The control row above a mapping list: search box left, its filter toggle
+   at the row's right end. The filler track is the one that grows, so the
+   toggle keeps the same edge whatever either control's width turns out to
+   be. .mapping-search-half caps the search box's own width so it doesn't
+   grow to fill its track. */
 .mapping-search-actions-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto;
   align-items: center;
-  justify-content: space-between;
   gap: 16px;
   margin-bottom: 14px;
 }
@@ -4258,35 +4273,22 @@ label.merge-list-item {
   margin-bottom: 0;
 }
 
-/* A checkbox filter sitting on a list's own label line rather than in a
-   toolbar. Auto margins on both sides centre it in the space between the
-   list's label and the pending-changes summary, instead of hugging one end
-   of the row. */
+/* A checkbox filter sitting on a list's control row rather than in a
+   toolbar — the row's right-hand track, opposite the search box it
+   narrows. */
 /* `label.` in the selector is load-bearing: .toggle-row's own
    margin-bottom:16px is declared later in this file at equal specificity,
    and inside a centred row that bottom margin lifts the toggle ~8px off its
    neighbours' line. */
 .mapping-search-actions-row label.mapping-inline-toggle {
-  margin: 0 auto;
+  margin: 0;
   font-size: 13px;
   font-weight: 500;
   white-space: nowrap;
 }
 
-/* The two columns' label lines have to share a baseline: the right one is
-   22px tall because it carries a checkbox, the left one only 18px, and with
-   both top-aligned the left label sat 3px high. Matching min-heights and
-   centring puts the two labels on the same line. */
-.mapping-list-group > label,
-.mapping-search-actions-row {
-  display: flex;
-  align-items: center;
-  min-height: 22px;
-}
-
-/* Change-detection summary, sitting directly above the Save button like a
-   label — matches "Supplier Cities" label's weight (same as .form-group
-   label) rather than the muted, small .hint styling. */
+/* Change-detection summary — matches the section header's label weight
+   rather than the muted, small .hint styling. */
 .mapping-save-summary {
   font-size: 13px;
   font-weight: 600;
