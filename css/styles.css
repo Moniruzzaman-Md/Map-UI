@@ -3123,12 +3123,39 @@ label.merge-list-item {
   align-items: center;
 }
 
-/* Full Screen hides the page title, so the panel rises to meet the cluster
-   and the toggles at the right picker's corner end up underneath it. The
-   cluster moves up into the gap under the topbar instead — 70 + its 38px
-   height still clears the panel's own top edge. */
+/* Full Screen means exactly that: the panel takes the whole display, so the
+   page's own padding goes and the card outline goes with it — a card reads
+   as a card only when there is page around it. The one thing kept is a slim
+   strip along the top for the floating cluster, which is the way back out
+   (and holds Save on hotel-mapping): it has to stay clear of the panel's
+   own top-right controls rather than float over them. 6 + the 38px button
+   height + 6 = 50. */
+#cityMappingMain.chrome-hidden,
+#hotelMappingMain.chrome-hidden {
+  padding: 50px 0 0;
+}
+
+#cityMappingMain.chrome-hidden .mapping-nav-fabs,
 #hotelMappingMain.chrome-hidden .mapping-nav-fabs {
-  top: 70px;
+  top: 6px;
+  right: 16px;
+}
+
+/* This margin is the gap under the page title, and the title is hidden. */
+#cityMappingMain.chrome-hidden .mapping-page-layout,
+#hotelMappingMain.chrome-hidden .mapping-page-layout {
+  margin-top: 0;
+}
+
+/* Only the top border survives — it is the line under the control strip.
+   The others would draw a box around the edges of the display. */
+#cityMappingMain.chrome-hidden .mapping-panel,
+#hotelMappingMain.chrome-hidden .mapping-panel {
+  border-radius: 0;
+  border-left: 0;
+  border-right: 0;
+  border-bottom: 0;
+  box-shadow: none;
 }
 
 /* hotel-mapping.html's Save, in the same floating cluster: filled navy
@@ -3179,6 +3206,18 @@ label.merge-list-item {
 /* Same Full Screen toggle, scoped to hotel-mapping.html's own <main>. */
 #hotelMappingMain.chrome-hidden .page-header,
 #hotelMappingMain.chrome-hidden .page-divider {
+  display: none;
+}
+
+/* Full Screen takes the app's own top bar away as well, so the display is
+   left with the mapping page's work panel and nothing else (bar the
+   floating cluster that exits again). The topbar is a sibling of the page's
+   <main>, not a descendant, so this reaches it with :has() on the shell —
+   still keyed to the one <main> id belonging to the page doing the
+   toggling, so it can never hide the topbar on any other screen. Add the
+   page's own id here when a third screen gets the toggle. */
+.app-shell:has(#cityMappingMain.chrome-hidden) > .topbar,
+.app-shell:has(#hotelMappingMain.chrome-hidden) > .topbar {
   display: none;
 }
 

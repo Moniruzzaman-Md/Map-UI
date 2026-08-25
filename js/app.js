@@ -543,11 +543,13 @@ function debounce(fn, delay = 350) {
 }
 
 // ---------- "Full Screen" toggle (mapping screens) ----------
-// Three things at once, deliberately: it hides the page title/divider inside
-// the app (the original behaviour), collapses the sidebar, and puts the
+// Three things at once, deliberately: it hides the app's own chrome — the
+// page title/divider and the topbar — collapses the sidebar, and puts the
 // browser itself into real fullscreen, the same state F11 gives — so the
 // mapping checklists get the whole display instead of just the space the
-// page header was using.
+// page header was using. Which chrome the .chrome-hidden class actually
+// hides is CSS's business (see the #...Main.chrome-hidden rules in
+// styles.css); this only carries the class onto the page's own <main>.
 //
 // The two can fall out of sync — the browser's own exits (Esc, F11, the
 // window losing fullscreen) don't route through this button — so the
