@@ -784,8 +784,8 @@ button {
    .filter-select itself, which doesn't reach that wrapper, so without this
    the Country/State/City/Star Rating/Status fields visibly failed to fill
    their grid column while the ID/Provider ID search boxes did — same
-   dead-space issue #hotelMappingBody .toolbar-filters already works around
-   for hotel-mapping.html's own filter row. */
+   dead-space issue .mapping-pin-fields already works around for the mapping
+   screens' own pickers. */
 .filter-field .searchable-select {
   display: block;
   width: 100%;
@@ -1279,6 +1279,12 @@ table.data-table {
   justify-content: center;
   width: 32px;
   height: 32px;
+  /* Nothing in here is ever meant to spill: it holds one centered icon in a
+     fixed 32px box. Without this the button reports a scroll width far wider
+     than itself, which bubbles up and puts a phantom horizontal scrollbar on
+     any bounded list containing one (the mapping screens' New Selection
+     boxes). */
+  overflow: hidden;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border-color);
   background: #fff;
@@ -3108,6 +3114,45 @@ label.merge-list-item {
   width: 152px;
 }
 
+/* Two buttons on this page, so its cluster runs across rather than down:
+   stacked, the second button would hang into the panel below and sit on top
+   of the picker's own toggles. Side by side, the whole cluster stays in the
+   band between the topbar and the panel. */
+#hotelMappingMain .mapping-nav-fabs {
+  flex-direction: row;
+  align-items: center;
+}
+
+/* Full Screen hides the page title, so the panel rises to meet the cluster
+   and the toggles at the right picker's corner end up underneath it. The
+   cluster moves up into the gap under the topbar instead — 70 + its 38px
+   height still clears the panel's own top edge. */
+#hotelMappingMain.chrome-hidden .mapping-nav-fabs {
+  top: 70px;
+}
+
+/* hotel-mapping.html's Save, in the same floating cluster: filled navy
+   rather than the cluster's usual white, since it is the page's one
+   committing action and the button beside it only changes the view. Matches
+   .mapping-chrome-toggle's width so the two read as one pair. */
+.mapping-save-fab {
+  width: 152px;
+  justify-content: center;
+  background: var(--navy);
+  border-color: var(--navy);
+  color: var(--text-on-navy);
+}
+
+.mapping-save-fab svg,
+.mapping-save-fab:hover svg {
+  color: var(--text-on-navy);
+}
+
+.mapping-save-fab:hover {
+  background: var(--navy-light);
+  border-color: var(--navy-light);
+}
+
 /* "Full Screen" toggle: swaps its own icon based on .active (not the
    currently-viewed-section highlight above, which is applied to the other
    two buttons only) — expand icon when off, collapse icon when on. */
@@ -3137,14 +3182,14 @@ label.merge-list-item {
   display: none;
 }
 
-/* Makes hotel-mapping.html's single panel body a flex column so its
-   already-shared .mapping-layout-bottom (flex:1;min-height:0, see below)
-   actually takes effect here too — without this, the grid just sizes to
-   its own content instead of filling the panel, and the right-hand hotel
-   checklist can't grow past its old fixed max-height. */
+/* hotel-mapping.html's panel body is a .mapping-work-panel body like
+   city-mapping.html's, so it already picks up that rule's flex column — but
+   not its padding: this page's body is the 2x2 split, whose picker bands
+   and dividing rules have to reach the card's own edges. Each cell carries
+   its own padding instead (see .mapping-split-header / .mapping-split >
+   .mapping-bottom-col). */
 #hotelMappingBody {
-  display: flex;
-  flex-direction: column;
+  padding: 0;
 }
 
 /* Green/red left bar replacing the old "Active"/"Inactive" text pill on
@@ -3216,49 +3261,240 @@ label.merge-list-item {
   overflow-y: auto;
 }
 
-/* hotel-mapping.html only: fill the filter row as an even 2-column grid
-   (Country/State, then City/checkbox-group) instead of the shared
-   .toolbar-filters flex-wrap behavior, which left dead space whenever a
-   fixed-width dropdown wrapped alone onto its own line. minmax(0, 1fr) —
-   not bare 1fr — for the same reason as .mapping-layout above: a bare 1fr
-   track's minimum width is its content's natural size, which would stop a
-   column from ever shrinking below a dropdown's intrinsic width. */
-#hotelMappingBody .toolbar-filters {
-  display: grid;
-  /* Fixed --control-width columns rather than 1fr: stretching a dropdown to
-     254px to fill its share of the row is the same ragged-width problem the
-     control tokens exist to prevent. */
-  grid-template-columns: repeat(2, var(--control-width));
-  gap: 12px 20px;
+/* hotel-mapping.html's work panel: a 2x2 grid rather than a header row
+   above two columns — each column owns its picker and the list that picker
+   feeds, so the two questions on this screen are two visible halves. Row 1
+   holds both pickers, which is what keeps their bottom rules on one line
+   whatever either one's height turns out to be; row 2 holds the two lists
+   and takes the remaining height. No gap between the columns: the rules do
+   the separating, and a gap would leave them floating in dead space. */
+.mapping-split {
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 0;
+  margin-top: 0;
 }
 
-/* Every direct child (each searchable-select wrapper, and .toggle-group)
-   stretches to fill its column — overrides the shared .searchable-select's
-   display:inline-block, which otherwise shrink-wraps to the trigger
-   button's own width and leaves the column's remainder empty. */
-#hotelMappingBody .toolbar-filters > * {
-  width: 100%;
+/* Vertical rule down the whole panel: the right column's two cells each
+   carry it, so it runs unbroken through both rows. */
+.mapping-split > :nth-child(2n) {
+  border-left: 1px solid var(--border-color);
+}
+
+/* Collapsing the pickers: one control folds both away to their headings, so
+   the two lists take the height the fields were using. One control, not one
+   per picker — they share the grid's first row, so a picker collapsed alone
+   frees nothing. */
+/* A labelled button, not a bare chevron: on its own in a panel corner a
+   glyph reads as decoration, and this one changes the whole panel's shape.
+   Bordered pill so it is visibly a control against the header's white. */
+.picker-collapse-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 10px;
+  margin-left: auto;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-pill);
+  background: var(--bg-card);
+  color: var(--text-dark);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.picker-collapse-toggle:hover {
+  background: var(--bg-panel);
+}
+
+.picker-collapse-toggle .chevron {
+  color: var(--text-muted);
+}
+
+.picker-collapse-toggle .chevron {
+  transition: transform 0.15s ease;
+  transform: rotate(180deg);
+}
+
+.mapping-split.pickers-collapsed .picker-collapse-toggle .chevron {
+  transform: none;
+}
+
+.mapping-split.pickers-collapsed .mapping-pin-fields,
+.mapping-split.pickers-collapsed .mapping-scope-fields {
+  display: none;
+}
+
+.mapping-split.pickers-collapsed .mapping-scope-title,
+.mapping-split.pickers-collapsed .mapping-scope-titlerow {
+  margin-bottom: 0;
+}
+
+/* What the hidden fields hold, shown only while they are hidden — a
+   collapsed picker still has to say what it is working on. */
+.mapping-scope-summary {
+  display: none;
+}
+
+/* Its own line under the heading rather than trailing it: beside the
+   heading it had only the leftover width and lost the end of itself to an
+   ellipsis, and the end is where the search query and the toggles land. */
+.mapping-split.pickers-collapsed .mapping-scope-summary {
+  display: block;
+  flex: 1 1 100%;
+  min-width: 0;
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+/* The heading keeps its own line and the button stays on it: the row does
+   not wrap, the heading claims the width, and only the summary inside it
+   breaks to a second line. */
+.mapping-split.pickers-collapsed .mapping-scope-titlerow {
+  flex-wrap: nowrap;
+  align-items: flex-start;
+}
+
+.mapping-split.pickers-collapsed .mapping-scope-title {
+  flex: 1 1 auto;
   min-width: 0;
 }
 
-/* The shared .filter-select's 190px min-width floor is exactly what caused
-   the dead space (a short "All Cities" label still reserved a rigid 190px
-   box); dropped to 0 here, scoped to this page only, so the column can
-   shrink to fit its grid track. .searchable-select-label's existing
-   text-overflow:ellipsis already handles long country/state/city names. */
-#hotelMappingBody .filter-select {
-  width: 100%;
+/* Top-aligned, not centred: the two headings and the two field rows then
+   start on the same lines, which is what makes the pickers read as a pair.
+   Centring the shorter one against the taller row staggers all four. */
+.mapping-split-header {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-color);
   min-width: 0;
 }
 
-/* Groups the 2 checkboxes into one grid cell so the filter row has exactly
-   4 logical items (Country, State, City, toggle-group) — a clean 2x2 grid
-   with no orphaned 5th cell. */
-#hotelMappingBody .toggle-group {
+.mapping-split > .mapping-bottom-col {
+  padding: 14px 20px 20px;
+}
+
+/* The heading line, with the right picker's two toggles riding its far end.
+   Wraps rather than compressing: on a narrow panel the toggles drop under
+   the heading instead of squeezing it. */
+.mapping-scope-titlerow {
   display: flex;
   align-items: center;
-  gap: 12px;
   flex-wrap: wrap;
+  gap: 6px 16px;
+  margin-bottom: 12px;
+}
+
+.mapping-scope-titlerow .mapping-scope-title {
+  margin-bottom: 0;
+}
+
+/* A cell in the picker's field grid, beside the search the second one
+   governs. Stacked and bottom-aligned so the pair sits against the control
+   row rather than the label row above it. */
+.mapping-scope-toggles {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-bottom: 0;
+  min-width: 0;
+}
+
+.mapping-scope-toggles .mapping-inline-toggle {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Names what its own dropdowns do. Carries the weight of a section
+   heading rather than a field label, since the field labels beneath it
+   ("State", "City") repeat between the two groups. */
+.mapping-scope-title {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 12px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+/* Numbered because the groups are ordered: nothing can be found for step 2
+   until step 1 names a country. */
+.mapping-scope-step {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--navy);
+  color: var(--text-on-navy);
+  font-size: 11px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* The country the second group inherits from the first. Reads as part of
+   the heading once it holds a real country; muted and lighter while it is
+   still the "pick a country" placeholder. */
+.mapping-scope-country {
+  color: var(--navy);
+}
+
+.mapping-scope-country.is-empty {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+/* Both pickers lay their fields out on the same auto-fit grid of fixed
+   --control-width columns: each column is half the panel wide, so a picker
+   fits two or three fields on a line depending on the display, and wraps
+   the rest onto the next line at full control width rather than squeezing
+   every dropdown narrower than the project's standard. */
+.mapping-scope-fields,
+.mapping-split-header .mapping-pin-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, var(--control-width));
+  gap: 12px 16px;
+}
+
+.mapping-scope-fields .form-group {
+  margin-bottom: 0;
+  min-width: 0;
+}
+
+/* Same wrapper-stretch fix .mapping-pin-fields needs: .searchable-select is
+   inline-block and would otherwise shrink-wrap each trigger to its current
+   label, rendering the two columns at two different widths. */
+.mapping-scope-fields .searchable-select {
+  display: block;
+  width: 100%;
+}
+
+.mapping-scope-fields .filter-select {
+  width: 100%;
+  min-width: 0;
+}
+
+/* The hotel-name search is one more field in this grid, so it fills its
+   column like the selects do — which means overriding both .toolbar-search's
+   240px min-width floor and .mapping-panel .toolbar-search's fixed
+   --control-width, neither of which knows it is in a grid track now. */
+.mapping-scope-fields .toolbar-search {
+  width: 100%;
+  min-width: 0;
+  margin-bottom: 0;
 }
 
 /* Makes the work panel's body a bounded flex column instead of the default
@@ -3742,6 +3978,17 @@ label.merge-list-item {
   display: none;
 }
 
+/* A pending-changes line riding a section header (hotel-mapping.html's
+   "Already Mapped"): pushed to the header's own right edge, just inside the
+   chevron. Keeps .mapping-save-summary's dark text against the header's
+   colored label so the two read as separate facts, not one sentence. */
+.mapping-collapsible-header .mapping-save-summary {
+  margin-left: auto;
+  padding-left: 12px;
+  margin-right: 10px;
+  text-align: right;
+}
+
 .mapping-collapsible-header .chevron {
   color: var(--text-muted);
   transition: transform 0.15s ease;
@@ -3859,8 +4106,21 @@ label.merge-list-item {
   padding-right: 10px;
 }
 
-/* Small inline "Saved"/"New" tag next to a row's name in the bottom-left
-   Selected Supplier Cities list and the Save preview's sections. */
+/* Star rating beside a hotel's name on hotel-mapping.html's list rows —
+   the count plus one star, not a row of repeated stars, which at this size
+   reads as a block of noise next to the name it is qualifying. Sized and
+   coloured down so the name still leads. */
+.hotel-star-rating {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* Small inline tag next to a row's name in a mapping list — currently the
+   "Primary" marker on hotel-mapping.html's Already Mapped rows, saying that
+   the pinned city is that hotel's own primary city rather than one of its
+   additional ones. */
 .pill-tag {
   padding: 2px 8px;
   font-size: 10px;
@@ -3910,6 +4170,36 @@ label.merge-list-item {
   flex-direction: column;
 }
 
+/* A modal title with a line under it. The header is a flex row of title and
+   close button, so the two title lines need a block of their own to stack
+   in; min-width:0 lets a long subtitle ellipsize rather than push the close
+   button out of the box. */
+.modal-title-block {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+}
+
+/* Names the pinned city the review's buckets are all about
+   (hotel-mapping.html), on the title's own line after a divider. Truncates
+   rather than wrapping, so the header stays one line at any width. */
+.preview-scope-line {
+  margin: 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.preview-scope-line::before {
+  content: "|";
+  margin-right: 10px;
+  color: var(--border-color);
+}
+
 /* Shared by city-mapping.html's and hotel-mapping.html's own save-preview
    popups (#mappingPreviewModal / #hotelMappingPreviewModal) — the only 2
    files that use this id. Each bucket stretches to fill the tall box and
@@ -3944,6 +4234,28 @@ label.merge-list-item {
   align-items: center;
   justify-content: center;
   min-height: 120px;
+}
+
+
+/* A save the backend refused, reported in its own popup over the review.
+   One line of why, then the records it applies to — no banner tint: the
+   popup is already the interruption, and colouring it red as well would say
+   "something broke" about a rule working exactly as intended. */
+.preview-reject-line {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* The refused hotels as rows, in the same shape the review's own buckets
+   use — they are the same records, and a name in a bullet list would read
+   as a different kind of thing. Bounded so a long refusal scrolls inside
+   the popup instead of stretching it. */
+.preview-reject-list {
+  margin-top: 12px;
+  max-height: 220px;
+  overflow-y: auto;
+  background: var(--bg-card);
 }
 
 .preview-section {
@@ -4061,9 +4373,9 @@ label.merge-list-item {
    that wrapper is display:inline-block — so it shrink-wraps to whatever
    label it currently holds, which is what made these three columns render
    at three different widths ("State" narrow, "New York - New York" wide).
-   Same fix .filter-field and #hotelMappingBody .toolbar-filters already
-   use: stretch the wrapper, and drop .filter-select's 190px min-width floor
-   so a column can also shrink to its track. */
+   Same fix .filter-field and .mapping-scope-fields already use: stretch the
+   wrapper, and drop .filter-select's 190px min-width floor so a column can
+   also shrink to its track. */
 .mapping-pin-fields .searchable-select {
   display: block;
   width: 100%;
@@ -4079,15 +4391,6 @@ label.merge-list-item {
   overflow-y: auto;
   flex: 1;
   min-height: 0;
-}
-
-.pinned-city-card {
-  margin-top: 18px;
-  padding: 16px;
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
-  background: var(--bg-panel);
-  flex-shrink: 0;
 }
 
 /* add-city.html's New City section: compact single-line confirmation shown
@@ -4125,29 +4428,6 @@ label.merge-list-item {
 
 .new-city-created-banner .btn {
   flex-shrink: 0;
-}
-
-.pinned-city-card .pinned-city-name {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--text-dark);
-}
-
-.pinned-city-card .pinned-city-meta {
-  font-size: 13px;
-  color: var(--text-muted);
-  margin-top: 2px;
-}
-
-/* Not scoped under .pinned-city-card — also used standalone for a
-   label+button action row outside a pinned-city summary (e.g. the Save
-   Mapping row on city-mapping.html). */
-.pinned-city-actions {
-  margin-top: 12px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
 }
 
 /* Same toggle sitting inside a .toolbar-filters row of dropdowns (e.g.

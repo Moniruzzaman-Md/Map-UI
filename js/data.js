@@ -764,6 +764,44 @@ function resolveHotelLocation(hotel) {
   return { city: hotel.city, state: hotel.state, country: hotel.country };
 }
 
+// ---------- A hotel's system cities ----------
+// A hotel belongs to a SET of system cities, and that set is currently kept
+// in two fields: `systemCityId` is the PRIMARY city (the one its own record
+// names — what Add/Edit Hotel sets and what resolveHotelLocation displays
+// above), and `mappedCityIds` holds every additional one. They are one
+// relationship stored two ways, so anything asking "does this hotel belong
+// to that city" has to ask both — reading only mappedCityIds is what made
+// the Hotel Mapping screen list a city's own hotels as unmapped.
+// city-system.html's Summary already treats them this way (its "direct"
+// bucket is rendered as primary: true).
+function hotelCityIds(hotel) {
+  const primary = hotel.systemCityId === null || hotel.systemCityId === undefined ? [] : [hotel.systemCityId];
+  return [...primary, ...(hotel.mappedCityIds || []).filter((id) => id !== hotel.systemCityId)];
+}
+
+function isHotelMappedToCity(hotel, cityId) {
+  return hotelCityIds(hotel).includes(cityId);
+}
+
+function isHotelPrimaryCity(hotel, cityId) {
+  return hotel.systemCityId === cityId;
+}
+
+// A system hotel must always belong to at least one system city, so an unmap
+// that would take away its last one is refused. This is a rule of the record
+// itself, not of any one screen: applyHotelCityMap() below enforces it and
+// returns false rather than trusting its caller to have checked. A caller
+// unmapping several hotels at once should ask hotelUnmapRefusals() first, so
+// it can report every refused row together instead of discovering them one
+// at a time.
+function wouldOrphanHotel(hotel, cityId) {
+  return isHotelMappedToCity(hotel, cityId) && hotelCityIds(hotel).length === 1;
+}
+
+function hotelUnmapRefusals(hotels, cityId) {
+  return hotels.filter((hotel) => wouldOrphanHotel(hotel, cityId));
+}
+
 // Full disambiguating label for a system hotel, mirroring getSystemCityLabel.
 function getSystemHotelLabel(id) {
   const hotel = SYSTEM_HOTELS.find((h) => h.id === id);
@@ -1477,8 +1515,11 @@ hydrateObject(supplierHotels, loadFromStorage("supplierHotels"));
 // one entry per batch, nothing to group there.
 function applyHotelCityMap(hotel, city, mapped, groupId) {
   hotel.mappedCityIds = hotel.mappedCityIds || [];
-  const alreadyMapped = hotel.mappedCityIds.includes(city.id);
-  if (mapped === alreadyMapped) return;
+  // Both fields count as "mapped" — see hotelCityIds() above.
+  const alreadyMapped = isHotelMappedToCity(hotel, city.id);
+  if (mapped === alreadyMapped) return true;
+  // Refused, and nothing is written: this city is the only one the hotel has.
+  if (!mapped && wouldOrphanHotel(hotel, city.id)) return false;
 
   const hotelLabel = getSystemHotelHistoryLabel(hotel.id);
   const cityLabel = getSystemCityHistoryLabel(city.id);
@@ -1486,7 +1527,16 @@ function applyHotelCityMap(hotel, city, mapped, groupId) {
   const timestamp = new Date();
 
   if (mapped) {
-    hotel.mappedCityIds.push(city.id);
+    // A hotel with no city yet takes this one as its primary; otherwise the
+    // new link is an additional city and the existing primary stands.
+    if (hotel.systemCityId === null || hotel.systemCityId === undefined) hotel.systemCityId = city.id;
+    else hotel.mappedCityIds.push(city.id);
+  } else if (hotel.systemCityId === city.id) {
+    // Removing the primary promotes the next city the hotel still has — the
+    // primary must always be one of its own mapped cities. There is always
+    // one left to promote: the case where this was the hotel's only city was
+    // refused above.
+    hotel.systemCityId = hotel.mappedCityIds.shift();
   } else {
     hotel.mappedCityIds = hotel.mappedCityIds.filter((id) => id !== city.id);
   }
@@ -1509,6 +1559,7 @@ function applyHotelCityMap(hotel, city, mapped, groupId) {
 
   saveToStorage("SYSTEM_HOTELS", SYSTEM_HOTELS);
   saveToStorage("SYSTEM_CITIES", SYSTEM_CITIES);
+  return true;
 }
 
 // Hotel-based Summary for a system city: hotels attached directly (via Add
