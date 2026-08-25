@@ -4211,6 +4211,15 @@ label.merge-list-item {
   white-space: nowrap;
 }
 
+/* Divides the hotel name from the star rating that follows it. Lighter and
+   unbolded against everything either side of it: a rule doing a rule's job,
+   not a third thing to read on the line. */
+.name-line-sep {
+  color: rgba(107, 107, 133, 0.35);
+  font-weight: 400;
+  margin-right: 5px;
+}
+
 /* "MTC - n" on hotel-mapping.html's rows: how many system cities that hotel
    is already in. It takes the star rating's type but sits fainter still —
    --text-muted at 55% — because it is a number you go looking for rather
@@ -4227,6 +4236,21 @@ label.merge-list-item {
   text-decoration: none;
   border-bottom: 1px dotted currentColor;
   cursor: help;
+}
+
+/* An Already Mapped row queued for unmap. The button that used to say so in
+   words is an icon now, so the row carries the state instead — and better
+   than the word did, which sat alone at the row's right edge: struck-out
+   name, faint red wash. Deliberately a wash and not the solid Active/
+   Inactive edge bar the checklist rows use — this is a pending intention,
+   not a fact about the hotel. */
+.merge-list-item--queued-unmap {
+  background: rgba(230, 65, 77, 0.06);
+}
+
+.merge-list-item--queued-unmap .merge-list-name-text {
+  text-decoration: line-through;
+  color: var(--text-muted);
 }
 
 /* Only this word goes red, not the count beside it: the count is the same

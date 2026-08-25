@@ -142,7 +142,7 @@
           <li>One of a hotel's cities is its <strong>primary city</strong> — the one the hotel's own record names. <strong>Already Mapped</strong> lists both kinds and tags the row <strong>Primary</strong> when the pinned city is that hotel's primary. Unmapping a primary hands the primary to another of that hotel's cities. A hotel cannot be unmapped from its <em>only</em> city — that save is refused and nothing in it is applied. A popup opens over the review listing the refused hotels: <strong>Keep them mapped</strong> drops them from the Unmap list and hands you back to the review, now rebuilt around what is left; <strong>Back to review</strong> leaves the batch as it is. Either way nothing is written — the save still happens only on <strong>Confirm &amp; Save</strong>.</li>
           <li>The checklist loads 50 hotels at a time — scroll to the bottom of the list to load more of the current filter/search results. Each row shows the hotel's star rating and its <strong>MTC</strong> count (Mapped To Cities — how many system cities that hotel is in, its own city included) beside its name, and its location underneath, and its left edge is green for an Active hotel, red for Inactive.</li>
           <li>Tick <strong>Fuzzy</strong> to match a hotel name loosely, forgiving of typos or skipped letters, instead of an exact substring match. It applies to the <strong>Hotel name</strong> box in the right-hand picker, this page's one search.</li>
-          <li>On the left, <strong>Already Mapped</strong> lists the hotels currently mapped to the pinned city. Its <strong>Unmap</strong> button queues a removal without the row disappearing; until Save the button reads <strong>Undo</strong> and the removal can be reversed. Its rows carry the same <strong>MTC</strong> count as the checklist; once a row is queued for unmap the count shows the pending arithmetic instead — <strong>MTC - (3 - 1)</strong> — and a hotel whose only city is the pinned one reads <strong>MTC - (1 - 1) Orphan</strong> in red, that being the save the page refuses. It loads 50 at a time and has no search of its own — to find a particular hotel, search the checklist on the right, which holds the same hotels. <strong>New Selection</strong> lists fresh picks from the checklist on the right, and its rows show the same pending arithmetic the other way up — <strong>MTC - (2 + 1)</strong>. The two are an accordion: opening one collapses the other, so whichever section you are working in gets the column's full height.</li>
+          <li>On the left, <strong>Already Mapped</strong> lists the hotels currently mapped to the pinned city. Its <strong>Unmap</strong> button — the broken-link icon at the row's right, matching the icon button New Selection removes a row with — queues a removal without the row disappearing. A queued row says so on the row itself: struck-out name, faint red wash, and the icon becomes an undo arrow, reversible right up until Save. Its rows carry the same <strong>MTC</strong> count as the checklist; once a row is queued for unmap the count shows the pending arithmetic instead — <strong>MTC - (3 - 1)</strong> — and a hotel whose only city is the pinned one reads <strong>MTC - (1 - 1) Orphan</strong> in red, that being the save the page refuses. It loads 50 at a time and has no search of its own — to find a particular hotel, search the checklist on the right, which holds the same hotels. <strong>New Selection</strong> lists fresh picks from the checklist on the right, and its rows show the same pending arithmetic the other way up — <strong>MTC - (2 + 1)</strong>. The two are an accordion: opening one collapses the other, so whichever section you are working in gets the column's full height.</li>
           <li>Tick <strong>"Unmapped"</strong> above the list to hide the hotels already mapped to the pinned city. Their count is on the left, as <strong>Already Mapped</strong>'s own count.</li>
           <li><strong>Save</strong> (top right, floating beside Full Screen) opens a preview before anything is applied — the pinned city it is all going into, then <strong>Previously Saved</strong>, <strong>New Map</strong> and <strong>Unmap</strong> — and logs a Map/Unmap entry on both the hotel's and the pinned city's History. Hotels cannot be ticked until a city is pinned. After a save the pinned city and the hotel filters stay as they are.</li>
           <li><strong>"Full Screen"</strong> (top-right) hides the page title and the app's top bar, collapses the sidebar and puts the browser into full screen, the same as pressing F11 — the panel then fills the display edge to edge, with only the floating buttons above it. The sidebar returns to whatever state it was in when full screen ends. Press it again, or press Esc or F11, to leave full screen.</li>
@@ -642,8 +642,11 @@
   // Sits on the name line, as the count plus one star rather than a row of
   // repeated stars: five glyphs beside a hotel name compete with the name
   // itself, and every row in this list is a hotel so the unit is obvious.
+  // The rule carries inside this function rather than sitting in the row
+  // templates so it can never be left behind on a hotel with no rating,
+  // where it would divide the name from nothing.
   function hotelStarsHtml(h) {
-    return h.starRating ? `<span class="hotel-star-rating">${h.starRating}⭐</span>` : "";
+    return h.starRating ? `<span class="hotel-star-rating"><span class="name-line-sep">|</span>${h.starRating}⭐</span>` : "";
   }
 
   // How many system cities this hotel is in already — hotelCityIds(), so
@@ -889,6 +892,12 @@
     renderNewSelectionSection(newSelectionRows);
   }
 
+  // A chain with its middle link broken (unmap) and an undo arrow (the
+  // queued row's way back). Kept as constants rather than inline so the two
+  // states of one button are read side by side.
+  const ICON_UNLINK = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M9.5 7H7.5a5 5 0 0 0 0 10h2M14.5 7h2a5 5 0 0 1 0 10h-2M7.5 12h2.5M14 12h2.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`;
+  const ICON_UNDO = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M4.5 11h9a4.5 4.5 0 0 1 0 9H9M8.5 6.5L4 11l4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
   function alreadyMappedRowHtml(h) {
     // Still checked = still mapped (offer Unmap); unchecked here means
     // the user already queued it for unmap this session (offer Undo
@@ -901,13 +910,28 @@
     // hotel's other cities.
     const primaryHere = isHotelPrimaryCity(h, pinnedCityId);
     return `
-      <div class="merge-list-item">
+      <div class="merge-list-item${queuedForUnmap ? " merge-list-item--queued-unmap" : ""}">
         <span class="meta">
           <span class="merge-list-name" title="${h.name}"><span class="merge-list-name-text">${h.name}</span> ${hotelStarsHtml(h)} ${hotelMappedCountHtml(h, queuedForUnmap ? "unmap" : "")}${primaryHere ? ` <span class="pill neutral pill-tag">Primary</span>` : ""}</span>
           <span class="sub">${hotelMetaSub(h)}</span>
         </span>
         <div class="row-actions">
-          <button class="btn btn-secondary btn-compact" data-toggle-unmap-id="${h.id}">${queuedForUnmap ? "Undo" : "Unmap"}</button>
+          <!-- Icon, not a word: the same "take this row out" action one
+               section below (New Selection's ✕) is already a 32px
+               .action-btn, and this column is the page's narrowest. A
+               different glyph though — a broken link, not an ✕ — because
+               this one queues a change to a saved record while New
+               Selection's only discards an unsaved pick. What the word
+               used to carry, "is this row queued or not", is on the row
+               itself now (see .merge-list-item--queued-unmap): struck
+               name, tinted row. title="" as well as aria-label, since
+               .action-btn's own CSS tooltip is clipped by its
+               overflow:hidden. -->
+          <button class="action-btn" data-toggle-unmap-id="${h.id}"
+            title="${queuedForUnmap ? "Undo — keep this hotel mapped" : "Unmap from this city"}"
+            aria-label="${queuedForUnmap ? `Undo unmap for ${h.name}` : `Unmap ${h.name} from this city`}">
+            ${queuedForUnmap ? ICON_UNDO : ICON_UNLINK}
+          </button>
         </div>
       </div>`;
   }
