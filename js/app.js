@@ -632,7 +632,7 @@ function initFullScreenToggle(mainEl, btnEl, options = {}) {
 // Shared identity + formatting for history entries across all pages.
 const CURRENT_USER = { name: "Admin User", email: "admin@mynztrip.com" };
 
-const OPERATION_PILL_CLASS = { Create: "success", Edit: "info", "Status Change": "neutral", Map: "success", Remap: "info", Unmap: "danger" };
+const OPERATION_PILL_CLASS = { Create: "success", Edit: "info", "Status Change": "neutral", Map: "success", Remap: "info", Unmap: "danger", "Primary City Change": "info" };
 
 // The one reserved marker for "start a new line here" inside a history
 // description string — used when one description needs to show more than

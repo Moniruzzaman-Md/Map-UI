@@ -417,6 +417,61 @@ button {
   min-width: 0;
 }
 
+/* The city name and its secondary-mapping count share one line: the name
+   truncates as it always did, the count keeps its width. Without the flex
+   row the count would sit inside the truncating box and be the first thing
+   clipped off a long city name — which is the opposite of what a marker is
+   for. */
+.location-city-line {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+/* Sized to the name, not to the column, so the count sits against the name
+   it qualifies instead of drifting to the cell's far edge. It can still
+   shrink (min-width:0) when the name is longer than the cell, which is what
+   keeps the truncation behaviour the rest of the column has. */
+.location-city-line .truncatable--location {
+  flex: 0 1 auto;
+  width: auto;
+  min-width: 0;
+}
+
+/* How many further system cities this hotel is mapped to beyond the one
+   named beside it (hotel-system.html's Location column). Green because it
+   counts established mappings — a fact about the record, not a warning —
+   and small and weighted rather than a pill, so it reads as a marker on the
+   name rather than a second value in the cell. It is a button (it opens the
+   Mapped Cities drawer), stripped back to text: a bordered control here
+   would compete with the name it is qualifying, so the underline on hover
+   is what says it is clickable. */
+.location-secondary-count {
+  flex-shrink: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--success);
+  cursor: pointer;
+}
+
+.location-secondary-count:hover,
+.location-secondary-count:focus-visible {
+  text-decoration: underline;
+}
+
+/* The Mapped Cities drawer holds one list and nothing else, so it takes the
+   drawer's own height rather than .merge-list's default 220px box — that
+   cap exists for lists sitting inside a crowded panel, and here it would
+   scroll a handful of rows inside an otherwise empty drawer. */
+#mappedCitiesList {
+  max-height: none;
+}
+
 /* GPS cell (hotel-supplier.html's "GPS" column) — same icon + stacked
    two-line shape as .location-cell/.supplier-hotel-cell (Lat on top, Long
    below), just narrower since coordinates are always short. */

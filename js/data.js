@@ -657,6 +657,18 @@ SYSTEM_HOTELS.push({
 // existed, DEMO_NEW_CITY_ID may not resolve to anything at all until Reset
 // Demo Data (same caveat as rule 40) — skip quietly instead of crashing the
 // whole page on an undefined `.history`.
+// SYSTEM_CITIES was hydrated from localStorage before these blocks run (the
+// city section is earlier in this file), so on a browser that already has
+// saved data the city being seeded here may already carry the entry about to
+// be pushed — and a plain push would add another copy on every single load.
+// The hotel side has no such problem: SYSTEM_HOTELS is hydrated *after*
+// these blocks, so storage replaces whatever they pushed. Seeded history is
+// fixed data, so writing it is only ever right once.
+function pushSeedCityHistoryOnce(city, entry) {
+  const exists = city.history.some((h) => h.operation === entry.operation && h.description === entry.description);
+  if (!exists) city.history.push(entry);
+}
+
 const demoNewCityForHotelDemo = SYSTEM_CITIES.find((c) => c.id === DEMO_NEW_CITY_ID);
 const demoMappedHotel = SYSTEM_HOTELS.find((h) => h.id === 1);
 if (demoNewCityForHotelDemo && demoMappedHotel) {
@@ -668,12 +680,50 @@ if (demoNewCityForHotelDemo && demoMappedHotel) {
     userEmail: "farhan.ahmed@mynztrip.com",
     timestamp: new Date("2026-06-22T15:00:00"),
   });
-  demoNewCityForHotelDemo.history.push({
+  pushSeedCityHistoryOnce(demoNewCityForHotelDemo, {
     operation: "Map",
     description: getSystemHotelHistoryLabel(demoMappedHotel.id),
     userName: "Farhan Ahmed",
     userEmail: "farhan.ahmed@mynztrip.com",
     timestamp: new Date("2026-06-22T15:00:00"),
+  });
+}
+
+// Demo multi-secondary hotel — Grand Plaza New York keeps New York as its
+// own city (its primary, untouched) and is additionally mapped to five
+// others, so the demo has one hotel whose Location reads "+5" on
+// hotel-system.html and which turns up as Secondary in five different
+// cities' Summary and Hotel Mapping lists. One hotel with several
+// secondaries is a case the bulk seed below cannot produce — it gives every
+// hotel it touches exactly one — and it is the case the +n marker exists
+// for, so it is worth authoring by hand.
+// Five separate entries on the hotel and one on each city, no shared batch
+// id: in the real app each of these is its own save against its own pinned
+// city, and a batch id groups entries within one city's history, which is
+// not what these are.
+const demoMultiCityHotel = SYSTEM_HOTELS.find((h) => h.id === 0);
+if (demoMultiCityHotel) {
+  // Same guard as the Beverly Hilton demo above: on a browser holding saved
+  // data from before these cities existed, skip quietly rather than pushing
+  // history onto an undefined record.
+  [1, 2, 3, 4, 5].forEach((cityId) => {
+    const city = SYSTEM_CITIES.find((c) => c.id === cityId);
+    if (!city || cityId === demoMultiCityHotel.systemCityId) return;
+    demoMultiCityHotel.mappedCityIds.push(cityId);
+    demoMultiCityHotel.history.push({
+      operation: "Map",
+      description: getSystemCityHistoryLabel(cityId),
+      userName: "Farhan Ahmed",
+      userEmail: "farhan.ahmed@mynztrip.com",
+      timestamp: new Date("2026-06-23T11:20:00"),
+    });
+    pushSeedCityHistoryOnce(city, {
+      operation: "Map",
+      description: getSystemHotelHistoryLabel(demoMultiCityHotel.id),
+      userName: "Farhan Ahmed",
+      userEmail: "farhan.ahmed@mynztrip.com",
+      timestamp: new Date("2026-06-23T11:20:00"),
+    });
   });
 }
 
@@ -712,8 +762,9 @@ if (demoNewCityForHotelDemo && demoMappedHotel) {
   SYSTEM_HOTELS.forEach((hotel, i) => {
     if (i % 2 !== 0) return;
     pick++;
-    // Leave the hand-authored demo mapping (The Beverly Hilton -> Crestwood
-    // Bay) exactly as it is — it's referenced by name in the dev notes.
+    // Leave the hand-authored demo mappings (The Beverly Hilton -> Crestwood
+    // Bay, Grand Plaza New York's five secondaries) exactly as they are —
+    // they're referenced by name in the dev notes.
     if (hotel.mappedCityIds.length) return;
 
     const siblings = citiesByCountry[hotel.country.code] || [];
@@ -1556,6 +1607,82 @@ function applyHotelCityMap(hotel, city, mapped, groupId) {
     timestamp,
     groupId: resolvedGroupId,
   });
+
+  saveToStorage("SYSTEM_HOTELS", SYSTEM_HOTELS);
+  saveToStorage("SYSTEM_CITIES", SYSTEM_CITIES);
+  return true;
+}
+
+// Moves which of a hotel's cities is its PRIMARY — the one its own record
+// names, the one resolveHotelLocation() shows, and the one every "is this
+// city Primary or Secondary for that hotel" read answers from.
+//
+// Not a mapping change: the hotel belonged to both cities before and after,
+// so nothing is added to or removed from its set — only which of them leads
+// changes, with the outgoing primary stepping down into the additional
+// cities. That is why this is not applyHotelCityMap with extra arguments,
+// and why its entries are Edits rather than Map/Unmap.
+//
+// Refused (returns false) if the city is not already one of the hotel's:
+// promoting a city the hotel is not mapped to would be a map and an edit at
+// once, and mapping belongs to hotel-mapping.html. Already-primary is a
+// no-op, reported as success — the caller asked for a state that holds.
+function setHotelPrimaryCity(hotel, city) {
+  hotel.mappedCityIds = hotel.mappedCityIds || [];
+  if (!city || !isHotelMappedToCity(hotel, city.id)) return false;
+  if (hotel.systemCityId === city.id) return true;
+
+  const previousId = hotel.systemCityId;
+  const previousCity = previousId === null || previousId === undefined ? null : SYSTEM_CITIES.find((c) => c.id === previousId);
+
+  hotel.systemCityId = city.id;
+  hotel.mappedCityIds = hotel.mappedCityIds.filter((id) => id !== city.id);
+  if (previousId !== null && previousId !== undefined && !hotel.mappedCityIds.includes(previousId)) {
+    hotel.mappedCityIds.push(previousId);
+  }
+
+  // The stored city/state/country snapshot follows the primary, the same way
+  // the Add/Edit Hotel form keeps them in step: resolveHotelLocation()
+  // prefers the reference but falls back to these, and leaving them behind
+  // would make the fallback name a city the hotel no longer leads with.
+  hotel.city = city.name;
+  hotel.state = city.state;
+  hotel.country = { ...city.country };
+
+  const timestamp = new Date();
+  const hotelLabel = getSystemHotelHistoryLabel(hotel.id);
+  // Its own operation, not an Edit: "Edit" is the pill for a field on the
+  // record being retyped, and this is a change in which of the hotel's
+  // cities leads — the same kind of thing Map/Unmap and Status Change get
+  // their own names for. Reading a history for "when did this hotel move
+  // city" should not mean opening every Edit to find out.
+  hotel.history.push({
+    operation: "Primary City Change",
+    description: `Primary City: ${previousCity ? getSystemCityHistoryLabel(previousId) : "—"} -> ${getSystemCityHistoryLabel(city.id)}`,
+    userName: CURRENT_USER.name,
+    userEmail: CURRENT_USER.email,
+    timestamp,
+  });
+  // Both cities keep the hotel, but what each of them calls it changes —
+  // that is exactly the Relation Type city-system.html's Summary shows — so
+  // both say so on their own record, the same dual-side convention map and
+  // unmap follow.
+  city.history.push({
+    operation: "Primary City Change",
+    description: `${hotelLabel}${HISTORY_LINE_BREAK}Relation Type: Secondary -> Primary`,
+    userName: CURRENT_USER.name,
+    userEmail: CURRENT_USER.email,
+    timestamp,
+  });
+  if (previousCity) {
+    previousCity.history.push({
+      operation: "Primary City Change",
+      description: `${hotelLabel}${HISTORY_LINE_BREAK}Relation Type: Primary -> Secondary`,
+      userName: CURRENT_USER.name,
+      userEmail: CURRENT_USER.email,
+      timestamp,
+    });
+  }
 
   saveToStorage("SYSTEM_HOTELS", SYSTEM_HOTELS);
   saveToStorage("SYSTEM_CITIES", SYSTEM_CITIES);
