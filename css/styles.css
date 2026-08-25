@@ -2915,6 +2915,59 @@ label.merge-list-item {
   flex-shrink: 0;
 }
 
+/* Padlock standing in for the checkbox on hotel-mapping.html's checklist
+   rows whose hotel already has the pinned city as its primary — those are
+   mapped by definition and this screen does not unmap them, so the row is
+   shown rather than asked about. Exactly the checkbox's own 16px box, so
+   swapping one for the other leaves every name in the list starting on the
+   same column. */
+.merge-list-item .row-lock {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  /* The checkbox it stands in for is 16px wide but does not occupy 16px: the
+     browser's own stylesheet puts `margin: 3px 3px 3px 4px` on a checkbox and
+     nothing here resets it, so its real slot is 23px and its box starts 4px
+     in. The lock copies those horizontal margins so the name column lands on
+     the same x in both kinds of row. Resetting the checkbox's margin instead
+     would have been tidier and would also have shifted every existing row on
+     every list using .merge-list-item. Vertical margins are not copied —
+     the row centres its items. */
+  margin: 0 3px 0 4px;
+  color: var(--text-muted);
+}
+
+/* Same idea at the other end of the row: Already Mapped's primary rows drop
+   their Unmap button entirely rather than showing a disabled one, and this
+   holds the space it occupied (12px row padding + 32px .action-btn + the
+   row's 10px gap) so those rows still end on the column every other row
+   ends on. Without it the names run 54px further right than their
+   neighbours', which reads as a broken row rather than a deliberate one. */
+.merge-list-item--no-actions {
+  padding-right: 54px;
+}
+
+/* Left-padding fix for the same rows, and worth knowing before adding any
+   other non-<label> row to these checklists. The active/inactive edge bar
+   below trades 3px of the row's left padding for its own border, but
+   `label.merge-list-item`'s padding shorthand is an element+class selector
+   and outranks that class-only rule — so every <label> row in the checklist
+   silently keeps the full 12px and the trade never happens. A primary row is
+   a <div> (there is no control for a label to label), which lets the 9px
+   through and would sit its name 3px left of every other row in the list.
+   Matching the labels explicitly is the smaller change: making the edge-bar
+   rule win everywhere would move every existing row on the page.
+   Both class selectors are named rather than just `.merge-list-item--no-checkbox`
+   on its own: that would tie with the edge-bar rule at equal specificity and
+   lose on source order, since the bar is defined further down this file. */
+.merge-list-item--hotel-active.merge-list-item--no-checkbox,
+.merge-list-item--hotel-inactive.merge-list-item--no-checkbox {
+  padding-left: 12px;
+}
+
 .merge-list-item .meta {
   flex: 1;
   min-width: 0;
@@ -3326,6 +3379,70 @@ label.merge-list-item {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+}
+
+/* Primary/Secondary scope filter on hotel-mapping.html's "Already Mapped"
+   list. A sibling *above* #hotelAlreadyMappedList rather than a row inside
+   it, for two reasons: that list is the IntersectionObserver root for the
+   section's scroll pagination, so anything rendered inside it would scroll
+   away mid-list and sit in the observer's own scroll area; and flex-shrink:0
+   here keeps the tabs pinned while the rows scroll under them. It lives
+   inside the <details>, so it only exists while the section is open --
+   which is exactly when it can be used.
+
+   Underline tabs, matching .modal-tab / .supplier-tab: this is a "which set
+   of rows am I looking at" switch, the same question those answer, and the
+   project already reads that idiom. Scaled down because this is the page's
+   narrowest column. Active state is --accent-blue like every other tab strip
+   here and deliberately not the --warning of the section header above it:
+   orange is that header's identity color, and an orange underline would read
+   as a status on the rows rather than as the tab you picked. */
+.list-scope-tabs {
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+  flex-shrink: 0;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* Equal thirds so the strip keeps a fixed rhythm whatever the counts grow
+   to -- tabs that resize as the numbers change make the strip twitch on
+   every re-render. min-width:0 lets a label ellipsize rather than widen. */
+.list-scope-tab {
+  flex: 1;
+  min-width: 0;
+  padding: 7px 2px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  background: none;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.list-scope-tab:hover:not(:disabled):not(.is-active) {
+  color: var(--text-dark);
+}
+
+.list-scope-tab.is-active {
+  color: var(--accent-blue);
+  border-bottom-color: var(--accent-blue);
+}
+
+.list-scope-tab:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.list-scope-count {
+  margin-left: 3px;
+  font-weight: 700;
 }
 
 /* Same role, city-mapping.html's "Map Supplier Cities" panel — its Already
