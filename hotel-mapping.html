@@ -140,9 +140,9 @@
           <li>On the right, <strong>2. Find hotels in</strong> is where to look for the hotels themselves — the <em>hotel's</em> own State and City, both optional. A hotel in one city can be mapped into another. There is one country on this screen: the right half runs inside the System Country picked on the left and shows it in its heading. The list stays empty until that country is picked.</li>
           <li>A hotel can be mapped to <strong>several system cities at once</strong>. Everything on this screen is about the pinned city only: a hotel counts as mapped here when it is mapped to the pinned city, checking one adds that mapping, unchecking one removes it. Mappings to other cities are not touched. There is no remap.</li>
           <li>One of a hotel's cities is its <strong>primary city</strong> — the one the hotel's own record names. <strong>Already Mapped</strong> lists both kinds and tags the row <strong>Primary</strong> when the pinned city is that hotel's primary. Unmapping a primary hands the primary to another of that hotel's cities. A hotel cannot be unmapped from its <em>only</em> city — that save is refused and nothing in it is applied. A popup opens over the review listing the refused hotels: <strong>Keep them mapped</strong> drops them from the Unmap list and hands you back to the review, now rebuilt around what is left; <strong>Back to review</strong> leaves the batch as it is. Either way nothing is written — the save still happens only on <strong>Confirm &amp; Save</strong>.</li>
-          <li>The checklist loads 50 hotels at a time — scroll to the bottom of the list to load more of the current filter/search results. Each row shows the hotel's star rating beside its name and its location underneath, and its left edge is green for an Active hotel, red for Inactive.</li>
+          <li>The checklist loads 50 hotels at a time — scroll to the bottom of the list to load more of the current filter/search results. Each row shows the hotel's star rating and its <strong>MTC</strong> count (Mapped To Cities — how many system cities that hotel is in, its own city included) beside its name, and its location underneath, and its left edge is green for an Active hotel, red for Inactive.</li>
           <li>Tick <strong>Fuzzy</strong> to match a hotel name loosely, forgiving of typos or skipped letters, instead of an exact substring match. It applies to the <strong>Hotel name</strong> box in the right-hand picker, this page's one search.</li>
-          <li>On the left, <strong>Already Mapped</strong> lists the hotels currently mapped to the pinned city. Its <strong>Unmap</strong> button queues a removal without the row disappearing; until Save the button reads <strong>Undo</strong> and the removal can be reversed. It loads 50 at a time and has no search of its own — to find a particular hotel, search the checklist on the right, which holds the same hotels. <strong>New Selection</strong> lists fresh picks from the checklist on the right. Both sections collapse independently.</li>
+          <li>On the left, <strong>Already Mapped</strong> lists the hotels currently mapped to the pinned city. Its <strong>Unmap</strong> button queues a removal without the row disappearing; until Save the button reads <strong>Undo</strong> and the removal can be reversed. Its rows carry the same <strong>MTC</strong> count as the checklist; once a row is queued for unmap the count shows the pending arithmetic instead — <strong>MTC - (3 - 1)</strong> — and a hotel whose only city is the pinned one reads <strong>MTC - (1 - 1) Orphan</strong> in red, that being the save the page refuses. It loads 50 at a time and has no search of its own — to find a particular hotel, search the checklist on the right, which holds the same hotels. <strong>New Selection</strong> lists fresh picks from the checklist on the right, and its rows show the same pending arithmetic the other way up — <strong>MTC - (2 + 1)</strong>. The two are an accordion: opening one collapses the other, so whichever section you are working in gets the column's full height.</li>
           <li>Tick <strong>"Unmapped"</strong> above the list to hide the hotels already mapped to the pinned city. Their count is on the left, as <strong>Already Mapped</strong>'s own count.</li>
           <li><strong>Save</strong> (top right, floating beside Full Screen) opens a preview before anything is applied — the pinned city it is all going into, then <strong>Previously Saved</strong>, <strong>New Map</strong> and <strong>Unmap</strong> — and logs a Map/Unmap entry on both the hotel's and the pinned city's History. Hotels cannot be ticked until a city is pinned. After a save the pinned city and the hotel filters stay as they are.</li>
           <li><strong>"Full Screen"</strong> (top-right) hides the page title and the app's top bar, collapses the sidebar and puts the browser into full screen, the same as pressing F11 — the panel then fills the display edge to edge, with only the floating buttons above it. The sidebar returns to whatever state it was in when full screen ends. Press it again, or press Esc or F11, to leave full screen.</li>
@@ -161,7 +161,7 @@
           <li><strong>Fuzzy</strong> — governs how the page's one search, the candidate list's, matches: when off, it matches hotel names by plain substring. When on, it matches loosely — every typed character has to appear in the hotel name in the same order, but not necessarily next to each other, so a shortened or slightly misspelled query can still find the right hotel. Toggling it re-applies immediately to whatever is currently typed. The search is debounced (150ms) rather than re-querying on every keystroke, and typing a new query while an earlier search is still in flight must not let that stale response overwrite the newer one.</li>
           <li><strong>Already Mapped / New Selection</strong> — Already Mapped must reflect the hotels mapped to the pinned city as of when that city was pinned; unchecking one queues an unmap (shown as "Undo" so it's reversible) without removing the row from view until Save actually runs. It's paginated the same way the main checklist is — its own scroll box, bounded pages of 50, scroll-triggered loading, "end of list" state. It deliberately has <em>no</em> search of its own: the only reason to hunt through it is to unmap a particular hotel, and the checklist on the right already searches the same records, so a second search field would be a second way to do one thing. New Selection must only ever show hotels newly checked this session, not the full mapped set, and isn't paginated. There is deliberately no second "Mapped: n/x" stat anywhere on this screen: Already Mapped's own count answers the same question about the same pinned city, and two places showing it is one place too many — same call as on the City Mapping screen.</li>
           <li><strong>Changing the pin discards queued picks</strong> — every pick asserts "map this hotel into the pinned city", so once that target moves the picks assert something the user never chose. Clearing the pin does the same. The baseline is recomputed from the newly pinned city's own mappings, never carried over.</li>
-          <li><strong>Save</strong> — floats in the page's own button cluster rather than sitting over either list, since it commits both halves at once and has to stay reachable however far either list is scrolled. It requires a pinned city, and must always show a review step first, naming the pinned city every group is measured against and splitting the batch into three: hotels staying mapped, hotels being newly mapped, and hotels being unmapped. The city has to be named there — the rows carry their own locations, and nothing else in the review says which city they are being mapped into. Nothing is written until this review is explicitly confirmed. If nothing changed, saving must be blocked with a clear message rather than silently succeeding. After a successful save the pinned city and the checklist's own filters must be left alone — mapping is rarely one hotel and done, and clearing them would make the next task begin by re-picking what the user just had; only the queued selections are dropped, and the baseline is recomputed so the saved rows move into Already Mapped.</li>
+          <li><strong>Save</strong> — floats in the page's own button cluster rather than sitting over either list, since it commits both halves at once and has to stay reachable however far either list is scrolled. It requires a pinned city, and must always show a review step first, naming the pinned city every group is measured against and splitting the batch into three: hotels staying mapped, hotels being newly mapped, and hotels being unmapped. The review drops the MTC count and keeps only its <strong>Orphan</strong> flag, on the Unmap rows that would earn one: by then the question is which rows the write will be refused for, and a count on every row would bury the one that matters. The refusal popup lists the same rows the same way. The city has to be named there — the rows carry their own locations, and nothing else in the review says which city they are being mapped into. Nothing is written until this review is explicitly confirmed. If nothing changed, saving must be blocked with a clear message rather than silently succeeding. After a successful save the pinned city and the checklist's own filters must be left alone — mapping is rarely one hotel and done, and clearing them would make the next task begin by re-picking what the user just had; only the queued selections are dropped, and the baseline is recomputed so the saved rows move into Already Mapped.</li>
           <li><strong>History</strong> — every entry has an <strong>operation name</strong>, a <strong>description</strong> in that operation's fixed pattern, and <strong>who + when</strong>, logged the instant the change happens, newest first. Every map/unmap always writes to <strong>two</strong> records — the hotel's own history AND the pinned city's own history — in the same action, whether it's one hotel or a whole batch from one Save.
             <p><strong>On the hotel's own record:</strong></p>
             <ul>
@@ -335,9 +335,18 @@
                   <div class="form-group mapping-list-group">
                     <!-- No "Selected Hotels" label: the picker heading above
                          this column already names what the column is, and
-                         the two sections inside carry their own headers. -->
+                         the two sections inside carry their own headers.
+
+                         The two share one name="", which makes them an
+                         exclusive accordion: opening one closes the other.
+                         They sit in one column of fixed height, so two open
+                         sections were splitting that height between them and
+                         each got a list too short to work in. Whichever one
+                         is open now gets all of it. The browser enforces
+                         this off the name alone — no JS, and it holds even
+                         when a section is opened from script. -->
                     <div class="merge-list">
-                      <details class="mapping-collapsible-inline" id="alreadyMappedSection">
+                      <details class="mapping-collapsible-inline" name="hotelMappingLeftSection" id="alreadyMappedSection">
                         <summary class="mapping-collapsible-header mapping-collapsible-header--warning">
                           <span>Already Mapped (<span id="hotelAlreadyMappedCount">0</span>)</span>
                           <!-- The pending-changes line rides this header,
@@ -349,7 +358,7 @@
                         </summary>
                         <div id="hotelAlreadyMappedList"></div>
                       </details>
-                      <details class="mapping-collapsible-inline" id="newSelectionSection" open>
+                      <details class="mapping-collapsible-inline" name="hotelMappingLeftSection" id="newSelectionSection" open>
                         <summary class="mapping-collapsible-header mapping-collapsible-header--info">
                           <span>New Selection (<span id="hotelNewSelectionCount">0</span>)</span>
                           <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -637,6 +646,33 @@
     return h.starRating ? `<span class="hotel-star-rating">${h.starRating}⭐</span>` : "";
   }
 
+  // How many system cities this hotel is in already — hotelCityIds(), so
+  // the hotel's own primary city counts the same as an additional mapping;
+  // they are one relationship (see the dev notes on this page). Shown even
+  // when it is 0, unlike the star rating: "in no city yet" is exactly the
+  // kind of thing this number is here to say. Abbreviated because it rides
+  // the name line, which is the row's tightest space, with the full wording
+  // on hover.
+  //
+  // pending — the change this row has queued but not saved: "unmap" for an
+  // Already Mapped row the user clicked Unmap on, "map" for a New Selection
+  // row. The count then has to say what saving would do to it, and it says
+  // so as the arithmetic rather than the answer: the change is queued, not
+  // written, so the row keeps showing the number the rest of the screen
+  // shows and puts the pending "- 1" or "+ 1" next to it. An unmap that
+  // lands on zero is the one save this page refuses outright — called out
+  // as Orphan rather than left as a bare 0 for the user to work out on
+  // their own. Mapping can never do that, so there is no counterpart flag.
+  const MTC_ABBR = `<abbr title="Mapped To Cities">MTC</abbr>`;
+
+  function hotelMappedCountHtml(h, pending = "") {
+    const count = hotelCityIds(h).length;
+    if (pending === "map") return `<span class="hotel-mtc">${MTC_ABBR} - (${count} + 1)</span>`;
+    if (pending !== "unmap") return `<span class="hotel-mtc">${MTC_ABBR} - ${count}</span>`;
+    const orphan = count === 1 ? ` <span class="hotel-mtc-orphan">Orphan</span>` : "";
+    return `<span class="hotel-mtc">${MTC_ABBR} - (${count} - 1)${orphan}</span>`;
+  }
+
   // The country is the header's System Country — this screen has exactly
   // one country, and picking it twice was picking the same value twice.
   function syncHotelScope() {
@@ -716,7 +752,7 @@
       <label class="merge-list-item ${h.active ? "merge-list-item--hotel-active" : "merge-list-item--hotel-inactive"}" title="${h.active ? "Active" : "Inactive"}">
         <input type="checkbox" data-hotel-id="${h.id}" ${pendingChecked.has(h.id) ? "checked" : ""} ${pinnedCityId === null ? "disabled" : ""} />
         <span class="meta">
-          <span class="merge-list-name" title="${h.name}">${h.name} ${hotelStarsHtml(h)}</span>
+          <span class="merge-list-name" title="${h.name}"><span class="merge-list-name-text">${h.name}</span> ${hotelStarsHtml(h)} ${hotelMappedCountHtml(h)}</span>
           <span class="sub">${hotelMetaSub(h)}</span>
         </span>
       </label>`;
@@ -867,7 +903,7 @@
     return `
       <div class="merge-list-item">
         <span class="meta">
-          <span class="merge-list-name" title="${h.name}">${h.name} ${hotelStarsHtml(h)}${primaryHere ? ` <span class="pill neutral pill-tag">Primary</span>` : ""}</span>
+          <span class="merge-list-name" title="${h.name}"><span class="merge-list-name-text">${h.name}</span> ${hotelStarsHtml(h)} ${hotelMappedCountHtml(h, queuedForUnmap ? "unmap" : "")}${primaryHere ? ` <span class="pill neutral pill-tag">Primary</span>` : ""}</span>
           <span class="sub">${hotelMetaSub(h)}</span>
         </span>
         <div class="row-actions">
@@ -964,7 +1000,7 @@
             (h) => `
       <div class="merge-list-item">
         <span class="meta">
-          <span class="merge-list-name" title="${h.name}">${h.name} ${hotelStarsHtml(h)}</span>
+          <span class="merge-list-name" title="${h.name}"><span class="merge-list-name-text">${h.name}</span> ${hotelStarsHtml(h)} ${hotelMappedCountHtml(h, "map")}</span>
           <span class="sub">${hotelMetaSub(h)}</span>
         </span>
         <div class="row-actions">
@@ -1043,11 +1079,22 @@
   // No Remap bucket — a hotel isn't limited to one city, so a freshly-checked
   // hotel is always a plain New Map, never a reassignment.
 
-  function previewRowHtml(h) {
+  // The review carries the Orphan flag but not the count it comes from: by
+  // this point the question is no longer how many cities each hotel is in,
+  // it is which of these rows the write will be refused for — and every row
+  // wearing a count would bury the one row that matters among rows nothing
+  // is wrong with. Only an Unmap row can earn it; nothing else here can
+  // leave a hotel city-less.
+  function previewOrphanFlagHtml(h, pending) {
+    if (pending !== "unmap" || hotelCityIds(h).length !== 1) return "";
+    return `<span class="hotel-mtc hotel-mtc-orphan">Orphan</span>`;
+  }
+
+  function previewRowHtml(h, pending = "") {
     return `
       <div class="merge-list-item">
         <span class="meta">
-          <span class="merge-list-name" title="${h.name}">${h.name} ${hotelStarsHtml(h)}</span>
+          <span class="merge-list-name" title="${h.name}"><span class="merge-list-name-text">${h.name}</span> ${hotelStarsHtml(h)} ${previewOrphanFlagHtml(h, pending)}</span>
           <span class="sub">${hotelMetaSub(h)}</span>
         </span>
       </div>`;
@@ -1063,9 +1110,9 @@
 
   function buildHotelPreviewSectionsHtml({ keptRows, newMapRows, removedRows }) {
     return (
-      previewSectionHtml("Previously Saved", keptRows, `<div class="merge-list">${keptRows.map(previewRowHtml).join("")}</div>`) +
-      previewSectionHtml("New Map", newMapRows, `<div class="merge-list">${newMapRows.map(previewRowHtml).join("")}</div>`) +
-      previewSectionHtml("Unmap", removedRows, `<div class="merge-list">${removedRows.map(previewRowHtml).join("")}</div>`)
+      previewSectionHtml("Previously Saved", keptRows, `<div class="merge-list">${keptRows.map((h) => previewRowHtml(h)).join("")}</div>`) +
+      previewSectionHtml("New Map", newMapRows, `<div class="merge-list">${newMapRows.map((h) => previewRowHtml(h, "map")).join("")}</div>`) +
+      previewSectionHtml("Unmap", removedRows, `<div class="merge-list">${removedRows.map((h) => previewRowHtml(h, "unmap")).join("")}</div>`)
     );
   }
 
@@ -1113,7 +1160,7 @@
     refusedHotels = hotels;
     document.getElementById("hotelUnmapRefusalTitle").textContent = `Can't unmap ${one ? "this hotel" : `these ${hotels.length} hotels`}`;
     document.getElementById("hotelUnmapRefusalLine").textContent = `This is the only city ${one ? "it is" : "each of them is"} mapped to, and a hotel must always keep at least one. Nothing was saved.`;
-    document.getElementById("hotelUnmapRefusalList").innerHTML = hotels.map(previewRowHtml).join("");
+    document.getElementById("hotelUnmapRefusalList").innerHTML = hotels.map((h) => previewRowHtml(h, "unmap")).join("");
     document.getElementById("hotelUnmapRefusalKeepBtn").textContent = `Keep ${one ? "it" : "them"} mapped`;
     openModal(refusalModal);
   }

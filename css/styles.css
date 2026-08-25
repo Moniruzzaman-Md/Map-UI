@@ -3280,11 +3280,51 @@ label.merge-list-item {
 /* hotel-mapping.html's "Selected Hotels" panel: gives "Already Mapped" its
    own bounded, independently-scrollable box — the IntersectionObserver root
    for its scroll-triggered pagination (see renderAlreadyMappedSection/
-   observeAlreadyMappedScrollStatus) — with "New Selection" matched to the
-   same height for visual balance (plain scroll, not paginated). */
+   observeAlreadyMappedScrollStatus) — with "New Selection" matched to it
+   (plain scroll, not paginated).
+
+   The bound is the box these two sections share rather than a height of
+   their own: they are an accordion (see the name="" on the <details> in
+   hotel-mapping.html), so exactly one is ever open, and a fixed 260px left
+   it scrolling its own rows with dead space underneath while the closed
+   section's header was the only other thing in the column. Open section
+   takes whatever the closed one's header does not. */
+.merge-list:has(> #alreadyMappedSection) {
+  display: flex;
+  flex-direction: column;
+  overflow-y: hidden;
+}
+
+#alreadyMappedSection[open],
+#newSelectionSection[open] {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+#alreadyMappedSection[open] > .mapping-collapsible-header,
+#newSelectionSection[open] > .mapping-collapsible-header {
+  flex-shrink: 0;
+}
+
+/* Chrome wraps an open <details>' content in a ::details-content box of its
+   own, so the list is a grandchild there and the section's height stops at
+   that wrapper. Passing the fill through it keeps the list stretching in
+   Chrome; browsers without the pseudo-element never match this rule and
+   don't need to — there the list is already a direct flex item. */
+#alreadyMappedSection[open]::details-content,
+#newSelectionSection[open]::details-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
 #hotelAlreadyMappedList,
 #hotelNewSelectionList {
-  max-height: 260px;
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
 }
 
@@ -4163,10 +4203,71 @@ label.merge-list-item {
    the count plus one star, not a row of repeated stars, which at this size
    reads as a block of noise next to the name it is qualifying. Sized and
    coloured down so the name still leads. */
-.hotel-star-rating {
+.hotel-star-rating,
+.hotel-mtc {
   font-size: 11px;
   font-weight: 600;
   color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* "MTC - n" on hotel-mapping.html's rows: how many system cities that hotel
+   is already in. It takes the star rating's type but sits fainter still —
+   --text-muted at 55% — because it is a number you go looking for rather
+   than one you read every row for: present when wanted, quiet enough that
+   scanning the list stays about the hotel names. Anything less and it stops
+   being legible against the row. The abbreviation is marked up as one so
+   its full wording is a hover away; the dotted underline is what says a
+   hover is there to try, and it fades with the text since it draws in
+   currentColor. */
+.hotel-mtc {
+  color: rgba(107, 107, 133, 0.55);
+}
+.hotel-mtc abbr {
+  text-decoration: none;
+  border-bottom: 1px dotted currentColor;
+  cursor: help;
+}
+
+/* Only this word goes red, not the count beside it: the count is the same
+   fact it is on every other row, and the one thing that has gone wrong is
+   that the queued unmap would leave this hotel with no city at all — a save
+   the page refuses. Held to the same 55% as the count it sits in, so the
+   whole MTC group stays one quiet unit and the red is what distinguishes
+   this one, not extra weight on the page. */
+.hotel-mtc-orphan {
+  color: rgba(230, 65, 77, 0.55);
+  font-weight: 700;
+}
+
+/* Hotel rows carry more on the name line than any other mapping list does —
+   star rating, MTC count, an Orphan flag, a Primary tag — and the shared
+   .merge-list-name truncates that whole line as one string, so on the
+   narrow left panel a long hotel name eats the markers off the end. Here
+   the line is a flex row instead: the name is the only part that gives way
+   (its title="" still carries it in full), and everything after it holds
+   its width.
+
+   Keyed off the wrapped name rather than a page id: hotel-mapping.html's
+   renderers are the ones that wrap the name in .merge-list-name-text, and
+   the rows they build also appear in the save review and the refusal popup,
+   which sit outside that page's <main>. Rows without the wrapper — every
+   other mapping list in the project — keep the plain truncating line. */
+.merge-list-item .meta .merge-list-name:has(> .merge-list-name-text) {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.merge-list-name:has(> .merge-list-name-text) > * {
+  flex-shrink: 0;
+}
+
+.merge-list-name-text {
+  min-width: 0;
+  flex-shrink: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
