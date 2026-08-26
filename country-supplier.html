@@ -144,6 +144,7 @@
       <template id="supplierCountryDevNotes">
         <p>This is where each supplier's own country list gets matched to the system's master country list, so bookings from different suppliers can be reconciled to one record.</p>
         <ul>
+          <li><strong>The list is a query, and looks like one.</strong> Fetching it shows the skeleton — the header stays put and the body fills with placeholder rows (shared <code>withTableLoading()</code>/<code>skeletonRowsHtml()</code>, see js/app.js). Only the body is replaced: the columns never change, so redrawing the header would flicker the one part of the table that is genuinely ready. The pagination footer is emptied for the same reason — page numbers describing rows that aren't on screen are a lie — and comes back with the rows. It runs on <strong>the first load, Search, Reset and any page or rows-per-page change</strong>, each a real query in a deployed system. Mapping or unmapping a row does <em>not</em>: that row is already on screen and only its own value changed. With no supplier picked nothing is being fetched at all, so that state answers immediately rather than sitting behind a wait (<code>cancelTableLoading()</code>).</li>
           <li><strong>Map</strong> — pick which country on the master list a supplier's country corresponds to. Reassigning a country that's already mapped to a different one must show old vs. new and require explicit confirmation — never silent. Picking the same country it's already mapped to must not save or log anything.</li>
           <li><strong>Unmap</strong> — clear an existing mapping, leaving the supplier's country unmapped. Must require confirmation before removing it.</li>
           <li><strong>History</strong> — every entry has three parts: an <strong>operation name</strong>, a <strong>description</strong> in that operation's fixed pattern, and <strong>who + when</strong>. Logged the instant the change happens (never reconstructed later by comparing snapshots), newest entry first. A mapping change always writes to <strong>two</strong> records — this supplier's country AND the affected master-list country — no matter which screen made the change.
@@ -200,6 +201,7 @@
           <table class="data-table" id="supplierCountryTable">
             <thead>
               <tr>
+                <th class="table-num">#</th>
                 <th style="width:14%">Country ID</th>
                 <th style="width:38%">Country Name</th>
                 <th style="width:32%">System Country</th>
@@ -208,7 +210,7 @@
             </thead>
             <tbody>
               <tr>
-                <td colspan="4" class="empty-state">Select a supplier to view its country list</td>
+                <td colspan="5" class="empty-state">Select a supplier to view its country list</td>
               </tr>
             </tbody>
           </table>
@@ -300,7 +302,7 @@
   const systemCountrySelect = document.getElementById("systemCountrySelect");
   systemCountrySelect.insertAdjacentHTML(
     "beforeend",
-    SYSTEM_COUNTRIES.map((c) => `<option value="${c.name}">${c.name} (${c.code})</option>`).join("")
+    SYSTEM_COUNTRIES.map((c) => `<option value="${c.name}">${systemCountryOptionLabel(c.name)}</option>`).join("")
   );
 
   const tbody = document.querySelector("#supplierCountryTable tbody");
@@ -331,9 +333,43 @@
     return rows;
   }
 
+  // Every trip through the list is a query in a real deployment — the first
+  // load, a Search, a Reset, a page or page-size change — so each one shows
+  // the skeleton first (see withTableLoading in js/app.js). Saving an edit
+  // deliberately does NOT: the row is already on screen and only its own
+  // values changed, so replacing the whole table with placeholders would be
+  // describing a fetch the user didn't ask for.
+  //
+  // Only the body is skeletoned. The header is already on screen and its
+  // columns never change, so redrawing it would make the one part of the
+  // table that is genuinely ready flicker. The pagination footer is emptied
+  // for the same reason — page numbers describing rows that aren't on screen
+  // are a lie — and comes back with them.
+  const tableWrap = document.querySelector("#supplierCountryTable").closest(".table-wrap");
+  const SUPPLIER_COUNTRY_COLUMN_COUNT = document.querySelectorAll("#supplierCountryTable thead th").length;
+
   function render() {
+    // Nothing is fetched until a supplier is picked, so this case answers
+    // straight away rather than showing a skeleton for a query that will
+    // never run (see cancelTableLoading in js/app.js).
     if (!state.supplier) {
-      tbody.innerHTML = `<tr><td colspan="4" class="empty-state">Select a supplier to view its country list</td></tr>`;
+      cancelTableLoading(tbody);
+      tableWrap.classList.remove("skeleton");
+      renderRows();
+      return;
+    }
+
+    tableWrap.classList.add("skeleton");
+    paginationBar.innerHTML = "";
+    withTableLoading(tbody, skeletonRowsHtml(SUPPLIER_COUNTRY_COLUMN_COUNT), () => {
+      tableWrap.classList.remove("skeleton");
+      renderRows();
+    });
+  }
+
+  function renderRows() {
+    if (!state.supplier) {
+      tbody.innerHTML = `<tr><td colspan="5" class="empty-state">Select a supplier to view its country list</td></tr>`;
       paginationBar.innerHTML = "";
       return;
     }
@@ -347,8 +383,9 @@
     tbody.innerHTML = pageItems.length
       ? pageItems
           .map(
-            (r) => `
+            (r, i) => `
       <tr>
+        <td class="table-num">${startIdx + i + 1}</td>
         <td style="white-space:nowrap">
           <div class="code-badge truncatable truncatable--badge-value" title="${r.supplierId}"><span class="truncatable-text">${r.supplierId}</span></div>
         </td>
@@ -377,7 +414,7 @@
       </tr>`
           )
           .join("")
-      : `<tr><td colspan="4" class="empty-state">No countries match this filter</td></tr>`;
+      : `<tr><td colspan="5" class="empty-state">No countries match this filter</td></tr>`;
 
     renderPagination(paginationBar, {
       total: filtered.length,
@@ -557,7 +594,7 @@
 
     saveToStorage("supplierCountries", supplierCountries);
     saveToStorage("SYSTEM_COUNTRIES", SYSTEM_COUNTRIES);
-    render();
+    renderRows();
     document.getElementById("mapCountryModal").classList.remove("open");
     showToast("Country mapped successfully");
   }
@@ -642,7 +679,7 @@
 
         saveToStorage("supplierCountries", supplierCountries);
         saveToStorage("SYSTEM_COUNTRIES", SYSTEM_COUNTRIES);
-        render();
+        renderRows();
         modal.classList.remove("open");
         showToast(`${record.name} unmapped`);
       }

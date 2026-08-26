@@ -149,6 +149,7 @@
       <template id="hotelListDevNotes">
         <p>The single master hotel list every other hotel-facing page reads from — a supplier's own hotel feed is matched to one of these by Provider ID, never stored as a direct link.</p>
         <ul>
+          <li><strong>The list is a query, and looks like one.</strong> Fetching it shows the skeleton — the header stays put and the body fills with placeholder rows (shared <code>withTableLoading()</code>/<code>skeletonRowsHtml()</code>, see js/app.js). Only the body is replaced: the columns never change, so redrawing the header would flicker the one part of the table that is genuinely ready. The pagination footer is emptied for the same reason — page numbers describing rows that aren't on screen are a lie — and comes back with the rows. It runs on <strong>the first load, Search, Reset and any page or rows-per-page change</strong>, each a real query in a deployed system. Saving an edit, flipping a status and moving a hotel's primary city all skip it — each changes rows already on screen, not which rows there are.</li>
           <li><strong>Id</strong> — permanent once assigned, never editable.</li>
           <li><strong>Location</strong> — resolved live from the hotel's own linked city record rather than a stored snapshot, so a rename to that city or its country is reflected here immediately without re-saving every hotel. The column names one city, but a hotel belongs to a <em>set</em> of them, so it must also say how many are not being shown: the <strong>+n</strong> counts the hotel's secondary cities — the same tail <code>hotelCityIds()</code> appends after the primary — and is rendered only when there is at least one, since a "+0" on most rows is noise on a column that already reads as a location. It is a marker on the name, not a second value in the cell: green (these are established mappings, not a warning), small, and sitting against the name rather than at the cell's far edge. The name keeps truncating and the count keeps its width, so a long city name never clips the marker off — the marker being the first thing lost would defeat the point of having one. The count is a <strong>button</strong>, not a label: it says how many there are but can never say which, so it opens a <strong>Mapped Cities</strong> drawer listing every city the hotel belongs to. That list leads with the primary — it is the one this column names and the one the rest of the app resolves the hotel's location from — and tags each row Primary or Secondary with the same pills city-system.html's Summary uses, since it is the same distinction about the same pair. The drawer is where the <strong>primary is moved</strong>, and it is the only place that offers it: Hotel Mapping deliberately refuses to unmap a primary precisely because promoting a replacement is a second write to a record that screen is not about, so the decision belongs here, on the hotel's own row, where every candidate is listed and the consequence is one click away. <strong>Make Primary</strong> appears on the secondary rows only — the primary row is already in the state the button asks for, and a disabled one on it would imply a step still to take. It is not a mapping change and must not be logged as one — the hotel belonged to both cities before and after, so nothing is added or removed — and it is not an Edit either, that pill being for a field on the record being retyped. It carries its own operation, <strong>Primary City Change</strong>, on all three entries: <code>Primary City: A -&gt; B</code> on the hotel, and <code>Relation Type: Primary -&gt; Secondary</code> / <code>Secondary -&gt; Primary</code> on the two cities, since that pairing is exactly what a city's Summary reads as Relation Type. Reading a history for "when did this hotel move city" should not mean opening every Edit to find out. It applies immediately rather than queueing behind a Save: the drawer holds one decision about one record, and the row's own state — pill moved, button gone — is the confirmation. <strong>Which</strong> cities the hotel belongs to is still Hotel Mapping's to change; offering that here too would split one operation across two screens.</li>
           <li><strong>City</strong> — picked from the master city list, gated behind Country the same way everywhere else in the project is: State narrows the choices but is never required, City requires a Country first.</li>
@@ -254,6 +255,7 @@
           <table class="data-table" id="hotelTable">
             <thead>
               <tr>
+                <th class="table-num">#</th>
                 <th>ID</th>
                 <th>Hotel</th>
                 <th>Location</th>
@@ -398,7 +400,7 @@
   const countryFilterSelect = document.getElementById("hotelCountryFilter");
   countryFilterSelect.insertAdjacentHTML(
     "beforeend",
-    SYSTEM_COUNTRIES.map((c) => `<option value="${c.name}">${c.name} (${c.code})</option>`).join("")
+    SYSTEM_COUNTRIES.map((c) => `<option value="${c.name}">${systemCountryOptionLabel(c.name)}</option>`).join("")
   );
 
   const stateFilterSelect = document.getElementById("hotelStateFilter");
@@ -495,7 +497,31 @@
     }
   }
 
+  // Every trip through the list is a query in a real deployment — the first
+  // load, a Search, a Reset, a page or page-size change — so each one shows
+  // the skeleton first (see withTableLoading in js/app.js). Saving an edit
+  // deliberately does NOT: the row is already on screen and only its own
+  // values changed, so replacing the whole table with placeholders would be
+  // describing a fetch the user didn't ask for.
+  //
+  // Only the body is skeletoned. The header is already on screen and its
+  // columns never change, so redrawing it would make the one part of the
+  // table that is genuinely ready flicker. The pagination footer is emptied
+  // for the same reason — page numbers describing rows that aren't on screen
+  // are a lie — and comes back with them.
+  const tableWrap = document.querySelector("#hotelTable").closest(".table-wrap");
+  const HOTEL_COLUMN_COUNT = document.querySelectorAll("#hotelTable thead th").length;
+
   function render() {
+    tableWrap.classList.add("skeleton");
+    paginationBar.innerHTML = "";
+    withTableLoading(tbody, skeletonRowsHtml(HOTEL_COLUMN_COUNT), () => {
+      tableWrap.classList.remove("skeleton");
+      renderRows();
+    });
+  }
+
+  function renderRows() {
     const filtered = getFiltered();
     const totalPages = Math.max(1, Math.ceil(filtered.length / state.pageSize));
     state.page = Math.min(state.page, totalPages);
@@ -548,12 +574,13 @@
 
     tbody.innerHTML = pageItems.length
       ? pageItems
-          .map((h) => {
+          .map((h, i) => {
             const loc = resolveHotelLocation(h);
             const countryName = getSystemCountryName(loc.country.code) || loc.country.name;
             const locationSubtitlePlain = `${loc.state ? `${loc.state}, ` : ""}${countryName} (${loc.country.code})`;
             return `
       <tr data-row-id="${h.id}">
+        <td class="table-num">${startIdx + i + 1}</td>
         <td>${idBadgeCell(getSystemHotelDisplayId(h.id))}</td>
         <td data-col="name">
           <div class="supplier-hotel-cell">
@@ -637,7 +664,7 @@
       </tr>`;
           })
           .join("")
-      : `<tr><td colspan="9" class="empty-state">No hotels found</td></tr>`;
+      : `<tr><td colspan="10" class="empty-state">No hotels found</td></tr>`;
 
     renderPagination(paginationBar, {
       total: filtered.length,
@@ -998,7 +1025,7 @@
     // The Location column names the primary, and the City filter's options
     // are built from hotels' resolved locations — both have just moved.
     updateCityFilterOptions();
-    render();
+    renderRows();
   });
 
   // ---------- Row actions: Edit / History / Toggle Active ----------
@@ -1075,7 +1102,7 @@
         timestamp: new Date(),
       });
       saveToStorage("SYSTEM_HOTELS", SYSTEM_HOTELS);
-      render();
+      renderRows();
       showToast(`${record.name} marked ${record.active ? "Active" : "Inactive"}`);
     }
   });
@@ -1099,7 +1126,7 @@
 
   hotelFormCountry.insertAdjacentHTML(
     "beforeend",
-    SYSTEM_COUNTRIES.map((c) => `<option value="${c.name}">${c.name} (${c.code})</option>`).join("")
+    SYSTEM_COUNTRIES.map((c) => `<option value="${c.name}">${systemCountryOptionLabel(c.name)}</option>`).join("")
   );
 
   function populateHotelFormStates(countryName, selectedState) {
@@ -1271,7 +1298,7 @@
 
     saveToStorage("SYSTEM_HOTELS", SYSTEM_HOTELS);
     updateCityFilterOptions();
-    render();
+    renderRows();
     hotelFormModal.classList.remove("open");
   });
 </script>

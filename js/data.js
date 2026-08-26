@@ -257,6 +257,25 @@ BULK_SUPPLIER_PREFIXES.forEach((prefix, p) => {
 // e.g. getSupplierCountryName("hotelbeds", "US") -> "USA". Keeps the city
 // list's country display in sync with that supplier's own country list
 // instead of duplicating a possibly-inconsistent name.
+// One format for every country dropdown in the project: "Name - Id",
+// where the id is whichever identifier that side of the mapping actually
+// keys the country by — the system's own 2-letter code for a system
+// country, that supplier's own country id (AG-US-001) for a supplier one.
+// Both read the central tables in this file rather than each page
+// formatting its own options, so a dropdown can never drift from the list
+// page it opens onto.
+//
+// Takes a name or a code, because the selects are keyed both ways across
+// the project (by name where the value is compared to a stored
+// systemCountry string, by code where it is compared to a row's own
+// countryCode) — and falls back to whatever it was given, so a country
+// the system does not hold still renders as itself rather than blank.
+function systemCountryOptionLabel(nameOrCode) {
+  const row =
+    SYSTEM_COUNTRIES.find((c) => c.name === nameOrCode) || SYSTEM_COUNTRIES.find((c) => c.code === nameOrCode);
+  return row ? `${row.name} - ${row.code}` : nameOrCode;
+}
+
 function getSupplierCountryName(supplierKey, code) {
   const row = (supplierCountries[supplierKey] || []).find((c) => c.code === code);
   return row ? row.name : code;
@@ -270,6 +289,14 @@ function getSupplierCountryName(supplierKey, code) {
 function getSupplierCountrySupplierId(supplierKey, code) {
   const row = (supplierCountries[supplierKey] || []).find((c) => c.code === code);
   return row ? row.supplierId : code;
+}
+
+// The supplier-side half of systemCountryOptionLabel(): that supplier's own
+// name for the country and its own id for it, in the same "Name - Id"
+// shape. Reads the two lookups above rather than the rows directly, so an
+// unknown code degrades exactly as they do.
+function supplierCountryOptionLabel(supplierKey, code) {
+  return `${getSupplierCountryName(supplierKey, code)} - ${getSupplierCountrySupplierId(supplierKey, code)}`;
 }
 
 // Looks up whether/how a specific supplier maps a given system country name

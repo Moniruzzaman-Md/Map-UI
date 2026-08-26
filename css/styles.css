@@ -738,6 +738,40 @@ button {
    hotel-system.html), only rendered when the panel below is closed and at
    least one filter is active, so a filtered table never looks unfiltered
    just because the controls are tucked away. */
+
+/* ---------- Grouped filter panel ----------
+   For a page whose filters cover two different subjects that share field
+   names — a supplier city's own Country/State, and the Country/State of the
+   system city it is mapped to (city-supplier.html). A flat grid made
+   "Country" ambiguous at a glance and left the reader matching every label
+   to a side; a caption per group says it once. The panel becomes a column
+   of groups, each group keeping the same fixed-width field grid the flat
+   version used, so control widths are untouched. */
+.filters-panel--grouped {
+  flex-direction: column;
+  gap: 14px;
+}
+
+.filter-group + .filter-group {
+  border-top: 1px solid var(--border-color);
+  padding-top: 14px;
+}
+
+.filter-group-title {
+  margin: 0 0 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.filter-group-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, var(--control-width));
+  gap: 16px;
+}
+
 .filters-summary {
   display: flex;
   flex-wrap: wrap;
@@ -4560,6 +4594,42 @@ label.merge-list-item {
   opacity: 0.3;
 }
 
+
+/* The mapping screens' checklists wait on the same kind of query, with no
+   table to draw: pinning a city, filtering it or searching it fetches rows,
+   so the placeholder is the checklist that is coming. Its rows are ordinary
+   .merge-list-item, so the rhythm is the real one; the min-height is what
+   holds a row up, since the name and sub-line inside it are blocks that
+   would otherwise collapse onto the bars they hold. Built by
+   skeletonListRowsHtml() in js/app.js. */
+.skeleton .merge-list-item {
+  min-height: 56px;
+  pointer-events: none;
+}
+
+/* A square standing in for a control rather than for a line of text — the
+   checkbox at the head of every checklist row. */
+.skeleton .skeleton-box {
+  display: block;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  background: linear-gradient(90deg, var(--bg-panel) 25%, #e9ebf5 40%, var(--bg-panel) 60%);
+  background-size: 300% 100%;
+  animation: skeleton-shimmer 1.3s ease-in-out infinite;
+}
+
+/* Same fade as the table skeleton's lower rows: a list continuing past the
+   edge rather than one that is exactly six long. */
+.skeleton .merge-list-item:nth-child(n + 5) {
+  opacity: 0.55;
+}
+
+.skeleton .merge-list-item:nth-child(n + 7) {
+  opacity: 0.3;
+}
+
 @keyframes skeleton-shimmer {
   from {
     background-position: 150% 0;
@@ -4572,9 +4642,119 @@ label.merge-list-item {
 /* A shimmer is decoration, not information — the aria-busy on the block is
    what actually announces the wait, so it can stop moving entirely. */
 @media (prefers-reduced-motion: reduce) {
-  .skeleton .skeleton-bar {
+  .skeleton .skeleton-bar,
+  .skeleton .skeleton-box {
     animation: none;
   }
+}
+
+
+/* ---------- Supplier visibility menu (city-mapping.html) ----------
+   Which suppliers the tab strip carries, chosen once and remembered. Rides
+   the .mapping-nav-fab stack in the top right corner, so it reads as one of
+   this screen's view controls rather than as another filter inside the
+   panel. */
+.supplier-visibility {
+  position: relative;
+}
+
+/* The count is this control's whole state at a glance — "4/4" says nothing
+   is hidden without opening anything. */
+.supplier-visibility-count {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text-muted);
+  background: var(--bg-panel);
+  border-radius: var(--radius-pill);
+  padding: 2px 8px;
+  font-variant-numeric: tabular-nums;
+}
+
+.supplier-visibility.open .supplier-visibility-toggle {
+  border-color: var(--accent-blue);
+}
+
+/* Anchored to the button's right edge: the stack it sits in is pinned to the
+   right of the viewport, so opening leftward is the only direction with
+   room. */
+.supplier-visibility-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 240px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  z-index: 41;
+}
+
+.supplier-visibility-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.supplier-visibility-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-right: auto;
+}
+
+.supplier-visibility-bulk {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--accent-blue);
+  cursor: pointer;
+}
+
+.supplier-visibility-bulk:hover {
+  text-decoration: underline;
+}
+
+/* Capped and scrolling: dozens of suppliers is the case this control exists
+   for, and a menu taller than the viewport cannot be closed from its own
+   bottom edge. */
+.supplier-visibility-list {
+  max-height: 264px;
+  overflow-y: auto;
+  padding: 6px;
+}
+
+.supplier-visibility-option {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--text-dark);
+  cursor: pointer;
+}
+
+.supplier-visibility-option:hover {
+  background: var(--bg-panel);
+}
+
+.supplier-visibility-option input {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+.supplier-visibility-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* ---------- Mapping Summary popup (city-system.html) ---------- */
@@ -4649,6 +4829,54 @@ label.merge-list-item {
 
 /* Project control width, and min-width:0 to beat .toolbar-search's own
    240px floor. */
+
+/* The filter lives in the popup's header, so the title takes the row's slack
+   and the menu sits beside Close — .modal-header is space-between, which
+   with three children would strand it in the middle of the row instead. */
+#summaryModal .modal-header {
+  gap: 14px;
+}
+
+#summaryModal .modal-header h3 {
+  margin-right: auto;
+  min-width: 0;
+}
+
+/* The same menu city-mapping.html carries, sitting in the Summary popup's
+   header beside Close instead of riding a floating fab — so its trigger is
+   sized like the popup's own controls rather than like a pill button. Its
+   menu opens over the sticky tab row below it, which the shared
+   .supplier-visibility-menu z-index already clears. */
+.summary-supplier-visibility {
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.summary-visibility-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: var(--control-height);
+  padding: 0 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  background: #fff;
+  color: var(--text-dark);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.summary-visibility-btn:hover {
+  background: var(--bg-panel);
+}
+
+.summary-visibility-btn svg {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
 .summary-supplier-search {
   flex-shrink: 0;
   width: var(--control-width);

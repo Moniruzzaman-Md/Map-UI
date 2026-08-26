@@ -429,6 +429,22 @@ function skeletonRowsHtml(columnCount, rowCount = SKELETON_ROWS, numColumn = tru
   ).join("");
 }
 
+// The mapping screens' checklists wait on the same kind of query the list
+// pages do, with no table to draw: `rowCount` rows shaped like the real
+// .merge-list-item — checkbox, name, sub-line — so the placeholder keeps
+// the row height and rhythm of the list it stands in for. Pairs with
+// withTableLoading() exactly as skeletonRowsHtml() does.
+function skeletonListRowsHtml(rowCount = SKELETON_ROWS) {
+  return Array.from({ length: rowCount }, (_, r) =>
+    `<div class="merge-list-item">
+       <span class="skeleton-box"></span>
+       <span class="meta">
+         <span class="merge-list-name"><span class="skeleton-bar" style="width:${52 + ((r * 13) % 34)}%"></span></span>
+         <span class="sub"><span class="skeleton-bar" style="width:${34 + ((r * 17) % 30)}%; height:9px"></span></span>
+       </span>
+     </div>`
+  ).join("");
+}
 // Runs `render` after the simulated query delay, showing `skeletonHtml` in
 // `host` meanwhile. The token is recorded on the host itself, so a second
 // load of the same list supersedes the first while two different lists

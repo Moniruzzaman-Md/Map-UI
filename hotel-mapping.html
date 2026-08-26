@@ -152,6 +152,7 @@
       <template id="hotelMappingDevNotes">
         <p>This screen links <strong>system hotels</strong> to a system city — any system city, since city types were retired and none of them is a special case. No supplier is involved anywhere on this page: both sides of the relationship are the system's own records. The relationship is <strong>many-to-many</strong> — one hotel can belong to several cities and a city to many hotels — so there is no "remap" concept here, only additive map/unmap. The pin (which city) and the hotel selection (which hotels) work fully independently, in either order, and only need to agree with each other once Save actually runs.</p>
         <ul>
+          <li><strong>The checklist is a query, and looks like one.</strong> Pinning a city, changing its State/City filters, toggling Unmapped only or fuzzy, and searching all fetch a different set of rows, so each one shows the checklist that is coming first: six placeholder rows in the real <code>.merge-list-item</code> shape (<code>skeletonListRowsHtml()</code> in js/app.js, driven by the same <code>withTableLoading()</code> every list page uses, so the wait is the project's one wait). Ticking a checkbox, taking a hotel back out of the queue and saving all skip it — they rearrange rows that are already here. Unpinned there is no query to make, so that state answers immediately (<code>cancelTableLoading()</code>). Separate from the scroll-triggered <em>load more</em> spinner further down this list, which appends to rows already on screen.</li>
           <li><strong>Pinning a system city</strong> — every system city is a valid target; there is no eligibility rule and no city type to exclude. The picker sits at the top of the panel's left half, above the list of that city's hotels: a compact Country &rarr; State &rarr; City cascade, where Country is required before the city picker loads and State is always an optional narrowing filter, never part of the gate. The City select itself is the pin — there is no separate pinned-city summary card, no mapped-count badge and no history entry point on this screen (a city's own history belongs to the City List, which owns that record); clearing that select unpins. Same header and same rules as the City Mapping screen's pin, deliberately: the two mapping screens differ in <em>what</em> is mapped into a city, never in how the city is chosen.</li>
           <li><strong>One country, two locations</strong> — the screen works inside a single system country, chosen once. The candidate list must never offer a country control of its own: a second one would always have to name the same country, and letting the two disagree would let a user assemble a hotel and a city that belong to different countries. Below that country there are still two distinct locations, and they must stay independent: one State/City pair narrows the <em>pin's own city picker</em>, the other narrows <em>where to look for hotels</em>. Each pair belongs at the top of the half it governs, directly above that half's list, so a picker and what it changes are never in separate places. They carry identical field labels, so each pair needs its own heading naming what it selects, and the headings are numbered because the second pair can find nothing until the first has named a country. Both fold away together behind one control, never one at a time: they share the layout's first row, so a picker collapsed on its own would free no height at all while the other holds that row open — and collapsed, each heading has to carry what its own fields held, or the panel stops saying what it is working on. That summary lists only what is actually set — a filter, a toggle or a search still narrowing the list from out of sight — never the defaults, which would push the parts that matter off a line that truncates. The control itself is labelled rather than a bare chevron: a lone glyph in a panel corner reads as decoration, and this one reshapes the whole panel. Binding the second pair to the first would quietly rule out the case this screen exists for — a hotel that sits in one city being mapped into another is the entire point of a many-to-many hotel-city model. Changing the pinned city therefore leaves the hotel filters alone; changing the country resets them, since they only ever describe places inside it.</li>
           <li><strong>Which hotels count as mapped</strong> — a hotel's system cities are held in two places: the city its own record names, and its additional mappings. Both are the same relationship, so "is this hotel in the pinned city" must ask both. Answering from the additional mappings alone lists every one of a city's own hotels as unmapped, which is exactly the bug this screen shipped with. The city a hotel's own record names is its <strong>primary city</strong>, and the rules follow from that: a hotel with no city at all takes the first city mapped to it as its primary; mapping a further city leaves the existing primary alone; and unmapping the primary would promote another of that hotel's cities — which is exactly why <strong>this screen no longer offers to unmap a primary at all</strong>: that promotion is a second write to a record the screen is not about, decided from a list that cannot show what it would do. Moving a primary belongs to the hotel's own record. Both places that could queue it are closed rather than one, since either alone would leave the other as a way around it. Neither is closed by <em>disabling</em> a control, though: the control is <strong>removed</strong>. Already Mapped's primary rows render no Unmap button, and the checklist swaps the checkbox for a padlock in the same 16px slot. A greyed-out control still asserts "this is a thing you do to this row, just not yet", and sends the reader looking for the state that would enable it — there isn't one, so the honest render is absence. Neither row is left mute: both carry the <strong>Primary</strong> tag beside the name, and the padlock says the rest on hover. Both keep their alignment rather than reflowing — the padlock fills the checkbox's slot, and <code>.merge-list-item--no-actions</code> holds the 54px the button used to hold, so a row that lost its control still ends on the column its neighbours end on. <strong>A hotel must always keep at least one city</strong>, so an unmap that would take away its last one is refused — and refused on the write, not prevented while the list is being assembled: the rule belongs to the record, so a screen that quietly greyed the row out would be asserting a rule it does not own. One refusal rejects the whole save and nothing is written, since applying the rest would leave the user working out which half went through. The refusal must come back as its own popup over the review, not as a banner inside it — it is an answer to an action the user just took, and it carries a decision of its own to make. It holds one line saying what the rule is, the refused hotels as rows (the same rows the buckets show — they are the same records, and a bare list of names reads as a different kind of thing), and two ways out: keep those hotels mapped, which takes them back out of the Unmap list and returns to the review rebuilt around what is left, or go back to the review untouched. Neither writes anything: resolving the refusal only edits the batch, and the save still happens only when the rebuilt review is confirmed. Making the user find and undo each refused row by hand is work the screen already knows how to do. Resolving a refusal must never write anything, not even when it empties the batch: the review is what the user is answering, so it is handed back rebuilt and the save still waits for the confirm. Confirming an empty batch is refused with the same "nothing to save" message as any other empty save. Already Mapped must mark which rows are primary here — that row cannot be unmapped at all, so it cannot look identical to the rest. Note the orphan rule below is <em>not</em> the same rule and still stands on its own: a hotel whose record names no primary can still be mapped here, and unmapping its last city is still refused on the write.</li>
@@ -471,7 +472,7 @@
 
   pinCountry.insertAdjacentHTML(
     "beforeend",
-    SYSTEM_COUNTRIES.map((c) => `<option value="${c.name}">${c.name} (${c.code})</option>`).join("")
+    SYSTEM_COUNTRIES.map((c) => `<option value="${c.name}">${systemCountryOptionLabel(c.name)}</option>`).join("")
   );
 
   // Every system city is a valid mapping target — cities carry no type or
@@ -634,7 +635,7 @@
   function resyncBaselineOnPinChange() {
     initialMappedIds = pinnedCityId === null ? new Set() : mappedHotelIdsFor(pinnedCityId);
     pendingChecked = new Set(initialMappedIds);
-    renderHotelList();
+    queryHotelList();
     renderSelectedHotelsList();
     updateSelectionSummary();
   }
@@ -889,6 +890,31 @@
         }
       }
     }, 450);
+  }
+
+  // Pinning a city, filtering it or searching it is a fetch — these rows
+  // come back from the server, not from anything already on screen — so
+  // each one shows the checklist that is coming first, through the same
+  // withTableLoading() every list page uses. Ticking a checkbox, taking a
+  // row back out of the queue and saving all skip it: those rearrange rows
+  // that are already here, and a placeholder would be describing a fetch
+  // nobody asked for.
+  function queryHotelList() {
+    // The unpinned (and supplier-less) states answer without a query at
+    // all, so they say so immediately rather than sitting behind a wait
+    // for something that will never be fetched.
+    if (pinnedCityId === null) {
+      cancelTableLoading(hotelMapList);
+      hotelMapList.classList.remove("skeleton");
+      renderHotelList();
+      return;
+    }
+
+    hotelMapList.classList.add("skeleton");
+    withTableLoading(hotelMapList, skeletonListRowsHtml(), () => {
+      hotelMapList.classList.remove("skeleton");
+      renderHotelList();
+    });
   }
 
   function renderHotelList() {
@@ -1209,17 +1235,17 @@
     updateScopeSummaries();
     state.city = "";
     updateCityFilterOptions();
-    renderHotelList();
+    queryHotelList();
   });
 
   cityFilterSelect.addEventListener("change", () => {
     state.city = cityFilterSelect.value;
     updateScopeSummaries();
-    renderHotelList();
+    queryHotelList();
   });
 
   unmappedOnlyToggle.addEventListener("change", () => {
-    renderHotelList();
+    queryHotelList();
     updateScopeSummaries();
   });
 
@@ -1227,7 +1253,7 @@
   // has no search of its own any more.
   fuzzyToggle.addEventListener("change", () => {
     state.fuzzy = fuzzyToggle.checked;
-    renderHotelList();
+    queryHotelList();
     updateScopeSummaries();
   });
 
@@ -1238,7 +1264,7 @@
     clearTimeout(searchDebounceTimer);
     searchDebounceTimer = setTimeout(() => {
       state.query = searchInput.value;
-      renderHotelList();
+      queryHotelList();
       updateScopeSummaries();
     }, 150);
   });
@@ -1467,7 +1493,7 @@
   updateStateFilterOptions();
   updateCityFilterOptions();
   updateScopeSummaries();
-  renderHotelList();
+  queryHotelList();
   renderSelectedHotelsList();
   updateSelectionSummary();
 </script>

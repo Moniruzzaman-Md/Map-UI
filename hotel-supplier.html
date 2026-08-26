@@ -134,6 +134,7 @@
       <template id="supplierHotelInfo">
         <p>Each supplier's own hotel feed, side by side with the matching system hotel (if any). Pick a <strong>Supplier</strong> first — nothing else on this page works until one is chosen.</p>
         <ul>
+          <li>Every <strong>country dropdown</strong> reads <strong>Name - ID</strong>, with the ID belonging to the side that dropdown is about: the supplier’s own country ID for the supplier’s Country filter and for the Edit City form (<em>Bharat - AG-IN-014</em>, that supplier’s own name for the country included), the system’s own code for the System Country filter (<em>India - IN</em>).</li>
           <li><strong>Supplier Hotel / Location / GPS / Contact</strong> — exactly what this supplier's feed reports: name, address, city/state/country, coordinates, email, and phone. Click any info icon to see the full values.</li>
           <li><strong>System Hotel ID / System Hotel / System Location / System GPS / System Star Rating / System Contact / System Status</strong> — the matching entry from the System Hotel List, found automatically by <strong>Provider ID</strong> — not something this supplier reported directly. Shows "Not mapped" when this row has no Provider ID, or one that doesn't match any system hotel yet.</li>
           <li><strong>Provider ID</strong> — the id this supplier's feed reports for the hotel. A blank Provider ID means the feed never sent one for this row.</li>
@@ -150,6 +151,7 @@
       <template id="supplierHotelDevNotes">
         <p>Each supplier's own hotel feed, joined at render time to its matching system hotel — never stored as a direct link. Nothing works until a <strong>Supplier</strong> is picked — every row/filter/action below is scoped to that one supplier's own array.</p>
         <ul>
+          <li><strong>The list is a query, and looks like one.</strong> Fetching it shows the skeleton — the header stays put and the body fills with placeholder rows (shared <code>withTableLoading()</code>/<code>skeletonRowsHtml()</code>, see js/app.js). Only the body is replaced: the columns never change, so redrawing the header would flicker the one part of the table that is genuinely ready. The pagination footer is emptied for the same reason — page numbers describing rows that aren't on screen are a lie — and comes back with the rows. It runs on <strong>the first load, Search, Reset and any page or rows-per-page change</strong>, each a real query in a deployed system. A status flip or a city edit does <em>not</em>: those change a row that is already on screen. With no supplier picked nothing is being fetched at all, so that state answers immediately rather than sitting behind a wait (<code>cancelTableLoading()</code>).</li>
           <li><strong>ID</strong> — this supplier's own generated identifier (e.g. <code>AG-HTL-001</code>), permanent.</li>
           <li><strong>Finding the matching system hotel</strong> — this row's Provider ID is matched against the System Hotel List's own Provider ID at render time, never a stored reference. A blank Provider ID, or one with no match, means every System-side cell shows "Not mapped" for that row.</li>
           <li><strong>Edit</strong> — the only editable field is city, via a cascading Country/State/City picker sourced from this supplier's own country and city lists. Every other field belongs to the supplier's feed and can't be changed here.</li>
@@ -299,6 +301,7 @@
           <table class="data-table" id="supplierHotelTable">
             <thead>
               <tr>
+                <th class="table-num">#</th>
                 <th>ID</th>
                 <th>Supplier Hotel</th>
                 <th>Location</th>
@@ -319,7 +322,7 @@
             </thead>
             <tbody>
               <tr>
-                <td colspan="16" class="empty-state">Select a supplier to view its hotel list</td>
+                <td colspan="17" class="empty-state">Select a supplier to view its hotel list</td>
               </tr>
             </tbody>
           </table>
@@ -500,10 +503,18 @@
   // and the Edit City modal's own population functions).
   function updateFilterOptions() {
     const rows = currentRows();
-    const countries = [...new Set(rows.map((r) => getSupplierCountryName(state.supplier, r.country.code)))].sort();
-    countryFilterSelect.innerHTML = `<option value="">All Countries</option>` + countries.map((c) => `<option value="${c}">${c}</option>`).join("");
+    // Carries the code alongside the name: the option's value stays the
+    // supplier's own country name (state.country is compared against it and
+    // the State filter below re-derives from it), while its label needs the
+    // code to resolve that supplier's own id for the country.
+    const countries = [...new Set(rows.map((r) => r.country.code))]
+      .map((code) => ({ code, name: getSupplierCountryName(state.supplier, code) }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+    countryFilterSelect.innerHTML =
+      `<option value="">All Countries</option>` +
+      countries.map((c) => `<option value="${c.name}">${supplierCountryOptionLabel(state.supplier, c.code)}</option>`).join("");
     countryFilterSelect.disabled = !state.supplier || countries.length === 0;
-    if (countries.includes(state.country)) {
+    if (countries.some((c) => c.name === state.country)) {
       countryFilterSelect.value = state.country;
     } else {
       state.country = "";
@@ -574,7 +585,8 @@
       .map((r) => ({ r, loc: systemLocationFor(r) }))
       .filter((x) => x.loc);
     const countries = [...new Set(rows.map((x) => getSystemCountryName(x.loc.country.code) || x.loc.country.name))].sort();
-    sysCountryFilterSelect.innerHTML = `<option value="">All Countries</option>` + countries.map((c) => `<option value="${c}">${c}</option>`).join("");
+    sysCountryFilterSelect.innerHTML =
+      `<option value="">All Countries</option>` + countries.map((c) => `<option value="${c}">${systemCountryOptionLabel(c)}</option>`).join("");
     sysCountryFilterSelect.disabled = !state.supplier || countries.length === 0;
     if (countries.includes(state.sysCountry)) {
       sysCountryFilterSelect.value = state.sysCountry;
@@ -658,9 +670,43 @@
     return `<div class="truncatable truncatable--${modifier}" title="${value}"><span class="truncatable-text">${value}</span></div>`;
   }
 
+  // Every trip through the list is a query in a real deployment — the first
+  // load, a Search, a Reset, a page or page-size change — so each one shows
+  // the skeleton first (see withTableLoading in js/app.js). Saving an edit
+  // deliberately does NOT: the row is already on screen and only its own
+  // values changed, so replacing the whole table with placeholders would be
+  // describing a fetch the user didn't ask for.
+  //
+  // Only the body is skeletoned. The header is already on screen and its
+  // columns never change, so redrawing it would make the one part of the
+  // table that is genuinely ready flicker. The pagination footer is emptied
+  // for the same reason — page numbers describing rows that aren't on screen
+  // are a lie — and comes back with them.
+  const tableWrap = document.querySelector("#supplierHotelTable").closest(".table-wrap");
+  const SUPPLIER_HOTEL_COLUMN_COUNT = document.querySelectorAll("#supplierHotelTable thead th").length;
+
   function render() {
+    // Nothing is fetched until a supplier is picked, so this case answers
+    // straight away rather than showing a skeleton for a query that will
+    // never run (see cancelTableLoading in js/app.js).
     if (!state.supplier) {
-      tbody.innerHTML = `<tr><td colspan="16" class="empty-state">Select a supplier to view its hotel list</td></tr>`;
+      cancelTableLoading(tbody);
+      tableWrap.classList.remove("skeleton");
+      renderRows();
+      return;
+    }
+
+    tableWrap.classList.add("skeleton");
+    paginationBar.innerHTML = "";
+    withTableLoading(tbody, skeletonRowsHtml(SUPPLIER_HOTEL_COLUMN_COUNT), () => {
+      tableWrap.classList.remove("skeleton");
+      renderRows();
+    });
+  }
+
+  function renderRows() {
+    if (!state.supplier) {
+      tbody.innerHTML = `<tr><td colspan="17" class="empty-state">Select a supplier to view its hotel list</td></tr>`;
       paginationBar.innerHTML = "";
       updateFiltersSummary();
       return;
@@ -674,7 +720,7 @@
 
     tbody.innerHTML = pageItems.length
       ? pageItems
-          .map((r) => {
+          .map((r, i) => {
             const countryName = getSupplierCountryName(state.supplier, r.country.code);
             const supplierCountryId = getSupplierCountrySupplierId(state.supplier, r.country.code);
             const countryPlain = `${countryName} (${supplierCountryId})`;
@@ -684,6 +730,7 @@
             const sysCountryName = sysLoc ? getSystemCountryName(sysLoc.country.code) || sysLoc.country.name : null;
             return `
       <tr>
+        <td class="table-num">${startIdx + i + 1}</td>
         <td><span class="code-badge">${r.id}</span></td>
         <td>
           <div class="supplier-hotel-cell">
@@ -845,7 +892,7 @@
       </tr>`;
           })
           .join("")
-      : `<tr><td colspan="16" class="empty-state">No hotels match this filter</td></tr>`;
+      : `<tr><td colspan="17" class="empty-state">No hotels match this filter</td></tr>`;
 
     renderPagination(paginationBar, {
       total: filtered.length,
@@ -1277,7 +1324,7 @@
         timestamp: new Date(),
       });
       saveToStorage("supplierHotels", supplierHotels);
-      render();
+      renderRows();
       showToast(`${record.name} marked ${record.active ? "Active" : "Inactive"}`);
       return;
     }
@@ -1366,7 +1413,7 @@
       `<option value="">Select country</option>` +
       (supplierCountries[state.supplier] || [])
         .filter((c) => c.code !== "ZZ")
-        .map((c) => `<option value="${c.code}">${c.name}</option>`)
+        .map((c) => `<option value="${c.code}">${supplierCountryOptionLabel(state.supplier, c.code)}</option>`)
         .join("");
     editCityCountry.value = record.country.code;
     populateEditCityStates(record.country.code, record.state);
@@ -1407,7 +1454,7 @@
 
     saveToStorage("supplierHotels", supplierHotels);
     closeModal(editCityModal);
-    render();
+    renderRows();
     showToast(`${record.name}'s city updated`);
   });
 

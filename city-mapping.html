@@ -134,6 +134,7 @@
       <template id="cityMappingInfo">
         <p>Pin a <strong>system city</strong> in the panel header, then select <strong>supplier cities</strong> to map into it. The pin and the supplier selection work independently, in either order, and only need each other at save time.</p>
         <ul>
+          <li>The <strong>Suppliers</strong> button in the top-right corner, beside Full Screen, chooses which suppliers the tab strip carries at all. Everything is selected to begin with; untick the ones you never work with — or <strong>Deselect all</strong> and tick back just the handful you do — and the strip carries only those, on this and every later visit. It is remembered per browser. Unticking the supplier currently loaded moves the workspace to the first one still on the strip; unticking every supplier leaves the strip empty and says so. Nothing you have queued is lost either way: your picks come back with the supplier when you tick it again. This is not the same as <strong>Find supplier</strong>, which narrows the strip for one search and forgets it.</li>
           <li>Every system city can be pinned, whether it came from the original master list or was added on the City List page.</li>
           <li>The supplier is chosen from the <strong>tabs</strong> above the workspace, one per supplier. No tab is selected when the page opens; selecting one loads that supplier's cities and clears the Country/State filters, the search box and any unsaved picks.</li>
           <li>When there are more suppliers than fit, the tab strip scrolls sideways: use the arrows at either end, or type in <strong>Find supplier</strong> to narrow the strip to matching names. The arrows and the box appear only when the tabs overflow. The supplier currently loaded stays on the strip even while a filter hides the rest.</li>
@@ -155,6 +156,8 @@
       <template id="cityMappingDevNotes">
         <p>This screen maps supplier cities to system cities. The relationship is <strong>many-to-many</strong>: a supplier city can belong to several system cities at once, and a system city can have many supplier cities mapped to it. The pin (which system city) and the supplier selection (which cities to map) work fully independently of each other — either can be set up first, in any order — and only need to agree with each other once Save actually runs.</p>
         <ul>
+          <li><strong>Which suppliers the strip carries</strong> — the Suppliers menu in the fab stack is a saved preference, not a filter, and it is stored as the <em>hidden</em> keys (<code>cityMappingHiddenSuppliers</code>, via the shared <code>saveToStorage()</code>, so Reset Demo Data clears it): "everything selected" is an empty list, and a supplier added to the system later shows up by default instead of being invisible because of a choice made before it existed. One function, <code>applySupplierTabFilters()</code>, owns tab visibility — the menu decides membership first, then the Find box narrows what is left, so a supplier switched off here can never be surfaced by a search. The active tab survives a search (hiding the supplier whose data is loaded below would leave the checklist showing rows with nothing marked as chosen) but not a deselection, which moves the panel to the first supplier still on the strip, or empties it when none are. Queued picks are never dropped by any of this: they live in <code>pendingBySupplier</code>, keyed by supplier, and come back with the tab. A <code>?supplier=</code> deep link outranks the preference and un-hides that supplier for good.</li>
+          <li><strong>The checklist is a query, and looks like one.</strong> Pinning a city, switching supplier, a change in that supplier's mapped countries and searching all fetch a different set of rows, so each one shows the checklist that is coming first: six placeholder rows in the real <code>.merge-list-item</code> shape (<code>skeletonListRowsHtml()</code> in js/app.js, driven by the same <code>withTableLoading()</code> every list page uses, so the wait is the project's one wait). Ticking a checkbox, taking a city back out of the queue and saving all skip it — they rearrange rows that are already here. With nothing pinned, or no supplier chosen, there is no query to make and that state answers immediately (<code>cancelTableLoading()</code>). Separate from the scroll-triggered <em>load more</em> spinner further down this list, which appends to rows already on screen.</li>
           <li><strong>Pinning a system city</strong> — every system city is a valid target; there is no eligibility rule and no city type to exclude. The picker is the panel header: a compact Country → State → City cascade, where Country is required before the city picker loads and State is always an optional narrowing filter, never part of the gate. The City select itself is the pin — there is no separate pinned-city summary, no mapped-count badge and no history entry point on this screen; clearing that select unpins.</li>
           <li><strong>Keeping a large result set from hanging the screen</strong> — both lists on this page (the Map Supplier Cities checklist and its Already Mapped sub-list) load and display results in bounded pages of 50 at a time, never the whole matching set in one go — same convention as hotel-mapping.html's checklist. Reaching the bottom of a list's currently-loaded rows triggers loading its next page automatically, with a brief spinner, appending below the existing rows without disturbing that list's own scroll position or re-rendering rows already on screen. Once a list is fully loaded, its bottom shows a clear "end of list" state and stops trying to load further. Changing any filter/search/pin resets the affected list back to its first page.</li>
           <li><strong>Map Supplier Cities panel</strong> — the supplier is picked from a tab strip, one tab per supplier, not from a filter dropdown: it selects which data set the whole panel is working against, so it must sit above the filters rather than beside them. No tab is selected on load. Selecting a different one resets only the search box before loading that supplier's cities — queued picks are kept per supplier and survive the switch (see the multi-supplier save rule below). Re-selecting the tab that is already active must do nothing at all. <strong>The strip must survive a realistic supplier count</strong> (dozens, not four): every tab is the same fixed width whatever its name, long names truncate rather than widen their tab, and the strip scrolls sideways on one line — never wraps onto extra rows, which would push the actual work off-screen and make the strip's height jump as it filters. Scroll arrows at both ends and a name filter over the tabs appear only when the tabs actually overflow, and each arrow is disabled once that end is reached. The filter must never hide the supplier whose data is currently loaded, and selecting a supplier that is scrolled out of view must bring its tab back into view. <strong>The supplier country is derived, never chosen</strong>: it is whichever of that supplier's own country records is mapped to the System Country selected in the header — resolved from that selection, not from the pinned city, since the pin's own cascade establishes the country before any city is picked and gating the panel on the later step would be arbitrary. This screen must therefore not offer a supplier country control at all — a second, independently-chosen country would let a user assemble a supplier city and a system city that belong to different countries. Display it read-only, using that supplier's own name for the country plus the identifier its feed keys that country by, since those are the values that identify it in the supplier's system. More than one of a supplier's country records may be mapped to the same system country; when that happens all of their cities are candidates. When the supplier has no country mapped to the selected system country, say so explicitly and load nothing — the fix is to map the country first, not to work around it here. A supplier tab is therefore required before the checklist loads — and so is a <strong>pinned city</strong>: every row in that list answers a question about the pinned city (is this supplier city already mapped to it, would this save map it), and unpinned there is no answer to give, only rows that look mapped to nothing in particular. The System Country requirement is still enforced, one step earlier rather than in its own right: the pin's own city picker does not load until a country is named, so a pinned city already means a country was picked. The checklist's search and Unmapped filter are disabled until the same point, having nothing to act on before it. <strong>There is no state filter over the supplier's cities</strong> — the header's State narrows the pin's own City list only. A supplier's states are its own vocabulary, not the system's, so filtering the candidate list by one would be filtering by a value the system never agreed to; the name search covers the same need without implying a mapping that doesn't exist. A supplier city already mapped to a different system city must still be selectable here, never blocked or marked — under the many-to-many model that mapping is simply irrelevant to this one. Each row's left edge is a colored bar (green for Active, red for Inactive) instead of the text pill used elsewhere in the project — a pill would shift the row's checkbox/name content.</li>
@@ -181,6 +184,26 @@
       </template>
 
       <div class="mapping-nav-fabs">
+        <!-- Which suppliers the tab strip carries. It sits up here with the
+             other view controls rather than inside the strip: it is a saved
+             preference about what this screen shows, the same kind of thing
+             Full Screen is, while the strip's own Find box is a throwaway
+             query over whatever this menu already allows. -->
+        <div class="supplier-visibility" id="supplierVisibility">
+          <button type="button" class="mapping-nav-fab supplier-visibility-toggle" id="supplierVisibilityBtn" aria-haspopup="true" aria-expanded="false" aria-controls="supplierVisibilityMenu">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 5h16l-6.5 7.5V19l-3 1.5v-8L4 5z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+            <span>Suppliers</span>
+            <span class="supplier-visibility-count" id="supplierVisibilityCount">0/0</span>
+          </button>
+          <div class="supplier-visibility-menu" id="supplierVisibilityMenu" role="group" aria-label="Suppliers shown in the strip" hidden>
+            <div class="supplier-visibility-head">
+              <span class="supplier-visibility-title">Show in strip</span>
+              <button type="button" class="supplier-visibility-bulk" data-visibility-all>Select all</button>
+              <button type="button" class="supplier-visibility-bulk" data-visibility-none>Deselect all</button>
+            </div>
+            <div class="supplier-visibility-list" id="supplierVisibilityList"></div>
+          </div>
+        </div>
         <button type="button" class="mapping-nav-fab mapping-chrome-toggle" id="mappingChromeToggleBtn" aria-label="Full screen: hide page title and fill the display">
           <svg class="icon-expand" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           <svg class="icon-collapse" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -426,7 +449,7 @@
 
   pinCountry.insertAdjacentHTML(
     "beforeend",
-    SYSTEM_COUNTRIES.map((c) => `<option value="${c.name}">${c.name} (${c.code})</option>`).join("")
+    SYSTEM_COUNTRIES.map((c) => `<option value="${c.name}">${systemCountryOptionLabel(c.name)}</option>`).join("")
   );
 
   // Every system city is a valid mapping target — cities carry no type or
@@ -585,22 +608,153 @@
   window.addEventListener("resize", debounce(syncSupplierTabsOverflow, 150));
 
   supplierTabsSearch.addEventListener("input", () => {
+    supplierTabs.scrollLeft = 0;
+    applySupplierTabFilters();
+  });
+
+  /* ---------- Which suppliers the strip carries ---------- */
+
+  // A saved preference, not a filter. A real deployment can hold dozens of
+  // suppliers while any one person works with a handful, so the strip is
+  // narrowed once and stays narrowed between sessions. Deliberately separate
+  // from the strip's own Find box: that answers "the one I can name" and is
+  // gone on the next keystroke, this decides which suppliers are on the
+  // strip at all.
+  //
+  // What gets stored is the HIDDEN keys, not the shown ones — so "everything
+  // selected" is an empty list, and a supplier added to the system later
+  // appears by default instead of being invisible because of a choice made
+  // before it existed. Written through the shared storage helpers, so Reset
+  // Demo Data clears this along with everything else.
+  const SUPPLIER_VISIBILITY_KEY = "cityMappingHiddenSuppliers";
+  const ALL_SUPPLIER_KEYS = Object.keys(SUPPLIER_LABELS);
+  const savedHiddenSuppliers = loadFromStorage(SUPPLIER_VISIBILITY_KEY);
+  const hiddenSuppliers = new Set(Array.isArray(savedHiddenSuppliers) ? savedHiddenSuppliers : []);
+
+  const supplierVisibility = document.getElementById("supplierVisibility");
+  const supplierVisibilityBtn = document.getElementById("supplierVisibilityBtn");
+  const supplierVisibilityMenu = document.getElementById("supplierVisibilityMenu");
+  const supplierVisibilityList = document.getElementById("supplierVisibilityList");
+  const supplierVisibilityCount = document.getElementById("supplierVisibilityCount");
+
+  const isSupplierShown = (key) => !hiddenSuppliers.has(key);
+  const shownSupplierKeys = () => ALL_SUPPLIER_KEYS.filter(isSupplierShown);
+
+  supplierVisibilityList.innerHTML = ALL_SUPPLIER_KEYS.map(
+    (key) => `
+      <label class="supplier-visibility-option">
+        <input type="checkbox" data-visibility-supplier="${key}" ${isSupplierShown(key) ? "checked" : ""} />
+        <span class="supplier-visibility-name">${SUPPLIER_LABELS[key]}</span>
+      </label>`
+  ).join("");
+
+  // Two things decide whether a tab is on the strip and they are not the
+  // same kind of thing, so they apply in order: this menu decides
+  // membership, the Find box narrows what is left. A supplier switched off
+  // here can never be surfaced by a search.
+  function applySupplierTabFilters() {
     const query = supplierTabsSearch.value.trim().toLowerCase();
     let matches = 0;
     supplierTabs.querySelectorAll(".supplier-tab").forEach((tab) => {
-      const match = !query || tab.textContent.toLowerCase().includes(query);
+      const shown = isSupplierShown(tab.dataset.supplier);
+      const match = shown && (!query || tab.textContent.toLowerCase().includes(query));
       if (match) matches++;
-      // The active tab is never filtered out — hiding the supplier whose
-      // data is currently loaded below would leave the panel showing rows
-      // with nothing marked as selected. It doesn't count as a match
-      // though, so "no supplier matches" is still said when the query
-      // genuinely matches nothing.
-      tab.hidden = !match && !tab.classList.contains("active");
+      // The active tab survives a search — hiding the supplier whose data is
+      // loaded below would leave the panel showing rows with nothing marked
+      // as chosen — but it does not survive being switched off here, which
+      // moves the panel to another supplier instead (see below).
+      tab.hidden = !match && !(shown && tab.classList.contains("active"));
     });
+    supplierTabsEmpty.textContent =
+      hiddenSuppliers.size >= ALL_SUPPLIER_KEYS.length
+        ? "No suppliers selected — pick some from the Suppliers menu"
+        : "No supplier matches that name";
     supplierTabsEmpty.hidden = matches > 0;
-    supplierTabs.scrollLeft = 0;
     syncSupplierTabsOverflow();
+  }
+
+  function updateSupplierVisibilityCount() {
+    supplierVisibilityCount.textContent = `${shownSupplierKeys().length}/${ALL_SUPPLIER_KEYS.length}`;
+  }
+
+  // Saves, redraws the strip, and moves the panel off a supplier that just
+  // left it — the checklist below is scoped to one supplier and cannot sit
+  // on one that has no tab. Queued picks are NOT dropped: they live in
+  // pendingBySupplier keyed by supplier, and come back with the tab.
+  function commitSupplierVisibility() {
+    saveToStorage(SUPPLIER_VISIBILITY_KEY, [...hiddenSuppliers]);
+    updateSupplierVisibilityCount();
+    applySupplierTabFilters();
+    if (!rightState.supplier || isSupplierShown(rightState.supplier)) return;
+    const next = shownSupplierKeys()[0] || "";
+    selectSupplier(next);
+    // With nothing left to move to, selectSupplier() delegates to
+    // refreshRightPanelBaseline(), which has nothing to refresh and returns
+    // early — so the panel is put back to its empty state here rather than
+    // left showing the switched-off supplier's rows.
+    if (!next) {
+      queryCityList();
+      renderSelectedCitiesList();
+      updateSelectionSummary();
+    }
+  }
+
+  // Also used by the ?supplier= deep link: a link naming a supplier outranks
+  // a preference that hid it.
+  function showSupplierInStrip(key) {
+    if (!hiddenSuppliers.has(key)) return;
+    hiddenSuppliers.delete(key);
+    const box = supplierVisibilityList.querySelector(`[data-visibility-supplier="${key}"]`);
+    if (box) box.checked = true;
+    commitSupplierVisibility();
+  }
+
+  supplierVisibilityList.addEventListener("change", (e) => {
+    const box = e.target.closest("[data-visibility-supplier]");
+    if (!box) return;
+    if (box.checked) hiddenSuppliers.delete(box.dataset.visibilitySupplier);
+    else hiddenSuppliers.add(box.dataset.visibilitySupplier);
+    commitSupplierVisibility();
   });
+
+  supplierVisibilityMenu.querySelector("[data-visibility-all]").addEventListener("click", () => {
+    hiddenSuppliers.clear();
+    supplierVisibilityList.querySelectorAll("input").forEach((box) => (box.checked = true));
+    commitSupplierVisibility();
+  });
+
+  // Emptying the strip completely is allowed: the strip says so in place,
+  // and forcing one supplier to stay on would be overruling a choice the
+  // user just made in the one control that exists to make it.
+  supplierVisibilityMenu.querySelector("[data-visibility-none]").addEventListener("click", () => {
+    ALL_SUPPLIER_KEYS.forEach((key) => hiddenSuppliers.add(key));
+    supplierVisibilityList.querySelectorAll("input").forEach((box) => (box.checked = false));
+    commitSupplierVisibility();
+  });
+
+  function setSupplierVisibilityOpen(open) {
+    supplierVisibilityMenu.hidden = !open;
+    supplierVisibility.classList.toggle("open", open);
+    supplierVisibilityBtn.setAttribute("aria-expanded", String(open));
+  }
+
+  supplierVisibilityBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    setSupplierVisibilityOpen(supplierVisibilityMenu.hidden);
+  });
+
+  // Clicks inside the menu belong to the menu — it stays open while boxes
+  // are ticked, since picking several at once is the normal case. Anything
+  // outside closes it, as does Escape.
+  supplierVisibilityMenu.addEventListener("click", (e) => e.stopPropagation());
+  document.addEventListener("click", () => setSupplierVisibilityOpen(false));
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !supplierVisibilityMenu.hidden) setSupplierVisibilityOpen(false);
+  });
+
+  updateSupplierVisibilityCount();
+  applySupplierTabFilters();
+
   const supplierCountryLabel = document.getElementById("supplierCountryLabel");
   const supplierCountryColon = document.getElementById("supplierCountryColon");
   const supplierCountryValue = document.getElementById("supplierCountryValue");
@@ -712,7 +866,7 @@
     mapCitySearch.value = "";
     baselineBySupplier = {};
     pendingBySupplier = {};
-    renderCityList();
+    queryCityList();
     renderSelectedCitiesList();
     updateSelectionSummary();
   }
@@ -737,7 +891,7 @@
     if (!rightState.supplier) return;
     baselineFor(rightState.supplier);
     pendingFor(rightState.supplier);
-    renderCityList();
+    queryCityList();
     renderSelectedCitiesList();
     updateSelectionSummary();
   }
@@ -751,11 +905,11 @@
     baselineBySupplier = {};
     pendingBySupplier = {};
     if (!rightState.supplier) {
-      renderCityList();
+      queryCityList();
       updateSelectionSummary();
       return;
     }
-    renderCityList();
+    queryCityList();
     renderSelectedCitiesList();
     updateSelectionSummary();
   }
@@ -816,7 +970,7 @@
 
     renderSupplierCountryValue(rows);
 
-    renderCityList();
+    queryCityList();
   }
 
   // Three distinct states, deliberately worded apart: nothing to resolve
@@ -866,7 +1020,7 @@
 
   const runMapSearch = debounce(() => {
     rightState.query = mapCitySearch.value;
-    renderCityList();
+    queryCityList();
   });
   mapCitySearch.addEventListener("input", runMapSearch);
   mapUnmappedOnlyToggle.addEventListener("change", renderCityList);
@@ -981,6 +1135,31 @@
         }
       }
     }, 450);
+  }
+
+  // Pinning a city, filtering it or searching it is a fetch — these rows
+  // come back from the server, not from anything already on screen — so
+  // each one shows the checklist that is coming first, through the same
+  // withTableLoading() every list page uses. Ticking a checkbox, taking a
+  // row back out of the queue and saving all skip it: those rearrange rows
+  // that are already here, and a placeholder would be describing a fetch
+  // nobody asked for.
+  function queryCityList() {
+    // The unpinned (and supplier-less) states answer without a query at
+    // all, so they say so immediately rather than sitting behind a wait
+    // for something that will never be fetched.
+    if (pinnedCityId === null || !rightState.supplier) {
+      cancelTableLoading(mapCityList);
+      mapCityList.classList.remove("skeleton");
+      renderCityList();
+      return;
+    }
+
+    mapCityList.classList.add("skeleton");
+    withTableLoading(mapCityList, skeletonListRowsHtml(), () => {
+      mapCityList.classList.remove("skeleton");
+      renderCityList();
+    });
   }
 
   function renderCityList() {
@@ -1421,6 +1600,12 @@
   const deepLinkSupplierCityId = urlParams.get("supplierCityId");
 
   if (deepLinkSupplier && SUPPLIER_LABELS[deepLinkSupplier]) {
+    // A link naming a supplier outranks a saved preference that hid it:
+    // the user is asking for that supplier right now, and loading its
+    // cities under a strip with no tab for it would leave the panel
+    // showing rows with nothing marked as chosen. It stays shown, rather
+    // than reappearing only until the next reload.
+    showSupplierInStrip(deepLinkSupplier);
     selectSupplier(deepLinkSupplier);
 
     // ?country= and ?state= are still accepted by old links but no longer
