@@ -154,7 +154,7 @@
           <li><strong>The list is a query, and looks like one.</strong> Fetching it shows the skeleton — the header stays put and the body fills with placeholder rows (shared <code>withTableLoading()</code>/<code>skeletonRowsHtml()</code>, see js/app.js). Only the body is replaced: the header's columns never change, so redrawing them would make the one part of the table that is genuinely ready flicker. The pagination footer is emptied for the same reason — page numbers describing rows that aren't on screen are a lie — and returns with the rows. This runs on <strong>the first load, Search, Reset and any page or rows-per-page change</strong>, each of which is a real query in a deployed system. It deliberately does <em>not</em> run after saving an edit: that row is already on screen and only its own values changed, so replacing the whole table with placeholders would be describing a fetch nobody asked for.</li>
           <li><strong>Nationality</strong> — a plain optional text field (e.g. "American"), nullable — no mapping, cascade, or other relationship keys off it, unlike Name. Stored as <code>null</code> (not an empty string) when unset, shown as "—" in the table. Its edit input is deliberately NOT wired via the modal's generic <code>data-fill</code> mechanism (unlike Code/Name) — that mechanism reads the rendered table cell's own text, which shows "—" for null, and would otherwise feed that literal "—" back into the input as if it were a real value. Populated directly from the record instead, so a null nationality opens as a genuinely empty field.</li>
           <li><strong>Edit</strong> — renaming must never break an existing mapping. Either mappings are keyed by the permanent code, or the rename updates every existing mapping in the same step. Empty names must be rejected with a clear error. Name and Nationality are independently checked and independently logged — see History below.</li>
-          <li><strong>Map</strong> — for each supplier, show every one of that supplier's own countries already mapped here (each with its own Unmap), and — whenever any of that supplier's other countries isn't mapped here — a picker to map one of those in (with Map); both can appear together, since more than one of a supplier's own countries can be mapped to the same system country at once. A supplier country only ever has a name and its own ID — never an ISO/system code, which is purely an internal join key and must never be displayed as if the supplier provided it. In the picker, any option already mapped to a different country must be labeled with its current target (e.g. "Deutschland (AG-DE-021) — mapped to Austria") so that's visible before it's picked, not just after. Picking an already-mapped-elsewhere option must show old vs. new and require explicit confirmation before applying — never silent. Logged as a <strong>Remap</strong> (see History below), not a plain Map.</li>
+          <li><strong>Map</strong> — for each supplier, show every one of that supplier's own countries already mapped here (each with its own Unmap), and — whenever any of that supplier's other countries isn't mapped here — a picker to map one of those in (with Map); both can appear together, since more than one of a supplier's own countries can be mapped to the same system country at once. A supplier country only ever has a name and its own ID — never an ISO/system code, which is purely an internal join key and must never be displayed as if the supplier provided it. In the picker, any option already mapped to a different country must be labeled with its current target, name and system code (e.g. "Deutschland (AG-DE-021) — mapped to Austria (AT)") so that's visible before it's picked, not just after. Picking an already-mapped-elsewhere option must show old vs. new and require explicit confirmation before applying — never silent. Logged as a <strong>Remap</strong> (see History below), not a plain Map.</li>
           <li><strong>History</strong> — every entry has three parts: an <strong>operation name</strong>, a <strong>description</strong> in that operation's fixed pattern, and <strong>who + when</strong>. Logged the instant the change happens (never reconstructed later by comparing snapshots), newest entry first. A mapping change always writes to <strong>two</strong> records — the country's own history AND the affected supplier country's own history — no matter which screen made the change.
             <p>When a description needs to show more than one distinct fact — e.g. who made the change, and separately what it changed from/to — separate the facts with a single pipe character <code>|</code>. The history view splits on <code>|</code> and puts each part on its own line, so a card stays easy to scan instead of one dense run-on sentence. Only insert <code>|</code> between genuinely distinct facts, and never for any other purpose — it's reserved as the line-break marker.</p>
             <p><strong>On the country's own record:</strong></p>
@@ -727,6 +727,14 @@
     renderMapCountriesBody();
   }
 
+  // A system country named in the picker's "mapped to" suffix is shown with
+  // its own system code — the name alone doesn't always say which country
+  // list entry it is. Falls back to the bare name if there's no match.
+  function systemCountryLabel(name) {
+    const match = countries.find((c) => c.name === name);
+    return match ? `${match.name} (${match.code})` : name;
+  }
+
   function renderMapCountriesBody() {
     const body = document.getElementById("mapCountriesBody");
     body.innerHTML = Object.keys(SUPPLIER_LABELS)
@@ -765,7 +773,7 @@
                   .map(
                     (r) =>
                       `<option value="${r.id}">${r.name} (${r.supplierId})${
-                        r.systemCountry ? ` — mapped to ${r.systemCountry}` : ""
+                        r.systemCountry ? ` — mapped to ${systemCountryLabel(r.systemCountry)}` : ""
                       }</option>`
                   )
                   .join("")}
