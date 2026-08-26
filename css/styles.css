@@ -2993,11 +2993,148 @@ a.supplier-open-link:focus-visible {
 }
 
 
+/* ---------- Dashboard skeletons ----------
+   Each card on the dashboard is fed by its own endpoint and reveals itself
+   the moment its own data lands, so each one holds its own placeholder in
+   the meantime. Same idea as the table skeleton above — draw the block that
+   is coming rather than a spinner — but the shapes here are a ring, a set
+   of tiles, a stacked bar and a list of supplier rows, so each placeholder
+   reuses the real layout classes of the block it stands in for and fills
+   them with bars. Nothing moves when the numbers arrive. */
+
+/* A placeholder is not a control: no hover lift on a tile that holds
+   nothing, no cursor on a row that isn't there yet. */
+.dash-skel {
+  pointer-events: none;
+}
+
+/* The real blocks wait behind `hidden`, which the UA stylesheet enforces at
+   a specificity every one of them beats (.dash-hero sets display:grid,
+   .star-rating-list display:flex). Without this they would all render at
+   once, underneath their own skeletons. */
+[data-loads][hidden] {
+  display: none !important;
+}
+
+/* Shapes the table skeleton has no equivalent for: the round supplier
+   avatars and legend dots, and the small square star swatches. */
+.dash-skel .skeleton-dot,
+.dash-skel .skeleton-square {
+  display: block;
+  flex-shrink: 0;
+  background: linear-gradient(90deg, var(--bg-panel) 25%, #e9ebf5 40%, var(--bg-panel) 60%);
+  background-size: 300% 100%;
+  animation: skeleton-shimmer 1.3s ease-in-out infinite;
+}
+
+.dash-skel .skeleton-dot {
+  border-radius: 50%;
+}
+
+.dash-skel .skeleton-square {
+  border-radius: 3px;
+}
+
+/* The coverage ring's own track, drawn as a bordered circle at the same
+   160px/14px the SVG uses. What's missing is exactly what hasn't arrived:
+   the arc on top of it. */
+.skel-ring {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  border: 14px solid var(--bg-panel);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+/* The star card's bar and legend arrive together, so their placeholder is
+   one block, and it takes the same column stretch .star-rating-list does. */
+.star-skel {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+/* A bar is thinner than the line of text it replaces, and a row holding one
+   would collapse to the bar's height — so every placeholder row is pinned to
+   the height its filled version resolves to. This is what "nothing moves
+   when the data lands" costs: the numbers below are the real rows, measured.
+   They mirror the type scale directly above each block in this stylesheet,
+   so a font-size change there wants a look here. */
+.dash-skel .hero-metric {
+  min-height: 17px;
+}
+
+.dash-skel .hero-health-title {
+  min-height: 14px;
+}
+
+.dash-skel .health-legend-item {
+  min-height: 16px;
+}
+
+/* The caption is one centred line, so its bar is centred too. */
+.dash-skel .hero-caption {
+  min-height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Not the bare line height: these tiles stretch to the tallest in their grid
+   row, and the sub-line under the widest count wraps to two lines, so this
+   is where the four of them settle once their own text is in. */
+.dash-skel .stat-tile-content {
+  min-height: 90px;
+}
+
+.dash-skel .star-rating-row {
+  min-height: 29px;
+}
+
+.dash-skel .metric-chip-top {
+  min-height: 16px;
+  align-items: center;
+}
+
+/* These stand in for buttons rather than for text, so they take the button's
+   own height — min-height, because the widths carried on each one are inline
+   and a plain height would lose to them. */
+.dash-skel .pagination-controls .skeleton-bar {
+  min-height: 32px;
+}
+
+/* Rows fade toward the bottom of the supplier block, the same way the table
+   skeleton's do — a list continuing past the edge rather than one that is
+   exactly six long. */
+.dash-skel .supplier-summary-card:nth-child(n + 4) {
+  opacity: 0.55;
+}
+
+.dash-skel .supplier-summary-card:nth-child(n + 6) {
+  opacity: 0.3;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dash-skel .skeleton-dot,
+  .dash-skel .skeleton-square {
+    animation: none;
+  }
+}
+
 /* ---------- Dashboard responsive ---------- */
 
 @media (max-width: 1240px) {
   .dash-grid {
     grid-template-columns: minmax(0, 1fr);
+  }
+  /* The tiles get wider as the card does, so fewer of their sub-lines
+     wrap and the height they settle at drops with each breakpoint. */
+  .dash-skel .stat-tile-content {
+    min-height: 88px;
   }
 }
 
@@ -3036,6 +3173,10 @@ a.supplier-open-link:focus-visible {
   }
   .supplier-summary-metrics {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .dash-skel .stat-tile-content {
+    min-height: 84px;
   }
   .dash-head {
     flex-wrap: wrap;
