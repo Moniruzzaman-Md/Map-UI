@@ -202,11 +202,25 @@ const BULK_SUPPLIER_COUNTRY_POOL = [
   { name: "France", code: "FR" },
   { name: "Germany", code: "DE" },
   { name: "Italy", code: "IT" },
-  { name: "Spain", code: "ES" },
+  // Spain was here, and is deliberately not any more: SYSTEM_CITIES holds no
+  // Spanish city, so every bulk supplier whose country window included Spain
+  // had a third of its city rows with nothing to map to. That capped those
+  // suppliers well below their coverage target for a reason invisible on
+  // screen. Add a Spanish system city and it can come back.
   { name: "Japan", code: "JP" },
   { name: "Singapore", code: "SG" },
   { name: "Australia", code: "AU" },
 ];
+
+// How completely each bulk supplier has been mapped, walked round-robin by
+// supplier index. Every bulk supplier used to get exactly one mapped country
+// and zero mapped cities, which pinned all 50 of them at roughly 6-8% — so
+// the whole upper half of the coverage scale (the dashboard's amber and
+// green tiers, its "80%+ mapped" pills, the Needs Attention green branch)
+// was unreachable in the demo no matter what you clicked. These five targets
+// spread the same 50 suppliers across the full scale instead, so every state
+// the design can render is actually visible in the seed data.
+const BULK_COVERAGE_TARGETS = [0.95, 0.86, 0.7, 0.58, 0.3];
 
 const BULK_SUPPLIER_KEYS = [];
 
@@ -221,16 +235,19 @@ BULK_SUPPLIER_PREFIXES.forEach((prefix, p) => {
     // 2-3 countries each, walked round-robin through the pool so different
     // suppliers cover different countries instead of all starting at the US.
     const countryCount = 2 + (index % 2);
+    const target = BULK_COVERAGE_TARGETS[index % BULK_COVERAGE_TARGETS.length];
+    const mappedCountryCount = Math.round(countryCount * target);
     supplierCountries[key] = Array.from({ length: countryCount }, (_, i) => {
       const meta = BULK_SUPPLIER_COUNTRY_POOL[(index + i) % BULK_SUPPLIER_COUNTRY_POOL.length];
       return {
         name: meta.name,
         code: meta.code,
         supplierId: `${key.slice(0, 3).toUpperCase()}-${meta.code}-${String(index + 1).padStart(3, "0")}`,
-        // Only the first country is mapped to its system counterpart, so
-        // these suppliers show a partly-mapped state rather than a
-        // uniformly empty or uniformly complete one.
-        systemCountry: i === 0 ? meta.name : null,
+        // How many of this supplier's countries are mapped follows its own
+        // coverage target rather than the old flat "only ever the first
+        // one" rule — see BULK_COVERAGE_TARGETS for why that rule made most
+        // of the coverage scale impossible to reach.
+        systemCountry: i < mappedCountryCount ? meta.name : null,
       };
     });
   });
@@ -992,8 +1009,8 @@ generateBulkCityNames(200, true).forEach((name, i) => {
 // Cities for the 50 bulk suppliers declared near SUPPLIER_LABELS above.
 // Each takes its own window of one shared name pool (offset by supplier
 // index) so no two of them look like copies of each other, spread across
-// that supplier's own countries. Unmapped, same reasoning as the bulk Agoda
-// rows above — these exist for volume, not to demonstrate mapping.
+// that supplier's own countries. How many of them end up mapped is decided
+// further down, from that supplier's BULK_COVERAGE_TARGETS entry.
 const BULK_SUPPLIER_CITY_POOL = generateBulkCityNames(400);
 
 BULK_SUPPLIER_KEYS.forEach((key, index) => {
@@ -1006,7 +1023,11 @@ BULK_SUPPLIER_KEYS.forEach((key, index) => {
       name,
       state: country.code === "US" ? STATES_BY_COUNTRY_CODE.US[i % STATES_BY_COUNTRY_CODE.US.length] : null,
       countryCode: country.code,
-      systemCityId: null,
+      // Plural, like every other supplier city row: a supplier city can be
+      // mapped to several system cities. These rows carried a singular
+      // `systemCityId: null` left over from before the many-to-many rework,
+      // which no screen has read since.
+      systemCityIds: [],
     };
   });
 });
@@ -1057,6 +1078,51 @@ Object.keys(supplierCities).forEach((key) => {
     row.id = generateSupplierCityId(key, row.countryCode, i, row.name);
     row.history = [];
     row.active = true;
+  });
+});
+
+// System cities grouped by country, so a bulk supplier's city can be linked
+// to a system city in the country it actually belongs to rather than to an
+// arbitrary one.
+const SYSTEM_CITY_IDS_BY_COUNTRY = SYSTEM_CITIES.reduce((byCode, city) => {
+  const code = city.country?.code;
+  if (!code) return byCode;
+  (byCode[code] = byCode[code] || []).push(city.id);
+  return byCode;
+}, {});
+
+// Map a share of each bulk supplier's cities, sized by that supplier's
+// coverage target, so the 50 of them spread across the whole good/fair/poor
+// scale instead of all sitting at the bottom of it.
+//
+// Assigned directly rather than replayed through applyCityMap(): these rows
+// carry no history by design (they exist for volume), and pushing several
+// hundred generated links through the history helper would bury the
+// hand-written mapping stories on the system cities that City Mapping and
+// System City List demo. The supplier row's own `systemCityIds` is what
+// every screen actually reads, so setting it is enough.
+BULK_SUPPLIER_KEYS.forEach((key, index) => {
+  const rows = supplierCities[key];
+  const target = BULK_COVERAGE_TARGETS[index % BULK_COVERAGE_TARGETS.length];
+  // Only rows whose country has at least one system city can be mapped at
+  // all — a bulk supplier covering a country the system holds no cities for
+  // (Spain, in this data) has nothing to point those rows at. Filling the
+  // target from the mappable rows rather than from the first N of all of
+  // them keeps a supplier's coverage on its target instead of quietly
+  // dropping a third of the way below it whenever its country window
+  // happens to include one of those gaps.
+  const mappable = rows.filter((row) => (SYSTEM_CITY_IDS_BY_COUNTRY[row.countryCode] || []).length > 0);
+  const wanted = Math.min(Math.round(rows.length * target), mappable.length);
+  // Counted per country, not per row: a supplier's rows alternate between
+  // its countries, so walking the pool by row index moved in step with that
+  // alternation and every German row landed on the same German city. This
+  // advances each country's own pool independently, and the supplier offset
+  // keeps two suppliers from opening on the same city.
+  const cursorByCountry = {};
+  mappable.slice(0, wanted).forEach((row) => {
+    const pool = SYSTEM_CITY_IDS_BY_COUNTRY[row.countryCode];
+    const seen = (cursorByCountry[row.countryCode] = (cursorByCountry[row.countryCode] ?? -1) + 1);
+    row.systemCityIds = [pool[(index + seen) % pool.length]];
   });
 });
 

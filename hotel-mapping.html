@@ -985,15 +985,23 @@
     // while New Selection's only discards an unsaved pick. What the word
     // used to carry, "is this row queued or not", is on the row itself now
     // (see .merge-list-item--queued-unmap): struck name, tinted row.
-    // title="" as well as aria-label, since .action-btn's own CSS tooltip
-    // is clipped by its overflow:hidden.
+    // title="" as well as aria-label, and here that is deliberate rather than
+    // a workaround. The project-wide styled tooltip (.action-btn[aria-label]
+    // ::after) is drawn above the button, and a row in this list sits under
+    // five nested overflow-clipped ancestors, so the bubble is cut off before
+    // it can be read. A native title is painted outside the page's clipping
+    // entirely. The stylesheet suppresses the styled bubble whenever a title
+    // is present, so exactly one tooltip ever shows. Elsewhere — the list
+    // tables, the page headers — the styled bubble reaches fine and no title
+    // is set. The aria-label stays longer than the title because it names the
+    // row, which a screen reader has no other way to hear.
     const unmapButton = primaryHere
       ? ""
       : `
         <div class="row-actions">
           <button class="action-btn" data-toggle-unmap-id="${h.id}"
             title="${queuedForUnmap ? "Undo — keep this hotel mapped" : "Unmap from this city"}"
-            aria-label="${queuedForUnmap ? `Undo unmap for ${h.name}` : `Unmap ${h.name} from this city`}">
+            aria-label="${queuedForUnmap ? `Undo — keep ${h.name} mapped` : `Unmap ${h.name} from this city`}">
             ${queuedForUnmap ? ICON_UNDO : ICON_UNLINK}
           </button>
         </div>`;

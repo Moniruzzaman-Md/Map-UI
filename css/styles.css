@@ -16,6 +16,15 @@
   --drawer-width: 480px;
   --success: #1a9d5c;
   --warning: #c8790d;
+  /* Deep variants used only where the color sits BEHIND white text — the
+     status pills. The base --success/--warning/--accent-red are tuned for
+     bars, dots and borders, where nothing has to be read out of them; as a
+     background for 12px white type they land at 3.4-4.0:1, under the 4.5:1
+     AA floor. These are the same hues dropped just far enough to clear it,
+     so a pill still matches the bar beside it. */
+  --success-deep: #178449;
+  --warning-deep: #a8620a;
+  --danger-deep: #d63643;
   --bg-page: #f2f2f9;
   --bg-card: #ffffff;
   --bg-panel: #ececfa;
@@ -1334,12 +1343,19 @@ table.data-table {
   justify-content: center;
   width: 32px;
   height: 32px;
-  /* Nothing in here is ever meant to spill: it holds one centered icon in a
-     fixed 32px box. Without this the button reports a scroll width far wider
-     than itself, which bubbles up and puts a phantom horizontal scrollbar on
-     any bounded list containing one (the mapping screens' New Selection
-     boxes). */
-  overflow: hidden;
+  /* No `overflow: hidden` here, deliberately. It used to be, to stop the
+     button reporting a scroll width far wider than itself and putting a
+     phantom horizontal scrollbar on any bounded list containing one (the
+     mapping screens' New Selection boxes). But the thing making it wide was
+     this button's OWN tooltip — .action-btn[aria-label]::after, which used
+     to be generated at all times and merely hidden with opacity/visibility,
+     so it occupied real layout space while invisible. Clipping the button
+     hid the symptom and took the tooltip with it: a bubble positioned above
+     a 32px box cannot escape that box, so no row-action button anywhere in
+     the project showed a tooltip on hover. The tooltip is now generated
+     only on hover/focus (`content: none` at rest — see the Tooltips section
+     at the end of this file), so nothing invisible occupies space and this
+     button needs no clipping. */
   border-radius: var(--radius-sm);
   border: 1px solid var(--border-color);
   background: #fff;
@@ -1454,10 +1470,11 @@ table.data-table {
   transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.2s, box-shadow 0.2s;
 }
 
-/* Heat tiers on the button itself — how hotly it's been chased recently.
-   Color/shadow only, never `transform`, since that property is already
-   owned by the dodge positioning above and the two would fight for control
-   if both tried to animate it. */
+/* Mood tiers on the button itself — where it is in the chase. Color, shadow
+   and FILTER only, never `transform`, since that property is already owned
+   by the dodge positioning above and the two would fight for control if both
+   tried to animate it. The wobble below is the one exception, and it is
+   applied to an inner wrapper (.dodge-face) for exactly that reason. */
 .page-btn.dodge-btn.heat-annoyed {
   border-color: #f3722c;
 }
@@ -1465,9 +1482,59 @@ table.data-table {
   border-color: #f94144;
   box-shadow: 0 0 0 2px rgba(249, 65, 68, 0.15);
 }
-.page-btn.dodge-btn.heat-saint {
+/* Winded: it has been running too long and the button starts sagging. */
+.page-btn.dodge-btn.heat-tired {
   border-color: #f9c74f;
   box-shadow: 0 0 0 2px rgba(249, 199, 79, 0.2);
+  opacity: 0.9;
+}
+/* Given up / retired — calm, warm, and catchable. */
+.page-btn.dodge-btn.heat-saint {
+  border-color: #90be6d;
+  box-shadow: 0 0 0 2px rgba(144, 190, 109, 0.25);
+}
+
+/* The label is wrapped so wobble/panting can animate a transform of their
+   own without touching the button's, which the dodge positioning owns. */
+.dodge-face {
+  display: inline-block;
+}
+
+.page-btn.dodge-btn.heat-tired .dodge-face {
+  animation: dodge-pant 0.5s ease-in-out infinite;
+}
+
+.page-btn.dodge-btn.heat-saint .dodge-face {
+  animation: dodge-sigh 2.4s ease-in-out infinite;
+}
+
+@keyframes dodge-pant {
+  0%, 100% { transform: translateY(0) scaleY(1); }
+  50% { transform: translateY(1px) scaleY(0.94); }
+}
+
+@keyframes dodge-sigh {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-1.5px); }
+}
+
+/* Dust kicked up where the button was standing a moment ago, so a jump reads
+   as "it ran off that spot" rather than "the layout glitched". Appended to
+   <body> for the same reason the confetti is — see below. */
+.dodge-puff {
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(120, 120, 160, 0.35);
+  pointer-events: none;
+  z-index: 9998;
+  animation: dodge-puff-out 0.45s ease-out forwards;
+}
+
+@keyframes dodge-puff-out {
+  from { transform: translate(-50%, -50%) scale(0.5); opacity: 0.7; }
+  to { transform: translate(-50%, -50%) scale(2.6); opacity: 0; }
 }
 
 /* Taunt bubble anchored above the runaway Next button — a child of the
@@ -1494,6 +1561,23 @@ table.data-table {
 .dodge-taunt.show {
   opacity: 1;
   transform: translate(-50%, 0);
+}
+
+/* The one-off gotcha line after the fake surrender — bigger, red, and given
+   a pop so it lands differently from the ordinary running taunts. */
+.dodge-taunt.big {
+  background: var(--accent-red);
+  font-size: 13px;
+  padding: 4px 12px;
+}
+
+.dodge-taunt.big.show {
+  animation: dodge-taunt-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes dodge-taunt-pop {
+  from { transform: translate(-50%, 0) scale(0.6); }
+  to { transform: translate(-50%, 0) scale(1); }
 }
 
 /* Confetti burst for catching the runaway button mid-chase. Appended to
@@ -2109,11 +2193,11 @@ table.data-table {
 }
 
 .pill.success {
-  background: var(--success);
+  background: var(--success-deep);
 }
 
 .pill.danger {
-  background: var(--accent-red);
+  background: var(--danger-deep);
 }
 
 .pill.info {
@@ -2125,7 +2209,7 @@ table.data-table {
 }
 
 .pill.warning {
-  background: var(--warning);
+  background: var(--warning-deep);
 }
 
 /* Sharp corners for operation pills (History card description lines) — the
@@ -2135,7 +2219,7 @@ table.data-table {
   flex-shrink: 0;
 }
 
-/* ---------- Dashboard (stat tiles, mapping-coverage meters, quick links) ---------- */
+/* ---------- Dashboard ---------- */
 
 .dashboard-layout {
   flex: 1;
@@ -2143,37 +2227,381 @@ table.data-table {
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 18px;
+  padding-bottom: 4px;
 }
 
-.dashboard-section-title {
+/* Every dashboard section wears the same card shell and the same head, so
+   four peer sections read as four peers. The old screen put "System" in a
+   bare heading outside a card and the other three in in-card <h2>s at the
+   same size and weight, which made equals look like two tiers. */
+.dash-card {
+  margin-top: 0;
+  flex: none;
+}
+
+.dash-head {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--text-dark);
-  margin: 0 0 12px;
+  gap: 10px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-color);
 }
 
-.dashboard-section-title svg {
+.dash-head h2 {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0;
+  color: var(--text-dark);
+}
+
+.dash-head > svg {
   color: var(--accent-blue);
   flex-shrink: 0;
 }
 
-.stat-tile-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 16px;
+.dash-head-note {
+  font-size: 12px;
+  color: var(--text-muted);
 }
 
+/* Pushes the toolbar controls (supplier search + sort) to the right edge of
+   the head, so the heading and the controls share one row instead of the
+   controls needing a strip of their own. */
+.dash-head-spacer {
+  flex: 1;
+  min-width: 12px;
+}
+
+/* The Suppliers head puts a search box and a sort dropdown side by side, so
+   both take the project's standard control width and height rather than
+   shrink-wrapping to their own content — same rule .filter-field applies
+   inside the filter panels, restated here because these two controls live
+   in a card head instead. The width has to reach .searchable-select, the
+   wrapper app.js builds around every <select>; .filter-select alone never
+   does. */
+.dash-head .toolbar-search,
+.dash-head .searchable-select,
+.dash-head .searchable-select-trigger {
+  width: var(--control-width);
+  min-width: 0;
+  flex-shrink: 0;
+}
+
+.dash-head .toolbar-search,
+.dash-head .searchable-select-trigger {
+  height: var(--control-height);
+  box-sizing: border-box;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+/* ---------- Quiet navigating labels ---------- */
+
+/* Every stat label on this dashboard doubles as a link into the screen
+   behind it, which is why the page carries no separate "links" block. The
+   catch is that at rest these read exactly like the static text around them
+   — same colour, same weight, no underline — so the only affordance was the
+   cursor, which you only get after you have already guessed there was
+   something to hover. A dotted underline says "this goes somewhere" from
+   across the page while keeping the labels quiet: turning them all
+   accent-blue would give micro-labels the loudest colour on the card and
+   flatten the hierarchy their muted tone exists to create. It goes solid
+   and blue on hover, so the resting hint and the active state are the same
+   gesture at two strengths.
+   Explicitly NOT applied to .stat-tile-action or .supplier-open-link — those
+   are already blue, already carry an icon or an arrow, and were never the
+   ones going unnoticed. */
+a.hero-metric-label,
+a.stat-tile-label,
+a.metric-chip-label {
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-decoration-color: #b4b4c6;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+a.hero-metric-label:hover,
+a.stat-tile-label:hover,
+a.metric-chip-label:hover {
+  color: var(--accent-blue);
+  text-decoration-style: solid;
+  text-decoration-color: currentColor;
+}
+
+/* Keyboard users got nothing but the browser default, which the card's own
+   overflow could clip. */
+a.hero-metric-label:focus-visible,
+a.stat-tile-label:focus-visible,
+a.metric-chip-label:focus-visible,
+a.stat-tile-action:focus-visible,
+a.supplier-open-link:focus-visible {
+  outline: 2px solid var(--accent-blue);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/* ---------- Coverage hero ---------- */
+
+/* The one number this screen exists to answer — how much of every supplier's
+   data is mapped into the system — sized so it is read first, with the three
+   per-entity rows that decompose it sitting beside it rather than a scroll
+   away. */
+.dash-hero {
+  display: grid;
+  grid-template-columns: 240px minmax(240px, 1fr) minmax(220px, 0.85fr);
+  gap: 28px;
+  padding: 22px 24px;
+  align-items: center;
+}
+
+.hero-ring-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+}
+
+.hero-ring {
+  position: relative;
+  width: 160px;
+  height: 160px;
+}
+
+.hero-ring svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.hero-ring-track {
+  stroke: var(--bg-panel);
+}
+
+/* One stroked arc whose length is set from JS via stroke-dasharray, not a
+   stack of wedges — a single path keeps the rounded cap and can animate up
+   from zero on load without any of the seams a multi-segment ring gets. */
+.hero-ring-fill {
+  stroke: var(--accent-blue);
+  stroke-linecap: round;
+  transition: stroke-dasharray 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.hero-ring-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.hero-ring-pct {
+  font-size: 38px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--text-dark);
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.hero-ring-unit {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* Full-width closing line for the whole hero, not a caption pinned under the
+   dial. It spans every column, so it stays on one line at any width the card
+   realistically gets instead of wrapping inside a 230px gutter. */
+.hero-caption {
+  grid-column: 1 / -1;
+  margin: 2px 0 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.hero-caption strong {
+  color: var(--text-dark);
+  font-weight: 700;
+}
+
+.hero-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  min-width: 0;
+}
+
+/* The meter column takes a floor, not minmax(0, 1fr): the label, value and
+   action columns are all content-sized, so on a narrow card 1fr resolves to
+   zero and the bar silently disappears while the numbers still look fine.
+   A floor makes the row overflow-and-wrap in the worst case instead, which
+   is visible and fixable rather than quietly wrong. */
+.hero-metric {
+  display: grid;
+  grid-template-columns: 84px minmax(48px, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.hero-metric-label {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+.hero-metric-value {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.hero-metric-value strong {
+  color: var(--text-dark);
+  font-weight: 700;
+}
+
+/* ---------- Supplier-health split ---------- */
+
+/* With 54 suppliers, "who is doing badly" is a shape question, not a list
+   question — one stacked bar answers it before any row is read. */
+/* Third column on a wide card, so the ring, the split it decomposes into,
+   and the population shape behind it are read left to right on one line —
+   and no bar has to stretch 600px to fill a row of its own. Below 1100px it
+   drops under the breakdown and the divider moves to its top edge. */
+.hero-health {
+  padding-left: 28px;
+  border-left: 1px solid var(--border-color);
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.hero-health-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 0 0 8px;
+}
+
+.health-stack {
+  display: flex;
+  height: 12px;
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  background: var(--bg-panel);
+}
+
+/* A bucket that exists must be visible. One supplier out of 54 is 1.8% of a
+   220px bar — under 4px, and the rounded end shaves what is left of it, so
+   a real category reads as "none". The floor keeps any non-empty bucket
+   legible; the hairline is drawn with a box-shadow rather than a gap or a
+   border so it costs the segment no width. Segments with a floor make the
+   bar slightly longer than its parts, which is the right trade here: this
+   bar answers "which categories exist and roughly how big", and the exact
+   counts are spelled out in the legend directly below it. */
+.health-stack span,
+.star-stack span {
+  display: block;
+  height: 100%;
+  min-width: 6px;
+  transition: width 0.6s ease;
+}
+
+.health-stack span + span,
+.star-stack span + span {
+  box-shadow: -1.5px 0 0 0 var(--bg-card);
+}
+
+.health-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.health-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.health-legend-item strong {
+  color: var(--text-dark);
+  font-weight: 700;
+}
+
+.health-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.health-dot.tier-good { background: var(--success); }
+.health-dot.tier-warn { background: #e0930f; }
+.health-dot.tier-low { background: var(--accent-red); }
+.health-dot.tier-empty { background: #b9b9cd; }
+
+/* ---------- System stat tiles ---------- */
+
+/* Fixed at two columns rather than auto-fit. Now that this card shares a row
+   with Star Ratings it is about half-width, and auto-fit resolved to three
+   across at wide viewports — leaving the fourth tile alone on its own line
+   beside a stretch of empty card. Two columns give a stable 2x2 at every
+   width the card takes, which also keeps this row's height predictable
+   instead of jumping as the tiles re-wrap. */
+.stat-tile-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  padding: 18px 20px;
+  /* Takes whatever height the card was given and centres the tiles in it,
+     so when Star Ratings beside it is the taller card the tiles sit in the
+     middle rather than clinging to the top with a gap underneath. */
+  flex: 1;
+  align-content: center;
+}
+
+/* No shadow at rest: these tiles sit inside the System card, and a raised
+   card inside a card is two frames around one thing. The hover lift keeps
+   its shadow, so they still read as clickable. */
 .stat-tile {
+  position: relative;
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
-  padding: 18px 20px;
+  padding: 15px 18px;
+  overflow: hidden;
   transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+/* A 3px accent rail keyed to the tile's own icon color — enough to tell the
+   four tiles apart at a glance without giving each one a different card. */
+.stat-tile::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--tile-accent, var(--accent-blue));
 }
 
 .stat-tile:hover {
@@ -2181,46 +2609,10 @@ table.data-table {
   transform: translateY(-2px);
 }
 
-.stat-tile-value-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.stat-tile-icon {
-  flex-shrink: 0;
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.stat-tile-icon svg {
-  width: 17px;
-  height: 17px;
-}
-
-.stat-tile-icon--blue {
-  background: rgba(43, 62, 209, 0.12);
-  color: var(--accent-blue);
-}
-
-.stat-tile-icon--cyan {
-  background: rgba(25, 195, 230, 0.16);
-  color: var(--cyan-hover);
-}
-
-.stat-tile-icon--navy {
-  background: rgba(26, 26, 168, 0.1);
-  color: var(--navy-light);
-}
-
 .stat-tile-content {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
   min-width: 0;
 }
 
@@ -2240,18 +2632,64 @@ table.data-table {
   text-decoration: none;
 }
 
-a.stat-tile-label:hover {
-  color: var(--accent-blue);
-  text-decoration: underline;
+.stat-tile-value-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.stat-tile-icon {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--tile-tint, rgba(43, 62, 209, 0.12));
+  color: var(--tile-accent, var(--accent-blue));
+}
+
+.stat-tile-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Each modifier sets the two custom properties the tile reads for its icon
+   chip AND its accent rail AND its micro-bar, so a tile's color lives in one
+   declaration instead of being repeated at three selectors. */
+.stat-tile-icon--blue {
+  --tile-accent: var(--accent-blue);
+  --tile-tint: rgba(43, 62, 209, 0.12);
+}
+
+.stat-tile-icon--cyan {
+  --tile-accent: var(--cyan-hover);
+  --tile-tint: rgba(25, 195, 230, 0.16);
+}
+
+.stat-tile-icon--navy {
+  --tile-accent: var(--navy-light);
+  --tile-tint: rgba(26, 26, 168, 0.1);
+}
+
+.stat-tile-icon--green {
+  --tile-accent: var(--success);
+  --tile-tint: rgba(26, 157, 92, 0.13);
 }
 
 .stat-tile-value {
-  font-size: 28px;
+  font-size: 29px;
   font-weight: 800;
   color: var(--text-dark);
-  line-height: 1.15;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
 }
 
+/* The sub-line under a System tile describes SUPPLIER data while the value
+   above it is a SYSTEM count — the old wording ("163 rows · 54 suppliers")
+   read as though both belonged to the same number, so the scope word leads. */
 .stat-tile-sub {
   font-size: 12.5px;
   color: var(--text-muted);
@@ -2262,12 +2700,28 @@ a.stat-tile-label:hover {
   color: var(--text-dark);
 }
 
+.stat-tile-bar {
+  display: block;
+  height: 5px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-panel);
+  overflow: hidden;
+  margin-top: 3px;
+}
+
+.stat-tile-bar i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--tile-accent, var(--accent-blue));
+}
+
 .stat-tile-action {
   flex-shrink: 0;
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  padding: 3px 8px 3px 6px;
+  padding: 3px 9px 3px 7px;
   border-radius: var(--radius-pill);
   background: rgba(43, 62, 209, 0.1);
   font-size: 11px;
@@ -2282,288 +2736,320 @@ a.stat-tile-label:hover {
   color: #fff;
 }
 
-.supplier-section,
-.star-rating-card,
-.attention-card {
-  margin-top: 0;
-  flex: none;
+/* ---------- Two-column body ---------- */
+
+/* Suppliers is the substance of this screen, so it takes the wide column and
+   the two read-only panels stack in the narrow one. Full-width stacking put
+   an 870px bar chart on a 1440px screen and pushed everything else below the
+   fold for no gain. */
+/* stretch, not start: the two cards in this row are peers, and letting each
+   size to its own content left the shorter one floating against the taller
+   one's bottom edge. Both now take the row's height and distribute their own
+   contents into it — see .stat-tile-row and .star-rating-list below. */
+.dash-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  gap: 18px;
+  align-items: stretch;
 }
+
+/* Empty state for a list inside a dashboard card. */
+.dash-empty {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  margin: 0;
+  padding: 10px 12px;
+  background: var(--bg-panel);
+  border-radius: var(--radius-sm);
+}
+
+/* ---------- Supplier rows ---------- */
 
 .supplier-summary-list {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 4px 20px 20px;
 }
 
 .supplier-summary-card {
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  background: var(--bg-card);
-  box-shadow: var(--shadow-sm);
-  padding: 16px 18px;
-  transition: box-shadow 0.15s ease, transform 0.15s ease;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px 12px;
+  padding: 13px 20px;
+  border-bottom: 1px solid var(--border-color);
+  transition: background 0.15s ease;
 }
 
 .supplier-summary-card:hover {
-  box-shadow: var(--shadow-md);
-  transform: translateY(-1px);
+  background: #fafaff;
 }
 
 .supplier-summary-header {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 14px;
+  min-width: 0;
 }
 
 .supplier-summary-avatar {
-  flex-shrink: 0;
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
-  font-weight: 800;
   color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
 }
 
-.supplier-summary-avatar.avatar-blue {
-  background: var(--accent-blue);
-}
-
-.supplier-summary-avatar.avatar-cyan {
-  background: var(--cyan-hover);
-}
-
-.supplier-summary-avatar.avatar-navylight {
-  background: var(--navy-light);
-}
-
-.supplier-summary-avatar.avatar-navy {
-  background: var(--navy);
-}
+.supplier-summary-avatar.avatar-blue { background: var(--accent-blue); }
+.supplier-summary-avatar.avatar-cyan { background: var(--cyan-hover); }
+.supplier-summary-avatar.avatar-navylight { background: var(--navy-light); }
+.supplier-summary-avatar.avatar-navy { background: var(--navy); }
 
 .supplier-summary-name {
-  font-size: 14.5px;
+  font-size: 13.5px;
   font-weight: 700;
   color: var(--text-dark);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.supplier-summary-overall {
-  margin-left: auto;
-  font-size: 11.5px;
-}
-
-.supplier-summary-metrics {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.coverage-meter-row {
+.supplier-summary-right {
   display: flex;
   align-items: center;
   gap: 12px;
+  justify-content: flex-end;
 }
 
-.coverage-meter-label {
-  flex: 0 0 70px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-dark);
-  text-decoration: none;
+.supplier-summary-overall {
+  font-variant-numeric: tabular-nums;
 }
 
-a.coverage-meter-label:hover {
+/* The row's one link that isn't a list. Each metric label already opens that
+   supplier's own Country/City/Hotel list, so the row-level link used to
+   duplicate the Hotel label exactly; it now points at City Mapping instead —
+   the screen where a supplier's unmapped cities actually get resolved, and
+   the only destination on this row that wasn't already reachable from it. */
+.supplier-open-link {
+  font-size: 12px;
+  font-weight: 700;
   color: var(--accent-blue);
+  white-space: nowrap;
+}
+
+.supplier-open-link:hover {
   text-decoration: underline;
 }
 
+.supplier-summary-metrics {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px 18px;
+}
+
+.metric-chip {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.metric-chip-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.metric-chip-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.metric-chip-value {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.metric-chip-value strong {
+  color: var(--text-dark);
+  font-weight: 700;
+}
+
+/* ---------- Coverage meters (hero rows + supplier chips) ---------- */
+
 .coverage-meter-track {
-  flex: 1;
-  height: 9px;
+  display: block;
+  height: 7px;
   border-radius: var(--radius-pill);
   background: var(--bg-panel);
   overflow: hidden;
-}
-
-.coverage-meter-track.tier-good {
-  background: rgba(26, 157, 92, 0.15);
-}
-
-.coverage-meter-track.tier-warn {
-  background: rgba(200, 121, 13, 0.15);
-}
-
-.coverage-meter-track.tier-low {
-  background: rgba(230, 65, 77, 0.15);
 }
 
 .coverage-meter-fill {
   display: block;
   height: 100%;
+  border-radius: inherit;
+  transition: width 0.6s ease;
+}
+
+.coverage-meter-fill.tier-good { background: var(--success); }
+.coverage-meter-fill.tier-warn { background: #e0930f; }
+.coverage-meter-fill.tier-low { background: var(--accent-red); }
+
+/* A supplier with no rows of a given kind has nothing to map, so it gets a
+   flat hatched rail and the words "No records" — never an empty red bar,
+   which is what the old screen drew and what put 50 blameless suppliers at
+   the top of Needs Attention. */
+.coverage-meter-track.is-empty {
+  background: repeating-linear-gradient(-45deg, var(--bg-panel) 0 4px, #e2e2ee 4px 8px);
+}
+
+.metric-chip.is-empty .metric-chip-value {
+  font-style: italic;
+  opacity: 0.75;
+}
+
+/* ---------- Star ratings ---------- */
+
+/* One stacked bar plus a legend, not six full-width tracks — the mix is the
+   point, and half the buckets are empty in this data. */
+.star-stack {
+  display: flex;
+  height: 14px;
   border-radius: var(--radius-pill);
+  overflow: hidden;
+  background: var(--bg-panel);
+  margin: 16px 20px 0;
 }
 
-.coverage-meter-fill.tier-good {
-  background: var(--success);
-}
 
-.coverage-meter-fill.tier-warn {
-  background: var(--warning);
-}
-
-.coverage-meter-fill.tier-low {
-  background: var(--accent-red);
-}
-
-.coverage-meter-value {
-  flex: 0 0 auto;
-  min-width: 95px;
-  text-align: right;
-  font-size: 12.5px;
-  font-weight: 700;
-  color: var(--text-dark);
-}
-
-.coverage-meter-pct {
-  font-weight: 600;
-  color: var(--text-muted);
-}
-
-.coverage-meter-action {
-  flex: 0 0 50px;
-  text-align: right;
-}
-
-.coverage-meter-action a {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--accent-blue);
-  text-decoration: none;
-}
-
-.coverage-meter-action a:hover {
-  text-decoration: underline;
-}
-
+/* Centred rather than spread: the rows are separated by border-top on each
+   row after the first, so pushing them apart would strand every divider a
+   gap above the row it belongs to. Centring keeps the block contiguous and
+   puts the leftover height evenly above and below it. */
 .star-rating-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 4px 20px 20px;
+  justify-content: center;
+  flex: 1;
+  padding: 10px 20px 16px;
 }
 
 .star-rating-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr) auto auto;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  padding: 6px 0;
+  font-size: 12.5px;
+}
+
+.star-rating-row + .star-rating-row {
+  border-top: 1px solid var(--border-color);
+}
+
+.star-rating-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
 }
 
 .star-rating-label {
-  flex: 0 0 55px;
-  font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-dark);
 }
 
-.star-rating-track {
-  flex: 1;
-  height: 9px;
-  border-radius: var(--radius-pill);
-  background: var(--bg-panel);
-  overflow: hidden;
+.star-rating-count {
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
 }
 
-.star-rating-fill {
-  display: block;
-  height: 100%;
-  border-radius: var(--radius-pill);
-  background: var(--accent-blue);
-}
-
-.star-rating-value {
-  flex: 0 0 auto;
-  min-width: 110px;
+.star-rating-pct {
+  min-width: 40px;
   text-align: right;
-  font-size: 12.5px;
   font-weight: 700;
-  color: var(--text-muted);
-}
-
-.attention-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 4px 20px 20px;
-}
-
-.attention-group-title {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-  margin: 6px 0 0;
-}
-
-.attention-group-title:first-child {
-  margin-top: 0;
-}
-
-.attention-empty {
-  font-size: 13px;
-  color: var(--text-muted);
-  margin: 0;
-}
-
-.attention-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 14px;
-  border-radius: var(--radius-sm);
-  background: var(--bg-panel);
-  border: 1px solid var(--border-color);
-}
-
-.attention-icon {
-  flex-shrink: 0;
-  color: var(--warning);
-}
-
-.attention-body {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.attention-text {
-  font-size: 13px;
   color: var(--text-dark);
+  font-variant-numeric: tabular-nums;
 }
 
-.attention-pill {
-  flex-shrink: 0;
-  font-size: 11px;
+.star-rating-row.is-zero .star-rating-label,
+.star-rating-row.is-zero .star-rating-pct {
+  color: var(--text-muted);
+  font-weight: 600;
 }
 
-.attention-link {
-  flex-shrink: 0;
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--accent-blue);
-  text-decoration: none;
+.star-rating-row.is-zero .star-rating-swatch {
+  opacity: 0.3;
 }
 
-.attention-link:hover {
-  text-decoration: underline;
+
+/* ---------- Dashboard responsive ---------- */
+
+@media (max-width: 1240px) {
+  .dash-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* 1280, not 1100: the breakdown column carries four columns of its own now
+   (label, meter, value, mapping link), so the three-across hero needs real
+   width before it earns its keep. Below this the split drops underneath and
+   the breakdown gets the whole row. */
+@media (max-width: 1280px) {
+  .dash-hero {
+    grid-template-columns: 240px minmax(0, 1fr);
+  }
+  /* The split drops below the breakdown, so its divider moves from its left
+     edge to its top one and it spans both columns. */
+  .hero-health {
+    grid-column: 1 / -1;
+    padding-left: 0;
+    padding-top: 18px;
+    border-left: none;
+    border-top: 1px solid var(--border-color);
+  }
+  .health-legend {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+  }
+}
+
+@media (max-width: 900px) {
+  .dash-hero {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 22px;
+  }
+  /* Two 215px tiles plus their gap no longer fit side by side here. */
+  .stat-tile-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .supplier-summary-metrics {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .dash-head {
+    flex-wrap: wrap;
+  }
+  .dash-head-spacer {
+    display: none;
+  }
+  /* At this width the numbered pages wrap onto their own line and shove
+     Previous/Next apart. The numbers are the droppable half: Previous, Next
+     and the "Showing X - Y of Z" line still say where you are. */
+  .dashboard-layout .pagination-controls .page-btn:not(.nav),
+  .dashboard-layout .pagination-controls .page-ellipsis {
+    display: none;
+  }
 }
 
 /* ---------- Searchable select (every dropdown in the project) ---------- */
@@ -4825,7 +5311,23 @@ label.merge-list-item {
 
 /* ---------- Tooltips ----------
    Any icon-only button with an aria-label gets a hover/focus tooltip for
-   free, using the aria-label text itself — no extra markup per button. */
+   free, using the aria-label text itself — no extra markup per button.
+
+   The bubble is generated ONLY on hover/focus (`content: none` at rest,
+   `content: attr(aria-label)` in the reveal rule below) rather than being
+   generated always and merely faded out. An always-present bubble is
+   invisible but still occupies layout: it reports its full width up through
+   every ancestor's scrollWidth, which put phantom horizontal scrollbars on
+   bounded lists and on .table-wrap. That was previously patched by clipping
+   the things around it — `overflow: hidden` on .action-btn itself and on
+   four of the tables — which suppressed the scrollbars and the tooltips
+   together, leaving no row-action button in the project with a working
+   tooltip. Not generating it at rest fixes the cause instead of the
+   symptom, so the clipping is no longer needed to hold it back.
+
+   The trade-off: a pseudo-element created at hover time has no previous
+   state to animate from, so the fade/slide below does not play on the way
+   in. A tooltip appearing instantly is the normal behaviour anyway. */
 
 .action-btn[aria-label],
 .icon-btn[aria-label],
@@ -4840,7 +5342,7 @@ label.merge-list-item {
 .modal-close[aria-label]::after,
 .toast-close[aria-label]::after,
 .info-icon-btn[aria-label]::after {
-  content: attr(aria-label);
+  content: none;
   position: absolute;
   bottom: calc(100% + 8px);
   left: 50%;
@@ -4871,7 +5373,48 @@ label.merge-list-item {
 .toast-close[aria-label]:focus-visible::after,
 .info-icon-btn[aria-label]:hover::after,
 .info-icon-btn[aria-label]:focus-visible::after {
+  content: attr(aria-label);
   opacity: 1;
   visibility: visible;
   transform: translateX(-50%) translateY(0);
+}
+
+/* The last button in a row-actions group sits hard against the table's right
+   edge, and the four listed tables clip at their own box (see the
+   #hotelTable/#countryTable rule far above, which stops a bubble widening
+   .table-wrap's scroll area). A centred bubble there loses its right half —
+   "View cities in Germany" rendered as "View cities in Germ". Anchoring the
+   last button's bubble to its own right edge makes it grow leftwards into
+   the table instead of out of it. */
+.row-actions .action-btn:last-child::after {
+  left: auto;
+  right: 0;
+  transform: translateX(0) translateY(4px);
+}
+
+.row-actions .action-btn:last-child:hover::after,
+.row-actions .action-btn:last-child:focus-visible::after {
+  transform: translateX(0) translateY(0);
+}
+
+/* An explicit title="" wins, and the aria-label bubble steps aside, so a
+   button never shows two tooltips at once. This is the escape hatch for the
+   places the styled bubble genuinely cannot reach: a row inside the mapping
+   screens' .merge-list sits under five nested overflow-clipped ancestors,
+   and a bubble positioned above the button is cut off by the nearest of
+   them however much room the list itself has. A native title is painted by
+   the browser outside the page's clipping entirely, so it still shows. Use
+   it only for that case — everywhere else the styled bubble is the one to
+   have, and adding a title would silently downgrade it. */
+.action-btn[aria-label][title]:hover::after,
+.action-btn[aria-label][title]:focus-visible::after,
+.icon-btn[aria-label][title]:hover::after,
+.icon-btn[aria-label][title]:focus-visible::after,
+.modal-close[aria-label][title]:hover::after,
+.modal-close[aria-label][title]:focus-visible::after,
+.toast-close[aria-label][title]:hover::after,
+.toast-close[aria-label][title]:focus-visible::after,
+.info-icon-btn[aria-label][title]:hover::after,
+.info-icon-btn[aria-label][title]:focus-visible::after {
+  content: none;
 }

@@ -132,38 +132,85 @@
       <hr class="page-divider" />
 
       <template id="dashboardInfo">
-        <p>This is a snapshot of the whole system, split into two halves: what exists in the system itself, and how well each supplier's own data lines up with it. Every count and label doubles as a shortcut straight into the screen behind it — there's no separate links section to hunt through.</p>
+        <p>A snapshot of the whole system, arranged as one question answered four times over, from the widest view down to the individual supplier. Every count and label doubles as a shortcut straight into the screen behind it — there's no separate links section to hunt through.</p>
         <ul>
-          <li><strong>System</strong> — total counts for Countries, Cities, and Hotels, plus how many of those cities were added or merged by hand rather than belonging to the original list, and how many countries have a Nationality set. These aren't mapped to anything themselves — they're what suppliers map into. Click a tile's title to open that list; Cities also has a direct link to add a new one.</li>
-          <li><strong>Hotel Star Ratings</strong> — how the system's hotels break down across the 1–5 star scale, plus SC (no formal star rating).</li>
-          <li><strong>Supplier</strong> — one card per supplier, with an overall mapped percentage next to its name, and a line each for Country/City/Hotel showing how many of their own records are linked to a system record versus their total count. Click Country/City/Hotel — or its View link — to open that supplier's list already scoped to this supplier. Browse suppliers a page at a time if there are more than fit at once.</li>
-          <li><strong>Needs Attention</strong> — a quick highlight of the lowest mapping coverage across every supplier and entity, and which suppliers have the most inactive hotels, each with a link straight to that supplier's list.</li>
+          <li><strong>Mapping Coverage</strong> — the headline: what share of all supplier records are linked to a system record, and a bar showing how the suppliers themselves divide into good, fair and poor coverage. This is the number to read first. The Country/City/Hotel-match rows beside it are the split that number is made of.</li>
+          <li><strong>System</strong> — total counts for Countries, Cities, and Hotels, plus how many countries have a Nationality set. These aren't mapped to anything themselves — they're what suppliers map into. Each tile's sub-line says how many supplier records of that kind exist for comparison. Click a tile's title to open that list; Cities also has a direct link to add a new one.</li>
+          <li><strong>Suppliers</strong> — one row per supplier, with an overall mapped percentage and a Country/City/Hotel meter each. Search by name and sort by coverage or size — <em>Lowest coverage first</em> turns the list into a work queue, worst supplier at the top. A supplier that has no records of a given kind reads <em>No records</em> rather than 0% — there's nothing there to map. Every label opens that supplier's own list, already scoped to them, and <strong>Map cities →</strong> opens City Mapping with that supplier already selected. <em>Hotel match</em> is named apart from the other two because it isn't mapped by hand — it's whether the supplier's Provider ID resolves to a hotel the system already holds.</li>
+          <li><strong>Mapping screens</strong> — there are two, and each is linked from the thing it acts on rather than from a list of links. <strong>City Mapping</strong> opens from any supplier row, already scoped to that supplier. <strong>Hotel Mapping</strong> opens from the System Hotels tile, because it maps system hotels into system cities and never touches a supplier record. There is no country mapping screen — supplier countries are mapped on the Supplier Country List itself, which is where the Country label already goes.</li>
+          <li><strong>Hotel Star Ratings</strong> — how the system's hotels divide across the 1–5 star scale, plus SC (no formal star rating), as one stacked bar with the exact counts below it.</li>
         </ul>
       </template>
 
       <template id="dashboardDevNotes">
-        <p>Every number on this screen is computed fresh on page load, directly from the live in-memory data — nothing here is cached or precomputed, so it always reflects whatever is currently in storage. Navigation is attached directly to the stat it belongs to instead of living in a separate links block.</p>
+        <p>Every number on this screen is computed fresh on page load, directly from the live in-memory data — nothing here is cached or precomputed, so it always reflects whatever is currently in storage. Navigation is attached directly to the stat it belongs to instead of living in a separate links block. The three entity types are declared once in an <code>ENTITIES</code> table (label, source list, "is this row mapped?" test, destination page); the hero and the supplier rows both read from that one table rather than each repeating a Country/City/Hotel triple of their own.</p>
         <ul>
-          <li><strong>System tiles</strong> — plain lengths of the system Country/City/Hotel lists. <strong>Nationality Set</strong> counts system countries whose Nationality field is non-null. Each tile's title links to that entity's System list; the Cities tile additionally links to Add City.</li>
-          <li><strong>Mapping coverage color tiers</strong> — the exact percentage cutoffs behind every coverage bar, the Supplier card's overall percentage pill, and the Needs Attention → Lowest Mapping Coverage pills (all three read from one shared function, so this is a single rule, not three separate ones): <strong>green</strong> (success) at <strong>80% or higher</strong>, <strong>amber</strong> (warning) from <strong>50% up to 79%</strong>, <strong>red</strong> (danger) <strong>below 50%</strong>. This is a different rule from Inactive Hotels below — don't conflate the two.</li>
-          <li><strong>Hotel Star Ratings</strong> — every system hotel's `starRating` field, bucketed 5 down to 1 plus a 0 bucket labeled <strong>SC</strong> (a real classification for hotels with no formal star rating, e.g. serviced apartments — not "unrated data"), shown as a percentage of the total. Buckets with zero hotels still render, so the full scale's shape is visible. This is a plain magnitude distribution, not a coverage metric, so every bar shares one flat color instead of the tier scale above.</li>
-          <li><strong>Supplier cards</strong> — one per supplier, with an overall percentage (mapped records summed across all three types, divided by their combined total) shown next to the name, colored by the mapping coverage tiers above. Three lines follow: <strong>Country</strong> (mapped when a system country is assigned), <strong>City</strong> (mapped when a system city is assigned), <strong>Hotel</strong> (mapped when its provider identifier resolves to a real system hotel — hotels have no separate stored link, so this is a derived match, never a manually set one). Every label link carries this supplier along as a `?supplier=` deep link so the destination screen opens with that supplier already selected, not an empty "pick a supplier" state. Every line's View link points at that same Supplier List its label already does — City's used to go to the City Mapping screen instead, but that was inconsistent with the other two, so all three now agree: View always means "go look at this supplier's own list for this entity." The card list is paginated independently of every other list on this page.</li>
-          <li><strong>Needs Attention</strong> — two independently computed, capped-at-3 highlight lists, not a general alert system. <strong>Lowest Mapping Coverage</strong> flattens all 12 supplier×entity combinations already computed for the Supplier cards above, sorts by percentage ascending, shows the worst 3, and colors each pill using the same mapping coverage tiers above — so which items appear (and their color) changes automatically as coverage changes, never a fixed list of names. <strong>Inactive Hotels</strong> counts each supplier's own inactive hotel rows (the only entity with real active/inactive variance in this data — system records and other supplier entities are effectively always active in the seed data), shows suppliers with at least one inactive hotel, worst count first, capped at 3. Its pill uses a separate, unrelated color rule: <strong>red</strong> (danger) at <strong>15% inactive or higher</strong>, <strong>amber</strong> (warning) below that — there's no green tier here, since even a low inactive rate still means some hotels aren't bookable. Both link to that supplier's own list, deep-linked the same way as the Supplier cards.</li>
+          <li><strong>Mapping Coverage hero</strong> — supplier records summed across all suppliers and all three entity types: mapped over total. The ring is a single stroked SVG arc whose <code>stroke-dasharray</code> is set from JS (drawn from 0 on the first frame so it sweeps up on load). <strong>Supplier coverage split</strong> buckets every supplier by its own overall percentage using the tiers below, so it re-shapes itself as coverage changes. Every row in the breakdown is supplier-side — the three the ring totals — so the card stays one subject throughout. Note that the system hotel ↔ system city graph the Hotel Mapping screen edits (a hotel's primary city in <code>systemCityId</code>, its others in <code>mappedCityIds</code>) is deliberately <em>not</em> summarised here; nothing on this dashboard moves when that screen is used.</li>
+          <li><strong>System tiles</strong> — plain lengths of the system Country/City/Hotel lists. <strong>Nationality Set</strong> counts system countries whose Nationality field is non-null. Each tile's title links to that entity's System list; the Cities tile additionally links to Add City. The sub-lines describe <em>supplier</em> row counts, so they lead with the word "Suppliers" — the value above them is a system count and the two were previously easy to read as one number.</li>
+          <li><strong>Mapping coverage color tiers</strong> — the exact percentage cutoffs behind every coverage bar, the supplier row's percentage pill and the hero's split bar (all read from one shared function, so this is a single rule, not three): <strong>green</strong> (success) at <strong>80% or higher</strong>, <strong>amber</strong> (warning) from <strong>50% up to 79%</strong>, <strong>red</strong> (danger) <strong>below 50%</strong>. It is the only tier rule on this page; an earlier Needs Attention card carried a second, unrelated one for inactive hotels, and both that card and that rule are gone.</li>
+          <li><strong>The seed data exercises the whole tier scale on purpose.</strong> The 50 bulk suppliers are generated against a rotating set of coverage targets (<code>BULK_COVERAGE_TARGETS</code> in <code>js/data.js</code>) that lands roughly 20 of them in green, 20 in amber and the rest in red. They used to get exactly one mapped country and no mapped cities each, which pinned all 50 at 6–8% — so green never appeared anywhere on this screen and half the design was impossible to see. Changing those targets reshapes everything here, since every number is computed from the data rather than fixed.</li>
+          <li><strong>Empty entities are not failures.</strong> A supplier with zero rows of some kind (in this data, 50 of the 54 suppliers have no hotel records at all) has nothing to map, so <code>0 / 0</code> is rendered as a hatched grey rail reading <em>No records</em> and is excluded from every ranking. The old screen scored it 0%, painted it red, and let a since-removed Needs Attention card fill up with suppliers that had done nothing wrong.</li>
+          <li><strong>Mapping screens</strong> — there are two, and each is linked from the thing it acts on rather than from a list of links. <strong>City Mapping</strong> opens from any supplier row, already scoped to that supplier. <strong>Hotel Mapping</strong> opens from the System Hotels tile, because it maps system hotels into system cities and never touches a supplier record. There is no country mapping screen — supplier countries are mapped on the Supplier Country List itself, which is where the Country label already goes.</li>
+          <li><strong>Hotel Star Ratings</strong> — every system hotel's <code>starRating</code> field, bucketed 5 down to 1 plus a 0 bucket labeled <strong>SC</strong> (a real classification for hotels with no formal star rating, e.g. serviced apartments — not "unrated data"). Drawn as one stacked bar over a legend. This is a plain magnitude distribution, not a coverage metric, so it uses an ordinal navy-to-pale ramp rather than the good/bad tier scale above; SC sits off the ramp in grey because it isn't a point on the 1–5 scale. Empty buckets keep their legend row (so the full scale's shape stays visible) but contribute no bar segment.</li>
+          <li><strong>Supplier rows</strong> — one per supplier, with an overall percentage (mapped records summed across all three types, divided by their combined total) colored by the tiers above. Three meters follow: <strong>Country</strong> (mapped when a system country is assigned), <strong>City</strong> (mapped when a system city is assigned), <strong>Hotel match</strong> (its provider identifier resolves to a real system hotel). That third one is deliberately not called "Hotel": Country and City are both mapped by hand, while this is derived from the feed — <code>hotel-supplier.html</code> carries no Map or Unmap action anywhere in it, so nothing on this row can be acted on directly. Sitting unlabelled beside the other two it claimed a parallel it does not have. It still earns its place: a low match rate means the system is missing hotels the suppliers already know about. Search filters by supplier name; sort defaults to <em>Name (A–Z)</em>, which interleaves the coverage tiers so the meters and pills carry information on first paint rather than showing page after page of red. <em>Lowest coverage first</em> is one click away, and it is the whole reason the Needs Attention card could be deleted: that card ranked supplier×entity pairs worst-first, and every item it ever surfaced came from a supplier already in this list's own worst five. It re-drew the top of this card and called it a second panel. Every link carries this supplier along as a <code>?supplier=</code> deep link so the destination opens with that supplier already selected, not an empty "pick a supplier" state. The row previously carried six links to three destinations — each meter label plus an identical "View" beside it — so the duplicates are gone; the row-level link that replaced them duplicated the Hotel label exactly, and now points at <strong>City Mapping</strong> instead, scoped to this supplier. That is the only destination on the row that its own labels don't already reach, and the screen where a supplier's unmapped cities actually get resolved. The list is paginated independently of everything else on this page.</li>
+          <li><strong>The Next button</strong> on the supplier pager runs away from the cursor. That is deliberate and lives only here — see the comment above <code>initRunawayNextButton()</code>. Keyboard and screen-reader access are untouched.</li>
         </ul>
       </template>
 
       <div class="dashboard-layout">
-        <section class="dashboard-section">
-          <h2 class="dashboard-section-title">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="14" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="14" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/></svg>
-            System
-          </h2>
+
+        <!-- Hero: the one question this screen exists to answer, before any
+             list of anything. -->
+        <section class="content-card dash-card">
+          <div class="dash-head">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M9 17l-4.5 2V7L9 5m0 12l6 2m-6-2V5m6 14l4.5-2V5L15 7m0 12V7m0 0L9 5" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+            <h2>Mapping Coverage</h2>
+            <span class="dash-head-note">Across all suppliers</span>
+          </div>
+          <div class="dash-hero">
+            <div class="hero-ring-wrap">
+              <div class="hero-ring">
+                <svg viewBox="0 0 160 160" aria-hidden="true">
+                  <circle class="hero-ring-track" cx="80" cy="80" r="68" fill="none" stroke-width="14" />
+                  <circle class="hero-ring-fill" id="heroRingFill" cx="80" cy="80" r="68" fill="none" stroke-width="14" stroke-dasharray="0 427.26" />
+                </svg>
+                <div class="hero-ring-center">
+                  <span class="hero-ring-pct" id="heroPct">--</span>
+                  <span class="hero-ring-unit">Mapped</span>
+                </div>
+              </div>
+            </div>
+            <div class="hero-breakdown" id="heroBreakdown"></div>
+            <div class="hero-health" id="heroHealth"></div>
+            <!-- Spans the whole card rather than sitting under the ring: it
+                 is the sentence form of everything above it, not a caption
+                 for the dial alone, and squeezed into the ring's own column
+                 it broke across three lines for no reason. -->
+            <p class="hero-caption" id="heroCaption"></p>
+          </div>
+        </section>
+
+        <!-- System: what exists to be mapped into — its counts, and the shape
+             of its hotels. Star Ratings sits here rather than beside the
+             Suppliers list below: it describes SYSTEM_HOTELS, so this is the
+             card it belongs to, and the pairing gives the row two columns of
+             near-equal height instead of leaving a short panel stranded
+             against a tall one. -->
+        <div class="dash-grid">
+        <section class="content-card dash-card">
+          <div class="dash-head">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="14" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="14" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/></svg>
+            <h2>System</h2>
+            <span class="dash-head-note">The records suppliers map into</span>
+          </div>
           <div class="stat-tile-row">
-            <div class="stat-tile">
+            <div class="stat-tile stat-tile-icon--blue">
               <div class="stat-tile-content">
-                <a class="stat-tile-label" href="country-system.html" title="View System Country List">System Countries</a>
+                <div class="stat-tile-header">
+                  <a class="stat-tile-label" href="country-system.html" title="View System Country List">System Countries</a>
+                </div>
                 <div class="stat-tile-value-row">
-                  <div class="stat-tile-icon stat-tile-icon--blue">
+                  <div class="stat-tile-icon">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.7 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.7-3.8-9s1.3-6.4 3.8-9z" stroke="currentColor" stroke-width="1.6"/></svg>
                   </div>
                   <span class="stat-tile-value" id="statSystemCountries">--</span>
@@ -171,7 +218,7 @@
                 <span class="stat-tile-sub" id="statSupplierCountries"></span>
               </div>
             </div>
-            <div class="stat-tile">
+            <div class="stat-tile stat-tile-icon--cyan">
               <div class="stat-tile-content">
                 <div class="stat-tile-header">
                   <a class="stat-tile-label" href="city-system.html" title="View System City List">System Cities</a>
@@ -181,7 +228,7 @@
                   </a>
                 </div>
                 <div class="stat-tile-value-row">
-                  <div class="stat-tile-icon stat-tile-icon--cyan">
+                  <div class="stat-tile-icon">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 21V8l6-4 6 4v13" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M16 21v-9l4 2v7" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 11h1M8 14h1M8 17h1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
                   </div>
                   <span class="stat-tile-value" id="statSystemCities">--</span>
@@ -189,63 +236,88 @@
                 <span class="stat-tile-sub" id="statSupplierCities"></span>
               </div>
             </div>
-            <div class="stat-tile">
+            <div class="stat-tile stat-tile-icon--navy">
               <div class="stat-tile-content">
-                <a class="stat-tile-label" href="hotel-system.html" title="View System Hotel List">System Hotels</a>
+                <div class="stat-tile-header">
+                  <a class="stat-tile-label" href="hotel-system.html" title="View System Hotel List">System Hotels</a>
+                  <!-- Hotel Mapping's home on this screen. It maps system
+                       hotels into system cities, so it belongs to this tile
+                       rather than to any of the supplier coverage rows in
+                       the hero — those are all about supplier records, and
+                       this screen never touches one. Same action-chip
+                       pattern the Cities tile uses for Add. -->
+                  <a class="stat-tile-action" href="hotel-mapping.html" title="Open Hotel Mapping">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M9 17l-4.5 2V7L9 5m0 12l6 2m-6-2V5m6 14l4.5-2V5L15 7m0 12V7m0 0L9 5" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+                    Map
+                  </a>
+                </div>
                 <div class="stat-tile-value-row">
-                  <div class="stat-tile-icon stat-tile-icon--navy">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M9 17l-4.5 2V7L9 5m0 12l6 2m-6-2V5m6 14l4.5-2V5L15 7m0 12V7m0 0L9 5" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+                  <div class="stat-tile-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 21V6a1 1 0 011-1h9a1 1 0 011 1v15" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M15 11h4a1 1 0 011 1v9" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M7 8.5h2M7 12h2M7 15.5h2M11 8.5h1M11 12h1M11 15.5h1M2 21h20" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
                   </div>
                   <span class="stat-tile-value" id="statSystemHotels">--</span>
                 </div>
                 <span class="stat-tile-sub" id="statSupplierHotels"></span>
               </div>
             </div>
-            <div class="stat-tile">
+            <div class="stat-tile stat-tile-icon--green">
               <div class="stat-tile-content">
-                <a class="stat-tile-label" href="country-system.html" title="View System Country List">Nationality Set</a>
+                <div class="stat-tile-header">
+                  <a class="stat-tile-label" href="country-system.html" title="View System Country List">Nationality Set</a>
+                </div>
                 <div class="stat-tile-value-row">
-                  <div class="stat-tile-icon stat-tile-icon--blue">
+                  <div class="stat-tile-icon">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.6"/><circle cx="9" cy="12" r="2.2" stroke="currentColor" stroke-width="1.4"/><path d="M14 10h4M14 14h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
                   </div>
                   <span class="stat-tile-value" id="statNationalitySet">--</span>
                 </div>
                 <span class="stat-tile-sub" id="statNationalitySub"></span>
+                <span class="stat-tile-bar"><i id="statNationalityBar" style="width:0%"></i></span>
               </div>
             </div>
           </div>
         </section>
 
-        <section class="content-card star-rating-card">
-          <div class="card-toolbar">
-            <h2>
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="vertical-align:-3px; margin-right:6px;"><path d="M12 3l2.5 5.5L21 9.5l-4.7 4.3L17.5 21 12 17.5 6.5 21l1.2-7.2L3 9.5l6.5-1z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
-              Hotel Star Ratings
-            </h2>
-          </div>
-          <div class="star-rating-list" id="starRatingList"></div>
-        </section>
+          <section class="content-card dash-card star-rating-card">
+            <div class="dash-head">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M12 3l2.5 5.5L21 9.5l-4.7 4.3L17.5 21 12 17.5 6.5 21l1.2-7.2L3 9.5l6.5-1z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+              <h2>Hotel Star Ratings</h2>
+            </div>
+            <div class="star-stack" id="starStack"></div>
+            <div class="star-rating-list" id="starRatingList"></div>
+          </section>
+        </div>
 
-        <section class="content-card supplier-section">
-          <div class="card-toolbar">
-            <h2>
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="vertical-align:-3px; margin-right:6px;"><path d="M3 12a9 9 0 1018 0 9 9 0 00-18 0z" stroke="currentColor" stroke-width="1.6"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.7 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.7-3.8-9s1.3-6.4 3.8-9z" stroke="currentColor" stroke-width="1.6"/></svg>
-              Supplier
-            </h2>
-          </div>
+        <!-- Suppliers takes the full width now that nothing sits beside it.
+             Needs Attention used to: it ranked supplier x entity pairs
+             worst-first, which turned out to be the top of this very list
+             re-drawn — every item it surfaced came from a supplier already
+             in the worst five overall, and the data holds no entity-level
+             outlier hiding inside a well-ranked supplier for it to catch.
+             One click on this card's own sort says the same thing, with the
+             counts attached. -->
+        <section class="content-card dash-card supplier-section">
+            <div class="dash-head">
+              <!-- Boxes, not the globe the System Countries tile uses: in
+                   this project a globe already means "country". -->
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M3 8.5L12 4l9 4.5-9 4.5-9-4.5z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M3 12.5L12 17l9-4.5M3 16.5L12 21l9-4.5" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+              <h2>Suppliers</h2>
+              <span class="dash-head-spacer"></span>
+              <div class="toolbar-search">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                <input type="text" id="supplierSearch" placeholder="Search suppliers..." />
+              </div>
+              <select class="filter-select" id="supplierSort" aria-label="Sort suppliers">
+                <option value="name">Name (A–Z)</option>
+                <option value="worst">Lowest coverage first</option>
+                <option value="best">Highest coverage first</option>
+                <option value="size">Most records</option>
+              </select>
+            </div>
           <div class="supplier-summary-list" id="supplierSummaryList"></div>
           <div class="table-footer pagination-bar" id="supplierPaginationBar"></div>
         </section>
 
-        <section class="content-card attention-card">
-          <div class="card-toolbar">
-            <h2>
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="vertical-align:-3px; margin-right:6px;"><path d="M12 9v4M12 17h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M10.3 4.6L2.9 17.5a1.8 1.8 0 001.6 2.7h15a1.8 1.8 0 001.6-2.7L13.7 4.6a1.8 1.8 0 00-3.4 0z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
-              Needs Attention
-            </h2>
-          </div>
-          <div class="attention-list" id="attentionList"></div>
-        </section>
       </div>
     </main>
   </div>
@@ -254,30 +326,48 @@
 <script src="js/app.js"></script>
 <script src="js/data.js"></script>
 <script>
-  // Sub-lines read "<row count> rows · <supplier count> suppliers" — both
-  // numbers bold so the line scans as two quick facts, short enough to
-  // never wrap regardless of how large the row count gets.
   const supplierCount = Object.keys(SUPPLIER_LABELS).length;
 
-  document.getElementById("statSystemCountries").textContent = SYSTEM_COUNTRIES.length;
-  const supplierCountryTotal = Object.values(supplierCountries).flat().length;
-  document.getElementById("statSupplierCountries").innerHTML =
-    `<strong>${supplierCountryTotal}</strong> rows · <strong>${supplierCount}</strong> suppliers`;
-
-  document.getElementById("statSystemCities").textContent = SYSTEM_CITIES.length;
-  const supplierCityTotal = Object.values(supplierCities).flat().length;
-  document.getElementById("statSupplierCities").innerHTML =
-    `<strong>${supplierCityTotal}</strong> rows · <strong>${supplierCount}</strong> suppliers`;
-
-  document.getElementById("statSystemHotels").textContent = SYSTEM_HOTELS.length;
-  const supplierHotelTotal = Object.values(supplierHotels).flat().length;
-  document.getElementById("statSupplierHotels").innerHTML =
-    `<strong>${supplierHotelTotal.toLocaleString()}</strong> rows · <strong>${supplierCount}</strong> suppliers`;
-
-  const countriesWithNationality = SYSTEM_COUNTRIES.filter((c) => c.nationality).length;
-  document.getElementById("statNationalitySet").textContent = `${countriesWithNationality}/${SYSTEM_COUNTRIES.length}`;
-  const nationalityPct = SYSTEM_COUNTRIES.length ? Math.round((countriesWithNationality / SYSTEM_COUNTRIES.length) * 100) : 0;
-  document.getElementById("statNationalitySub").innerHTML = `<strong>${nationalityPct}%</strong> have one set`;
+  // The three entity types declared once — label, where a supplier's rows
+  // live, what counts as "mapped" for that type, and which screen owns it.
+  // The hero, the supplier rows and Needs Attention all read this table, so
+  // adding a fourth entity is one entry here rather than a Country/City/
+  // Hotel triple repeated in three places (which is what this file used to
+  // carry, three times over, per link).
+  const ENTITIES = [
+    {
+      key: "country",
+      label: "Country",
+      noun: "country",
+      page: "country-supplier.html",
+      rowsFor: (k) => supplierCountries[k] || [],
+      isMapped: (r) => r.systemCountry != null,
+    },
+    {
+      key: "city",
+      label: "City",
+      noun: "city",
+      page: "city-supplier.html",
+      rowsFor: (k) => supplierCities[k] || [],
+      isMapped: (r) => (r.systemCityIds || []).length > 0,
+    },
+    {
+      key: "hotel",
+      // Not "Hotel". Sitting in a row with Country and City, that name
+      // claimed a parallel this metric does not have: Country and City are
+      // both things somebody maps by hand, while this one is derived from
+      // the feed — hotel-supplier.html has no Map or Unmap action anywhere
+      // in it, and nothing on this row can be acted on directly. What it
+      // does say is worth saying: a low match rate means the system is
+      // missing hotels the suppliers already know about.
+      label: "Hotel match",
+      noun: "hotel",
+      page: "hotel-supplier.html",
+      hint: "Supplier hotel rows whose Provider ID resolves to a system hotel — derived from the feed, never mapped by hand",
+      rowsFor: (k) => supplierHotels[k] || [],
+      isMapped: (r) => Boolean(findSystemHotelByProviderId(r.providerId)),
+    },
+  ];
 
   function coverageTierClass(pct) {
     if (pct >= 80) return "tier-good";
@@ -285,131 +375,340 @@
     return "tier-low";
   }
 
-  function meterRowHtml(label, mapped, total, href, viewHref, labelTitle, viewTitle) {
-    const pct = total ? Math.round((mapped / total) * 100) : 0;
-    const tier = coverageTierClass(pct);
-    return `
-      <div class="coverage-meter-row">
-        <a class="coverage-meter-label" href="${href}" title="${labelTitle || ""}">${label}</a>
-        <span class="coverage-meter-track ${tier}">
-          <span class="coverage-meter-fill ${tier}" style="width:${pct}%"></span>
-        </span>
-        <span class="coverage-meter-value">${mapped} / ${total} <span class="coverage-meter-pct">(${pct}%)</span></span>
-        <span class="coverage-meter-action">${viewHref ? `<a href="${viewHref}" title="${viewTitle || ""}">View →</a>` : ""}</span>
-      </div>`;
+  const TIER_PILL = { "tier-good": "success", "tier-warn": "warning", "tier-low": "danger" };
+
+  // A supplier that has no rows of some kind has nothing to map, so `empty`
+  // is tracked separately from a genuine 0%. Everything downstream — the
+  // meter, the wording, and whether the pair is eligible for the Needs
+  // Attention ranking at all — keys off this flag rather than off pct === 0.
+  // In this data 50 of the 54 suppliers have no hotel records whatsoever;
+  // scoring them 0% is what used to fill the whole panel with blameless
+  // suppliers and paint half the screen red.
+  function coverage(rows, isMapped) {
+    const total = rows.length;
+    const mapped = rows.filter(isMapped).length;
+    return { total, mapped, unmapped: total - mapped, empty: total === 0, pct: total ? Math.round((mapped / total) * 100) : 0 };
   }
 
-  // -- Hotel Star Ratings: a plain magnitude distribution, not a coverage
-  // metric, so bars share one flat color rather than the tier scale above
-  // (there's no "good/bad" star rating). All buckets are shown even if a
-  // rating has zero hotels, so the shape of the full scale is visible.
-  // Rating 0 is a real category, not "unrated" — hotels with no formal star
-  // rating (e.g. serviced apartments) are classed "SC", listed after 1 Star
-  // rather than as a highest-to-lowest numeric bucket.
-  const starRatingCounts = [5, 4, 3, 2, 1, 0].map((stars) => ({
-    stars,
-    label: stars === 0 ? "SC" : `${stars} Star`,
-    count: SYSTEM_HOTELS.filter((h) => h.starRating === stars).length,
-  }));
-  document.getElementById("starRatingList").innerHTML = starRatingCounts
-    .map(({ label, count }) => {
-      const pct = SYSTEM_HOTELS.length ? Math.round((count / SYSTEM_HOTELS.length) * 100) : 0;
-      return `
-        <div class="star-rating-row">
-          <span class="star-rating-label">${label}</span>
-          <span class="star-rating-track">
-            <span class="star-rating-fill" style="width:${pct}%"></span>
-          </span>
-          <span class="star-rating-value">${count} hotels (${pct}%)</span>
-        </div>`;
-    })
-    .join("");
+  function meterHtml(c) {
+    if (c.empty) return `<span class="coverage-meter-track is-empty"></span>`;
+    const tier = coverageTierClass(c.pct);
+    return `<span class="coverage-meter-track"><span class="coverage-meter-fill ${tier}" style="width:${c.pct}%"></span></span>`;
+  }
 
-  // -- Supplier mapping-summary cards (System/Country/City/Hotel counts +
-  // mapping counts per supplier), paginated independently of every other
-  // list on this page via a small local pager (reuses getPageList() from
-  // js/app.js for page-number generation, but skips the rows-per-page
-  // dropdown renderPagination() bundles in — a handful of supplier cards
-  // doesn't need a variable page size the way a data table does).
+  /* ------------------------------------------------------------------ *
+   * System tiles
+   * ------------------------------------------------------------------ */
+
+  // Each sub-line describes SUPPLIER rows while the value above it is a
+  // SYSTEM count, so it leads with the scope word — "163 rows · 54
+  // suppliers" under a system total of 36 read as though the two belonged
+  // to each other.
+  function supplierRowTotal(entity) {
+    return Object.keys(SUPPLIER_LABELS).reduce((n, k) => n + entity.rowsFor(k).length, 0);
+  }
+
+  const rowTotals = {};
+  ENTITIES.forEach((e) => (rowTotals[e.key] = supplierRowTotal(e)));
+
+  document.getElementById("statSystemCountries").textContent = SYSTEM_COUNTRIES.length;
+  document.getElementById("statSupplierCountries").innerHTML =
+    `Suppliers hold <strong>${rowTotals.country.toLocaleString()}</strong> country rows`;
+
+  document.getElementById("statSystemCities").textContent = SYSTEM_CITIES.length;
+  document.getElementById("statSupplierCities").innerHTML =
+    `Suppliers hold <strong>${rowTotals.city.toLocaleString()}</strong> city rows`;
+
+  document.getElementById("statSystemHotels").textContent = SYSTEM_HOTELS.length;
+  document.getElementById("statSupplierHotels").innerHTML =
+    `Suppliers hold <strong>${rowTotals.hotel.toLocaleString()}</strong> hotel rows`;
+
+  const countriesWithNationality = SYSTEM_COUNTRIES.filter((c) => c.nationality).length;
+  const nationalityPct = SYSTEM_COUNTRIES.length ? Math.round((countriesWithNationality / SYSTEM_COUNTRIES.length) * 100) : 0;
+  document.getElementById("statNationalitySet").textContent = `${countriesWithNationality}/${SYSTEM_COUNTRIES.length}`;
+  document.getElementById("statNationalitySub").innerHTML = `<strong>${nationalityPct}%</strong> of system countries`;
+  document.getElementById("statNationalityBar").style.width = `${nationalityPct}%`;
+
+  /* ------------------------------------------------------------------ *
+   * Per-supplier summaries — computed once, read by the hero, the supplier
+   * list and the hero alike.
+   * ------------------------------------------------------------------ */
+
   // Fixed hue order for the supplier avatar badges — pulled from the app's
   // existing non-status brand colors (never the success/warning/red trio,
-  // which the meter bars below already use for coverage severity; reusing
-  // them here would make a red avatar look like a coverage warning).
+  // which the meters use for coverage severity; reusing them here would
+  // make a red avatar look like a coverage warning).
   const SUPPLIER_AVATAR_CLASSES = ["avatar-blue", "avatar-cyan", "avatar-navylight", "avatar-navy"];
 
-  function computeSupplierSummary(key, index) {
-    const countryRows = supplierCountries[key] || [];
-    const cityRows = supplierCities[key] || [];
-    const hotelRows = supplierHotels[key] || [];
-    const country = { total: countryRows.length, mapped: countryRows.filter((r) => r.systemCountry != null).length };
-    const city = { total: cityRows.length, mapped: cityRows.filter((r) => (r.systemCityIds || []).length > 0).length };
-    const hotel = {
-      total: hotelRows.length,
-      mapped: hotelRows.filter((r) => Boolean(findSystemHotelByProviderId(r.providerId))).length,
-    };
-    const totalAll = country.total + city.total + hotel.total;
-    const mappedAll = country.mapped + city.mapped + hotel.mapped;
+  const supplierSummaries = Object.keys(SUPPLIER_LABELS).map((key, index) => {
+    const stats = {};
+    ENTITIES.forEach((e) => (stats[e.key] = coverage(e.rowsFor(key), e.isMapped)));
+    const totalAll = ENTITIES.reduce((n, e) => n + stats[e.key].total, 0);
+    const mappedAll = ENTITIES.reduce((n, e) => n + stats[e.key].mapped, 0);
     return {
       key,
       label: SUPPLIER_LABELS[key],
       avatarClass: SUPPLIER_AVATAR_CLASSES[index % SUPPLIER_AVATAR_CLASSES.length],
+      stats,
+      totalAll,
+      mappedAll,
       overallPct: totalAll ? Math.round((mappedAll / totalAll) * 100) : 0,
-      country,
-      city,
-      hotel,
+      hasRows: totalAll > 0,
     };
+  });
+
+  /* ------------------------------------------------------------------ *
+   * Hero — the headline number, its three-way split, and the shape of the
+   * supplier population behind it.
+   * ------------------------------------------------------------------ */
+
+  const grandTotal = supplierSummaries.reduce((n, s) => n + s.totalAll, 0);
+  const grandMapped = supplierSummaries.reduce((n, s) => n + s.mappedAll, 0);
+  const grandPct = grandTotal ? Math.round((grandMapped / grandTotal) * 100) : 0;
+
+  document.getElementById("heroPct").textContent = `${grandPct}%`;
+  document.getElementById("heroCaption").innerHTML =
+    `<strong>${grandMapped.toLocaleString()}</strong> of <strong>${grandTotal.toLocaleString()}</strong> supplier records are linked to a system record.`;
+
+  // r=68 on the 160-box below; the arc is drawn from zero on the first frame
+  // so the ring sweeps up to its value instead of appearing already full.
+  const RING_CIRCUMFERENCE = 2 * Math.PI * 68;
+  const ringFill = document.getElementById("heroRingFill");
+  requestAnimationFrame(() => {
+    ringFill.style.strokeDasharray = `${(grandPct / 100) * RING_CIRCUMFERENCE} ${RING_CIRCUMFERENCE}`;
+  });
+
+  // No per-row action link. Only one of these three rows had a mapping
+  // screen to point at — City — because country mapping happens inline on
+  // the Supplier Country List (there is no country-mapping.html) and
+  // supplier hotels are never mapped at all. A lone "Map →" on the middle
+  // row made the other two look like they were missing something they
+  // cannot have. City Mapping is still one click away from every supplier
+  // row below, scoped to that supplier, which is the more useful form of it.
+  function heroMetricHtml({ label, href, labelTitle, meter, value }) {
+    return `
+      <div class="hero-metric">
+        <a class="hero-metric-label" href="${href}" title="${labelTitle}">${label}</a>
+        ${meter}
+        <span class="hero-metric-value">${value}</span>
+      </div>`;
   }
 
-  const supplierSummaries = Object.keys(SUPPLIER_LABELS).map(computeSupplierSummary);
+  document.getElementById("heroBreakdown").innerHTML = ENTITIES.map((e) => {
+    const rows = Object.keys(SUPPLIER_LABELS).flatMap((k) => e.rowsFor(k));
+    const c = coverage(rows, e.isMapped);
+    return heroMetricHtml({
+      label: e.label,
+      href: e.page,
+      labelTitle: e.hint || `View the supplier ${e.noun} list`,
+      meter: meterHtml(c),
+      value: `<strong>${c.mapped.toLocaleString()}</strong> of ${c.total.toLocaleString()} (${c.pct}%)`,
+    });
+  }).join("");
 
-  // Every one of these destination pages (country-supplier.html,
-  // city-supplier.html, hotel-supplier.html) already supports a
-  // `?supplier=<key>` deep link that pre-selects that supplier in its own
-  // Supplier dropdown — reused here so a card's links land already scoped
-  // to that supplier instead of an empty "pick a supplier" state. Every
-  // row's View link points at the same Supplier List its label does — kept
-  // deliberately uniform across Country/City/Hotel (View always means
-  // "this supplier's own list for this entity"), not a mapping screen.
-  function supplierCardHtml(s) {
-    const overallTier = coverageTierClass(s.overallPct);
+  // "Who is doing badly" across 54 suppliers is a shape question, not a list
+  // question — one stacked bar answers it before any row below is read.
+  // Buckets use the same tier cutoffs as every meter on the page.
+  const HEALTH_BUCKETS = [
+    { cls: "tier-good", label: "80%+ mapped", fill: "var(--success)", test: (s) => s.overallPct >= 80 },
+    { cls: "tier-warn", label: "50–79% mapped", fill: "#e0930f", test: (s) => s.overallPct >= 50 },
+    { cls: "tier-low", label: "Under 50% mapped", fill: "var(--accent-red)", test: () => true },
+    { cls: "tier-empty", label: "No records at all", fill: "#b9b9cd", test: null },
+  ];
+  HEALTH_BUCKETS.forEach((b) => (b.n = 0));
+  supplierSummaries.forEach((s) => {
+    if (!s.hasRows) HEALTH_BUCKETS[3].n++;
+    else HEALTH_BUCKETS.find((b) => b.test && b.test(s)).n++;
+  });
+  const shownBuckets = HEALTH_BUCKETS.filter((b) => b.n > 0);
+
+  document.getElementById("heroHealth").innerHTML = `
+    <p class="hero-health-title">Supplier coverage split</p>
+    <div class="health-stack">
+      ${shownBuckets
+        .map((b) => `<span style="width:${(b.n / supplierCount) * 100}%; background:${b.fill}" title="${b.n} suppliers — ${b.label}"></span>`)
+        .join("")}
+    </div>
+    <div class="health-legend">
+      ${shownBuckets
+        .map((b) => `<span class="health-legend-item"><i class="health-dot ${b.cls}"></i><strong>${b.n}</strong> ${b.label}</span>`)
+        .join("")}
+    </div>`;
+
+  /* ------------------------------------------------------------------ *
+   * Hotel star ratings — a magnitude distribution, so an ordinal ramp
+   * rather than the good/bad tier scale. SC (no formal star rating, e.g.
+   * serviced apartments) is a real classification, not missing data, and
+   * sits off the ramp in grey because it isn't a point on the 1-5 scale.
+   * ------------------------------------------------------------------ */
+
+  const STAR_COLORS = { 5: "#10108a", 4: "#2b3ed1", 3: "#5a6ae0", 2: "#8f99ec", 1: "#c2c8f6", 0: "#a3a3bd" };
+  const starBuckets = [5, 4, 3, 2, 1, 0].map((stars) => {
+    const count = SYSTEM_HOTELS.filter((h) => h.starRating === stars).length;
+    return {
+      stars,
+      label: stars === 0 ? "SC" : `${stars} Star`,
+      count,
+      pct: SYSTEM_HOTELS.length ? Math.round((count / SYSTEM_HOTELS.length) * 100) : 0,
+    };
+  });
+
+  // Empty buckets keep their legend row, so the shape of the full scale
+  // stays visible, but contribute no segment to the bar.
+  document.getElementById("starStack").innerHTML = starBuckets
+    .filter((b) => b.count > 0)
+    .map((b) => `<span style="width:${(b.count / SYSTEM_HOTELS.length) * 100}%; background:${STAR_COLORS[b.stars]}" title="${b.label}: ${b.count}"></span>`)
+    .join("");
+
+  document.getElementById("starRatingList").innerHTML = starBuckets
+    .map(
+      (b) => `
+      <div class="star-rating-row ${b.count === 0 ? "is-zero" : ""}">
+        <span class="star-rating-swatch" style="background:${STAR_COLORS[b.stars]}"></span>
+        <span class="star-rating-label">${b.label}</span>
+        <span class="star-rating-count">${b.count.toLocaleString()} hotels</span>
+        <span class="star-rating-pct">${b.pct}%</span>
+      </div>`
+    )
+    .join("");
+
+  /* ------------------------------------------------------------------ *
+   * Supplier list — searchable, sortable, paginated.
+   * ------------------------------------------------------------------ */
+
+  // Every destination page (country-supplier.html, city-supplier.html,
+  // hotel-supplier.html) already supports a `?supplier=<key>` deep link that
+  // pre-selects that supplier in its own dropdown — reused here so a row's
+  // links land already scoped to that supplier instead of an empty "pick a
+  // supplier" state. One link per destination: the row previously carried
+  // six links to three URLs, each metric label plus an identical "View"
+  // beside it.
+  function supplierRowHtml(s) {
+    const tier = coverageTierClass(s.overallPct);
     return `
       <div class="supplier-summary-card">
         <div class="supplier-summary-header">
           <span class="supplier-summary-avatar ${s.avatarClass}">${s.label.charAt(0)}</span>
           <span class="supplier-summary-name">${s.label}</span>
-          <span class="pill ${overallTier === "tier-good" ? "success" : overallTier === "tier-warn" ? "warning" : "danger"} supplier-summary-overall">${s.overallPct}% mapped</span>
+        </div>
+        <div class="supplier-summary-right">
+          <span class="pill ${TIER_PILL[tier]} supplier-summary-overall">${s.overallPct}% mapped</span>
+          <a class="supplier-open-link" href="city-mapping.html?supplier=${s.key}" title="Map ${s.label}'s cities">Map cities &rarr;</a>
         </div>
         <div class="supplier-summary-metrics">
-          ${meterRowHtml(
-            "Country",
-            s.country.mapped,
-            s.country.total,
-            `country-supplier.html?supplier=${s.key}`,
-            `country-supplier.html?supplier=${s.key}`,
-            `View ${s.label}'s country list`,
-            `View ${s.label}'s country list`
-          )}
-          ${meterRowHtml(
-            "City",
-            s.city.mapped,
-            s.city.total,
-            `city-supplier.html?supplier=${s.key}`,
-            `city-supplier.html?supplier=${s.key}`,
-            `View ${s.label}'s city list`,
-            `View ${s.label}'s city list`
-          )}
-          ${meterRowHtml(
-            "Hotel",
-            s.hotel.mapped,
-            s.hotel.total,
-            `hotel-supplier.html?supplier=${s.key}`,
-            `hotel-supplier.html?supplier=${s.key}`,
-            `View ${s.label}'s hotel list`,
-            `View ${s.label}'s hotel list`
-          )}
+          ${ENTITIES.map((e) => {
+            const c = s.stats[e.key];
+            return `
+              <div class="metric-chip ${c.empty ? "is-empty" : ""}">
+                <div class="metric-chip-top">
+                  <a class="metric-chip-label" href="${e.page}?supplier=${s.key}" title="View ${s.label}'s ${e.noun} list">${e.label}</a>
+                  <span class="metric-chip-value">${c.empty ? "No records" : `<strong>${c.mapped.toLocaleString()}</strong> / ${c.total.toLocaleString()} (${c.pct}%)`}</span>
+                </div>
+                ${meterHtml(c)}
+              </div>`;
+          }).join("")}
         </div>
       </div>`;
   }
+
+  // Alphabetical by default, not worst-first: opening on the worst cases
+  // made page one six red pills, and nothing told you a supplier above 80%
+  // even existed. A-Z interleaves the tiers (the coverage targets rotate
+  // with the generated names), so the meters and pills do their job on first
+  // paint. Worst-first is one click away, and is now the only place the
+  // worst cases are ranked — the Needs Attention card that used to do it was
+  // showing the top of this very list a second time.
+  const SUPPLIER_SORTS = {
+    worst: (a, b) => a.overallPct - b.overallPct || b.totalAll - a.totalAll || a.label.localeCompare(b.label),
+    best: (a, b) => b.overallPct - a.overallPct || b.totalAll - a.totalAll || a.label.localeCompare(b.label),
+    name: (a, b) => a.label.localeCompare(b.label),
+    size: (a, b) => b.totalAll - a.totalAll || a.label.localeCompare(b.label),
+  };
+
+  const supplierPageState = { page: 1, pageSize: 6, search: "", sort: "name" };
+
+  function visibleSuppliers() {
+    const q = supplierPageState.search.trim().toLowerCase();
+    return supplierSummaries
+      .filter((s) => !q || s.label.toLowerCase().includes(q))
+      .sort(SUPPLIER_SORTS[supplierPageState.sort] || SUPPLIER_SORTS.name);
+  }
+
+  function renderSupplierPage() {
+    const items = visibleSuppliers();
+    const total = items.length;
+    const totalPages = Math.max(1, Math.ceil(total / supplierPageState.pageSize));
+    supplierPageState.page = Math.min(Math.max(1, supplierPageState.page), totalPages);
+    const start = (supplierPageState.page - 1) * supplierPageState.pageSize;
+    const pageItems = items.slice(start, start + supplierPageState.pageSize);
+
+    document.getElementById("supplierSummaryList").innerHTML = total
+      ? pageItems.map(supplierRowHtml).join("")
+      : `<p class="dash-empty" style="margin:16px 20px;">No supplier matches that name.</p>`;
+
+    renderCardPagination(document.getElementById("supplierPaginationBar"), {
+      total,
+      page: supplierPageState.page,
+      pageSize: supplierPageState.pageSize,
+      onChange: ({ page }) => {
+        supplierPageState.page = page;
+        renderSupplierPage();
+      },
+    });
+  }
+
+  document.getElementById("supplierSearch").addEventListener(
+    "input",
+    debounce((e) => {
+      supplierPageState.search = e.target.value;
+      supplierPageState.page = 1;
+      renderSupplierPage();
+    }, 200)
+  );
+
+  document.getElementById("supplierSort").addEventListener("change", (e) => {
+    supplierPageState.sort = e.target.value;
+    supplierPageState.page = 1;
+    renderSupplierPage();
+  });
+
+  /* ------------------------------------------------------------------ *
+   * Supplier pagination — a small local pager (reuses getPageList() from
+   * js/app.js for page-number generation, but skips the rows-per-page
+   * dropdown renderPagination() bundles in: a card list doesn't need a
+   * variable page size the way a data table does).
+   * ------------------------------------------------------------------ */
+
+  function renderCardPagination(container, { total, page, pageSize, onChange }) {
+    const totalPages = Math.max(1, Math.ceil(total / pageSize));
+    const start = total === 0 ? 0 : (page - 1) * pageSize + 1;
+    const end = Math.min(page * pageSize, total);
+    const pages = getPageList(page, totalPages);
+    container.innerHTML = `
+      <div class="pagination-info">Showing <strong>${start}</strong> - <strong>${end}</strong> of <strong>${total}</strong> suppliers</div>
+      <div class="pagination-controls">
+        <button class="page-btn nav" data-page="${page - 1}" title="Previous page" ${page === 1 ? "disabled" : ""}>&laquo; Previous</button>
+        ${pages
+          .map((p) =>
+            p === "..."
+              ? `<span class="page-ellipsis">&hellip;</span>`
+              : `<button class="page-btn ${p === page ? "active" : ""}" data-page="${p}" title="Go to page ${p}">${p}</button>`
+          )
+          .join("")}
+        <button class="page-btn nav" data-page="${page + 1}" title="Next page" ${page === totalPages ? "disabled" : ""}><span class="dodge-face">Next &raquo;</span></button>
+      </div>`;
+    container.querySelectorAll(".page-btn[data-page]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        if (btn.disabled) return;
+        onChange({ page: parseInt(btn.dataset.page, 10) });
+      });
+    });
+    initRunawayNextButton(container);
+  }
+
+  /* ------------------------------------------------------------------ *
+   * The runaway Next button
+   * ------------------------------------------------------------------ */
 
   // Makes the supplier pagination's Next button dodge the cursor as it
   // approaches, instead of just sitting there waiting to be clicked. Scoped
@@ -417,36 +716,52 @@
   // js/app.js (used by every other list page) is untouched, so this is a
   // dashboard-only quirk. Purely a transform on the button itself, so the
   // click handler and keyboard/Tab access still work normally; it only
-  // makes landing a mouse click on it hard, not impossible.
+  // makes landing a MOUSE click on it hard, never impossible.
   //
-  // Personality: it dodges the instant the cursor gets close — no slow
-  // buildup — plus a taunt bubble each time. A 0-100 "heat" value tracks how
-  // hotly it's been pursued recently (rises per dodge, decays over time) to
-  // drive the border-color escalation, the catch reward, and the 30s
-  // decision below; it never gates the dodge itself. Left alone, heat decays
-  // back to 0 and it eases home on its own (no fixed idle cutoff). It always
-  // stays fully on screen (clamped to the viewport intersected with
-  // .content-card's own box — the card has overflow:hidden, so that's the
-  // real clipping boundary, not the much larger .dashboard-layout scroll
-  // area). 30s after the page loads, dodging retires for good — if it's
-  // still actively being chased right at that moment it "becomes a saint"
-  // (a one-off toast, eases home) instead of just quietly stopping. Catching
-  // it mid-chase (clicking while heat > 0) triggers a small confetti reward;
-  // normal clicks on an already-calm button do nothing extra.
+  // It has an arc rather than a single behaviour, driven by how many times
+  // it has fled (`dodges`), so a long chase keeps paying out new material:
+  //
+  //   1-3    cocky      full-speed jumps, cheap taunts
+  //   4-7    annoyed    orange, faster comebacks
+  //   8      SURRENDER  goes still, "Okay okay, I give up" — and then bolts
+  //                     the moment the cursor closes in ("PSYCH!"). One-off.
+  //   9-13   angry      red, ring glow, longest jumps
+  //   14-17  winded     jumps shrink, the label starts panting
+  //   18+    beaten     gives up for real, green, sits still to be clicked
+  //
+  // A separate 0-100 "heat" value tracks how hotly it is being pursued right
+  // now (rises per dodge, decays when left alone) — it drives the ease-home
+  // when a chase stops and gates the catch reward, but never the arc above,
+  // which only ever counts forward. Left alone it eases home on its own; 30s
+  // after page load dodging retires for good regardless, so the control is
+  // never permanently slippery.
   function initRunawayNextButton(container) {
     if (container._runawayInit) return;
     container._runawayInit = true;
     if (window.matchMedia("(pointer: coarse)").matches) return; // leave touch devices alone
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return; // and anyone who asked for stillness
 
-    const DODGE_RADIUS = 70; // px from cursor to button center that triggers an instant dodge
-    const HEAT_PER_DODGE = 30; // heat gained each time it flees
+    const DODGE_RADIUS = 70; // px from cursor to button center that triggers a dodge
+    const HEAT_PER_DODGE = 30;
     const HEAT_DECAY_PER_TICK = 2;
     const DECAY_TICK_MS = 150;
     const MIN_DODGE_INTERVAL_MS = 160; // floor between jumps — keeps it snappy, not jittery
     const SHOW_DURATION_MS = 30000; // dodging is retired for good after this long
     const EDGE_MARGIN = 12; // px kept clear of the visible area's edge
-    const HEAT_CLASSES = ["heat-annoyed", "heat-angry", "heat-saint"];
-    const TAUNTS = ["Nope!", "Too slow!", "Nice try!", "Catch me if you can!", "Missed me!"];
+    const FAKE_SURRENDER_AT = 8; // the dodge that triggers the one-off fake-out
+    const WINDED_AT = 14;
+    const BEATEN_AT = 18;
+    const MOOD_CLASSES = ["heat-annoyed", "heat-angry", "heat-tired", "heat-saint"];
+
+    // Taunts escalate with the arc rather than cycling one flat list, so the
+    // twentieth dodge doesn't read the same as the first.
+    const TAUNTS = {
+      cocky: ["Nope!", "Too slow!", "Missed me!"],
+      annoyed: ["Nice try!", "Not today!", "Wheee!", "Still nope."],
+      angry: ["Catch me if you can!", "You're very persistent.", "This is my job now.", "I could do this all day."],
+      winded: ["...okay... *pant*", "my little legs...", "one second...", "*wheeze*"],
+    };
+
     const scrollParent = container.closest(".dashboard-layout"); // scrolls -> can go stale, see below
     const clipParent = container.closest(".content-card"); // overflow:hidden -> the real visual boundary
 
@@ -467,39 +782,73 @@
       height: 0,
       curLeft: 0,
       curTop: 0,
+      tilt: 0,
     };
     let showActive = true;
     let heat = 0;
-    let isSaint = false;
+    let dodges = 0; // counts forward across page changes — it's the same gremlin
+    let beaten = false;
+    let surrendering = false; // playing dead right now
+    let surrenderUsed = false; // the fake-out only ever lands once
+    let surrenderAt = 0;
     let lastDodgeAt = 0;
     let tauntIndex = 0;
+
+    function phase() {
+      if (beaten) return "beaten";
+      if (dodges >= WINDED_AT) return "winded";
+      if (dodges >= 9) return "angry";
+      if (dodges >= 4) return "annoyed";
+      return "cocky";
+    }
+
+    function applyTransform() {
+      if (!state.btn) return;
+      const dx = state.curLeft - state.naturalLeft;
+      const dy = state.curTop - state.naturalTop;
+      // Rotation is composed here rather than in a class, because transform
+      // is a single property — a class that set its own would clobber the
+      // translate that positions the button.
+      state.btn.style.transform = dx || dy || state.tilt ? `translate(${dx}px, ${dy}px) rotate(${state.tilt}deg)` : "";
+    }
 
     function goHome() {
       if (!state.btn) return;
       state.curLeft = state.naturalLeft;
       state.curTop = state.naturalTop;
+      state.tilt = 0;
       state.btn.style.transform = "";
     }
 
-    function heatTier(h) {
-      if (h < 40) return null; // no extra styling — plain button
-      if (h < 75) return "heat-annoyed";
-      return "heat-angry";
-    }
-
-    function updateHeat() {
+    function updateMood() {
       if (!state.btn) return;
-      const cls = isSaint ? "heat-saint" : heatTier(heat);
-      state.btn.classList.remove(...HEAT_CLASSES);
+      const cls = { beaten: "heat-saint", winded: "heat-tired", angry: "heat-angry", annoyed: "heat-annoyed", cocky: null }[
+        surrendering ? "beaten" : phase()
+      ];
+      state.btn.classList.remove(...MOOD_CLASSES);
       if (cls) state.btn.classList.add(cls);
     }
 
-    function showTaunt() {
+    function showTaunt(text, big) {
       if (!state.tauntEl) return;
-      state.tauntEl.textContent = TAUNTS[tauntIndex++ % TAUNTS.length];
+      const pool = TAUNTS[phase()] || TAUNTS.cocky;
+      state.tauntEl.textContent = text || pool[tauntIndex++ % pool.length];
+      state.tauntEl.classList.toggle("big", Boolean(big));
       state.tauntEl.classList.add("show");
       clearTimeout(state.tauntTimer);
-      state.tauntTimer = setTimeout(() => state.tauntEl?.classList.remove("show"), 1100);
+      state.tauntTimer = setTimeout(() => state.tauntEl?.classList.remove("show"), big ? 1600 : 1100);
+    }
+
+    // Dust where it was standing, so a jump reads as "it ran off that spot"
+    // rather than as the layout glitching. Appended to <body>, not the
+    // button, so .content-card's overflow:hidden can't clip it.
+    function spawnPuff(x, y) {
+      const puff = document.createElement("span");
+      puff.className = "dodge-puff";
+      puff.style.left = `${x}px`;
+      puff.style.top = `${y}px`;
+      document.body.appendChild(puff);
+      setTimeout(() => puff.remove(), 450);
     }
 
     const CONFETTI_COLORS = ["#f94144", "#f3722c", "#f9c74f", "#90be6d", "#577590", "#43aa8b"];
@@ -517,30 +866,38 @@
         const dist = 40 + Math.random() * 40;
         piece.style.setProperty("--dx", `${Math.cos(angle) * dist}px`);
         piece.style.setProperty("--dy", `${Math.sin(angle) * dist}px`);
-        // appended to <body>, not the button, so .content-card's
-        // overflow:hidden can't clip the burst.
         document.body.appendChild(piece);
         setTimeout(() => piece.remove(), 700);
       }
     }
 
+    // The prize scales with how long the chase ran, so catching it early and
+    // grinding it down to exhaustion are different achievements.
     function celebrateCatch() {
       spawnConfetti(state.btn);
-      showToast("Caught! Achievement unlocked: Mouse Whisperer.", "success");
+      const title = beaten
+        ? "War of Attrition"
+        : dodges <= 3
+        ? "Reflexes of a Hawk"
+        : dodges <= 10
+        ? "Mouse Whisperer"
+        : "Absolutely Relentless";
+      showToast(`Caught after ${dodges} dodge${dodges === 1 ? "" : "s"}. Achievement unlocked: ${title}.`, "success");
     }
 
-    function becomeSaint() {
-      isSaint = true;
+    function giveUpForGood(message) {
+      beaten = true;
+      surrendering = false;
       heat = 0;
       goHome();
-      updateHeat();
-      showToast("Blessed are those who never give up.", "success");
+      updateMood();
+      showTaunt("🏳️", false);
+      showToast(message, "success");
     }
 
     const decayTimer = setInterval(() => {
       if (!showActive || heat <= 0) return;
       heat = Math.max(0, heat - HEAT_DECAY_PER_TICK);
-      updateHeat();
       if (heat === 0 && state.btn && (state.curLeft !== state.naturalLeft || state.curTop !== state.naturalTop)) {
         goHome();
       }
@@ -549,10 +906,10 @@
     setTimeout(() => {
       showActive = false;
       clearInterval(decayTimer);
-      // Still actively being chased right at the 30s mark -> comedic
-      // reward ending instead of just quietly stopping.
-      if (heat > 0) {
-        becomeSaint();
+      // Still actively being chased right at the 30s mark -> comedic reward
+      // ending instead of just quietly stopping.
+      if (heat > 0 && !beaten) {
+        giveUpForGood("Blessed are those who never give up.");
       } else {
         goHome();
       }
@@ -568,7 +925,6 @@
     scrollParent?.addEventListener("scroll", () => {
       goHome();
       heat = 0;
-      updateHeat();
       state.btn = null;
     });
 
@@ -582,8 +938,9 @@
 
       if (btn !== state.btn) {
         // Fresh render (page changed) or a cache-clear from a scroll — new
-        // chase either way. transform is guaranteed empty here, so this
-        // rect read is exact.
+        // chase either way, though `dodges` deliberately survives: catching
+        // it and paging forward shouldn't reset its temper. transform is
+        // guaranteed empty here, so this rect read is exact.
         btn.classList.add("dodge-btn");
         btn.style.transform = "";
         const rect = btn.getBoundingClientRect();
@@ -594,6 +951,7 @@
         state.height = rect.height;
         state.curLeft = rect.left;
         state.curTop = rect.top;
+        state.tilt = 0;
         heat = 0;
 
         // Taunt bubble is a child of the button itself, so it automatically
@@ -607,187 +965,135 @@
           taunt.className = "dodge-taunt";
           btn.appendChild(taunt);
           // Catch reward: only wire this once per real DOM element.
-          btn.addEventListener("click", () => {
-            if (heat > 0) celebrateCatch();
+          btn.addEventListener("click", (ev) => {
+            // detail === 0 means the click came from the keyboard, which
+            // was never in any danger — worth a nod, not a trophy.
+            if (ev.detail === 0 && heat > 0 && !beaten) {
+              showToast("Tab and Enter? That's technically legal.", "success");
+              return;
+            }
+            if (heat > 0 || beaten) celebrateCatch();
           });
         }
         state.tauntEl = taunt;
 
-        updateHeat();
+        updateMood();
       }
 
-      if (isSaint) return; // permanently calm from here on
+      if (beaten) return; // permanently calm from here on
 
       const cx = state.curLeft + state.width / 2;
       const cy = state.curTop + state.height / 2;
       const dx = cx - e.clientX;
       const dy = cy - e.clientY;
       const dist = Math.hypot(dx, dy);
-      // Dodges the instant the cursor gets close — no slow buildup — just a
-      // short cooldown so it doesn't jitter on every single pixel of motion.
+
+      // Playing dead: hold still until the cursor is genuinely on top of it,
+      // then bolt. The short delay stops the fake-out firing on the same
+      // mouse movement that triggered the surrender.
+      if (surrendering) {
+        if (dist < DODGE_RADIUS * 0.6 && Date.now() - surrenderAt > 700) {
+          surrendering = false;
+          surrenderUsed = true;
+          updateMood();
+          showTaunt("PSYCH!", true);
+          jump(dx, dy, 2);
+        }
+        return;
+      }
+
       if (dist > DODGE_RADIUS || Date.now() - lastDodgeAt < MIN_DODGE_INTERVAL_MS) return;
 
       lastDodgeAt = Date.now();
+      dodges++;
       heat = Math.min(100, heat + HEAT_PER_DODGE);
-      updateHeat();
+
+      if (dodges >= BEATEN_AT) {
+        giveUpForGood("It sat down and gave up. Achievement unlocked: War of Attrition.");
+        return;
+      }
+
+      if (dodges === FAKE_SURRENDER_AT && !surrenderUsed) {
+        surrendering = true;
+        surrenderAt = Date.now();
+        goHome();
+        updateMood();
+        showTaunt("Okay okay, I give up 🏳️", false);
+        return;
+      }
+
+      updateMood();
       showTaunt();
+      // Winded: the jumps get short before it quits altogether.
+      jump(dx, dy, phase() === "winded" ? 0.45 : 1);
+    });
 
-      const angle = Math.atan2(dy, dx) + (Math.random() - 0.5) * 0.6;
-      const jump = 70 + Math.random() * 40;
-      let newLeft = state.curLeft + Math.cos(angle) * jump;
-      let newTop = state.curTop + Math.sin(angle) * jump;
-
-      // Clamp to stay fully visible: inside the browser viewport, inside the
-      // card's own box (clipParent has overflow:hidden — moving past its
-      // edge gets clipped even while still "on screen"), AND inside whatever
-      // part of the card is currently scrolled into view (the card can be
-      // taller than the scroll container's own visible window, so being
-      // within the card alone isn't enough — the card's top/bottom can
-      // themselves be scrolled off-screen). Both rects are already
-      // viewport-relative, so intersecting them is automatically scroll-correct.
+    // Where it is allowed to land: inside the browser viewport, inside the
+    // card's own box (clipParent has overflow:hidden — moving past its edge
+    // gets clipped even while still "on screen"), AND inside whatever part
+    // of the card is currently scrolled into view (the card can be taller
+    // than the scroll container's own visible window, so being within the
+    // card alone isn't enough — the card's top and bottom can themselves be
+    // scrolled off-screen). Both rects are already viewport-relative, so
+    // intersecting them is automatically scroll-correct. Recomputed per jump
+    // rather than cached, since either box can move under it at any time.
+    function landingBounds() {
       const cardRect = clipParent?.getBoundingClientRect();
       const scrollRect = scrollParent?.getBoundingClientRect();
-      const boundsLeft = Math.max(cardRect?.left ?? -Infinity, scrollRect?.left ?? -Infinity);
-      const boundsRight = Math.min(cardRect?.right ?? Infinity, scrollRect?.right ?? Infinity);
-      const boundsTop = Math.max(cardRect?.top ?? -Infinity, scrollRect?.top ?? -Infinity);
-      const boundsBottom = Math.min(cardRect?.bottom ?? Infinity, scrollRect?.bottom ?? Infinity);
+      const left = Math.max(cardRect?.left ?? -Infinity, scrollRect?.left ?? -Infinity);
+      const right = Math.min(cardRect?.right ?? Infinity, scrollRect?.right ?? Infinity);
+      const top = Math.max(cardRect?.top ?? -Infinity, scrollRect?.top ?? -Infinity);
+      const bottom = Math.min(cardRect?.bottom ?? Infinity, scrollRect?.bottom ?? Infinity);
+      return {
+        minLeft: Math.max(EDGE_MARGIN, left + EDGE_MARGIN),
+        maxLeft: Math.min(window.innerWidth - state.width - EDGE_MARGIN, right - state.width - EDGE_MARGIN),
+        minTop: Math.max(EDGE_MARGIN, top + EDGE_MARGIN),
+        maxTop: Math.min(window.innerHeight - state.height - EDGE_MARGIN, bottom - state.height - EDGE_MARGIN),
+      };
+    }
 
-      const minLeft = Math.max(EDGE_MARGIN, boundsLeft + EDGE_MARGIN);
-      const maxLeft = Math.min(window.innerWidth - state.width - EDGE_MARGIN, boundsRight - state.width - EDGE_MARGIN);
-      const minTop = Math.max(EDGE_MARGIN, boundsTop + EDGE_MARGIN);
-      const maxTop = Math.min(window.innerHeight - state.height - EDGE_MARGIN, boundsBottom - state.height - EDGE_MARGIN);
+    // dx/dy point FROM the cursor TO the button, so fleeing along that
+    // vector is simply "keep going the way you already are", plus a little
+    // scatter so a straight-line chase can't predict the landing spot.
+    function jump(dx, dy, scale) {
+      const prevCx = state.curLeft + state.width / 2;
+      const prevCy = state.curTop + state.height / 2;
+      const bounds = landingBounds();
+      const baseAngle = Math.atan2(dy, dx);
 
-      state.curLeft = Math.max(minLeft, Math.min(maxLeft, newLeft));
-      state.curTop = Math.max(minTop, Math.min(maxTop, newTop));
-      btn.style.transform = `translate(${state.curLeft - state.naturalLeft}px, ${state.curTop - state.naturalTop}px)`;
-    });
-  }
+      // Running straight ahead can put it hard against a wall, and the clamp
+      // then drops it back on the spot it started from — which reads as the
+      // button being stuck, not cornered. So: fan out around the direction
+      // it wanted to go and take the first heading that actually gains
+      // ground. Falling back to the first candidate means a genuinely boxed
+      // in button still moves as far as the corner allows.
+      let landed = null;
+      for (let attempt = 0; attempt < 5; attempt++) {
+        const angle = baseAngle + (Math.random() - 0.5) * 0.6 + attempt * 1.9;
+        const distance = (70 + Math.random() * 40) * scale;
+        const candidate = {
+          angle,
+          left: Math.max(bounds.minLeft, Math.min(bounds.maxLeft, state.curLeft + Math.cos(angle) * distance)),
+          top: Math.max(bounds.minTop, Math.min(bounds.maxTop, state.curTop + Math.sin(angle) * distance)),
+        };
+        if (!landed) landed = candidate;
+        if (Math.hypot(candidate.left - state.curLeft, candidate.top - state.curTop) > 24 * scale) {
+          landed = candidate;
+          break;
+        }
+      }
 
-  function renderCardPagination(container, { total, page, pageSize, onChange }) {
-    const totalPages = Math.max(1, Math.ceil(total / pageSize));
-    const start = total === 0 ? 0 : (page - 1) * pageSize + 1;
-    const end = Math.min(page * pageSize, total);
-    const pages = getPageList(page, totalPages);
-    container.innerHTML = `
-      <div class="pagination-info">Showing <strong>${start}</strong> - <strong>${end}</strong> of <strong>${total}</strong> suppliers</div>
-      <div class="pagination-controls">
-        <button class="page-btn nav" data-page="${page - 1}" title="Previous page" ${page === 1 ? "disabled" : ""}>&laquo; Previous</button>
-        ${pages
-          .map((p) =>
-            p === "..."
-              ? `<span class="page-ellipsis">&hellip;</span>`
-              : `<button class="page-btn ${p === page ? "active" : ""}" data-page="${p}" title="Go to page ${p}">${p}</button>`
-          )
-          .join("")}
-        <button class="page-btn nav" data-page="${page + 1}" title="Next page" ${page === totalPages ? "disabled" : ""}>Next &raquo;</button>
-      </div>`;
-    container.querySelectorAll(".page-btn[data-page]").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        if (btn.disabled) return;
-        onChange({ page: parseInt(btn.dataset.page, 10) });
-      });
-    });
-    initRunawayNextButton(container);
-  }
-
-  const supplierPageState = { page: 1, pageSize: 2 };
-
-  function renderSupplierPage() {
-    const total = supplierSummaries.length;
-    const totalPages = Math.max(1, Math.ceil(total / supplierPageState.pageSize));
-    supplierPageState.page = Math.min(Math.max(1, supplierPageState.page), totalPages);
-    const start = (supplierPageState.page - 1) * supplierPageState.pageSize;
-    const pageItems = supplierSummaries.slice(start, start + supplierPageState.pageSize);
-
-    document.getElementById("supplierSummaryList").innerHTML = pageItems.map(supplierCardHtml).join("");
-    renderCardPagination(document.getElementById("supplierPaginationBar"), {
-      total,
-      page: supplierPageState.page,
-      pageSize: supplierPageState.pageSize,
-      onChange: ({ page }) => {
-        supplierPageState.page = page;
-        renderSupplierPage();
-      },
-    });
+      state.curLeft = landed.left;
+      state.curTop = landed.top;
+      // Lean into the run, and straighten up again once it's winded.
+      state.tilt = phase() === "winded" ? 0 : Math.max(-9, Math.min(9, Math.cos(landed.angle) * 9));
+      applyTransform();
+      spawnPuff(prevCx, prevCy);
+    }
   }
 
   renderSupplierPage();
 
-  // -- Needs Attention: two curated highlight lists computed from data
-  // already gathered above, not a general-purpose alert system — capped at
-  // 3 rows each so this stays a quick scan, not another full table.
-  function attentionItemHtml(tier, boldText, restText, pillText, href, linkTitle) {
-    return `
-      <div class="attention-item">
-        <svg class="attention-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 9v4M12 17h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M10.3 4.6L2.9 17.5a1.8 1.8 0 001.6 2.7h15a1.8 1.8 0 001.6-2.7L13.7 4.6a1.8 1.8 0 00-3.4 0z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
-        <div class="attention-body">
-          <span class="attention-text"><strong>${boldText}</strong> ${restText}</span>
-          <span class="pill ${tier === "tier-good" ? "success" : tier === "tier-warn" ? "warning" : "danger"} attention-pill">${pillText}</span>
-        </div>
-        <a class="attention-link" href="${href}" title="${linkTitle || ""}">View →</a>
-      </div>`;
-  }
-
-  // Lowest mapping coverage: flatten every supplier x entity combo already
-  // computed in supplierSummaries into one list, worst percentage first.
-  const coverageCombos = supplierSummaries.flatMap((s) => [
-    { supplierLabel: s.label, entityLabel: "Country", ...s.country, href: `country-supplier.html?supplier=${s.key}` },
-    { supplierLabel: s.label, entityLabel: "City", ...s.city, href: `city-supplier.html?supplier=${s.key}` },
-    { supplierLabel: s.label, entityLabel: "Hotel", ...s.hotel, href: `hotel-supplier.html?supplier=${s.key}` },
-  ]);
-  coverageCombos.forEach((c) => (c.pct = c.total ? Math.round((c.mapped / c.total) * 100) : 0));
-  coverageCombos.sort((a, b) => a.pct - b.pct);
-  const lowestCoverageHtml = coverageCombos
-    .slice(0, 3)
-    .map((c) =>
-      attentionItemHtml(
-        coverageTierClass(c.pct),
-        c.supplierLabel,
-        `— ${c.entityLabel} mapping is the lowest in the system`,
-        `${c.pct}% mapped`,
-        c.href,
-        `View ${c.supplierLabel}'s ${c.entityLabel} list`
-      )
-    )
-    .join("");
-
-  // Inactive hotels per supplier — the only entity with real active/inactive
-  // variance in this data (system records and other supplier entities are
-  // effectively always active), worst count first.
-  const inactiveHotelCounts = Object.keys(SUPPLIER_LABELS)
-    .map((key) => {
-      const rows = supplierHotels[key] || [];
-      const inactive = rows.filter((h) => !h.active).length;
-      return {
-        label: SUPPLIER_LABELS[key],
-        inactive,
-        total: rows.length,
-        pct: rows.length ? Math.round((inactive / rows.length) * 100) : 0,
-        href: `hotel-supplier.html?supplier=${key}`,
-      };
-    })
-    .filter((s) => s.inactive > 0)
-    .sort((a, b) => b.inactive - a.inactive);
-  const inactiveHotelsHtml = inactiveHotelCounts
-    .slice(0, 3)
-    .map((s) =>
-      attentionItemHtml(
-        s.pct >= 15 ? "tier-low" : "tier-warn",
-        s.label,
-        `has ${s.inactive} inactive hotel${s.inactive === 1 ? "" : "s"}`,
-        `${s.pct}% inactive`,
-        s.href,
-        `View ${s.label}'s hotel list`
-      )
-    )
-    .join("");
-
-  document.getElementById("attentionList").innerHTML = `
-    <p class="attention-group-title">Lowest Mapping Coverage</p>
-    ${lowestCoverageHtml || '<p class="attention-empty">Nothing stands out — coverage looks even across suppliers.</p>'}
-    <p class="attention-group-title">Inactive Hotels</p>
-    ${inactiveHotelsHtml || '<p class="attention-empty">No inactive hotels found.</p>'}
-  `;
 </script>
 </body>
 </html>
