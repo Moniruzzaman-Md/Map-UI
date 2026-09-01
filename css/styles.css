@@ -1,16 +1,52 @@
 /* ==========================================================================
    mynztrip.com — Admin Portal shared styles
    Shared across all standalone design pages
+
+   Icons: two systems, split the same way the live admin portal splits them.
+   The CHROME — sidebar menu items, and the topbar's menu/messages/bell/search
+   — uses Font Awesome Free 5.15.4 Solid glyphs (icons CC BY 4.0), inlined as
+   raw <svg><path> instead of through the Font Awesome runtime. Everything
+   INSIDE a page — toolbar buttons, table row actions, the info popups — uses
+   this project's own stroke-drawn 24x24 icons (fill:none, currentColor,
+   1.6-1.7 stroke). The live portal renders those same custom icons; do not
+   "unify" the two sets, the split is deliberate and matches production.
    ========================================================================== */
 
 :root {
   --navy-dark: #0d0d5c;
+  /* Chrome gradient shared by the topbar and sidebar, lifted from the live
+     admin app (test-branch--nz-admin.netlify.app). --navy-dark stays as-is
+     for tooltips, which are not part of that chrome. */
+  --navy-grad-from: #000088;
+  --navy-grad-to: #000055;
+  /* Menu highlight, also from the live app: one pale-to-blue pill shared by
+     hover and the active page, at both menu levels. */
+  --menu-hl-from: #f0f4ff;
+  --menu-hl-to: #1d4ed8;
+  --menu-hl-text: #000;
+  --menu-hl-shadow: 0 6px 18px rgba(37, 99, 235, 0.45);
+  /* Resting menu type, also from the live app: one flat colour at both
+     levels rather than the two opacities this used to fade between. */
+  --menu-text: #f0f4ff;
+  --page-active: #2199e8;
+  /* The live portal's table grid line — Bootstrap's $gray-300. Slightly
+     warmer and darker than --border-color, which stays the tint for card
+     and control edges. */
+  --table-grid: #dee2e6;
+  /* Toolbar button fills, taken from the live portal: its primary button is
+     the brand navy (its own --nz-color), and Reset is a tinted wash with red
+     text rather than a solid red. Hovers are ours — live defines none. */
+  --btn-primary-bg: #0000aa;
+  --btn-primary-bg-hover: #000088;
+  --btn-danger-bg: rgba(243, 210, 207, 0.898);
+  --btn-danger-bg-hover: #f3d2cf;
+  --btn-danger-text: #f34141;
   --navy: #10108a;
   --navy-light: #1a1aa8;
   --navy-hover: rgba(255, 255, 255, 0.08);
   --accent-red: #e6414d;
   --accent-blue: #2b3ed1;
-  --table-head: #1b1b8f;
+  --table-head: #0100a6;   /* live portal's thead fill */
   --cyan: #19c3e6;
   --cyan-hover: #0fb0d2;
   --drawer-width: 480px;
@@ -54,11 +90,20 @@
 html, body {
   height: 100%;
   overflow: hidden;
+  /* Declared on html too, not just body — otherwise the root element keeps
+     the UA default (Times New Roman) and anything that escapes body would
+     inherit it. */
+  font-family: sans-serif;
 }
 
+/* One font for the whole project: the generic sans-serif, set above on
+   html/body and inherited everywhere. This is what the live admin portal
+   actually renders in — its CSS names Poppins but never loads the font, so
+   every element there falls through to the generic sans-serif (Arial on
+   Windows). Measured across the portal's own pages to confirm. Do not add a
+   second family here; form controls need the inherit rule below to follow. */
 body {
   margin: 0;
-  font-family: "Segoe UI", Roboto, -apple-system, BlinkMacSystemFont, sans-serif;
   background: var(--bg-page);
   color: var(--text-dark);
 }
@@ -71,6 +116,24 @@ a {
 button {
   font-family: inherit;
   cursor: pointer;
+}
+
+/* Browsers do not inherit the page font into form controls — they apply
+   their own (Arial in Chrome), which happens to look identical to
+   sans-serif on Windows but would diverge on any other platform. The
+   second group is the UA's monospace default: <pre>, <code> and friends
+   get a fixed-width face from the browser stylesheet, never from ours, so
+   they have to be claimed explicitly too. This project is one font
+   everywhere — these rules are what actually make that true. */
+input,
+select,
+option,
+textarea,
+pre,
+code,
+kbd,
+samp {
+  font-family: inherit;
 }
 
 /* ---------- Layout shell ---------- */
@@ -87,7 +150,10 @@ button {
   display: flex;
   align-items: center;
   gap: 16px;
-  background: var(--navy-dark);
+  /* Matches the live admin app: the same two stops as the sidebar, run
+     horizontally here and vertically there, so the two meet at #000088 in
+     the top-left corner. */
+  background: linear-gradient(90deg, var(--navy-grad-from), var(--navy-grad-to));
   padding: 12px 20px;
   flex-shrink: 0;
   z-index: 50;
@@ -205,7 +271,7 @@ button {
 
 .sidebar {
   width: 260px;
-  background: var(--navy-dark);
+  background: linear-gradient(var(--navy-grad-from), var(--navy-grad-to));
   flex-shrink: 0;
   padding: 10px 0 24px;
   overflow-y: auto;
@@ -234,13 +300,16 @@ button {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 13px 22px;
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 15px;
-  font-weight: 500;
+  padding: 13px 14px;
+  margin: 4px 8px;
+  border-radius: 10px;
+  color: var(--menu-text);
+  font-size: 13px;
+  line-height: 1.5;
+  font-weight: 400;
   border: none;
   background: none;
-  width: 100%;
+  width: auto;
   text-align: left;
 }
 
@@ -253,23 +322,39 @@ button {
   transition: transform 0.15s ease;
 }
 
-.nav-item:hover {
-  background: var(--navy-hover);
+/* An expanded parent carries no fill of its own — matching the live app,
+   where the open accordion header sits flat on the sidebar. Every page
+   marks that parent .active in the markup, so this reclaims it from the
+   .nav-item.active rule below; :not(:hover) lets the pill still appear
+   under the pointer. The rotated chevron is what marks a section open. */
+.nav-group.open > .nav-item.active:not(:hover) {
+  background: none;
+  color: var(--menu-text);
+  box-shadow: none;
 }
 
+.nav-item:hover,
 .nav-item.active,
-.nav-group.open > .nav-item {
-  background: var(--navy-hover);
+.nav-group.open > .nav-item:hover,
+.submenu-item:hover,
+.submenu-item.active {
+  background: linear-gradient(90deg, var(--menu-hl-from), var(--menu-hl-to));
+  color: var(--menu-hl-text);
+  box-shadow: var(--menu-hl-shadow);
 }
 
 .nav-group.open > .nav-item .chevron {
   transform: rotate(180deg);
 }
 
+/* No fill of its own: the submenu is a layout container, and its items sit
+   directly on the sidebar gradient the way they do in the live portal. The
+   0.15 black wash this used to carry dated from the old flat sidebar, where
+   it separated the two levels; against the gradient it just read as a dark
+   band two-thirds of the way down. */
 .submenu {
   display: flex;
   flex-direction: column;
-  background: rgba(0, 0, 0, 0.15);
 }
 
 .nav-group:not(.open) .submenu {
@@ -278,38 +363,26 @@ button {
 
 /* One level of pages under the parent — no third level. The icon sits
    indented from the parent's own, and the label lines up past it, so the
-   hierarchy reads from the indent rather than from nesting. The 3px left
-   border is transparent until active, so nothing shifts when it lights. */
+   hierarchy reads from the indent rather than from nesting. */
 .submenu-item {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 11px 22px 11px 37px;
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.75);
-  border-left: 3px solid transparent;
+  padding: 11px 14px 11px 29px;
+  margin: 4px 8px;
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+  font-weight: 500;
+  color: var(--menu-text);
 }
 
 .submenu-item svg {
   flex-shrink: 0;
-  opacity: 0.75;
-}
-
-.submenu-item.active svg,
-.submenu-item:hover svg {
-  opacity: 1;
-}
-
-.submenu-item:hover {
-  color: #fff;
-  background: var(--navy-hover);
 }
 
 .submenu-item.active {
-  color: #fff;
   font-weight: 600;
-  background: rgba(255, 255, 255, 0.1);
-  border-left-color: var(--accent-red);
 }
 
 .sidebar-footer {
@@ -976,18 +1049,30 @@ table.data-table {
   color: #fff;
   font-weight: 700;
   font-size: 12.5px;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
+  /* Mixed case, as the live portal renders it — the markup already carries
+     the right casing ("Code", "Nationality"), so nothing transforms it. The
+     0.4px tracking that used to sit here existed only to open up uppercase
+     letterforms; mixed case does not want it. */
   padding: 14px 20px;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--table-grid);
   white-space: nowrap;
 }
 
 .data-table tbody td {
   padding: 13px 20px;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--table-grid);
   color: var(--text-dark);
   vertical-align: middle;
+}
+
+/* The live portal rules its tables both ways: rows carry the horizontal
+   lines, cells the vertical ones, and border-collapse merges each adjacent
+   pair into one 1px line. Declaring the verticals on the cells (rather than
+   the rows) is what makes the header divide too. */
+.data-table th,
+.data-table td {
+  border-left: 1px solid var(--table-grid);
+  border-right: 1px solid var(--table-grid);
 }
 
 .data-table tbody tr:last-child td {
@@ -1393,7 +1478,9 @@ table.data-table {
   border-radius: var(--radius-sm);
   border: 1px solid var(--border-color);
   background: #fff;
-  color: var(--navy);
+  /* The live portal's row-action glyphs sit at --accent-blue, a step
+     lighter than the navy this used to use. */
+  color: var(--accent-blue);
 }
 
 .action-btn:hover {
@@ -1637,9 +1724,12 @@ table.data-table {
   cursor: not-allowed;
 }
 
+/* The current page is the live portal's sky blue, not the indigo used for
+   primary actions — it reads as a position marker rather than a button you
+   are meant to press. */
 .page-btn.active {
-  background: var(--accent-blue);
-  border-color: var(--accent-blue);
+  background: var(--page-active);
+  border-color: var(--page-active);
   color: #fff;
 }
 
@@ -1891,6 +1981,13 @@ table.data-table {
    list pages' .data-table and the Summary popup's. It numbers rows by
    their position in the whole result, not within the page, so row 11 on
    page 2 reads 11. */
+/* The Action column is the only right-aligned header in the table: it
+   labels controls rather than data, and pushing it to the trailing edge
+   separates it from the four columns of readable content to its left. */
+.data-table thead th.table-action {
+  text-align: right;
+}
+
 .table-num {
   width: 24px;
   /* Three-digit row numbers are normal once a list pages past 99 — without
@@ -2116,21 +2213,21 @@ table.data-table {
 }
 
 .btn-primary {
-  background: var(--accent-blue);
+  background: var(--btn-primary-bg);
   color: #fff;
 }
 
 .btn-primary:hover {
-  background: #2434b8;
+  background: var(--btn-primary-bg-hover);
 }
 
 .btn-danger {
-  background: var(--accent-red);
-  color: #fff;
+  background: var(--btn-danger-bg);
+  color: var(--btn-danger-text);
 }
 
 .btn-danger:hover {
-  background: #c9313b;
+  background: var(--btn-danger-bg-hover);
 }
 
 .toast {
