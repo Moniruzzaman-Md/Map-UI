@@ -140,7 +140,7 @@
           <li><strong>History</strong> — view every change: creation, edits, status changes, cities mapped or unmapped on Hotel Mapping, and every move of the primary city.</li>
           <li><strong>Active/Inactive toggle</strong> — controls whether a hotel is available for booking. Changes immediately, no confirmation needed, and is logged to History.</li>
           <li>Type a name and tick <strong>Fuzzy</strong> to match it loosely (forgiving of typos or skipped letters) instead of requiring an exact substring.</li>
-          <li>Nothing you type or pick filters the list right away — click <strong>Search</strong> (or press Enter in a search box) to apply it. Click <strong>Filters</strong> to reveal the rest: ID, Provider ID, Country/State/City, Star Rating, and Status. City only opens up once a Country is picked. While collapsed, anything you've set shows as a removable chip — click a chip's × to clear just that one filter. <strong>Reset</strong> clears everything and shows the full list immediately, no Search needed.</li>
+          <li>Nothing you type or pick filters the list right away — click <strong>Search</strong> (or press Enter in a search box) to apply it. Click <strong>Filters</strong> to reveal the rest, in two sections: <strong>System</strong> (Hotel Name, Hotel ID, Country, State, City, Star Rating) and <strong>Other</strong> (Active/Inactive, Mapping ID / Provider ID). City only opens up once a Country is picked. While collapsed, anything you've set shows as a removable chip — click a chip's × to clear just that one filter. <strong>Reset</strong> clears everything and shows the full list immediately, no Search needed.</li>
         </ul>
       </template>
 
@@ -204,44 +204,43 @@
                invisible — see updateFiltersSummary(). -->
           <div class="filters-summary" id="hotelFiltersSummary" style="display:none;"></div>
 
-          <!-- Collapsed by default: ID/Provider ID search + the Country/State/
-               City/Star Rating/Status selects. Same ids/behavior as before,
-               just relocated out of the always-visible row above. -->
+          <!-- Collapsed by default. -->
           <div class="filters-panel" id="hotelFiltersPanel" style="display:none;">
+            <div class="filters-section-label">System</div>
             <div class="filter-field">
-              <label for="hotelIdSearch">ID</label>
+              <label for="hotelNameFilter">System Hotel Name</label>
               <div class="toolbar-search">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-                <input type="text" id="hotelIdSearch" placeholder="Search by ID..." />
+                <input type="text" id="hotelNameFilter" placeholder="Search by hotel name..." />
               </div>
             </div>
             <div class="filter-field">
-              <label for="hotelProviderIdSearch">Provider ID</label>
+              <label for="hotelIdSearch">System Hotel ID</label>
               <div class="toolbar-search">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-                <input type="text" id="hotelProviderIdSearch" placeholder="Search by Provider ID..." />
+                <input type="text" id="hotelIdSearch" placeholder="Search by hotel ID..." />
               </div>
             </div>
             <div class="filter-field">
-              <label for="hotelCountryFilter">Country</label>
+              <label for="hotelCountryFilter">System Country</label>
               <select class="filter-select" id="hotelCountryFilter">
                 <option value="">All Countries</option>
               </select>
             </div>
             <div class="filter-field">
-              <label for="hotelStateFilter">State</label>
+              <label for="hotelStateFilter">System State</label>
               <select class="filter-select" id="hotelStateFilter" disabled>
                 <option value="">Select State</option>
               </select>
             </div>
             <div class="filter-field">
-              <label for="hotelCityFilter">City</label>
+              <label for="hotelCityFilter">System City</label>
               <select class="filter-select" id="hotelCityFilter" disabled>
                 <option value="">All Cities</option>
               </select>
             </div>
             <div class="filter-field">
-              <label for="hotelStarRatingFilter">Star Rating</label>
+              <label for="hotelStarRatingFilter">System Star Rating</label>
               <select class="filter-select" id="hotelStarRatingFilter">
                 <option value="">All Ratings</option>
                 <option value="5">5 ★</option>
@@ -252,13 +251,22 @@
                 <option value="0">0 ★</option>
               </select>
             </div>
+
+            <div class="filters-section-label">Other</div>
             <div class="filter-field">
-              <label for="hotelStatusFilter">Status</label>
+              <label for="hotelStatusFilter">Active / Inactive</label>
               <select class="filter-select" id="hotelStatusFilter">
                 <option value="all">All Status</option>
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
               </select>
+            </div>
+            <div class="filter-field">
+              <label for="hotelProviderIdSearch">Mapping ID / Provider ID</label>
+              <div class="toolbar-search">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                <input type="text" id="hotelProviderIdSearch" placeholder="Search by Mapping / Provider ID..." />
+              </div>
             </div>
           </div>
         </div>
@@ -274,8 +282,8 @@
                 <th>GPS</th>
                 <th>Star Rating</th>
                 <th>Contact</th>
-                <th>Provider ID</th>
                 <th>Status</th>
+                <th>Provider ID</th>
                 <th class="table-action">Action</th>
               </tr>
             </thead>
@@ -422,6 +430,7 @@
   const tbody = document.querySelector("#hotelTable tbody");
   const paginationBar = document.getElementById("paginationBar");
   const hotelSearch = document.getElementById("hotelSearch");
+  const hotelNameFilter = document.getElementById("hotelNameFilter");
   const hotelFuzzyToggle = document.getElementById("hotelFuzzyToggle");
   const hotelSearchBtn = document.getElementById("hotelSearchBtn");
   const hotelIdSearch = document.getElementById("hotelIdSearch");
@@ -658,8 +667,8 @@
             </div>
           </div>
         </td>
-        <td>${truncatableCell(h.providerId, "providerid")}</td>
         <td><span class="pill ${h.active ? "success" : "danger"}">${h.active ? "Active" : "Inactive"}</span></td>
+        <td>${truncatableCell(h.providerId, "providerid")}</td>
         <td>
           <div class="row-actions">
             <button class="action-btn" data-edit-btn data-row-id="${h.id}" aria-label="Edit ${h.name}">
@@ -707,14 +716,14 @@
 
   function activeFilterEntries() {
     const entries = [];
-    if (state.query.trim()) entries.push({ key: "query", label: state.fuzzy ? "Name (fuzzy)" : "Name", value: state.query.trim() });
-    if (state.idQuery.trim()) entries.push({ key: "idQuery", label: "ID", value: state.idQuery.trim() });
-    if (state.providerIdQuery.trim()) entries.push({ key: "providerIdQuery", label: "Provider ID", value: state.providerIdQuery.trim() });
-    if (state.country) entries.push({ key: "country", label: "Country", value: state.country });
-    if (state.hotelState) entries.push({ key: "hotelState", label: "State", value: state.hotelState });
-    if (state.city) entries.push({ key: "city", label: "City", value: state.city });
-    if (state.starRating) entries.push({ key: "starRating", label: "Star Rating", value: `${state.starRating} ★` });
+    if (state.query.trim()) entries.push({ key: "query", label: state.fuzzy ? "System Hotel Name (fuzzy)" : "System Hotel Name", value: state.query.trim() });
+    if (state.idQuery.trim()) entries.push({ key: "idQuery", label: "System Hotel ID", value: state.idQuery.trim() });
+    if (state.country) entries.push({ key: "country", label: "System Country", value: state.country });
+    if (state.hotelState) entries.push({ key: "hotelState", label: "System State", value: state.hotelState });
+    if (state.city) entries.push({ key: "city", label: "System City", value: state.city });
+    if (state.starRating) entries.push({ key: "starRating", label: "System Star Rating", value: `${state.starRating} ★` });
     if (state.status !== "all") entries.push({ key: "status", label: "Status", value: state.status === "active" ? "Active" : "Inactive" });
+    if (state.providerIdQuery.trim()) entries.push({ key: "providerIdQuery", label: "Mapping / Provider ID", value: state.providerIdQuery.trim() });
     return entries;
   }
 
@@ -730,6 +739,7 @@
     query: () => {
       state.query = "";
       hotelSearch.value = "";
+      hotelNameFilter.value = "";
       updateFiltersSummary();
     },
     idQuery: () => {
@@ -842,11 +852,22 @@
     });
   }
   onEnterKey(hotelSearch, runSearchNow);
+  onEnterKey(hotelNameFilter, runSearchNow);
   onEnterKey(hotelIdSearch, runSearchNow);
   onEnterKey(hotelProviderIdSearch, runSearchNow);
 
+  // Hotel Name in the System section is the same filter (state.query) as
+  // the toolbar's own search box — kept in sync both ways, not a second
+  // criterion.
   hotelSearch.addEventListener("input", () => {
     state.query = hotelSearch.value;
+    hotelNameFilter.value = hotelSearch.value;
+    updateFiltersSummary();
+  });
+
+  hotelNameFilter.addEventListener("input", () => {
+    state.query = hotelNameFilter.value;
+    hotelSearch.value = hotelNameFilter.value;
     updateFiltersSummary();
   });
 
@@ -910,6 +931,7 @@
   // away, not just clear the pending fields and leave stale results shown.
   document.getElementById("resetHotelFilterBtn").addEventListener("click", () => {
     hotelSearch.value = "";
+    hotelNameFilter.value = "";
     hotelFuzzyToggle.checked = false;
     hotelIdSearch.value = "";
     hotelProviderIdSearch.value = "";
