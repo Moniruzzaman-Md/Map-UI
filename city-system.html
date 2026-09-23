@@ -229,39 +229,57 @@
                hotel-system.html / hotel-supplier.html. -->
           <div class="filters-summary" id="cityFiltersSummary" style="display:none;"></div>
 
-          <!-- Collapsed by default: the Country/State/Status selects and the
-               custom-cities toggle, moved out of the always-visible row. -->
-          <div class="filters-panel" id="cityFiltersPanel" style="display:none;">
-            <div class="filter-field">
-              <label for="cityCountryFilter">Country</label>
-              <select class="filter-select" id="cityCountryFilter">
-                <option value="">All Countries</option>
-              </select>
+          <!-- Collapsed by default. Grouped the same way as
+               city-supplier.html: the city's own fields under System, the
+               rest under Other. -->
+          <div class="filters-panel filters-panel--grouped" id="cityFiltersPanel" style="display:none;">
+            <div class="filter-group">
+              <p class="filter-group-title">System</p>
+              <div class="filter-group-fields">
+                <div class="filter-field">
+                  <label for="cityIdSearch">System City ID</label>
+                  <div class="toolbar-search">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                    <input type="text" id="cityIdSearch" placeholder="Search by system city ID..." />
+                  </div>
+                </div>
+                <div class="filter-field">
+                  <label for="cityCountryFilter">System Country</label>
+                  <select class="filter-select" id="cityCountryFilter">
+                    <option value="">All Countries</option>
+                  </select>
+                </div>
+                <div class="filter-field">
+                  <label for="cityStateFilter">System State</label>
+                  <select class="filter-select" id="cityStateFilter" disabled>
+                    <option value="">Select State</option>
+                  </select>
+                </div>
+              </div>
             </div>
-            <div class="filter-field">
-              <label for="cityStateFilter">State</label>
-              <select class="filter-select" id="cityStateFilter" disabled>
-                <option value="">Select State</option>
-              </select>
-            </div>
-            <div class="filter-field">
-              <label for="cityStatusFilter">Status</label>
-              <select class="filter-select" id="cityStatusFilter">
-                <option value="all">All Status</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-              </select>
-            </div>
-            <!-- "Custom" means added through this page's Add City drawer, as
-                 opposed to shipping in the original master list. Read off the
-                 record's own history, not a stored city type. A checkbox
-                 rather than a dropdown: it's one on/off narrowing, and there
-                 is deliberately no "original only" counterpart. -->
-            <div class="filter-field filter-field--toggle">
-              <label class="toggle-row" for="cityCustomFilter" style="margin-bottom:0;">
-                <input type="checkbox" id="cityCustomFilter" />
-                Custom cities only
-              </label>
+            <div class="filter-group">
+              <p class="filter-group-title">Other</p>
+              <div class="filter-group-fields">
+                <div class="filter-field">
+                  <label for="cityStatusFilter">Status</label>
+                  <select class="filter-select" id="cityStatusFilter">
+                    <option value="all">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                  </select>
+                </div>
+                <!-- "Custom" means added through this page's Add City drawer, as
+                     opposed to shipping in the original master list. Read off the
+                     record's own history, not a stored city type. A checkbox
+                     rather than a dropdown: it's one on/off narrowing, and there
+                     is deliberately no "original only" counterpart. -->
+                <div class="filter-field filter-field--toggle">
+                  <label class="toggle-row" for="cityCustomFilter" style="margin-bottom:0;">
+                    <input type="checkbox" id="cityCustomFilter" />
+                    Custom cities only
+                  </label>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -442,15 +460,18 @@
   const tbody = document.querySelector("#cityTable tbody");
   const paginationBar = document.getElementById("paginationBar");
   const citySearch = document.getElementById("citySearch");
+  const cityIdSearch = document.getElementById("cityIdSearch");
   const cityTableEl = document.getElementById("cityTable");
   const revealValuesToggle = document.getElementById("cityRevealValuesToggle");
 
-  let state = { page: 1, pageSize: 10, query: "", country: "", cityState: "", status: "all", customOnly: false };
+  let state = { page: 1, pageSize: 10, query: "", idQuery: "", country: "", cityState: "", status: "all", customOnly: false };
 
   function getFiltered() {
     let rows = SYSTEM_CITIES;
     const q = state.query.trim().toLowerCase();
     if (q) rows = rows.filter((c) => c.name.toLowerCase().includes(q));
+    const idQ = state.idQuery.trim().toLowerCase();
+    if (idQ) rows = rows.filter((c) => String(getSystemCityDisplayId(c.id)).toLowerCase().includes(idQ));
     if (state.country) rows = rows.filter((c) => (getSystemCountryName(c.country.code) || c.country.name) === state.country);
     if (state.cityState) rows = rows.filter((c) => c.state === state.cityState);
     if (state.status === "active") rows = rows.filter((c) => c.active);
@@ -585,6 +606,11 @@
     updateFiltersSummary();
   });
 
+  cityIdSearch.addEventListener("input", () => {
+    state.idQuery = cityIdSearch.value;
+    updateFiltersSummary();
+  });
+
   countryFilterSelect.addEventListener("change", () => {
     state.country = countryFilterSelect.value;
     state.cityState = "";
@@ -632,8 +658,9 @@
   function activeFilterEntries() {
     const entries = [];
     if (state.query.trim()) entries.push({ key: "query", label: "Name", value: state.query.trim() });
-    if (state.country) entries.push({ key: "country", label: "Country", value: state.country });
-    if (state.cityState) entries.push({ key: "cityState", label: "State", value: state.cityState });
+    if (state.idQuery.trim()) entries.push({ key: "idQuery", label: "System City ID", value: state.idQuery.trim() });
+    if (state.country) entries.push({ key: "country", label: "System Country", value: state.country });
+    if (state.cityState) entries.push({ key: "cityState", label: "System State", value: state.cityState });
     if (state.status !== "all") entries.push({ key: "status", label: "Status", value: state.status === "active" ? "Active" : "Inactive" });
     if (state.customOnly) entries.push({ key: "customOnly", label: "Custom cities only", value: "Yes" });
     return entries;
@@ -647,6 +674,11 @@
     query: () => {
       state.query = "";
       citySearch.value = "";
+      updateFiltersSummary();
+    },
+    idQuery: () => {
+      state.idQuery = "";
+      cityIdSearch.value = "";
       updateFiltersSummary();
     },
     country: () => {
@@ -694,7 +726,7 @@
   }
 
   function setFiltersPanelOpen(open) {
-    cityFiltersPanel.style.display = open ? "grid" : "none";
+    cityFiltersPanel.style.display = open ? "flex" : "none";
     cityFiltersToggleBtn.classList.toggle("open", open);
     cityFiltersToggleBtn.setAttribute("aria-expanded", String(open));
     updateFiltersSummary();
@@ -714,17 +746,21 @@
   citySearch.addEventListener("keydown", (e) => {
     if (e.key === "Enter") runSearchNow();
   });
+  cityIdSearch.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") runSearchNow();
+  });
 
   // Reset is the one control that re-queries without waiting for Search —
   // "start over" showing the previous filter's results would be a lie.
   document.getElementById("resetCityFilterBtn").addEventListener("click", () => {
     citySearch.value = "";
+    cityIdSearch.value = "";
     countryFilterSelect.value = "";
     stateFilterSelect.disabled = true;
     stateFilterSelect.innerHTML = `<option value="">Select State</option>`;
     statusFilterSelect.value = "all";
     customFilterToggle.checked = false;
-    state = { ...state, page: 1, query: "", country: "", cityState: "", status: "all", customOnly: false };
+    state = { ...state, page: 1, query: "", idQuery: "", country: "", cityState: "", status: "all", customOnly: false };
     render();
   });
 
@@ -1439,6 +1475,7 @@
     // rebuilt for that country but left on All, and Status is cleared, so
     // the row is shown because it matches and not by coincidence.
     citySearch.value = name;
+    cityIdSearch.value = "";
     countryFilterSelect.value = meta.name;
     const newCityStates = getStatesForCountryCode(meta.code);
     if (newCityStates.length) {
@@ -1454,7 +1491,7 @@
     // the row that was just created, and leaving "Original Only" set would
     // hide the very city this is trying to surface.
     customFilterToggle.checked = false;
-    state = { ...state, page: 1, query: name, country: meta.name, cityState: "", status: "all", customOnly: false };
+    state = { ...state, page: 1, query: name, idQuery: "", country: meta.name, cityState: "", status: "all", customOnly: false };
     render();
     showToast("City added successfully");
   });
