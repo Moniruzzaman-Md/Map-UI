@@ -261,9 +261,9 @@
               <p class="filter-group-title">Other</p>
               <div class="filter-group-fields">
                 <div class="filter-field">
-                  <label for="cityStatusFilter">Status</label>
+                  <label for="cityStatusFilter">Active / Inactive</label>
                   <select class="filter-select" id="cityStatusFilter">
-                    <option value="all">All Status</option>
+                    <option value="all">All</option>
                     <option value="active">Active</option>
                     <option value="inactive">Inactive</option>
                   </select>
@@ -661,7 +661,7 @@
     if (state.idQuery.trim()) entries.push({ key: "idQuery", label: "System City ID", value: state.idQuery.trim() });
     if (state.country) entries.push({ key: "country", label: "System Country", value: state.country });
     if (state.cityState) entries.push({ key: "cityState", label: "System State", value: state.cityState });
-    if (state.status !== "all") entries.push({ key: "status", label: "Status", value: state.status === "active" ? "Active" : "Inactive" });
+    if (state.status !== "all") entries.push({ key: "status", label: "Active / Inactive", value: state.status === "active" ? "Active" : "Inactive" });
     if (state.customOnly) entries.push({ key: "customOnly", label: "Custom cities only", value: "Yes" });
     return entries;
   }

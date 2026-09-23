@@ -308,7 +308,7 @@
             <div class="filter-field">
               <label for="hotelStatusFilter">Active / Inactive</label>
               <select class="filter-select" id="hotelStatusFilter">
-                <option value="all">All Status</option>
+                <option value="all">All</option>
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
               </select>
@@ -988,7 +988,7 @@
     if (state.sysCity) entries.push({ key: "sysCity", label: "System City", value: state.sysCity });
     if (state.sysStarRating) entries.push({ key: "sysStarRating", label: "System Star Rating", value: `${state.sysStarRating} ★` });
     if (state.mapping !== "all") entries.push({ key: "mapping", label: "Mapping", value: state.mapping === "mapped" ? "Mapped" : "Unmapped" });
-    if (state.status !== "all") entries.push({ key: "status", label: "Status", value: state.status === "active" ? "Active" : "Inactive" });
+    if (state.status !== "all") entries.push({ key: "status", label: "Active / Inactive", value: state.status === "active" ? "Active" : "Inactive" });
     if (state.providerIdQuery.trim()) entries.push({ key: "providerIdQuery", label: "Mapping / Provider ID", value: state.providerIdQuery.trim() });
     return entries;
   }

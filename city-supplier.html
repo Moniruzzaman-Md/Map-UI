@@ -279,9 +279,9 @@
                   </select>
                 </div>
                 <div class="filter-field">
-                  <label for="statusFilter">Status</label>
+                  <label for="statusFilter">Active / Inactive</label>
                   <select class="filter-select" id="statusFilter">
-                    <option value="all">All Status</option>
+                    <option value="all">All</option>
                     <option value="active">Active</option>
                     <option value="inactive">Inactive</option>
                   </select>
@@ -662,7 +662,7 @@
     if (state.sysState) entries.push({ key: "sysState", label: "System State", value: state.sysState });
     if (state.sysCity) entries.push({ key: "sysCity", label: "System City", value: SYSTEM_CITIES.find((c) => String(c.id) === state.sysCity)?.name || state.sysCity });
     if (state.mapped !== "all") entries.push({ key: "mapped", label: "Map/Unmap", value: state.mapped === "mapped" ? "Mapped" : "Unmapped" });
-    if (state.status !== "all") entries.push({ key: "status", label: "Status", value: state.status === "active" ? "Active" : "Inactive" });
+    if (state.status !== "all") entries.push({ key: "status", label: "Active / Inactive", value: state.status === "active" ? "Active" : "Inactive" });
     return entries;
   }
 
