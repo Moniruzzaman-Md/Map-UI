@@ -161,7 +161,7 @@
             </ul>
           </li>
           <li><strong>Details</strong> — dumps this row's own record as JSON (excluding its history), so its shape can differ supplier to supplier — some carry extra fields the others don't.</li>
-          <li><strong>Filters</strong> — nothing in the toolbar re-queries the list on its own; every field only updates the pending state and the live Filters count pill / chip summary (visible once the panel is collapsed). The list itself only re-queries on <strong>Search</strong> (or Enter in the Name/ID/Provider ID search box), <strong>Reset</strong>, or picking a <strong>Supplier</strong> — the latter two bypass the wait-for-Search gate and re-render immediately, since the page is non-functional without a supplier. Reset here also clears the Supplier, putting the page back to its pick-a-supplier state — unlike the Supplier Country and Supplier City Lists, whose Reset keeps the supplier and shows its unfiltered list. Supplier and System are two fully independent Country/State/City cascades — one over this row's own fields, the other over the matched system hotel's — picking one never narrows the other. City is gated behind Country in both, same as everywhere else in the project.</li>
+          <li><strong>Filters</strong> — nothing in the toolbar re-queries the list on its own; every field only updates the pending state and the live Filters count pill / chip summary (visible once the panel is collapsed). The list itself only re-queries on <strong>Search</strong> (or Enter in the Name/ID/Provider ID search box), <strong>Reset</strong>, or picking a <strong>Supplier</strong> — the latter two bypass the wait-for-Search gate and re-render immediately, since the page is non-functional without a supplier. The panel has three sections: <strong>Supplier</strong> (this row's own name, ID, country, state, city, star rating), <strong>System</strong> (the same six, read from the matched system hotel) and <strong>Other</strong> (Mapped/Unmapped, Active/Inactive, Mapping ID / Provider ID). Reset here also clears the Supplier, putting the page back to its pick-a-supplier state — unlike the Supplier Country and Supplier City Lists, whose Reset keeps the supplier and shows its unfiltered list. Supplier and System are two fully independent Country/State/City cascades — one over this row's own fields, the other over the matched system hotel's — picking one never narrows the other. City is gated behind Country in both, same as everywhere else in the project.</li>
         </ul>
       </template>
 
@@ -206,54 +206,39 @@
           <div class="filters-panel" id="supplierHotelFiltersPanel" style="display:none;">
             <div class="filters-section-label">Supplier</div>
             <div class="filter-field">
-              <label for="supplierHotelIdSearch">ID</label>
-              <div class="toolbar-search">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-                <input type="text" id="supplierHotelIdSearch" placeholder="Search by ID..." />
-              </div>
-            </div>
-            <div class="filter-field">
-              <label for="supplierHotelProviderIdSearch">Provider ID</label>
-              <div class="toolbar-search">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-                <input type="text" id="supplierHotelProviderIdSearch" placeholder="Search by Provider ID..." />
-              </div>
-            </div>
-            <div class="filter-field">
-              <label for="hotelCountryFilter">Country</label>
-              <select class="filter-select" id="hotelCountryFilter">
-                <option value="">All Countries</option>
-              </select>
-            </div>
-            <div class="filter-field">
-              <label for="hotelStateFilter">State</label>
-              <select class="filter-select" id="hotelStateFilter" disabled>
-                <option value="">All States</option>
-              </select>
-            </div>
-            <div class="filter-field">
-              <label for="hotelCityFilter">City</label>
-              <select class="filter-select" id="hotelCityFilter" disabled>
-                <option value="">All Cities</option>
-              </select>
-            </div>
-            <div class="filter-field">
-              <label for="supplierHotelNameFilter">Hotel Name</label>
+              <label for="supplierHotelNameFilter">Supplier Hotel Name</label>
               <div class="toolbar-search">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
                 <input type="text" id="supplierHotelNameFilter" placeholder="Search by hotel name..." />
               </div>
             </div>
             <div class="filter-field">
-              <label for="hotelStatusFilter">Status</label>
-              <select class="filter-select" id="hotelStatusFilter">
-                <option value="all">All Status</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
+              <label for="supplierHotelIdSearch">Supplier Hotel ID</label>
+              <div class="toolbar-search">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                <input type="text" id="supplierHotelIdSearch" placeholder="Search by hotel ID..." />
+              </div>
+            </div>
+            <div class="filter-field">
+              <label for="hotelCountryFilter">Supplier Country</label>
+              <select class="filter-select" id="hotelCountryFilter">
+                <option value="">All Countries</option>
               </select>
             </div>
             <div class="filter-field">
-              <label for="supplierHotelStarRatingFilter">Star Rating</label>
+              <label for="hotelStateFilter">Supplier State</label>
+              <select class="filter-select" id="hotelStateFilter" disabled>
+                <option value="">All States</option>
+              </select>
+            </div>
+            <div class="filter-field">
+              <label for="hotelCityFilter">Supplier City</label>
+              <select class="filter-select" id="hotelCityFilter" disabled>
+                <option value="">All Cities</option>
+              </select>
+            </div>
+            <div class="filter-field">
+              <label for="supplierHotelStarRatingFilter">Supplier Star Rating</label>
               <select class="filter-select" id="supplierHotelStarRatingFilter">
                 <option value="">All Ratings</option>
                 <option value="5">5 ★</option>
@@ -267,22 +252,11 @@
 
             <div class="filters-section-label">System</div>
             <div class="filter-field">
-              <label for="sysCountryFilter">Country</label>
-              <select class="filter-select" id="sysCountryFilter">
-                <option value="">All Countries</option>
-              </select>
-            </div>
-            <div class="filter-field">
-              <label for="sysStateFilter">State</label>
-              <select class="filter-select" id="sysStateFilter" disabled>
-                <option value="">All States</option>
-              </select>
-            </div>
-            <div class="filter-field">
-              <label for="sysCityFilter">City</label>
-              <select class="filter-select" id="sysCityFilter" disabled>
-                <option value="">All Cities</option>
-              </select>
+              <label for="sysHotelNameFilter">System Hotel Name</label>
+              <div class="toolbar-search">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                <input type="text" id="sysHotelNameFilter" placeholder="Search by system hotel name..." />
+              </div>
             </div>
             <div class="filter-field">
               <label for="sysHotelIdFilter">System Hotel ID</label>
@@ -292,10 +266,58 @@
               </div>
             </div>
             <div class="filter-field">
-              <label for="sysHotelNameFilter">Hotel Name</label>
+              <label for="sysCountryFilter">System Country</label>
+              <select class="filter-select" id="sysCountryFilter">
+                <option value="">All Countries</option>
+              </select>
+            </div>
+            <div class="filter-field">
+              <label for="sysStateFilter">System State</label>
+              <select class="filter-select" id="sysStateFilter" disabled>
+                <option value="">All States</option>
+              </select>
+            </div>
+            <div class="filter-field">
+              <label for="sysCityFilter">System City</label>
+              <select class="filter-select" id="sysCityFilter" disabled>
+                <option value="">All Cities</option>
+              </select>
+            </div>
+            <div class="filter-field">
+              <label for="sysStarRatingFilter">System Star Rating</label>
+              <select class="filter-select" id="sysStarRatingFilter">
+                <option value="">All Ratings</option>
+                <option value="5">5 ★</option>
+                <option value="4">4 ★</option>
+                <option value="3">3 ★</option>
+                <option value="2">2 ★</option>
+                <option value="1">1 ★</option>
+                <option value="0">0 ★</option>
+              </select>
+            </div>
+
+            <div class="filters-section-label">Other</div>
+            <div class="filter-field">
+              <label for="hotelMappingStatusFilter">Mapped / Unmapped</label>
+              <select class="filter-select" id="hotelMappingStatusFilter">
+                <option value="all">All</option>
+                <option value="mapped">Mapped</option>
+                <option value="unmapped">Unmapped</option>
+              </select>
+            </div>
+            <div class="filter-field">
+              <label for="hotelStatusFilter">Active / Inactive</label>
+              <select class="filter-select" id="hotelStatusFilter">
+                <option value="all">All Status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
+            <div class="filter-field">
+              <label for="supplierHotelProviderIdSearch">Mapping ID / Provider ID</label>
               <div class="toolbar-search">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-                <input type="text" id="sysHotelNameFilter" placeholder="Search by system hotel name..." />
+                <input type="text" id="supplierHotelProviderIdSearch" placeholder="Search by Mapping / Provider ID..." />
               </div>
             </div>
           </div>
@@ -321,12 +343,13 @@
                 <th>System Star Rating</th>
                 <th>System Contact</th>
                 <th>System Status</th>
+                <th>Provider ID</th>
                 <th class="table-action">Action</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td colspan="17" class="empty-state">Select a supplier to view its hotel list</td>
+                <td colspan="18" class="empty-state">Select a supplier to view its hotel list</td>
               </tr>
             </tbody>
           </table>
@@ -444,6 +467,12 @@
   const sysCityFilterSelect = document.getElementById("sysCityFilter");
   const sysHotelIdFilter = document.getElementById("sysHotelIdFilter");
   const sysHotelNameFilter = document.getElementById("sysHotelNameFilter");
+  const sysStarRatingFilter = document.getElementById("sysStarRatingFilter");
+
+  // Other section — neither side's own fields: whether a system hotel is
+  // matched at all, the row's own Active flag, and the Provider ID that
+  // does the matching.
+  const mappingStatusFilterSelect = document.getElementById("hotelMappingStatusFilter");
 
   const hotelSearch = document.getElementById("hotelSearch");
   const supplierHotelFuzzyToggle = document.getElementById("supplierHotelFuzzyToggle");
@@ -472,6 +501,8 @@
     sysCity: "",
     sysHotelIdQuery: "",
     sysHotelNameQuery: "",
+    sysStarRating: "",
+    mapping: "all",
   };
 
   function currentRows() {
@@ -655,6 +686,14 @@
         return m && getSystemHotelDisplayId(m.id).toLowerCase().includes(sysHotelIdQ);
       });
     }
+    if (state.sysStarRating) {
+      rows = rows.filter((r) => {
+        const m = findSystemHotelByProviderId(r.providerId);
+        return m && String(m.starRating) === state.sysStarRating;
+      });
+    }
+    if (state.mapping === "mapped") rows = rows.filter((r) => findSystemHotelByProviderId(r.providerId));
+    if (state.mapping === "unmapped") rows = rows.filter((r) => !findSystemHotelByProviderId(r.providerId));
     const sysHotelNameQ = state.sysHotelNameQuery.trim().toLowerCase();
     if (sysHotelNameQ) {
       rows = rows.filter((r) => {
@@ -710,7 +749,7 @@
 
   function renderRows() {
     if (!state.supplier) {
-      tbody.innerHTML = `<tr><td colspan="17" class="empty-state">Select a supplier to view its hotel list</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="18" class="empty-state">Select a supplier to view its hotel list</td></tr>`;
       paginationBar.innerHTML = "";
       updateFiltersSummary();
       return;
@@ -877,6 +916,7 @@
             : '<span class="text-not-mapped">Not mapped</span>'
         }</td>
         <td>${matchedHotel ? `<span class="pill ${matchedHotel.active ? "success" : "danger"}">${matchedHotel.active ? "Active" : "Inactive"}</span>` : '<span class="text-not-mapped">Not mapped</span>'}</td>
+        <td>${truncatableCell(r.providerId, "providerid")}</td>
         <td>
           <div class="row-actions">
             <button class="action-btn" data-edit-city-btn data-row-id="${r.id}" aria-label="Edit city for ${r.name}">
@@ -896,7 +936,7 @@
       </tr>`;
           })
           .join("")
-      : `<tr><td colspan="17" class="empty-state">No hotels match this filter</td></tr>`;
+      : `<tr><td colspan="18" class="empty-state">No hotels match this filter</td></tr>`;
 
     renderPagination(paginationBar, {
       total: filtered.length,
@@ -935,19 +975,21 @@
 
   function activeFilterEntries() {
     const entries = [];
-    if (state.query.trim()) entries.push({ key: "query", label: state.fuzzy ? "Name (fuzzy)" : "Name", value: state.query.trim() });
-    if (state.idQuery.trim()) entries.push({ key: "idQuery", label: "ID", value: state.idQuery.trim() });
-    if (state.providerIdQuery.trim()) entries.push({ key: "providerIdQuery", label: "Provider ID", value: state.providerIdQuery.trim() });
-    if (state.country) entries.push({ key: "country", label: "Country", value: state.country });
-    if (state.hotelState) entries.push({ key: "hotelState", label: "State", value: state.hotelState });
-    if (state.city) entries.push({ key: "city", label: "City", value: state.city });
-    if (state.status !== "all") entries.push({ key: "status", label: "Status", value: state.status === "active" ? "Active" : "Inactive" });
-    if (state.starRating) entries.push({ key: "starRating", label: "Star Rating", value: `${state.starRating} ★` });
+    if (state.query.trim()) entries.push({ key: "query", label: state.fuzzy ? "Supplier Hotel Name (fuzzy)" : "Supplier Hotel Name", value: state.query.trim() });
+    if (state.idQuery.trim()) entries.push({ key: "idQuery", label: "Supplier Hotel ID", value: state.idQuery.trim() });
+    if (state.country) entries.push({ key: "country", label: "Supplier Country", value: state.country });
+    if (state.hotelState) entries.push({ key: "hotelState", label: "Supplier State", value: state.hotelState });
+    if (state.city) entries.push({ key: "city", label: "Supplier City", value: state.city });
+    if (state.starRating) entries.push({ key: "starRating", label: "Supplier Star Rating", value: `${state.starRating} ★` });
+    if (state.sysHotelNameQuery.trim()) entries.push({ key: "sysHotelNameQuery", label: "System Hotel Name", value: state.sysHotelNameQuery.trim() });
+    if (state.sysHotelIdQuery.trim()) entries.push({ key: "sysHotelIdQuery", label: "System Hotel ID", value: state.sysHotelIdQuery.trim() });
     if (state.sysCountry) entries.push({ key: "sysCountry", label: "System Country", value: state.sysCountry });
     if (state.sysState) entries.push({ key: "sysState", label: "System State", value: state.sysState });
     if (state.sysCity) entries.push({ key: "sysCity", label: "System City", value: state.sysCity });
-    if (state.sysHotelIdQuery.trim()) entries.push({ key: "sysHotelIdQuery", label: "System Hotel ID", value: state.sysHotelIdQuery.trim() });
-    if (state.sysHotelNameQuery.trim()) entries.push({ key: "sysHotelNameQuery", label: "System Hotel Name", value: state.sysHotelNameQuery.trim() });
+    if (state.sysStarRating) entries.push({ key: "sysStarRating", label: "System Star Rating", value: `${state.sysStarRating} ★` });
+    if (state.mapping !== "all") entries.push({ key: "mapping", label: "Mapping", value: state.mapping === "mapped" ? "Mapped" : "Unmapped" });
+    if (state.status !== "all") entries.push({ key: "status", label: "Status", value: state.status === "active" ? "Active" : "Inactive" });
+    if (state.providerIdQuery.trim()) entries.push({ key: "providerIdQuery", label: "Mapping / Provider ID", value: state.providerIdQuery.trim() });
     return entries;
   }
 
@@ -1010,6 +1052,14 @@
       state.sysHotelIdQuery = "";
       sysHotelIdFilter.value = "";
       updateFiltersSummary();
+    },
+    sysStarRating: () => {
+      sysStarRatingFilter.value = "";
+      sysStarRatingFilter.dispatchEvent(new Event("change"));
+    },
+    mapping: () => {
+      mappingStatusFilterSelect.value = "all";
+      mappingStatusFilterSelect.dispatchEvent(new Event("change"));
     },
     sysHotelNameQuery: () => {
       state.sysHotelNameQuery = "";
@@ -1076,6 +1126,8 @@
     state.sysCity = "";
     state.sysHotelIdQuery = "";
     state.sysHotelNameQuery = "";
+    state.sysStarRating = "";
+    state.mapping = "all";
     state.query = "";
     state.fuzzy = false;
     state.idQuery = "";
@@ -1089,6 +1141,8 @@
     supplierHotelStarRatingFilter.value = "";
     sysHotelIdFilter.value = "";
     sysHotelNameFilter.value = "";
+    sysStarRatingFilter.value = "";
+    mappingStatusFilterSelect.value = "all";
     hotelSearch.disabled = !state.supplier;
     supplierHotelFuzzyToggle.disabled = !state.supplier;
     supplierHotelSearchBtn.disabled = !state.supplier;
@@ -1170,6 +1224,16 @@
 
   sysCityFilterSelect.addEventListener("change", () => {
     state.sysCity = sysCityFilterSelect.value;
+    updateFiltersSummary();
+  });
+
+  sysStarRatingFilter.addEventListener("change", () => {
+    state.sysStarRating = sysStarRatingFilter.value;
+    updateFiltersSummary();
+  });
+
+  mappingStatusFilterSelect.addEventListener("change", () => {
+    state.mapping = mappingStatusFilterSelect.value;
     updateFiltersSummary();
   });
 
